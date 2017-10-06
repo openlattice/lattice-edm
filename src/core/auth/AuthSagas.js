@@ -5,7 +5,7 @@
 import { push } from 'react-router-redux';
 import { call, put, take } from 'redux-saga/effects';
 
-import * as RoutePaths from '../router/RoutePaths';
+import * as Routes from '../router/Routes';
 import * as Utils from '../../utils/Utils';
 
 import * as Auth0 from './Auth0';
@@ -84,6 +84,6 @@ export function* watchLogout() :Generator<*, *, *> {
   while (true) {
     yield take(AuthActionTypes.LOGOUT);
     yield call(AuthUtils.clearAuthToken);
-    yield put(push(RoutePaths.LOGIN));
+    yield put(push(Routes.LOGIN));
   }
 }

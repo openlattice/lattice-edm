@@ -8,7 +8,7 @@ import { connect } from 'react-redux';
 import { Redirect, Route, Switch, withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
 
-import * as RoutePaths from '../../core/router/RoutePaths';
+import * as Routes from '../../core/router/Routes';
 
 import * as Auth0 from './Auth0';
 import * as AuthActionFactory from './AuthActionFactory';
@@ -103,8 +103,8 @@ class AuthRoute extends React.Component<Props> {
     // TODO: perhpas render something at "/login" instead of an empty page
     return (
       <Switch>
-        <Route exact strict path={RoutePaths.LOGIN} />
-        <Redirect to={RoutePaths.LOGIN} />
+        <Route exact strict path={Routes.LOGIN} />
+        <Redirect to={Routes.LOGIN} />
       </Switch>
     );
   }
