@@ -4,7 +4,7 @@
 
 import Auth0Lock from 'auth0-lock';
 
-import * as RoutePaths from '../router/RoutePaths';
+import * as Routes from '../router/Routes';
 import * as AuthUtils from './AuthUtils';
 
 // injected by Webpack.DefinePlugin
@@ -63,7 +63,7 @@ export function parseHashPath() {
   if (hashPath.indexOf('access_token') !== -1 && hashPath.indexOf('id_token') !== -1) {
 
     const urlBeforeHash :string = href.slice(0, hashIndex >= 0 ? hashIndex : 0);
-    window.location.replace(`${urlBeforeHash}#${RoutePaths.LOGIN}`);
+    window.location.replace(`${urlBeforeHash}#${Routes.LOGIN}`);
     return hashPath;
   }
 
