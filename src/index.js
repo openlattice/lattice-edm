@@ -7,6 +7,9 @@ import 'babel-polyfill';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
+import FontAwesome from '@fortawesome/fontawesome';
+import { faSearch } from '@fortawesome/fontawesome-free-solid';
+
 import { normalize } from 'polished';
 import { Provider } from 'react-redux';
 import { ConnectedRouter } from 'react-router-redux';
@@ -54,6 +57,9 @@ injectGlobal`
   }
 `;
 /* eslint-enable */
+
+// TODO: move styling into core/style
+FontAwesome.library.add(faSearch);
 
 /*
  * // !!! MUST HAPPEN FIRST !!!
