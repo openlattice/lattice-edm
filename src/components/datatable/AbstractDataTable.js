@@ -42,8 +42,7 @@ const DataGridOuterWrapper = styled.div`
 const DataGridInnerWrapper = styled.div``;
 
 const HeadGridWrapper = styled.div`
-  background-color: #f7f9fb;
-  border-bottom: 1px solid #516A83;
+  border-bottom: 1px solid #516a83;
 `;
 
 const BodyGridWrapper = styled.div``;
@@ -71,9 +70,10 @@ const HeadCell = styled.div`
 
 const BodyCell = styled.div`
   align-items: center;
-  border-top: 1px solid #ccd7dd;
+  border-top: 1px solid #c5d5e5;
   display: flex;
   font-size: 14px;
+  margin-top: -1px;
   padding: ${CELL_PADDING}px;
 `;
 
