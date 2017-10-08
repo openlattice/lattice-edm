@@ -4,7 +4,7 @@
 
 import styled from 'styled-components';
 
-const Card = styled.div`
+const StyledCard = styled.div`
   background-color: #fefefe;
   border: 1px solid #c5d5e5;
   border-radius: 4px;
@@ -15,7 +15,7 @@ const Card = styled.div`
   margin: 0 20px;
 `;
 
-const CardTitle = styled.h1`
+const StyledCardTitle = styled.h1`
   flex: 1 0 auto;
   font-size: 22px;
   font-weight: 600;
@@ -23,12 +23,12 @@ const CardTitle = styled.h1`
   padding: 0;
 `;
 
-const CardSection = styled.section`
+const StyledCardSection = styled.section`
   display: flex;
   flex-direction: column;
 `;
 
-const CardSectionTitle = styled.h2`
+const StyledCardSectionTitle = styled.h2`
   flex: 1 0 auto;
   font-size: 16px;
   font-weight: 600;
@@ -36,7 +36,7 @@ const CardSectionTitle = styled.h2`
   padding: 0;
 `;
 
-const CardSectionBody = styled.div`
+const StyledCardSectionBody = styled.div`
   font-size: 14px;
   font-weight: normal;
   p {
@@ -46,9 +46,9 @@ const CardSectionBody = styled.div`
 `;
 
 export {
-  Card,
-  CardSection,
-  CardSectionBody,
-  CardSectionTitle,
-  CardTitle
+  StyledCard,
+  StyledCardSection,
+  StyledCardSectionBody,
+  StyledCardSectionTitle,
+  StyledCardTitle
 };
