@@ -73,7 +73,25 @@ type Props = {
   }
 }
 
-class EntityDataModelContainer extends React.Component<Props> {
+type State = {
+  searchQuery :string
+};
+
+class EntityDataModelContainer extends React.Component<Props, State> {
+
+  constructor(props :Props) {
+
+    super(props);
+
+    this.state = {
+      searchQuery: ''
+    };
+  }
+
+  handleSearchOnChange = (searchQuery :string) => {
+
+    this.setState({ searchQuery });
+  }
 
   renderNavSection = () => {
 
@@ -112,9 +130,16 @@ class EntityDataModelContainer extends React.Component<Props> {
 
     return (
       <ActionSection>
-        <SearchInput />
+        <SearchInput onChange={this.handleSearchOnChange} />
         <StyledButton disabled>{buttonText}</StyledButton>
       </ActionSection>
+    );
+  }
+
+  renderPropertyTypesContainer = () => {
+
+    return (
+      <PropertyTypesContainer filterQuery={this.state.searchQuery} />
     );
   }
 
@@ -123,7 +148,7 @@ class EntityDataModelContainer extends React.Component<Props> {
     return (
       <Section>
         <Switch>
-          <Route path={Routes.PROPERTY_TYPES} component={PropertyTypesContainer} />
+          <Route path={Routes.PROPERTY_TYPES} render={this.renderPropertyTypesContainer} />
           <Route path={Routes.ENTITY_TYPES} component={null} />
           <Route path={Routes.ASSOCIATION_TYPES} component={null} />
           <Route path={Routes.SCHEMAS} component={null} />

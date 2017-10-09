@@ -41,9 +41,7 @@ const DataGridOuterWrapper = styled.div`
 
 const DataGridInnerWrapper = styled.div``;
 
-const HeadGridWrapper = styled.div`
-  border-bottom: 1px solid #516a83;
-`;
+const HeadGridWrapper = styled.div``;
 
 const BodyGridWrapper = styled.div``;
 
@@ -63,6 +61,7 @@ const BodyGrid = styled(Grid)`
 
 const HeadCell = styled.div`
   align-items: center;
+  border-bottom: 1px solid #516a83;
   display: flex;
   font-weight: 600;
   padding: ${CELL_PADDING}px;
@@ -110,6 +109,7 @@ type Props = {
   height :number,
   maxHeight :number,
   maxWidth :number,
+  recomputeDimensionsWhenPropsChange :boolean,
   width :number,
   onRowClick :Function
 }
@@ -124,6 +124,10 @@ type State = {
   headers :GridHeaders
 }
 
+/*
+ * TODO: implement filtering
+ * TODO: allow configuration over dimensions & resizing
+ */
 class AbstractDataTable extends React.Component<Props, State> {
 
   headGrid :?Grid;
@@ -135,6 +139,7 @@ class AbstractDataTable extends React.Component<Props, State> {
     height: 0,
     maxHeight: DEFAULT_GRID_MAX_HEIGHT,
     maxWidth: DEFAULT_GRID_MAX_WIDTH,
+    recomputeDimensionsWhenPropsChange: true,
     width: 0,
     onRowClick: () => {}
   };
@@ -253,7 +258,10 @@ class AbstractDataTable extends React.Component<Props, State> {
 
     if (haveHeadersChanged || hasDataChanged) {
 
-      const dimensions :Object = AbstractDataTable.computeDimensions(nextProps);
+      let dimensions :Object = {};
+      if (this.props.recomputeDimensionsWhenPropsChange) {
+        dimensions = AbstractDataTable.computeDimensions(nextProps);
+      }
 
       this.setState({
         data: nextData,

@@ -18,6 +18,7 @@ export default function* sagas() :Generator<*, *, *> {
     fork(AuthSagas.watchLogout),
 
     // PropertyTypesSagas
-    fork(PropertyTypesSagas.watchFetchAllPropertyTypesRequest)
+    fork(PropertyTypesSagas.watchFetchAllPropertyTypesRequest),
+    fork(PropertyTypesSagas.watchSearchForPropertyTypesRequest)
   ];
 }

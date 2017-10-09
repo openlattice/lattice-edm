@@ -29,46 +29,41 @@ const Wrapper = StyledFlexComponent.extend`
   justify-content: space-evenly;
 `;
 
+const AllPropertyTypesCard = StyledCard.extend`
+  width: 800px;
+`;
+
 const PropertyTypeDetailsCard = StyledCard.extend`
   width: 500px;
 `;
-
-function mapStateToProps(state :Map<*, *>) :Object {
-
-  return {
-    propertyTypes: state.getIn(['edm', 'propertyTypes', 'propertyTypes'], Immutable.List())
-  };
-}
-
-function mapDispatchToProps(dispatch :Function) :Object {
-
-  const actions = {
-    fetchAllPropertyTypesRequest
-  };
-
-  return {
-    actions: bindActionCreators(actions, dispatch)
-  };
-}
 
 type Props = {
   actions :{
     fetchAllPropertyTypesRequest :Function
   },
-  propertyTypes :List<Map<*, *>>
+  propertyTypes :List<Map<*, *>>,
+  filterQuery :string
 };
 
 type State = {
+  filterQuery :string,
   selectedPropertyTypeIndex :number
 };
 
 class PropertyTypesContainer extends React.Component<Props, State> {
+
+  static defaultProps = {
+    actions: {},
+    propertyTypes: Immutable.List(),
+    filterQuery: ''
+  };
 
   constructor(props :Props) {
 
     super(props);
 
     this.state = {
+      filterQuery: props.filterQuery || '',
       selectedPropertyTypeIndex: 0
     };
   }
@@ -78,7 +73,12 @@ class PropertyTypesContainer extends React.Component<Props, State> {
     this.props.actions.fetchAllPropertyTypesRequest();
   }
 
-  renderAbstractTypeTable() {
+  componentWillReceiveProps(nextProps :Props) {
+
+    this.setState({ filterQuery: nextProps.filterQuery });
+  }
+
+  renderAbstractTypeTable = () => {
 
     // TODO: make this better
     const headers :Object[] = [
@@ -86,15 +86,35 @@ class PropertyTypesContainer extends React.Component<Props, State> {
       { id: 'title', value: 'Title' }
     ];
 
-    const data :List<Map<string, string>> = this.props.propertyTypes.map((propertyType :Map<*, *>) => {
-      // TODO: make this better
-      return Immutable.OrderedMap().withMutations((map :OrderedMap<string, string>) => {
+    const data = this.props.propertyTypes.reduce(
+      (propertyTypes :List<Map<string, string>>, propertyType :Map<*, *>) => {
+
         const ptType :Map<string, string> = propertyType.get('type', Immutable.Map());
-        const ptFQN :FullyQualifiedName = new FullyQualifiedName(ptType.toJS());
-        map.set('type', ptFQN.getFullyQualifiedName());
-        map.set('title', propertyType.get('title', ''));
-      });
-    });
+        const ptFQN :string = (new FullyQualifiedName(ptType.toJS())).getFullyQualifiedName();
+        const ptTitle :string = propertyType.get('title', '');
+
+        let includePropertyType :boolean = true;
+        if (this.state.filterQuery && this.state.filterQuery !== '*') {
+          const matchesFQN :boolean = ptFQN.includes(this.state.filterQuery);
+          const matchesTitle :boolean = ptTitle.includes(this.state.filterQuery);
+          if (!matchesFQN && !matchesTitle) {
+            includePropertyType = false;
+          }
+        }
+
+        if (includePropertyType) {
+          return propertyTypes.push(
+            Immutable.OrderedMap().withMutations((map :OrderedMap<string, string>) => {
+              map.set('type', ptFQN);
+              map.set('title', ptTitle);
+            })
+          );
+        }
+
+        return propertyTypes;
+      },
+      Immutable.List()
+    );
 
     const onClick :Function = (selectedRowIndex :number) => {
       this.setState({
@@ -103,26 +123,35 @@ class PropertyTypesContainer extends React.Component<Props, State> {
     };
 
     return (
-      <AbstractDataTable
-          data={data}
-          headers={Immutable.fromJS(headers)}
-          onRowClick={onClick}
-          maxHeight={600}
-          maxWidth={800} />
+      <div>
+        {
+          data.isEmpty()
+            ? (<div>No PropertyTypes</div>)
+            : null
+        }
+        <AbstractDataTable
+            data={data}
+            headers={Immutable.fromJS(headers)}
+            onRowClick={onClick}
+            maxHeight={600}
+            maxWidth={700}
+            width={700}
+            recomputeDimensionsWhenPropsChange={false} />
+      </div>
     );
   }
 
   renderPropertyTypeTable = () => {
 
     return (
-      <StyledCard>
+      <AllPropertyTypesCard>
         <StyledCardTitle>EDM PropertyTypes</StyledCardTitle>
         <StyledCardSection>
           <StyledCardSectionBody>
             { this.renderAbstractTypeTable() }
           </StyledCardSectionBody>
         </StyledCardSection>
-      </StyledCard>
+      </AllPropertyTypesCard>
     );
   }
 
@@ -211,6 +240,24 @@ class PropertyTypesContainer extends React.Component<Props, State> {
       </Wrapper>
     );
   }
+}
+
+function mapStateToProps(state :Map<*, *>) :Object {
+
+  return {
+    propertyTypes: state.getIn(['edm', 'propertyTypes', 'propertyTypes'], Immutable.List())
+  };
+}
+
+function mapDispatchToProps(dispatch :Function) :Object {
+
+  const actions = {
+    fetchAllPropertyTypesRequest
+  };
+
+  return {
+    actions: bindActionCreators(actions, dispatch)
+  };
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(PropertyTypesContainer);

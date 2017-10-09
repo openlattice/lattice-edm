@@ -42,15 +42,71 @@ const SearchIcon = styled.div`
   margin-left: 13px;
 `;
 
-// TODO: allow customization and extensibility via styled-components
-export default function SearchInput() {
-
-  return (
-    <SearchInputWrapper>
-      <SearchIcon>
-        <FontAwesomeIcon pack="fas" name="search" transform={{ size: 13 }} />
-      </SearchIcon>
-      <Input placeholder="Search..." />
-    </SearchInputWrapper>
-  );
+type Props = {
+  onChange :Function,
+  onSubmit :Function
 }
+
+type State = {
+  searchQuery :string
+}
+
+// TODO: allow customization and extensibility via styled-components
+class SearchInput extends React.Component<Props, State> {
+
+  static defaultProps = {
+    onChange: () => {},
+    onSubmit: () => {}
+  };
+
+  constructor(props :Props) {
+
+    super(props);
+
+    this.state = {
+      searchQuery: ''
+    };
+  }
+
+  handleOnChange = (event :SyntheticInputEvent<*>) => {
+
+    this.setState({
+      searchQuery: event.target.value
+    });
+
+    if (this.props.onChange) {
+      this.props.onChange(event.target.value);
+    }
+  }
+
+  handleOnKeyDown = (event :SyntheticKeyboardEvent<*>) => {
+
+    switch (event.keyCode) {
+      case 13: // 'Enter' key code
+        if (this.state.searchQuery) {
+          this.props.onSubmit(this.state.searchQuery);
+        }
+        break;
+      default:
+        break;
+    }
+  }
+
+  render() {
+
+    return (
+      <SearchInputWrapper>
+        <SearchIcon>
+          <FontAwesomeIcon pack="fas" name="search" transform={{ size: 13 }} />
+        </SearchIcon>
+        <Input
+            type="text"
+            placeholder="Search..."
+            onChange={this.handleOnChange}
+            onKeyDown={this.handleOnKeyDown} />
+      </SearchInputWrapper>
+    );
+  }
+}
+
+export default SearchInput;
