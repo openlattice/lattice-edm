@@ -30,7 +30,7 @@ const Wrapper = StyledFlexComponent.extend`
 `;
 
 const AllPropertyTypesCard = StyledCard.extend`
-  width: 800px;
+  min-width: 500px;
 `;
 
 const PropertyTypeDetailsCard = StyledCard.extend`
@@ -46,8 +46,8 @@ type Props = {
 };
 
 type State = {
-  filterQuery :string,
-  selectedPropertyTypeIndex :number
+  filteredPropertyTypes :List<Map<*, *>>,
+  selectedIndex :number
 };
 
 class PropertyTypesContainer extends React.Component<Props, State> {
@@ -62,10 +62,36 @@ class PropertyTypesContainer extends React.Component<Props, State> {
 
     super(props);
 
+    const filteredPropertyTypes :List<Map<*, *>> = PropertyTypesContainer.filterPropertyTypes(
+      props.propertyTypes,
+      props.filterQuery
+    );
+
     this.state = {
-      filterQuery: props.filterQuery || '',
-      selectedPropertyTypeIndex: 0
+      filteredPropertyTypes,
+      selectedIndex: 0
     };
+  }
+
+  static filterPropertyTypes(propertyTypes :List<Map<*, *>>, filterQuery :?string) :List<Map<*, *>> {
+
+    return propertyTypes.filter((propertyType :Map<*, *>) => {
+
+      const ptType :Map<string, string> = propertyType.get('type', Immutable.Map());
+      const ptFQN :string = (new FullyQualifiedName(ptType.toJS())).getFullyQualifiedName();
+      const ptTitle :string = propertyType.get('title', '');
+
+      let includePropertyType :boolean = true;
+      if (filterQuery && filterQuery.trim()) {
+        const matchesFQN :boolean = ptFQN.includes(filterQuery.trim());
+        const matchesTitle :boolean = ptTitle.includes(filterQuery.trim());
+        if (!matchesFQN && !matchesTitle) {
+          includePropertyType = false;
+        }
+      }
+
+      return includePropertyType;
+    });
   }
 
   componentDidMount() {
@@ -75,10 +101,20 @@ class PropertyTypesContainer extends React.Component<Props, State> {
 
   componentWillReceiveProps(nextProps :Props) {
 
-    this.setState({ filterQuery: nextProps.filterQuery });
+    // TODO: potential bug with using nextProps.propertyTypes
+    const filteredPropertyTypes :List<Map<*, *>> = PropertyTypesContainer.filterPropertyTypes(
+      nextProps.propertyTypes,
+      nextProps.filterQuery
+    );
+
+    // TODO: might have weird/unexpected behavior by resetting selectedIndex
+    this.setState({
+      filteredPropertyTypes,
+      selectedIndex: 0
+    });
   }
 
-  renderAbstractTypeTable = () => {
+  renderDataTable = () => {
 
     // TODO: make this better
     const headers :Object[] = [
@@ -86,39 +122,21 @@ class PropertyTypesContainer extends React.Component<Props, State> {
       { id: 'title', value: 'Title' }
     ];
 
-    const data = this.props.propertyTypes.reduce(
-      (propertyTypes :List<Map<string, string>>, propertyType :Map<*, *>) => {
+    const data :List<Map<string, string>> = this.state.filteredPropertyTypes.map((propertyType :Map<*, *>) => {
 
-        const ptType :Map<string, string> = propertyType.get('type', Immutable.Map());
-        const ptFQN :string = (new FullyQualifiedName(ptType.toJS())).getFullyQualifiedName();
-        const ptTitle :string = propertyType.get('title', '');
+      const ptType :Map<string, string> = propertyType.get('type', Immutable.Map());
+      const ptFQN :string = (new FullyQualifiedName(ptType.toJS())).getFullyQualifiedName();
+      const ptTitle :string = propertyType.get('title', '');
 
-        let includePropertyType :boolean = true;
-        if (this.state.filterQuery && this.state.filterQuery !== '*') {
-          const matchesFQN :boolean = ptFQN.includes(this.state.filterQuery);
-          const matchesTitle :boolean = ptTitle.includes(this.state.filterQuery);
-          if (!matchesFQN && !matchesTitle) {
-            includePropertyType = false;
-          }
-        }
-
-        if (includePropertyType) {
-          return propertyTypes.push(
-            Immutable.OrderedMap().withMutations((map :OrderedMap<string, string>) => {
-              map.set('type', ptFQN);
-              map.set('title', ptTitle);
-            })
-          );
-        }
-
-        return propertyTypes;
-      },
-      Immutable.List()
-    );
+      return Immutable.OrderedMap().withMutations((map :OrderedMap<string, string>) => {
+        map.set('type', ptFQN);
+        map.set('title', ptTitle);
+      });
+    });
 
     const onClick :Function = (selectedRowIndex :number) => {
       this.setState({
-        selectedPropertyTypeIndex: selectedRowIndex
+        selectedIndex: selectedRowIndex
       });
     };
 
@@ -135,8 +153,7 @@ class PropertyTypesContainer extends React.Component<Props, State> {
             onRowClick={onClick}
             maxHeight={600}
             maxWidth={700}
-            width={700}
-            recomputeDimensionsWhenPropsChange={false} />
+            width={700} />
       </div>
     );
   }
@@ -148,7 +165,7 @@ class PropertyTypesContainer extends React.Component<Props, State> {
         <StyledCardTitle>EDM PropertyTypes</StyledCardTitle>
         <StyledCardSection>
           <StyledCardSectionBody>
-            { this.renderAbstractTypeTable() }
+            { this.renderDataTable() }
           </StyledCardSectionBody>
         </StyledCardSection>
       </AllPropertyTypesCard>
@@ -157,11 +174,14 @@ class PropertyTypesContainer extends React.Component<Props, State> {
 
   renderPropertyTypeDetails = () => {
 
-    if (this.state.selectedPropertyTypeIndex < 0) {
+    if (this.state.selectedIndex < 0) {
       return null;
     }
 
-    const propertyType :Map<*, *> = this.props.propertyTypes.get(this.state.selectedPropertyTypeIndex);
+    const propertyType :Map<*, *> = this.state.filteredPropertyTypes.get(this.state.selectedIndex, Immutable.Map());
+    if (!propertyType || propertyType.isEmpty()) {
+      return null;
+    }
 
     const ptType :Map<string, string> = propertyType.get('type', Immutable.Map());
     const fqnAsString :string = `${new FullyQualifiedName(ptType.toJS())}`;
