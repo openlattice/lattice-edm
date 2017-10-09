@@ -29,6 +29,10 @@ const Wrapper = StyledFlexComponent.extend`
   justify-content: space-evenly;
 `;
 
+const PropertyTypeDetailsCard = StyledCard.extend`
+  width: 500px;
+`;
+
 function mapStateToProps(state :Map<*, *>) :Object {
 
   return {
@@ -140,7 +144,7 @@ class PropertyTypesContainer extends React.Component<Props, State> {
     const piiAsString :string = `${ptPII}`;
 
     return (
-      <StyledCard style={{ minWidth: '500px', maxWidth: '500px' }}>
+      <PropertyTypeDetailsCard>
         <StyledCardTitle>PropertyType Details</StyledCardTitle>
         <StyledCardSection>
           <StyledCardSectionTitle>ID</StyledCardSectionTitle>
@@ -190,7 +194,7 @@ class PropertyTypesContainer extends React.Component<Props, State> {
             <p>{ propertyType.get('analyzer') }</p>
           </StyledCardSectionBody>
         </StyledCardSection>
-      </StyledCard>
+      </PropertyTypeDetailsCard>
     );
   }
 

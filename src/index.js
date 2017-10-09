@@ -52,8 +52,7 @@ injectGlobal`
 
   #app {
     display: flex;
-    height: 100%;
-    width: 100%;
+    flex: 1 0 auto;
   }
 `;
 /* eslint-enable */

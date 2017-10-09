@@ -64,7 +64,6 @@ const NavTab = styled(NavLink).attrs({
 
 const ActionSection = Section.extend`
   align-self: center;
-  width: 800px;
   justify-content: space-between;
 `;
 
@@ -113,9 +112,7 @@ class EntityDataModelContainer extends React.Component<Props> {
 
     return (
       <ActionSection>
-        <div style={{ width: '500px' }}>
-          <SearchInput />
-        </div>
+        <SearchInput />
         <StyledButton disabled>{buttonText}</StyledButton>
       </ActionSection>
     );

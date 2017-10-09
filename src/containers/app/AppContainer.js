@@ -20,14 +20,18 @@ import EntityDataModelContainer from '../edm/EntityDataModelContainer';
 const StyledFlexHeaderComponent = StyledFlexComponent.withComponent('header');
 
 const AppWrapper = StyledFlexComponentStacked.extend`
-  flex: 1;
+  flex: 1 0 auto;
 `;
 
-const AppHeaderWrapper = StyledFlexHeaderComponent.extend`
+const AppHeaderWrapper = StyledFlexComponent.extend`
+  flex: 1 0 auto;
+`;
+
+const Header = StyledFlexHeaderComponent.extend`
   align-items: center;
   background-color: #fefefe;
   border-bottom: 1px solid #c5d5e5;
-  flex: 0 0 auto;
+  flex: 1 0 auto;
   justify-content: center;
   padding: 20px 50px;
   position: relative;
@@ -64,8 +68,10 @@ const AppContainer = (props :Props) => {
   return (
     <AppWrapper>
       <AppHeaderWrapper>
-        <Title>OpenLattice Entity Data Model</Title>
-        <StyledLogoutButton onClick={props.actions.logout}>Logout</StyledLogoutButton>
+        <Header>
+          <Title>OpenLattice Entity Data Model</Title>
+          <StyledLogoutButton onClick={props.actions.logout}>Logout</StyledLogoutButton>
+        </Header>
       </AppHeaderWrapper>
       <AppBodyWrapper>
         <Switch>
