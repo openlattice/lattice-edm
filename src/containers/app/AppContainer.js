@@ -7,35 +7,41 @@ import React from 'react';
 import styled from 'styled-components';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
+import { Redirect, Route, Switch } from 'react-router-dom';
 
+import StyledButton from '../../components/buttons/StyledButton';
 import StyledFlexComponent from '../../components/flex/StyledFlexComponent';
 import StyledFlexComponentStacked from '../../components/flex/StyledFlexComponentStacked';
+import * as Routes from '../../core/router/Routes';
 import { logout } from '../../core/auth/AuthActionFactory';
+
+import EntityDataModelContainer from '../edm/EntityDataModelContainer';
 
 const StyledFlexHeaderComponent = StyledFlexComponent.withComponent('header');
 
 const AppWrapper = StyledFlexComponentStacked.extend`
-  background-color: #f7f8f9;
-  color: #455a64;
-  height: 100%;
-  width: 100%;
+  flex: 1;
 `;
 
 const AppHeaderWrapper = StyledFlexHeaderComponent.extend`
   align-items: center;
   background-color: #fefefe;
-  border-bottom: 1px solid rgba(84, 110, 122, 0.2);
+  border-bottom: 1px solid #c5d5e5;
+  flex: 0 0 auto;
   justify-content: center;
   padding: 20px 50px;
   position: relative;
 `;
 
-const AppBodyWrapper = StyledFlexComponentStacked.extend`
+const AppBodyWrapper = StyledFlexComponent.extend`
   flex: 1 0 auto;
-  padding: 50px;
 `;
 
-const StyledLogoutButton = styled.button`
+const Title = styled.h1`
+  font-weight: normal;
+`;
+
+const StyledLogoutButton = StyledButton.extend`
   position: absolute;
   right: 50px;
 `;
@@ -58,11 +64,14 @@ const AppContainer = (props :Props) => {
   return (
     <AppWrapper>
       <AppHeaderWrapper>
-        <h1>Lattice Entity Data Model</h1>
+        <Title>OpenLattice Entity Data Model</Title>
         <StyledLogoutButton onClick={props.actions.logout}>Logout</StyledLogoutButton>
       </AppHeaderWrapper>
       <AppBodyWrapper>
-        <h1>Hello, World!</h1>
+        <Switch>
+          <Route path={Routes.ROOT} component={EntityDataModelContainer} />
+          <Redirect to={Routes.ROOT} />
+        </Switch>
       </AppBodyWrapper>
     </AppWrapper>
   );
