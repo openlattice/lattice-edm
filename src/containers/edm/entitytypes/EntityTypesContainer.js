@@ -20,7 +20,7 @@ import {
   StyledCardTitle
 } from '../../../components/cards/StyledCard';
 
-import { fetchAllPropertyTypesRequest } from './PropertyTypesActionFactory';
+import { fetchAllEntityTypesRequest } from './EntityTypesActionFactory';
 
 const { FullyQualifiedName } = Models;
 
@@ -29,32 +29,32 @@ const Wrapper = StyledFlexComponent.extend`
   justify-content: space-evenly;
 `;
 
-const AllPropertyTypesCard = StyledCard.extend`
+const AllEntityTypesCard = StyledCard.extend`
   min-width: 500px;
 `;
 
-const PropertyTypeDetailsCard = StyledCard.extend`
+const EntityTypeDetailsCard = StyledCard.extend`
   width: 500px;
 `;
 
 type Props = {
   actions :{
-    fetchAllPropertyTypesRequest :Function
+    fetchAllEntityTypesRequest :Function
   },
-  propertyTypes :List<Map<*, *>>,
+  entityTypes :List<Map<*, *>>,
   filterQuery :string
 };
 
 type State = {
-  filteredPropertyTypes :List<Map<*, *>>,
+  filteredEntityTypes :List<Map<*, *>>,
   selectedIndex :number
 };
 
-class PropertyTypesContainer extends React.Component<Props, State> {
+class EntityTypesContainer extends React.Component<Props, State> {
 
   static defaultProps = {
     actions: {},
-    propertyTypes: Immutable.List(),
+    entityTypes: Immutable.List(),
     filterQuery: ''
   };
 
@@ -62,54 +62,54 @@ class PropertyTypesContainer extends React.Component<Props, State> {
 
     super(props);
 
-    const filteredPropertyTypes :List<Map<*, *>> = PropertyTypesContainer.filterPropertyTypes(
-      props.propertyTypes,
+    const filteredEntityTypes :List<Map<*, *>> = EntityTypesContainer.filterEntityTypes(
+      props.entityTypes,
       props.filterQuery
     );
 
     this.state = {
-      filteredPropertyTypes,
+      filteredEntityTypes,
       selectedIndex: 0
     };
   }
 
-  static filterPropertyTypes(propertyTypes :List<Map<*, *>>, filterQuery :?string) :List<Map<*, *>> {
+  static filterEntityTypes(entityTypes :List<Map<*, *>>, filterQuery :?string) :List<Map<*, *>> {
 
-    return propertyTypes.filter((propertyType :Map<*, *>) => {
+    return entityTypes.filter((entityType :Map<*, *>) => {
 
-      const ptType :Map<string, string> = propertyType.get('type', Immutable.Map());
+      const ptType :Map<string, string> = entityType.get('type', Immutable.Map());
       const ptFQN :string = (new FullyQualifiedName(ptType.toJS())).getFullyQualifiedName();
-      const ptTitle :string = propertyType.get('title', '');
+      const ptTitle :string = entityType.get('title', '');
 
-      let includePropertyType :boolean = true;
+      let includeEntityType :boolean = true;
       if (filterQuery && filterQuery.trim()) {
         const matchesFQN :boolean = ptFQN.includes(filterQuery.trim());
         const matchesTitle :boolean = ptTitle.includes(filterQuery.trim());
         if (!matchesFQN && !matchesTitle) {
-          includePropertyType = false;
+          includeEntityType = false;
         }
       }
 
-      return includePropertyType;
+      return includeEntityType;
     });
   }
 
   componentDidMount() {
 
-    this.props.actions.fetchAllPropertyTypesRequest();
+    this.props.actions.fetchAllEntityTypesRequest();
   }
 
   componentWillReceiveProps(nextProps :Props) {
 
-    // TODO: potential bug with using nextProps.propertyTypes
-    const filteredPropertyTypes :List<Map<*, *>> = PropertyTypesContainer.filterPropertyTypes(
-      nextProps.propertyTypes,
+    // TODO: potential bug with using nextProps.entityTypes
+    const filteredEntityTypes :List<Map<*, *>> = EntityTypesContainer.filterEntityTypes(
+      nextProps.entityTypes,
       nextProps.filterQuery
     );
 
     // TODO: might have weird/unexpected behavior by resetting selectedIndex
     this.setState({
-      filteredPropertyTypes,
+      filteredEntityTypes,
       selectedIndex: 0
     });
   }
@@ -122,11 +122,11 @@ class PropertyTypesContainer extends React.Component<Props, State> {
       { id: 'title', value: 'Title' }
     ];
 
-    const data :List<Map<string, string>> = this.state.filteredPropertyTypes.map((propertyType :Map<*, *>) => {
+    const data :List<Map<string, string>> = this.state.filteredEntityTypes.map((entityType :Map<*, *>) => {
 
-      const ptType :Map<string, string> = propertyType.get('type', Immutable.Map());
+      const ptType :Map<string, string> = entityType.get('type', Immutable.Map());
       const ptFQN :string = (new FullyQualifiedName(ptType.toJS())).getFullyQualifiedName();
-      const ptTitle :string = propertyType.get('title', '');
+      const ptTitle :string = entityType.get('title', '');
 
       return Immutable.OrderedMap().withMutations((map :OrderedMap<string, string>) => {
         map.set('type', ptFQN);
@@ -144,7 +144,7 @@ class PropertyTypesContainer extends React.Component<Props, State> {
       <div>
         {
           data.isEmpty()
-            ? (<div>No PropertyTypes</div>)
+            ? (<div>No EntityTypes</div>)
             : null
         }
         <AbstractDataTable
@@ -158,47 +158,50 @@ class PropertyTypesContainer extends React.Component<Props, State> {
     );
   }
 
-  renderPropertyTypesTable = () => {
+  renderEntityTypesTable = () => {
 
     return (
-      <AllPropertyTypesCard>
-        <StyledCardTitle>EDM PropertyTypes</StyledCardTitle>
+      <AllEntityTypesCard>
+        <StyledCardTitle>EDM EntityTypes</StyledCardTitle>
         <StyledCardSection>
           <StyledCardSectionBody>
             { this.renderDataTable() }
           </StyledCardSectionBody>
         </StyledCardSection>
-      </AllPropertyTypesCard>
+      </AllEntityTypesCard>
     );
   }
 
-  renderPropertyTypeDetails = () => {
+  renderEntityTypeDetails = () => {
 
     if (this.state.selectedIndex < 0) {
       return null;
     }
 
-    const propertyType :Map<*, *> = this.state.filteredPropertyTypes.get(this.state.selectedIndex, Immutable.Map());
-    if (!propertyType || propertyType.isEmpty()) {
+    const entityType :Map<*, *> = this.state.filteredEntityTypes.get(this.state.selectedIndex, Immutable.Map());
+    if (!entityType || entityType.isEmpty()) {
       return null;
     }
 
-    const ptType :Map<string, string> = propertyType.get('type', Immutable.Map());
+    const ptType :Map<string, string> = entityType.get('type', Immutable.Map());
     const fqnAsString :string = `${new FullyQualifiedName(ptType.toJS())}`;
 
-    const ptSchemas :List<*> = propertyType.get('schemas', Immutable.List());
+    const ptKey :List<*> = entityType.get('key', Immutable.List());
+    const keyAsString :string = ptKey.isEmpty() ? '[]' : ptKey.toString();
+
+    const ptProperties :List<*> = entityType.get('properties', Immutable.List());
+    const propertiesAsString :string = ptProperties.isEmpty() ? '[]' : ptProperties.toString();
+
+    const ptSchemas :List<*> = entityType.get('schemas', Immutable.List());
     const schemasAsString :string = ptSchemas.isEmpty() ? '[]' : ptSchemas.toString();
 
-    const ptPII :boolean = propertyType.get('piiField', false);
-    const piiAsString :string = `${ptPII}`;
-
     return (
-      <PropertyTypeDetailsCard>
-        <StyledCardTitle>PropertyType Details</StyledCardTitle>
+      <EntityTypeDetailsCard>
+        <StyledCardTitle>EntityType Details</StyledCardTitle>
         <StyledCardSection>
           <StyledCardSectionTitle>ID</StyledCardSectionTitle>
           <StyledCardSectionBody>
-            <p>{ propertyType.get('id') }</p>
+            <p>{ entityType.get('id') }</p>
           </StyledCardSectionBody>
         </StyledCardSection>
         <StyledCardSection>
@@ -210,19 +213,37 @@ class PropertyTypesContainer extends React.Component<Props, State> {
         <StyledCardSection>
           <StyledCardSectionTitle>Title</StyledCardSectionTitle>
           <StyledCardSectionBody>
-            <p>{ propertyType.get('title') }</p>
+            <p>{ entityType.get('title') }</p>
           </StyledCardSectionBody>
         </StyledCardSection>
         <StyledCardSection>
           <StyledCardSectionTitle>Description</StyledCardSectionTitle>
           <StyledCardSectionBody>
-            <p>{ propertyType.get('description') }</p>
+            <p>{ entityType.get('description') }</p>
           </StyledCardSectionBody>
         </StyledCardSection>
         <StyledCardSection>
-          <StyledCardSectionTitle>DataType</StyledCardSectionTitle>
+          <StyledCardSectionTitle>BaseType</StyledCardSectionTitle>
           <StyledCardSectionBody>
-            <p>{ propertyType.get('datatype') }</p>
+            <p>{ entityType.get('baseType') }</p>
+          </StyledCardSectionBody>
+        </StyledCardSection>
+        <StyledCardSection>
+          <StyledCardSectionTitle>Category</StyledCardSectionTitle>
+          <StyledCardSectionBody>
+            <p>{ entityType.get('category') }</p>
+          </StyledCardSectionBody>
+        </StyledCardSection>
+        <StyledCardSection>
+          <StyledCardSectionTitle>Key</StyledCardSectionTitle>
+          <StyledCardSectionBody>
+            <p>{ keyAsString }</p>
+          </StyledCardSectionBody>
+        </StyledCardSection>
+        <StyledCardSection>
+          <StyledCardSectionTitle>Properties</StyledCardSectionTitle>
+          <StyledCardSectionBody>
+            <p>{ propertiesAsString }</p>
           </StyledCardSectionBody>
         </StyledCardSection>
         <StyledCardSection>
@@ -231,32 +252,20 @@ class PropertyTypesContainer extends React.Component<Props, State> {
             <p>{ schemasAsString }</p>
           </StyledCardSectionBody>
         </StyledCardSection>
-        <StyledCardSection>
-          <StyledCardSectionTitle>PII</StyledCardSectionTitle>
-          <StyledCardSectionBody>
-            <p>{ piiAsString }</p>
-          </StyledCardSectionBody>
-        </StyledCardSection>
-        <StyledCardSection>
-          <StyledCardSectionTitle>Analyzer</StyledCardSectionTitle>
-          <StyledCardSectionBody>
-            <p>{ propertyType.get('analyzer') }</p>
-          </StyledCardSectionBody>
-        </StyledCardSection>
-      </PropertyTypeDetailsCard>
+      </EntityTypeDetailsCard>
     );
   }
 
   render() {
 
-    if (this.props.propertyTypes.isEmpty()) {
+    if (this.props.entityTypes.isEmpty()) {
       return null;
     }
 
     return (
       <Wrapper>
-        { this.renderPropertyTypesTable() }
-        { this.renderPropertyTypeDetails() }
+        { this.renderEntityTypesTable() }
+        { this.renderEntityTypeDetails() }
       </Wrapper>
     );
   }
@@ -265,14 +274,14 @@ class PropertyTypesContainer extends React.Component<Props, State> {
 function mapStateToProps(state :Map<*, *>) :Object {
 
   return {
-    propertyTypes: state.getIn(['edm', 'propertyTypes', 'propertyTypes'], Immutable.List())
+    entityTypes: state.getIn(['edm', 'entityTypes', 'entityTypes'], Immutable.List())
   };
 }
 
 function mapDispatchToProps(dispatch :Function) :Object {
 
   const actions = {
-    fetchAllPropertyTypesRequest
+    fetchAllEntityTypesRequest
   };
 
   return {
@@ -280,4 +289,4 @@ function mapDispatchToProps(dispatch :Function) :Object {
   };
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(PropertyTypesContainer);
+export default connect(mapStateToProps, mapDispatchToProps)(EntityTypesContainer);

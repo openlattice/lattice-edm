@@ -13,6 +13,7 @@ import StyledFlexComponentCentered from '../../components/flex/StyledFlexCompone
 import StyledFlexComponentStacked from '../../components/flex/StyledFlexComponentStacked';
 import * as Routes from '../../core/router/Routes';
 
+import EntityTypesContainer from './entitytypes/EntityTypesContainer';
 import PropertyTypesContainer from './propertytypes/PropertyTypesContainer';
 
 const SUB_NAV_LINK_ACTIVE_CLASSNAME :string = 'sub-nav-link-active';
@@ -136,6 +137,13 @@ class EntityDataModelContainer extends React.Component<Props, State> {
     );
   }
 
+  renderEntityTypesContainer = () => {
+
+    return (
+      <EntityTypesContainer filterQuery={this.state.searchQuery} />
+    );
+  }
+
   renderPropertyTypesContainer = () => {
 
     return (
@@ -149,7 +157,7 @@ class EntityDataModelContainer extends React.Component<Props, State> {
       <Section>
         <Switch>
           <Route path={Routes.PROPERTY_TYPES} render={this.renderPropertyTypesContainer} />
-          <Route path={Routes.ENTITY_TYPES} component={null} />
+          <Route path={Routes.ENTITY_TYPES} component={this.renderEntityTypesContainer} />
           <Route path={Routes.ASSOCIATION_TYPES} component={null} />
           <Route path={Routes.SCHEMAS} component={null} />
           <Redirect to={Routes.PROPERTY_TYPES} />

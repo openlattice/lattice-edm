@@ -10,16 +10,14 @@ export const SEARCH_FOR_PROPERTY_TYPES_REQUEST :string = 'SEARCH_FOR_PROPERTY_TY
 export const SEARCH_FOR_PROPERTY_TYPES_SUCCESS :string = 'SEARCH_FOR_PROPERTY_TYPES_SUCCESS';
 export const SEARCH_FOR_PROPERTY_TYPES_FAILURE :string = 'SEARCH_FOR_PROPERTY_TYPES_FAILURE';
 
-declare type Action = { [key :string] :any };
-
-export function fetchAllPropertyTypesRequest() :Action {
+export function fetchAllPropertyTypesRequest() :Object {
 
   return {
     type: FETCH_ALL_PROPERTY_TYPES_REQUEST
   };
 }
 
-export function fetchAllPropertyTypesSuccess(propertyTypes :Object[]) :Action {
+export function fetchAllPropertyTypesSuccess(propertyTypes :Object[]) :Object {
 
   return {
     type: FETCH_ALL_PROPERTY_TYPES_SUCCESS,
@@ -27,7 +25,7 @@ export function fetchAllPropertyTypesSuccess(propertyTypes :Object[]) :Action {
   };
 }
 
-export function fetchAllPropertyTypesFailure(error :any) :Action {
+export function fetchAllPropertyTypesFailure(error :any) :Object {
 
   return {
     type: FETCH_ALL_PROPERTY_TYPES_FAILURE,
@@ -35,7 +33,7 @@ export function fetchAllPropertyTypesFailure(error :any) :Action {
   };
 }
 
-export function searchForPropertyTypesRequest(searchQuery :string, page :number) :Action {
+export function searchForPropertyTypesRequest(searchQuery :string, page :number) :Object {
 
   return {
     type: SEARCH_FOR_PROPERTY_TYPES_REQUEST,
@@ -44,7 +42,7 @@ export function searchForPropertyTypesRequest(searchQuery :string, page :number)
   };
 }
 
-export function searchForPropertyTypesSuccess(searchResults :Object) :Action {
+export function searchForPropertyTypesSuccess(searchResults :Object) :Object {
 
   return {
     type: SEARCH_FOR_PROPERTY_TYPES_SUCCESS,
@@ -52,7 +50,7 @@ export function searchForPropertyTypesSuccess(searchResults :Object) :Action {
   };
 }
 
-export function searchForPropertyTypesFailure(error :any) :Action {
+export function searchForPropertyTypesFailure(error :any) :Object {
 
   return {
     type: SEARCH_FOR_PROPERTY_TYPES_FAILURE,
