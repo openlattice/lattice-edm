@@ -13,6 +13,7 @@ const SearchInputWrapper = styled.div`
   height: 40px;
   min-height: 40px;
   min-width: 40px;
+  position: relative;
   width: 400px;
 `;
 

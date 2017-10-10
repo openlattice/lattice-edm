@@ -5,12 +5,12 @@
 import React from 'react';
 
 import Immutable from 'immutable';
+import styled from 'styled-components';
 import { Models } from 'lattice';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 
 import AbstractDataTable from '../../../components/datatable/AbstractDataTable';
-import StyledFlexComponent from '../../../components/flex/StyledFlexComponent';
 
 import {
   StyledCard,
@@ -26,14 +26,12 @@ import { fetchAllEntityTypesRequest } from './EntityTypesActionFactory';
 
 const { FullyQualifiedName } = Models;
 
-const Wrapper = StyledFlexComponent.extend`
-  align-items: flex-start;
-  justify-content: left;
+const ETContainerWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
 `;
 
-const AllEntityTypesCard = StyledCard.extend`
-  min-width: 500px;
-`;
+const AllEntityTypesCard = StyledCard.extend``;
 
 type Props = {
   entityTypes :List<Map<*, *>>,
@@ -146,7 +144,7 @@ class EntityTypesContainer extends React.Component<Props, State> {
                 data={data}
                 headers={Immutable.fromJS(headers)}
                 onRowClick={onClick}
-                maxHeight={600}
+                maxHeight={500}
                 maxWidth={600}
                 width={600} />
           </StyledCardSectionBody>
@@ -223,7 +221,7 @@ class EntityTypesContainer extends React.Component<Props, State> {
       <StyledCard>
         <StyledCardTitle>EntityType Details</StyledCardTitle>
         <StyledCardSectionGroup horizontal>
-          <StyledCardSection style={{ width: '400px' }}>
+          <StyledCardSection style={{ width: '350px' }}>
             <StyledCardDetail>
               <StyledCardSectionTitle>ID</StyledCardSectionTitle>
               <StyledCardSectionBody>
@@ -287,10 +285,10 @@ class EntityTypesContainer extends React.Component<Props, State> {
     }
 
     return (
-      <Wrapper>
+      <ETContainerWrapper>
         { this.renderEntityTypesDataTable() }
         { this.renderEntityTypeDetails() }
-      </Wrapper>
+      </ETContainerWrapper>
     );
   }
 }

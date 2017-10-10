@@ -16,7 +16,6 @@ const StyledCard = styled.div`
 `;
 
 const StyledCardTitle = styled.h1`
-  flex: 1 0 auto;
   font-size: 22px;
   font-weight: 600;
   margin: 0 0 20px 0;
@@ -24,7 +23,6 @@ const StyledCardTitle = styled.h1`
 `;
 
 const StyledCardSectionTitle = styled.h2`
-  flex: 1 0 auto;
   font-size: 16px;
   font-weight: 600;
   margin: 20px 0 10px 0;
@@ -48,6 +46,7 @@ const StyledCardSectionGroup = styled.div.attrs({
   section {
     border-left: 1px solid #c5d5e5;
     margin-left: 20px;
+    padding-bottom: 20px;
     padding-left: 20px;
   }
   section:first-child {

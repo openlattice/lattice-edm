@@ -12,8 +12,6 @@ import { bindActionCreators } from 'redux';
 
 import StyledButton from '../../components/buttons/StyledButton';
 import SearchInput from '../../components/controls/SearchInput';
-import StyledFlexComponentCentered from '../../components/flex/StyledFlexComponentCentered';
-import StyledFlexComponentStacked from '../../components/flex/StyledFlexComponentStacked';
 import * as Routes from '../../core/router/Routes';
 
 import EntityTypesContainer from './entitytypes/EntityTypesContainer';
@@ -24,29 +22,40 @@ import { fetchAllPropertyTypesRequest } from './propertytypes/PropertyTypesActio
 
 const SUB_NAV_LINK_ACTIVE_CLASSNAME :string = 'sub-nav-link-active';
 
-const StyledFlexNavComponent = StyledFlexComponentCentered.withComponent('nav');
-const StyledFlexSectionComponent = StyledFlexComponentCentered.withComponent('section');
-
-const Wrapper = StyledFlexComponentStacked.extend`
+const EDMContainerWrapper = styled.div`
+  display: flex;
   flex: 1 0 auto;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
 `;
 
-const Section = StyledFlexSectionComponent.extend`
-  justify-content: center;
-  margin: 20px 0;
+const EDMExplorerOuterWrapper = styled.div`
+  display: flex;
+  flex: 1 0 auto;
+  flex-direction: row;
+  margin: 0;
+  overflow-x: scroll;
+  padding: 0;
 `;
 
-const NavSection = Section.extend`
-  margin-bottom: 20px;
-  margin-top: 0;
+const EDMExplorerInnerWrapper = styled.div`
+  display: flex;
+  flex: 1 0 auto;
+  flex-direction: column;
+  margin: 0;
+  padding: 20px;
 `;
 
-const Nav = StyledFlexNavComponent.extend`
+const Nav = styled.nav`
   background-color: #fefefe;
   border-bottom: 1px solid #c5d5e5;
-  flex: 1 0 auto;
+  display: flex;
+  flex: 0 0 auto;
   height: 50px;
   justify-content: center;
+  margin-bottom: 20px;
+  margin-top: 0;
 `;
 
 const NavTab = styled(NavLink).attrs({
@@ -69,9 +78,16 @@ const NavTab = styled(NavLink).attrs({
   }
 `;
 
-const ActionSection = Section.extend`
-  align-self: center;
+const ActionSection = styled.section`
+  align-self: left;
+  display: flex;
+  flex: 0 0 auto;
   justify-content: space-between;
+  margin: 20px 40px;
+`;
+
+const AddActionButton = StyledButton.extend`
+  margin-left: 40px;
 `;
 
 type Props = {
@@ -110,17 +126,15 @@ class EntityDataModelContainer extends React.Component<Props, State> {
     this.setState({ searchQuery });
   }
 
-  renderNavSection = () => {
+  renderNav = () => {
 
     return (
-      <NavSection>
-        <Nav>
-          <NavTab to={Routes.PROPERTY_TYPES}>PropertyTypes</NavTab>
-          <NavTab to={Routes.ENTITY_TYPES}>EntityTypes</NavTab>
-          <NavTab to={Routes.ASSOCIATION_TYPES}>AssociationTypes</NavTab>
-          <NavTab to={Routes.SCHEMAS}>Schemas</NavTab>
-        </Nav>
-      </NavSection>
+      <Nav>
+        <NavTab to={Routes.PROPERTY_TYPES}>PropertyTypes</NavTab>
+        <NavTab to={Routes.ENTITY_TYPES}>EntityTypes</NavTab>
+        <NavTab to={Routes.ASSOCIATION_TYPES}>AssociationTypes</NavTab>
+        <NavTab to={Routes.SCHEMAS}>Schemas</NavTab>
+      </Nav>
     );
   }
 
@@ -148,7 +162,7 @@ class EntityDataModelContainer extends React.Component<Props, State> {
     return (
       <ActionSection>
         <SearchInput onChange={this.handleSearchOnChange} />
-        <StyledButton disabled>{buttonText}</StyledButton>
+        <AddActionButton disabled>{buttonText}</AddActionButton>
       </ActionSection>
     );
   }
@@ -170,26 +184,28 @@ class EntityDataModelContainer extends React.Component<Props, State> {
   renderBodySection = () => {
 
     return (
-      <Section>
-        <Switch>
-          <Route path={Routes.PROPERTY_TYPES} render={this.renderPropertyTypesContainer} />
-          <Route path={Routes.ENTITY_TYPES} component={this.renderEntityTypesContainer} />
-          <Route path={Routes.ASSOCIATION_TYPES} component={null} />
-          <Route path={Routes.SCHEMAS} component={null} />
-          <Redirect to={Routes.PROPERTY_TYPES} />
-        </Switch>
-      </Section>
+      <Switch>
+        <Route path={Routes.PROPERTY_TYPES} render={this.renderPropertyTypesContainer} />
+        <Route path={Routes.ENTITY_TYPES} component={this.renderEntityTypesContainer} />
+        <Route path={Routes.ASSOCIATION_TYPES} component={null} />
+        <Route path={Routes.SCHEMAS} component={null} />
+        <Redirect to={Routes.PROPERTY_TYPES} />
+      </Switch>
     );
   }
 
   render() {
 
     return (
-      <Wrapper>
-        { this.renderNavSection() }
+      <EDMContainerWrapper>
+        { this.renderNav() }
         { this.renderActionSection() }
-        { this.renderBodySection() }
-      </Wrapper>
+        <EDMExplorerOuterWrapper>
+          <EDMExplorerInnerWrapper>
+            { this.renderBodySection() }
+          </EDMExplorerInnerWrapper>
+        </EDMExplorerOuterWrapper>
+      </EDMContainerWrapper>
     );
   }
 }

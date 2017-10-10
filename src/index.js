@@ -51,8 +51,9 @@ injectGlobal`
   }
 
   #app {
-    display: flex;
-    flex: 1 0 auto;
+    display: block;
+    height: 100%;
+    width: 100%;
   }
 `;
 /* eslint-enable */
