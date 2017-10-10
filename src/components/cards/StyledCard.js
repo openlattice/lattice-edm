@@ -23,11 +23,6 @@ const StyledCardTitle = styled.h1`
   padding: 0;
 `;
 
-const StyledCardSection = styled.section`
-  display: flex;
-  flex-direction: column;
-`;
-
 const StyledCardSectionTitle = styled.h2`
   flex: 1 0 auto;
   font-size: 16px;
@@ -45,10 +40,39 @@ const StyledCardSectionBody = styled.div`
   }
 `;
 
+const StyledCardSectionGroup = styled.div.attrs({
+  flexdirection: props => (props.horizontal ? 'row' : 'column')
+})`
+  display: flex;
+  flex-direction: ${props => props.flexdirection};
+  section {
+    border-left: 1px solid #c5d5e5;
+    margin-left: 20px;
+    padding-left: 20px;
+  }
+  section:first-child {
+    border-left: none;
+    margin-left: 0;
+    padding-left: 0;
+  }
+`;
+
+const StyledCardSection = styled.section`
+  display: flex;
+  flex-direction: column;
+`;
+
+const StyledCardDetail = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+
 export {
   StyledCard,
+  StyledCardDetail,
   StyledCardSection,
   StyledCardSectionBody,
+  StyledCardSectionGroup,
   StyledCardSectionTitle,
   StyledCardTitle
 };

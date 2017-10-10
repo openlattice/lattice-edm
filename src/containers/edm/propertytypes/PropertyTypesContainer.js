@@ -26,7 +26,7 @@ const { FullyQualifiedName } = Models;
 
 const Wrapper = StyledFlexComponent.extend`
   align-items: flex-start;
-  justify-content: space-evenly;
+  justify-content: left;
 `;
 
 const AllPropertyTypesCard = StyledCard.extend`
@@ -38,9 +38,6 @@ const PropertyTypeDetailsCard = StyledCard.extend`
 `;
 
 type Props = {
-  actions :{
-    fetchAllPropertyTypesRequest :Function
-  },
   propertyTypes :List<Map<*, *>>,
   filterQuery :string
 };
@@ -92,11 +89,6 @@ class PropertyTypesContainer extends React.Component<Props, State> {
 
       return includePropertyType;
     });
-  }
-
-  componentDidMount() {
-
-    this.props.actions.fetchAllPropertyTypesRequest();
   }
 
   componentWillReceiveProps(nextProps :Props) {
@@ -152,8 +144,8 @@ class PropertyTypesContainer extends React.Component<Props, State> {
             headers={Immutable.fromJS(headers)}
             onRowClick={onClick}
             maxHeight={600}
-            maxWidth={700}
-            width={700} />
+            maxWidth={600}
+            width={600} />
       </div>
     );
   }

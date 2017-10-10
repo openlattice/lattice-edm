@@ -14,8 +14,10 @@ import StyledFlexComponent from '../../../components/flex/StyledFlexComponent';
 
 import {
   StyledCard,
+  StyledCardDetail,
   StyledCardSection,
   StyledCardSectionBody,
+  StyledCardSectionGroup,
   StyledCardSectionTitle,
   StyledCardTitle
 } from '../../../components/cards/StyledCard';
@@ -26,22 +28,16 @@ const { FullyQualifiedName } = Models;
 
 const Wrapper = StyledFlexComponent.extend`
   align-items: flex-start;
-  justify-content: space-evenly;
+  justify-content: left;
 `;
 
 const AllEntityTypesCard = StyledCard.extend`
   min-width: 500px;
 `;
 
-const EntityTypeDetailsCard = StyledCard.extend`
-  width: 500px;
-`;
-
 type Props = {
-  actions :{
-    fetchAllEntityTypesRequest :Function
-  },
   entityTypes :List<Map<*, *>>,
+  propertyTypesById :Map<string, Map<*, *>>,
   filterQuery :string
 };
 
@@ -55,6 +51,7 @@ class EntityTypesContainer extends React.Component<Props, State> {
   static defaultProps = {
     actions: {},
     entityTypes: Immutable.List(),
+    propertyTypesById: Immutable.Map(),
     filterQuery: ''
   };
 
@@ -94,11 +91,6 @@ class EntityTypesContainer extends React.Component<Props, State> {
     });
   }
 
-  componentDidMount() {
-
-    this.props.actions.fetchAllEntityTypesRequest();
-  }
-
   componentWillReceiveProps(nextProps :Props) {
 
     // TODO: potential bug with using nextProps.entityTypes
@@ -114,7 +106,7 @@ class EntityTypesContainer extends React.Component<Props, State> {
     });
   }
 
-  renderDataTable = () => {
+  renderEntityTypesDataTable = () => {
 
     // TODO: make this better
     const headers :Object[] = [
@@ -141,34 +133,75 @@ class EntityTypesContainer extends React.Component<Props, State> {
     };
 
     return (
-      <div>
-        {
-          data.isEmpty()
-            ? (<div>No EntityTypes</div>)
-            : null
-        }
-        <AbstractDataTable
-            data={data}
-            headers={Immutable.fromJS(headers)}
-            onRowClick={onClick}
-            maxHeight={600}
-            maxWidth={700}
-            width={700} />
-      </div>
-    );
-  }
-
-  renderEntityTypesTable = () => {
-
-    return (
       <AllEntityTypesCard>
         <StyledCardTitle>EDM EntityTypes</StyledCardTitle>
         <StyledCardSection>
           <StyledCardSectionBody>
-            { this.renderDataTable() }
+            {
+              data.isEmpty()
+                ? (<div>No EntityTypes</div>)
+                : null
+            }
+            <AbstractDataTable
+                data={data}
+                headers={Immutable.fromJS(headers)}
+                onRowClick={onClick}
+                maxHeight={600}
+                maxWidth={600}
+                width={600} />
           </StyledCardSectionBody>
         </StyledCardSection>
       </AllEntityTypesCard>
+    );
+  }
+
+  renderEntityTypePropertiesDataTable = (entityType :Map<*, *>) => {
+
+    // TODO: make this better
+    const headers :Object[] = [
+      { id: 'pk', value: 'PK' },
+      { id: 'type', value: 'FQN' },
+      { id: 'title', value: 'Title' }
+    ];
+
+    const data :List<Map<string, string>> = entityType.get('properties', Immutable.List())
+      .map((propertyTypeId :UUID) => {
+        return Immutable.OrderedMap().withMutations((map :OrderedMap<string, string>) => {
+
+          const propertyType :Map<*, *> = this.props.propertyTypesById.get(propertyTypeId, Immutable.Map());
+          const ptType :Map<string, string> = propertyType.get('type', Immutable.Map());
+          const ptFQN :string = (new FullyQualifiedName(ptType.toJS())).getFullyQualifiedName();
+          const ptTitle :string = propertyType.get('title', '');
+
+          const isKey :boolean = entityType.get('key', Immutable.List()).includes(propertyTypeId);
+
+          map.set('pk', isKey ? 'PK' : '');
+          map.set('type', ptFQN);
+          map.set('title', ptTitle);
+        })
+      })
+      .sort((propertyType) => {
+        const primaryKey :string = propertyType.get('pk');
+        if (primaryKey === 'PK') {
+          return -1;
+        }
+        else if (primaryKey === '') {
+          return 1;
+        }
+        return 0;
+      });
+
+    const onClick :Function = (selectedRowIndex :number) => {
+      console.log('I clicked a PropertyType!');
+    };
+
+    return (
+      <AbstractDataTable
+          data={data}
+          headers={Immutable.fromJS(headers)}
+          onRowClick={onClick}
+          maxHeight={400}
+          maxWidth={600} />
     );
   }
 
@@ -186,85 +219,76 @@ class EntityTypesContainer extends React.Component<Props, State> {
     const ptType :Map<string, string> = entityType.get('type', Immutable.Map());
     const fqnAsString :string = `${new FullyQualifiedName(ptType.toJS())}`;
 
-    const ptKey :List<*> = entityType.get('key', Immutable.List());
-    const keyAsString :string = ptKey.isEmpty() ? '[]' : ptKey.toString();
-
-    const ptProperties :List<*> = entityType.get('properties', Immutable.List());
-    const propertiesAsString :string = ptProperties.isEmpty() ? '[]' : ptProperties.toString();
-
-    const ptSchemas :List<*> = entityType.get('schemas', Immutable.List());
-    const schemasAsString :string = ptSchemas.isEmpty() ? '[]' : ptSchemas.toString();
-
     return (
-      <EntityTypeDetailsCard>
+      <StyledCard>
         <StyledCardTitle>EntityType Details</StyledCardTitle>
-        <StyledCardSection>
-          <StyledCardSectionTitle>ID</StyledCardSectionTitle>
-          <StyledCardSectionBody>
-            <p>{ entityType.get('id') }</p>
-          </StyledCardSectionBody>
-        </StyledCardSection>
-        <StyledCardSection>
-          <StyledCardSectionTitle>Type</StyledCardSectionTitle>
-          <StyledCardSectionBody>
-            <p>{ fqnAsString }</p>
-          </StyledCardSectionBody>
-        </StyledCardSection>
-        <StyledCardSection>
-          <StyledCardSectionTitle>Title</StyledCardSectionTitle>
-          <StyledCardSectionBody>
-            <p>{ entityType.get('title') }</p>
-          </StyledCardSectionBody>
-        </StyledCardSection>
-        <StyledCardSection>
-          <StyledCardSectionTitle>Description</StyledCardSectionTitle>
-          <StyledCardSectionBody>
-            <p>{ entityType.get('description') }</p>
-          </StyledCardSectionBody>
-        </StyledCardSection>
-        <StyledCardSection>
-          <StyledCardSectionTitle>BaseType</StyledCardSectionTitle>
-          <StyledCardSectionBody>
-            <p>{ entityType.get('baseType') }</p>
-          </StyledCardSectionBody>
-        </StyledCardSection>
-        <StyledCardSection>
-          <StyledCardSectionTitle>Category</StyledCardSectionTitle>
-          <StyledCardSectionBody>
-            <p>{ entityType.get('category') }</p>
-          </StyledCardSectionBody>
-        </StyledCardSection>
-        <StyledCardSection>
-          <StyledCardSectionTitle>Key</StyledCardSectionTitle>
-          <StyledCardSectionBody>
-            <p>{ keyAsString }</p>
-          </StyledCardSectionBody>
-        </StyledCardSection>
-        <StyledCardSection>
-          <StyledCardSectionTitle>Properties</StyledCardSectionTitle>
-          <StyledCardSectionBody>
-            <p>{ propertiesAsString }</p>
-          </StyledCardSectionBody>
-        </StyledCardSection>
-        <StyledCardSection>
-          <StyledCardSectionTitle>Schemas</StyledCardSectionTitle>
-          <StyledCardSectionBody>
-            <p>{ schemasAsString }</p>
-          </StyledCardSectionBody>
-        </StyledCardSection>
-      </EntityTypeDetailsCard>
+        <StyledCardSectionGroup horizontal>
+          <StyledCardSection style={{ width: '400px' }}>
+            <StyledCardDetail>
+              <StyledCardSectionTitle>ID</StyledCardSectionTitle>
+              <StyledCardSectionBody>
+                <p>{ entityType.get('id') }</p>
+              </StyledCardSectionBody>
+            </StyledCardDetail>
+            <StyledCardDetail>
+              <StyledCardSectionTitle>Type</StyledCardSectionTitle>
+              <StyledCardSectionBody>
+                <p>{ fqnAsString }</p>
+              </StyledCardSectionBody>
+            </StyledCardDetail>
+            <StyledCardDetail>
+              <StyledCardSectionTitle>Title</StyledCardSectionTitle>
+              <StyledCardSectionBody>
+                <p>{ entityType.get('title') }</p>
+              </StyledCardSectionBody>
+            </StyledCardDetail>
+            <StyledCardDetail>
+              <StyledCardSectionTitle>Description</StyledCardSectionTitle>
+              <StyledCardSectionBody>
+                <p>{ entityType.get('description') }</p>
+              </StyledCardSectionBody>
+            </StyledCardDetail>
+            <StyledCardDetail>
+              <StyledCardSectionTitle>BaseType</StyledCardSectionTitle>
+              <StyledCardSectionBody>
+                <p>{ entityType.get('baseType') }</p>
+              </StyledCardSectionBody>
+            </StyledCardDetail>
+            <StyledCardDetail>
+              <StyledCardSectionTitle>Category</StyledCardSectionTitle>
+              <StyledCardSectionBody>
+                <p>{ entityType.get('category') }</p>
+              </StyledCardSectionBody>
+            </StyledCardDetail>
+          </StyledCardSection>
+          <StyledCardSection>
+            <StyledCardDetail>
+              <StyledCardSectionTitle>Properties</StyledCardSectionTitle>
+              <StyledCardSectionBody>
+                { this.renderEntityTypePropertiesDataTable(entityType) }
+              </StyledCardSectionBody>
+            </StyledCardDetail>
+            <StyledCardDetail>
+              <StyledCardSectionTitle>Schemas</StyledCardSectionTitle>
+              <StyledCardSectionBody>
+                <p>TODO</p>
+              </StyledCardSectionBody>
+            </StyledCardDetail>
+          </StyledCardSection>
+        </StyledCardSectionGroup>
+      </StyledCard>
     );
   }
 
   render() {
 
-    if (this.props.entityTypes.isEmpty()) {
+    if (this.props.entityTypes.isEmpty() || this.props.propertyTypesById.isEmpty()) {
       return null;
     }
 
     return (
       <Wrapper>
-        { this.renderEntityTypesTable() }
+        { this.renderEntityTypesDataTable() }
         { this.renderEntityTypeDetails() }
       </Wrapper>
     );
@@ -274,7 +298,8 @@ class EntityTypesContainer extends React.Component<Props, State> {
 function mapStateToProps(state :Map<*, *>) :Object {
 
   return {
-    entityTypes: state.getIn(['edm', 'entityTypes', 'entityTypes'], Immutable.List())
+    entityTypes: state.getIn(['edm', 'entityTypes', 'entityTypes'], Immutable.List()),
+    propertyTypesById: state.getIn(['edm', 'propertyTypes', 'propertyTypesById'], Immutable.List())
   };
 }
 

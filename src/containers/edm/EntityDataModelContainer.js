@@ -4,8 +4,11 @@
 
 import React from 'react';
 
+import Immutable from 'immutable';
 import styled from 'styled-components';
+import { connect } from 'react-redux';
 import { NavLink, Redirect, Route, Switch, withRouter } from 'react-router-dom';
+import { bindActionCreators } from 'redux';
 
 import StyledButton from '../../components/buttons/StyledButton';
 import SearchInput from '../../components/controls/SearchInput';
@@ -15,6 +18,9 @@ import * as Routes from '../../core/router/Routes';
 
 import EntityTypesContainer from './entitytypes/EntityTypesContainer';
 import PropertyTypesContainer from './propertytypes/PropertyTypesContainer';
+
+import { fetchAllEntityTypesRequest } from './entitytypes/EntityTypesActionFactory';
+import { fetchAllPropertyTypesRequest } from './propertytypes/PropertyTypesActionFactory';
 
 const SUB_NAV_LINK_ACTIVE_CLASSNAME :string = 'sub-nav-link-active';
 
@@ -69,6 +75,10 @@ const ActionSection = Section.extend`
 `;
 
 type Props = {
+  actions :{
+    fetchAllEntityTypesRequest :Function,
+    fetchAllPropertyTypesRequest :Function
+  },
   location :{
     pathname :string
   }
@@ -87,6 +97,12 @@ class EntityDataModelContainer extends React.Component<Props, State> {
     this.state = {
       searchQuery: ''
     };
+  }
+
+  componentDidMount() {
+
+    this.props.actions.fetchAllEntityTypesRequest();
+    this.props.actions.fetchAllPropertyTypesRequest();
   }
 
   handleSearchOnChange = (searchQuery :string) => {
@@ -178,4 +194,18 @@ class EntityDataModelContainer extends React.Component<Props, State> {
   }
 }
 
-export default withRouter(EntityDataModelContainer);
+function mapDispatchToProps(dispatch :Function) :Object {
+
+  const actions = {
+    fetchAllEntityTypesRequest,
+    fetchAllPropertyTypesRequest
+  };
+
+  return {
+    actions: bindActionCreators(actions, dispatch)
+  };
+}
+
+export default withRouter(
+  connect(null, mapDispatchToProps)(EntityDataModelContainer)
+);
