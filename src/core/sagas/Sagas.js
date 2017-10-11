@@ -20,10 +20,8 @@ export default function* sagas() :Generator<*, *, *> {
 
     // PropertyTypesSagas
     fork(PropertyTypesSagas.watchFetchAllPropertyTypesRequest),
-    fork(PropertyTypesSagas.watchSearchForPropertyTypesRequest),
 
     // EntityTypesSagas
-    fork(EntityTypesSagas.watchFetchAllEntityTypesRequest),
-    fork(EntityTypesSagas.watchSearchForEntityTypesRequest)
+    fork(EntityTypesSagas.watchFetchAllEntityTypesRequest)
   ];
 }
