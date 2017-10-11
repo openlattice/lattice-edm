@@ -198,6 +198,7 @@ class EntityTypesContainer extends React.Component<Props, State> {
           data={data}
           headers={Immutable.fromJS(headers)}
           onRowClick={onClick}
+          columnMinWidth={50}
           maxHeight={400}
           maxWidth={600} />
     );

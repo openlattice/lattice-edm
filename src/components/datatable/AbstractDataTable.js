@@ -104,6 +104,7 @@ type GridData = List<Map<string, string>>;
 type GridHeaders = List<Map<string, string>>;
 
 type Props = {
+  columnMinWidth :number,
   data :GridData,
   headers :GridHeaders,
   height :number,
@@ -134,6 +135,7 @@ class AbstractDataTable extends React.Component<Props, State> {
   bodyGrid :?Grid;
 
   static defaultProps = {
+    columnMinWidth: DEFAULT_COLUMN_MIN_WIDTH,
     data: Immutable.List(),
     headers: Immutable.List(),
     height: 0,
@@ -162,17 +164,17 @@ class AbstractDataTable extends React.Component<Props, State> {
     return Math.ceil(CANVAS_CONTEXT.measureText(text).width);
   }
 
-  static computeColumnWidths(headers :GridHeaders, data :GridData) :Map<number, number> {
+  static computeColumnWidths(props :Props) :Map<number, number> {
 
     return Immutable.OrderedMap().withMutations((map :OrderedMap<number, number>) => {
 
       // iterate through the headers, column by column, and compute an estimated width for each column
-      headers.forEach((header :Map<string, string>, columnIndex :number) => {
+      props.headers.forEach((header :Map<string, string>, columnIndex :number) => {
 
         // find the widest cell in the column
         let columnWidth :number = 0;
 
-        data.forEach((row :Map<string, string>) => {
+        props.data.forEach((row :Map<string, string>) => {
           // keeping it simple for now
           const cellValue :string = row.get(header.get('id', ''), '');
           const cellWidth :number = AbstractDataTable.measureTextWidth(cellValue);
@@ -189,8 +191,8 @@ class AbstractDataTable extends React.Component<Props, State> {
         let columnWidthInPixels :number = columnWidth + (2 * CELL_PADDING);
 
         // ensure column will have a minimum width
-        if (columnWidthInPixels < DEFAULT_COLUMN_MIN_WIDTH) {
-          columnWidthInPixels = DEFAULT_COLUMN_MIN_WIDTH;
+        if (columnWidthInPixels < props.columnMinWidth) {
+          columnWidthInPixels = props.columnMinWidth;
         }
         // ensure column will have a maximum width
         else if (columnWidthInPixels > DEFAULT_COLUMN_MAX_WIDTH) {
@@ -207,7 +209,7 @@ class AbstractDataTable extends React.Component<Props, State> {
 
     const rowCount :number = props.data.size;
 
-    let columnWidths :Map<number, number> = AbstractDataTable.computeColumnWidths(props.headers, props.data);
+    let columnWidths :Map<number, number> = AbstractDataTable.computeColumnWidths(props);
     const totalWidth :number = columnWidths.reduce(
       (widthSum :number, columnWidth :number) :number => {
         return widthSum + columnWidth;
