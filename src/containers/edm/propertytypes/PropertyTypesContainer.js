@@ -12,29 +12,28 @@ import { bindActionCreators } from 'redux';
 
 import AbstractDataTable from '../../../components/datatable/AbstractDataTable';
 
-import {
-  StyledCard,
-  StyledCardSection,
-  StyledCardSectionBody,
-  StyledCardSectionTitle,
-  StyledCardTitle
-} from '../../../components/cards/StyledCard';
+import { StyledCard } from '../../../components/cards/StyledCard';
 
 import { fetchAllPropertyTypesRequest } from './PropertyTypesActionFactory';
 
 const { FullyQualifiedName } = Models;
 
 const PTContainerWrapper = styled.div`
+  align-items: flex-start;
   display: flex;
   flex-direction: row;
 `;
 
-const AllPropertyTypesCard = StyledCard.extend`
+const PropertyTypesCard = StyledCard.extend`
+  flex: 1 0 auto;
+  max-width: 1000px;
   min-width: 500px;
 `;
 
 const PropertyTypeDetailsCard = StyledCard.extend`
-  width: 500px;
+  flex: 3 0 auto;
+  max-width: 1000px;
+  min-width: 500px;
 `;
 
 type Props = {
@@ -74,15 +73,17 @@ class PropertyTypesContainer extends React.Component<Props, State> {
 
     return propertyTypes.filter((propertyType :Map<*, *>) => {
 
+      const propertyTypeId :string = propertyType.get('id');
       const ptType :Map<string, string> = propertyType.get('type', Immutable.Map());
       const ptFQN :string = (new FullyQualifiedName(ptType.toJS())).getFullyQualifiedName();
       const ptTitle :string = propertyType.get('title', '');
 
       let includePropertyType :boolean = true;
       if (filterQuery && filterQuery.trim()) {
+        const matchesId :boolean = (propertyTypeId === filterQuery);
         const matchesFQN :boolean = ptFQN.includes(filterQuery.trim());
         const matchesTitle :boolean = ptTitle.includes(filterQuery.trim());
-        if (!matchesFQN && !matchesTitle) {
+        if (!matchesId && !matchesFQN && !matchesTitle) {
           includePropertyType = false;
         }
       }
@@ -106,7 +107,7 @@ class PropertyTypesContainer extends React.Component<Props, State> {
     });
   }
 
-  renderDataTable = () => {
+  renderPropertyTypesDataTable = () => {
 
     // TODO: make this better
     const headers :Object[] = [
@@ -133,7 +134,8 @@ class PropertyTypesContainer extends React.Component<Props, State> {
     };
 
     return (
-      <div>
+      <PropertyTypesCard>
+        <h1>EDM PropertyTypes</h1>
         {
           data.isEmpty()
             ? (<div>No PropertyTypes</div>)
@@ -143,24 +145,8 @@ class PropertyTypesContainer extends React.Component<Props, State> {
             data={data}
             headers={Immutable.fromJS(headers)}
             onRowClick={onClick}
-            maxHeight={600}
-            maxWidth={600}
-            width={600} />
-      </div>
-    );
-  }
-
-  renderPropertyTypesTable = () => {
-
-    return (
-      <AllPropertyTypesCard>
-        <StyledCardTitle>EDM PropertyTypes</StyledCardTitle>
-        <StyledCardSection>
-          <StyledCardSectionBody>
-            { this.renderDataTable() }
-          </StyledCardSectionBody>
-        </StyledCardSection>
-      </AllPropertyTypesCard>
+            maxHeight={600} />
+      </PropertyTypesCard>
     );
   }
 
@@ -186,55 +172,39 @@ class PropertyTypesContainer extends React.Component<Props, State> {
 
     return (
       <PropertyTypeDetailsCard>
-        <StyledCardTitle>PropertyType Details</StyledCardTitle>
-        <StyledCardSection>
-          <StyledCardSectionTitle>ID</StyledCardSectionTitle>
-          <StyledCardSectionBody>
-            <p>{ propertyType.get('id') }</p>
-          </StyledCardSectionBody>
-        </StyledCardSection>
-        <StyledCardSection>
-          <StyledCardSectionTitle>Type</StyledCardSectionTitle>
-          <StyledCardSectionBody>
-            <p>{ fqnAsString }</p>
-          </StyledCardSectionBody>
-        </StyledCardSection>
-        <StyledCardSection>
-          <StyledCardSectionTitle>Title</StyledCardSectionTitle>
-          <StyledCardSectionBody>
-            <p>{ propertyType.get('title') }</p>
-          </StyledCardSectionBody>
-        </StyledCardSection>
-        <StyledCardSection>
-          <StyledCardSectionTitle>Description</StyledCardSectionTitle>
-          <StyledCardSectionBody>
-            <p>{ propertyType.get('description') }</p>
-          </StyledCardSectionBody>
-        </StyledCardSection>
-        <StyledCardSection>
-          <StyledCardSectionTitle>DataType</StyledCardSectionTitle>
-          <StyledCardSectionBody>
-            <p>{ propertyType.get('datatype') }</p>
-          </StyledCardSectionBody>
-        </StyledCardSection>
-        <StyledCardSection>
-          <StyledCardSectionTitle>Schemas</StyledCardSectionTitle>
-          <StyledCardSectionBody>
-            <p>{ schemasAsString }</p>
-          </StyledCardSectionBody>
-        </StyledCardSection>
-        <StyledCardSection>
-          <StyledCardSectionTitle>PII</StyledCardSectionTitle>
-          <StyledCardSectionBody>
-            <p>{ piiAsString }</p>
-          </StyledCardSectionBody>
-        </StyledCardSection>
-        <StyledCardSection>
-          <StyledCardSectionTitle>Analyzer</StyledCardSectionTitle>
-          <StyledCardSectionBody>
-            <p>{ propertyType.get('analyzer') }</p>
-          </StyledCardSectionBody>
-        </StyledCardSection>
+        <h1>PropertyType Details</h1>
+        <section>
+          <h2>ID</h2>
+          <p>{ propertyType.get('id') }</p>
+        </section>
+        <section>
+          <h2>Type</h2>
+          <p>{ fqnAsString }</p>
+        </section>
+        <section>
+          <h2>Title</h2>
+          <p>{ propertyType.get('title') }</p>
+        </section>
+        <section>
+          <h2>Description</h2>
+          <p>{ propertyType.get('description') }</p>
+        </section>
+        <section>
+          <h2>DataType</h2>
+          <p>{ propertyType.get('datatype') }</p>
+        </section>
+        <section>
+          <h2>Schemas</h2>
+          <p>{ schemasAsString }</p>
+        </section>
+        <section>
+          <h2>PII</h2>
+          <p>{ piiAsString }</p>
+        </section>
+        <section>
+          <h2>Analyzer</h2>
+          <p>{ propertyType.get('analyzer') }</p>
+        </section>
       </PropertyTypeDetailsCard>
     );
   }
@@ -247,7 +217,7 @@ class PropertyTypesContainer extends React.Component<Props, State> {
 
     return (
       <PTContainerWrapper>
-        { this.renderPropertyTypesTable() }
+        { this.renderPropertyTypesDataTable() }
         { this.renderPropertyTypeDetails() }
       </PTContainerWrapper>
     );
