@@ -5,6 +5,7 @@
 import { fork } from 'redux-saga/effects';
 
 import * as AuthSagas from '../auth/AuthSagas';
+import * as AssociationTypesSagas from '../../containers/edm/associationtypes/AssociationTypesSagas';
 import * as EntityTypesSagas from '../../containers/edm/entitytypes/EntityTypesSagas';
 import * as PropertyTypesSagas from '../../containers/edm/propertytypes/PropertyTypesSagas';
 
@@ -22,6 +23,9 @@ export default function* sagas() :Generator<*, *, *> {
     fork(PropertyTypesSagas.watchFetchAllPropertyTypesRequest),
 
     // EntityTypesSagas
-    fork(EntityTypesSagas.watchFetchAllEntityTypesRequest)
+    fork(EntityTypesSagas.watchFetchAllEntityTypesRequest),
+
+    // AssociationTypesSagas
+    fork(AssociationTypesSagas.watchFetchAllAssociationTypesRequest)
   ];
 }

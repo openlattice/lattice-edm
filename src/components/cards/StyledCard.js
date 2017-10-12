@@ -11,67 +11,34 @@ const StyledCard = styled.div`
   box-shadow: 0 2px 8px -2px rgba(17, 51, 85, 0.15);
   display: flex;
   flex-direction: column;
-  padding: 30px;
-  margin: 0 20px;
-`;
-
-const StyledCardTitle = styled.h1`
-  font-size: 22px;
-  font-weight: 600;
-  margin: 0 0 20px 0;
-  padding: 0;
-`;
-
-const StyledCardSectionTitle = styled.h2`
-  font-size: 16px;
-  font-weight: 600;
-  margin: 20px 0 10px 0;
-  padding: 0;
-`;
-
-const StyledCardSectionBody = styled.div`
   font-size: 14px;
   font-weight: normal;
+  padding: 30px;
+  margin: 0 20px;
+  h1 {
+    font-size: 22px;
+    font-weight: 600;
+    margin: 10px 0;
+    padding: 0;
+  }
+  h2 {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 18px 0 10px 0;
+    padding: 0;
+  }
   p {
     margin: 0;
     padding: 0;
   }
-`;
-
-const StyledCardSectionGroup = styled.div.attrs({
-  flexdirection: props => (props.horizontal ? 'row' : 'column')
-})`
-  display: flex;
-  flex-direction: ${props => props.flexdirection};
   section {
-    border-left: 1px solid #c5d5e5;
-    margin-left: 20px;
-    padding-bottom: 20px;
-    padding-left: 20px;
+    display: flex;
+    flex-direction: column;
+    margin-left: 10px;
+    margin-top: 10px;
   }
-  section:first-child {
-    border-left: none;
-    margin-left: 0;
-    padding-left: 0;
-  }
-`;
-
-const StyledCardSection = styled.section`
-  display: flex;
-  flex-direction: column;
-`;
-
-const StyledCardDetail = styled.div`
-  display: flex;
-  flex-direction: column;
 `;
 
 export {
-  StyledCard,
-  StyledCardDetail,
-  StyledCardSection,
-  StyledCardSectionBody,
-  StyledCardSectionGroup,
-  StyledCardSectionTitle,
-  StyledCardTitle
+  StyledCard
 };

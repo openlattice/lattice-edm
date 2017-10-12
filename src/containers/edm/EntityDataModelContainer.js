@@ -14,9 +14,11 @@ import StyledButton from '../../components/buttons/StyledButton';
 import SearchInput from '../../components/controls/SearchInput';
 import * as Routes from '../../core/router/Routes';
 
+import AssociationTypesContainer from './associationtypes/AssociationTypesContainer';
 import EntityTypesContainer from './entitytypes/EntityTypesContainer';
 import PropertyTypesContainer from './propertytypes/PropertyTypesContainer';
 
+import { fetchAllAssociationTypesRequest } from './associationtypes/AssociationTypesActionFactory';
 import { fetchAllEntityTypesRequest } from './entitytypes/EntityTypesActionFactory';
 import { fetchAllPropertyTypesRequest } from './propertytypes/PropertyTypesActionFactory';
 
@@ -92,6 +94,7 @@ const AddActionButton = StyledButton.extend`
 
 type Props = {
   actions :{
+    fetchAllAssociationTypesRequest :Function,
     fetchAllEntityTypesRequest :Function,
     fetchAllPropertyTypesRequest :Function
   },
@@ -117,8 +120,9 @@ class EntityDataModelContainer extends React.Component<Props, State> {
 
   componentDidMount() {
 
-    this.props.actions.fetchAllEntityTypesRequest();
     this.props.actions.fetchAllPropertyTypesRequest();
+    this.props.actions.fetchAllEntityTypesRequest();
+    this.props.actions.fetchAllAssociationTypesRequest();
   }
 
   handleSearchOnChange = (searchQuery :string) => {
@@ -167,6 +171,13 @@ class EntityDataModelContainer extends React.Component<Props, State> {
     );
   }
 
+  renderAssociationTypesContainer = () => {
+
+    return (
+      <AssociationTypesContainer filterQuery={this.state.searchQuery} />
+    );
+  }
+
   renderEntityTypesContainer = () => {
 
     return (
@@ -181,14 +192,21 @@ class EntityDataModelContainer extends React.Component<Props, State> {
     );
   }
 
+  renderSchemasContainer = () => {
+
+    return (
+      <p>TODO</p>
+    );
+  }
+
   renderBodySection = () => {
 
     return (
       <Switch>
         <Route path={Routes.PROPERTY_TYPES} render={this.renderPropertyTypesContainer} />
         <Route path={Routes.ENTITY_TYPES} component={this.renderEntityTypesContainer} />
-        <Route path={Routes.ASSOCIATION_TYPES} component={null} />
-        <Route path={Routes.SCHEMAS} component={null} />
+        <Route path={Routes.ASSOCIATION_TYPES} component={this.renderAssociationTypesContainer} />
+        <Route path={Routes.SCHEMAS} component={this.renderSchemasContainer} />
         <Redirect to={Routes.PROPERTY_TYPES} />
       </Switch>
     );
@@ -213,6 +231,7 @@ class EntityDataModelContainer extends React.Component<Props, State> {
 function mapDispatchToProps(dispatch :Function) :Object {
 
   const actions = {
+    fetchAllAssociationTypesRequest,
     fetchAllEntityTypesRequest,
     fetchAllPropertyTypesRequest
   };

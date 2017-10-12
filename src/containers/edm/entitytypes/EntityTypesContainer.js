@@ -8,30 +8,30 @@ import Immutable from 'immutable';
 import styled from 'styled-components';
 import { Models } from 'lattice';
 import { connect } from 'react-redux';
-import { bindActionCreators } from 'redux';
 
 import AbstractDataTable from '../../../components/datatable/AbstractDataTable';
 
-import {
-  StyledCard,
-  StyledCardDetail,
-  StyledCardSection,
-  StyledCardSectionBody,
-  StyledCardSectionGroup,
-  StyledCardSectionTitle,
-  StyledCardTitle
-} from '../../../components/cards/StyledCard';
-
-import { fetchAllEntityTypesRequest } from './EntityTypesActionFactory';
+import { StyledCard } from '../../../components/cards/StyledCard';
 
 const { FullyQualifiedName } = Models;
 
 const ETContainerWrapper = styled.div`
+  align-items: flex-start;
   display: flex;
   flex-direction: row;
 `;
 
-const AllEntityTypesCard = StyledCard.extend``;
+const EntityTypesCard = StyledCard.extend`
+  flex: 1 0 auto;
+  max-width: 1000px;
+  min-width: 500px;
+`;
+
+const EntityTypeDetailsCard = StyledCard.extend`
+  flex: 3 0 auto;
+  max-width: 1000px;
+  min-width: 500px;
+`;
 
 type Props = {
   entityTypes :List<Map<*, *>>,
@@ -72,15 +72,17 @@ class EntityTypesContainer extends React.Component<Props, State> {
 
     return entityTypes.filter((entityType :Map<*, *>) => {
 
-      const ptType :Map<string, string> = entityType.get('type', Immutable.Map());
-      const ptFQN :string = (new FullyQualifiedName(ptType.toJS())).getFullyQualifiedName();
-      const ptTitle :string = entityType.get('title', '');
+      const entityTypeId :string = entityType.get('id');
+      const etType :Map<string, string> = entityType.get('type', Immutable.Map());
+      const etFQN :string = (new FullyQualifiedName(etType.toJS())).getFullyQualifiedName();
+      const etTitle :string = entityType.get('title', '');
 
       let includeEntityType :boolean = true;
       if (filterQuery && filterQuery.trim()) {
-        const matchesFQN :boolean = ptFQN.includes(filterQuery.trim());
-        const matchesTitle :boolean = ptTitle.includes(filterQuery.trim());
-        if (!matchesFQN && !matchesTitle) {
+        const matchesId :boolean = (entityTypeId === filterQuery);
+        const matchesFQN :boolean = etFQN.includes(filterQuery.trim());
+        const matchesTitle :boolean = etTitle.includes(filterQuery.trim());
+        if (!matchesId && !matchesFQN && !matchesTitle) {
           includeEntityType = false;
         }
       }
@@ -131,25 +133,19 @@ class EntityTypesContainer extends React.Component<Props, State> {
     };
 
     return (
-      <AllEntityTypesCard>
-        <StyledCardTitle>EDM EntityTypes</StyledCardTitle>
-        <StyledCardSection>
-          <StyledCardSectionBody>
-            {
-              data.isEmpty()
-                ? (<div>No EntityTypes</div>)
-                : null
-            }
-            <AbstractDataTable
-                data={data}
-                headers={Immutable.fromJS(headers)}
-                onRowClick={onClick}
-                maxHeight={500}
-                maxWidth={600}
-                width={600} />
-          </StyledCardSectionBody>
-        </StyledCardSection>
-      </AllEntityTypesCard>
+      <EntityTypesCard>
+        <h1>EDM EntityTypes</h1>
+        {
+          data.isEmpty()
+            ? (<div>No EntityTypes</div>)
+            : null
+        }
+        <AbstractDataTable
+            data={data}
+            headers={Immutable.fromJS(headers)}
+            onRowClick={onClick}
+            maxHeight={600} />
+      </EntityTypesCard>
     );
   }
 
@@ -189,18 +185,11 @@ class EntityTypesContainer extends React.Component<Props, State> {
         return 0;
       });
 
-    const onClick :Function = (selectedRowIndex :number) => {
-      console.log('I clicked a PropertyType!');
-    };
-
     return (
       <AbstractDataTable
           data={data}
           headers={Immutable.fromJS(headers)}
-          onRowClick={onClick}
-          columnMinWidth={50}
-          maxHeight={400}
-          maxWidth={600} />
+          maxHeight={500} />
     );
   }
 
@@ -219,63 +208,41 @@ class EntityTypesContainer extends React.Component<Props, State> {
     const fqnAsString :string = `${new FullyQualifiedName(ptType.toJS())}`;
 
     return (
-      <StyledCard>
-        <StyledCardTitle>EntityType Details</StyledCardTitle>
-        <StyledCardSectionGroup horizontal>
-          <StyledCardSection style={{ width: '350px' }}>
-            <StyledCardDetail>
-              <StyledCardSectionTitle>ID</StyledCardSectionTitle>
-              <StyledCardSectionBody>
-                <p>{ entityType.get('id') }</p>
-              </StyledCardSectionBody>
-            </StyledCardDetail>
-            <StyledCardDetail>
-              <StyledCardSectionTitle>Type</StyledCardSectionTitle>
-              <StyledCardSectionBody>
-                <p>{ fqnAsString }</p>
-              </StyledCardSectionBody>
-            </StyledCardDetail>
-            <StyledCardDetail>
-              <StyledCardSectionTitle>Title</StyledCardSectionTitle>
-              <StyledCardSectionBody>
-                <p>{ entityType.get('title') }</p>
-              </StyledCardSectionBody>
-            </StyledCardDetail>
-            <StyledCardDetail>
-              <StyledCardSectionTitle>Description</StyledCardSectionTitle>
-              <StyledCardSectionBody>
-                <p>{ entityType.get('description') }</p>
-              </StyledCardSectionBody>
-            </StyledCardDetail>
-            <StyledCardDetail>
-              <StyledCardSectionTitle>BaseType</StyledCardSectionTitle>
-              <StyledCardSectionBody>
-                <p>{ entityType.get('baseType') }</p>
-              </StyledCardSectionBody>
-            </StyledCardDetail>
-            <StyledCardDetail>
-              <StyledCardSectionTitle>Category</StyledCardSectionTitle>
-              <StyledCardSectionBody>
-                <p>{ entityType.get('category') }</p>
-              </StyledCardSectionBody>
-            </StyledCardDetail>
-          </StyledCardSection>
-          <StyledCardSection>
-            <StyledCardDetail>
-              <StyledCardSectionTitle>Properties</StyledCardSectionTitle>
-              <StyledCardSectionBody>
-                { this.renderEntityTypePropertiesDataTable(entityType) }
-              </StyledCardSectionBody>
-            </StyledCardDetail>
-            <StyledCardDetail>
-              <StyledCardSectionTitle>Schemas</StyledCardSectionTitle>
-              <StyledCardSectionBody>
-                <p>TODO</p>
-              </StyledCardSectionBody>
-            </StyledCardDetail>
-          </StyledCardSection>
-        </StyledCardSectionGroup>
-      </StyledCard>
+      <EntityTypeDetailsCard>
+        <h1>EntityType Details</h1>
+        <section>
+          <h2>ID</h2>
+          <p>{ entityType.get('id') }</p>
+        </section>
+        <section>
+          <h2>Type</h2>
+          <p>{ fqnAsString }</p>
+        </section>
+        <section>
+          <h2>Title</h2>
+          <p>{ entityType.get('title') }</p>
+        </section>
+        <section>
+          <h2>Description</h2>
+          <p>{ entityType.get('description') }</p>
+        </section>
+        <section>
+          <h2>BaseType</h2>
+          <p>{ entityType.get('baseType') }</p>
+        </section>
+        <section>
+          <h2>Category</h2>
+          <p>{ entityType.get('category') }</p>
+        </section>
+        <section>
+          <h2>Properties</h2>
+          { this.renderEntityTypePropertiesDataTable(entityType) }
+        </section>
+        <section>
+          <h2>Schemas</h2>
+          <p>TODO</p>
+        </section>
+      </EntityTypeDetailsCard>
     );
   }
 
@@ -302,15 +269,4 @@ function mapStateToProps(state :Map<*, *>) :Object {
   };
 }
 
-function mapDispatchToProps(dispatch :Function) :Object {
-
-  const actions = {
-    fetchAllEntityTypesRequest
-  };
-
-  return {
-    actions: bindActionCreators(actions, dispatch)
-  };
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(EntityTypesContainer);
+export default connect(mapStateToProps)(EntityTypesContainer);

@@ -12,6 +12,7 @@ import {
 
 const INITIAL_STATE :Map<*, *> = Immutable.fromJS({
   entityTypes: Immutable.List(),
+  entityTypesById: Immutable.Map(),
   isFetchingAllEntityTypes: false
 });
 
@@ -29,9 +30,17 @@ export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, act
         return entityType.get('category') === 'EntityType';
       });
 
+      const entityTypesById :Map<string, Map<*, *>> = Immutable.Map()
+        .withMutations((map :Map<string, Map<*, *>>) => {
+          entityTypesStrict.forEach((entityType :Map<*, *>) => {
+            map.set(entityType.get('id'), entityType);
+          });
+        });
+
       return state
         .set('isFetchingAllEntityTypes', false)
-        .set('entityTypes', entityTypesStrict);
+        .set('entityTypes', entityTypesStrict)
+        .set('entityTypesById', entityTypesById);
     }
 
     case FETCH_ALL_ENTITY_TYPES_FAILURE:
