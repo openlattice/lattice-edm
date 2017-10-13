@@ -4,19 +4,16 @@
 
 import React from 'react';
 
-import Immutable from 'immutable';
 import styled from 'styled-components';
 import { connect } from 'react-redux';
 import { NavLink, Redirect, Route, Switch, withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
 
-import StyledButton from '../../components/buttons/StyledButton';
-import SearchInput from '../../components/controls/SearchInput';
+import AbstractTypes from '../../utils/AbstractTypes';
 import * as Routes from '../../core/router/Routes';
 
+import AbstractTypeOverviewContainer from './AbstractTypeOverviewContainer';
 import AssociationTypesContainer from './associationtypes/AssociationTypesContainer';
-import EntityTypesContainer from './entitytypes/EntityTypesContainer';
-import PropertyTypesContainer from './propertytypes/PropertyTypesContainer';
 
 import { fetchAllAssociationTypesRequest } from './associationtypes/AssociationTypesActionFactory';
 import { fetchAllEntityTypesRequest } from './entitytypes/EntityTypesActionFactory';
@@ -24,29 +21,16 @@ import { fetchAllPropertyTypesRequest } from './propertytypes/PropertyTypesActio
 
 const SUB_NAV_LINK_ACTIVE_CLASSNAME :string = 'sub-nav-link-active';
 
+/*
+ * styled components
+ */
+
 const EDMContainerWrapper = styled.div`
   display: flex;
   flex: 1 0 auto;
   flex-direction: column;
   margin: 0;
   padding: 0;
-`;
-
-const EDMExplorerOuterWrapper = styled.div`
-  display: flex;
-  flex: 1 0 auto;
-  flex-direction: row;
-  margin: 0;
-  overflow-x: scroll;
-  padding: 0;
-`;
-
-const EDMExplorerInnerWrapper = styled.div`
-  display: flex;
-  flex: 1 0 auto;
-  flex-direction: column;
-  margin: 0;
-  padding: 20px;
 `;
 
 const Nav = styled.nav`
@@ -80,43 +64,19 @@ const NavTab = styled(NavLink).attrs({
   }
 `;
 
-const ActionSection = styled.section`
-  align-self: left;
-  display: flex;
-  flex: 0 0 auto;
-  justify-content: space-between;
-  margin: 20px 40px;
-`;
-
-const AddActionButton = StyledButton.extend`
-  margin-left: 40px;
-`;
+/*
+ * types
+ */
 
 type Props = {
   actions :{
     fetchAllAssociationTypesRequest :Function,
     fetchAllEntityTypesRequest :Function,
     fetchAllPropertyTypesRequest :Function
-  },
-  location :{
-    pathname :string
   }
 }
 
-type State = {
-  searchQuery :string
-};
-
-class EntityDataModelContainer extends React.Component<Props, State> {
-
-  constructor(props :Props) {
-
-    super(props);
-
-    this.state = {
-      searchQuery: ''
-    };
-  }
+class EntityDataModelContainer extends React.Component<Props> {
 
   componentDidMount() {
 
@@ -125,70 +85,24 @@ class EntityDataModelContainer extends React.Component<Props, State> {
     this.props.actions.fetchAllAssociationTypesRequest();
   }
 
-  handleSearchOnChange = (searchQuery :string) => {
-
-    this.setState({ searchQuery });
-  }
-
-  renderNav = () => {
-
-    return (
-      <Nav>
-        <NavTab to={Routes.PROPERTY_TYPES}>PropertyTypes</NavTab>
-        <NavTab to={Routes.ENTITY_TYPES}>EntityTypes</NavTab>
-        <NavTab to={Routes.ASSOCIATION_TYPES}>AssociationTypes</NavTab>
-        <NavTab to={Routes.SCHEMAS}>Schemas</NavTab>
-      </Nav>
-    );
-  }
-
-  renderActionSection = () => {
-
-    let buttonText :string = 'Add';
-
-    switch (this.props.location.pathname) {
-      case Routes.PROPERTY_TYPES:
-        buttonText = `${buttonText} PropertyType`;
-        break;
-      case Routes.ENTITY_TYPES:
-        buttonText = `${buttonText} EntityType`;
-        break;
-      case Routes.ASSOCIATION_TYPES:
-        buttonText = `${buttonText} AssociationType`;
-        break;
-      case Routes.SCHEMAS:
-        buttonText = `${buttonText} Schema`;
-        break;
-      default:
-        break;
-    }
-
-    return (
-      <ActionSection>
-        <SearchInput onChange={this.handleSearchOnChange} />
-        <AddActionButton disabled>{buttonText}</AddActionButton>
-      </ActionSection>
-    );
-  }
-
   renderAssociationTypesContainer = () => {
 
     return (
-      <AssociationTypesContainer filterQuery={this.state.searchQuery} />
+      <AbstractTypeOverviewContainer type={AbstractTypes.AssociationType} />
     );
   }
 
   renderEntityTypesContainer = () => {
 
     return (
-      <EntityTypesContainer filterQuery={this.state.searchQuery} />
+      <AbstractTypeOverviewContainer type={AbstractTypes.EntityType} />
     );
   }
 
   renderPropertyTypesContainer = () => {
 
     return (
-      <PropertyTypesContainer filterQuery={this.state.searchQuery} />
+      <AbstractTypeOverviewContainer type={AbstractTypes.PropertyType} />
     );
   }
 
@@ -199,30 +113,23 @@ class EntityDataModelContainer extends React.Component<Props, State> {
     );
   }
 
-  renderBodySection = () => {
-
-    return (
-      <Switch>
-        <Route path={Routes.PROPERTY_TYPES} render={this.renderPropertyTypesContainer} />
-        <Route path={Routes.ENTITY_TYPES} component={this.renderEntityTypesContainer} />
-        <Route path={Routes.ASSOCIATION_TYPES} component={this.renderAssociationTypesContainer} />
-        <Route path={Routes.SCHEMAS} component={this.renderSchemasContainer} />
-        <Redirect to={Routes.PROPERTY_TYPES} />
-      </Switch>
-    );
-  }
-
   render() {
 
     return (
       <EDMContainerWrapper>
-        { this.renderNav() }
-        { this.renderActionSection() }
-        <EDMExplorerOuterWrapper>
-          <EDMExplorerInnerWrapper>
-            { this.renderBodySection() }
-          </EDMExplorerInnerWrapper>
-        </EDMExplorerOuterWrapper>
+        <Nav>
+          <NavTab to={Routes.PROPERTY_TYPES}>PropertyTypes</NavTab>
+          <NavTab to={Routes.ENTITY_TYPES}>EntityTypes</NavTab>
+          <NavTab to={Routes.ASSOCIATION_TYPES}>AssociationTypes</NavTab>
+          <NavTab to={Routes.SCHEMAS}>Schemas</NavTab>
+        </Nav>
+        <Switch>
+          <Route path={Routes.PROPERTY_TYPES} render={this.renderPropertyTypesContainer} />
+          <Route path={Routes.ENTITY_TYPES} render={this.renderEntityTypesContainer} />
+          <Route path={Routes.ASSOCIATION_TYPES} render={this.renderAssociationTypesContainer} />
+          <Route path={Routes.SCHEMAS} render={this.renderSchemasContainer} />
+          <Redirect to={Routes.PROPERTY_TYPES} />
+        </Switch>
       </EDMContainerWrapper>
     );
   }

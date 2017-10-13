@@ -8,7 +8,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 import FontAwesome from '@fortawesome/fontawesome';
-import { faSearch } from '@fortawesome/fontawesome-free-solid';
+import { faCheck, faPencilAlt, faSearch } from '@fortawesome/fontawesome-free-solid';
 
 import { normalize } from 'polished';
 import { Provider } from 'react-redux';
@@ -30,7 +30,7 @@ injectGlobal`${normalize()}`;
 injectGlobal`
   html,
   body {
-    background-color: #f6f9fc;
+    background-color: #f9fcff;
     color: #113355;
     height: 100%;
     width: 100%;
@@ -59,7 +59,7 @@ injectGlobal`
 /* eslint-enable */
 
 // TODO: move styling into core/style
-FontAwesome.library.add(faSearch);
+FontAwesome.library.add(faCheck, faPencilAlt, faSearch);
 
 /*
  * // !!! MUST HAPPEN FIRST !!!

@@ -44,6 +44,8 @@ const SearchIcon = styled.div`
 `;
 
 type Props = {
+  className :string,
+  placeholder :string,
   onChange :Function,
   onSubmit :Function
 }
@@ -56,6 +58,8 @@ type State = {
 class SearchInput extends React.Component<Props, State> {
 
   static defaultProps = {
+    className: '',
+    placeholder: 'Search...',
     onChange: () => {},
     onSubmit: () => {}
   };
@@ -96,13 +100,13 @@ class SearchInput extends React.Component<Props, State> {
   render() {
 
     return (
-      <SearchInputWrapper>
+      <SearchInputWrapper className={this.props.className}>
         <SearchIcon>
           <FontAwesomeIcon pack="fas" name="search" transform={{ size: 13 }} />
         </SearchIcon>
         <Input
             type="text"
-            placeholder="Search..."
+            placeholder={this.props.placeholder}
             onChange={this.handleOnChange}
             onKeyDown={this.handleOnKeyDown} />
       </SearchInputWrapper>

@@ -39,6 +39,4 @@ const StyledCard = styled.div`
   }
 `;
 
-export {
-  StyledCard
-};
+export default StyledCard;
