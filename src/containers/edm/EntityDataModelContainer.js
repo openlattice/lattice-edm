@@ -88,21 +88,21 @@ class EntityDataModelContainer extends React.Component<Props> {
   renderAssociationTypesContainer = () => {
 
     return (
-      <AbstractTypeOverviewContainer type={AbstractTypes.AssociationType} />
+      <AbstractTypeOverviewContainer workingAbstractTypeType={AbstractTypes.AssociationType} />
     );
   }
 
   renderEntityTypesContainer = () => {
 
     return (
-      <AbstractTypeOverviewContainer type={AbstractTypes.EntityType} />
+      <AbstractTypeOverviewContainer workingAbstractTypeType={AbstractTypes.EntityType} />
     );
   }
 
   renderPropertyTypesContainer = () => {
 
     return (
-      <AbstractTypeOverviewContainer type={AbstractTypes.PropertyType} />
+      <AbstractTypeOverviewContainer workingAbstractTypeType={AbstractTypes.PropertyType} />
     );
   }
 
