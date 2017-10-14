@@ -13,8 +13,6 @@ import AbstractTypes from '../../utils/AbstractTypes';
 import * as Routes from '../../core/router/Routes';
 
 import AbstractTypeOverviewContainer from './AbstractTypeOverviewContainer';
-import AssociationTypesContainer from './associationtypes/AssociationTypesContainer';
-
 import { fetchAllAssociationTypesRequest } from './associationtypes/AssociationTypesActionFactory';
 import { fetchAllEntityTypesRequest } from './entitytypes/EntityTypesActionFactory';
 import { fetchAllPropertyTypesRequest } from './propertytypes/PropertyTypesActionFactory';
@@ -26,6 +24,7 @@ const SUB_NAV_LINK_ACTIVE_CLASSNAME :string = 'sub-nav-link-active';
  */
 
 const EDMContainerWrapper = styled.div`
+  align-items: center;
   display: flex;
   flex: 1 0 auto;
   flex-direction: column;
@@ -42,6 +41,7 @@ const Nav = styled.nav`
   justify-content: center;
   margin-bottom: 20px;
   margin-top: 0;
+  width: 100%;
 `;
 
 const NavTab = styled(NavLink).attrs({

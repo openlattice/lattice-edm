@@ -8,7 +8,10 @@ import { call, put, take } from 'redux-saga/effects';
 import {
   FETCH_ALL_PROPERTY_TYPES_REQUEST,
   fetchAllPropertyTypesSuccess,
-  fetchAllPropertyTypesFailure
+  fetchAllPropertyTypesFailure,
+  CREATE_PROPERTY_TYPE_REQUEST,
+  createPropertyTypeSuccess,
+  createPropertyTypeFailure
 } from './PropertyTypesActionFactory';
 
 export function* watchFetchAllPropertyTypesRequest() :Generator<*, *, *> {
@@ -21,6 +24,20 @@ export function* watchFetchAllPropertyTypesRequest() :Generator<*, *, *> {
     }
     catch (error) {
       yield put(fetchAllPropertyTypesFailure(error));
+    }
+  }
+}
+
+export function* watchCreatePropertyTypeRequest() :Generator<*, *, *> {
+
+  while (true) {
+    const action :Object = yield take(CREATE_PROPERTY_TYPE_REQUEST);
+    try {
+      const response = yield call(EntityDataModelApi.createPropertyType, action.propertyType);
+      yield put(createPropertyTypeSuccess(action.propertyType, response));
+    }
+    catch (error) {
+      yield put(createPropertyTypeFailure(action.propertyType, error));
     }
   }
 }

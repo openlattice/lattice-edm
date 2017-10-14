@@ -26,7 +26,7 @@ const StyledButton = styled.button`
   &:disabled {
     border-color: #d9e3ec;
     color: #a3acb5;
-    cursor: default;
+    cursor: not-allowed;
   }
 `;
 
