@@ -40,6 +40,7 @@ const DEFAULT_HEADERS :List<Map<string, string>> = Immutable.fromJS([
 type Props = {
   abstractTypes :List<Map<*, *>>,
   headerIds :List<string>,
+  height :number,
   maxHeight :number,
   type :AbstractType,
   onAbstractTypeSelect :Function
@@ -51,6 +52,8 @@ class AbstractTypeDataTable extends React.Component<Props> {
   static defaultProps = {
     abstractTypes: Immutable.List(),
     headerIds: Immutable.List(),
+    height: -1,
+    maxHeight: -1,
     type: AbstractTypes.PropertyType,
     onAbstractTypeSelect: () => {}
   }
@@ -93,6 +96,7 @@ class AbstractTypeDataTable extends React.Component<Props> {
           data={data}
           headers={headers}
           onRowClick={onAbstractTypeSelect}
+          height={this.props.height}
           maxHeight={this.props.maxHeight} />
     );
   }

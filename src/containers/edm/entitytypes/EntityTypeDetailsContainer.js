@@ -81,7 +81,7 @@ class EntityTypeDetailsContainer extends React.Component<Props> {
           <p>{ this.props.entityType.get('category') }</p>
         </section>
         <section>
-          <h2>Primary Key Properties</h2>
+          <h2>Primary Key PropertyTypes</h2>
           <AbstractTypeDataTable
               abstractTypes={keyPropertyTypes}
               maxHeight={500}
@@ -92,7 +92,7 @@ class EntityTypeDetailsContainer extends React.Component<Props> {
             ? null
             : (
               <section>
-                <h2>Properties</h2>
+                <h2>PropertyTypes</h2>
                 <AbstractTypeDataTable
                     abstractTypes={propertyTypes}
                     maxHeight={500}

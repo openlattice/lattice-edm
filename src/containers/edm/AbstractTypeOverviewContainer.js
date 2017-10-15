@@ -16,6 +16,7 @@ import StyledButton from '../../components/buttons/StyledButton';
 import StyledCard from '../../components/cards/StyledCard';
 
 import AssociationTypeDetailsContainer from './associationtypes/AssociationTypeDetailsContainer';
+import CreateNewEntityTypeContainer from './entitytypes/CreateNewEntityTypeContainer';
 import CreateNewPropertyTypeContainer from './propertytypes/CreateNewPropertyTypeContainer';
 import EntityTypeDetailsContainer from './entitytypes/EntityTypeDetailsContainer';
 import PropertyTypeDetailsContainer from './propertytypes/PropertyTypeDetailsContainer';
@@ -67,7 +68,7 @@ const AbstractTypeDirectoryCardSearch = styled(SearchInput)`
 `;
 
 const AbstractTypeDetailsCard = StyledCard.extend`
-  flex: 3 0 auto;
+  flex: 1 0 auto;
   max-width: 1000px;
   min-width: 500px;
 `;
@@ -79,6 +80,8 @@ const AbstractTypeDetailsCard = StyledCard.extend`
 type Props = {
   associationTypes :List<Map<*, *>>,
   entityTypes :List<Map<*, *>>,
+  entityTypesById :Map<string, Map<*, *>>,
+  newlyCreatedEntityTypeId :string,
   newlyCreatedPropertyTypeId :string,
   propertyTypes :List<Map<*, *>>,
   propertyTypesById :Map<string, Map<*, *>>,
@@ -160,6 +163,10 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
         && nextProps.newlyCreatedPropertyTypeId !== this.props.newlyCreatedPropertyTypeId) {
       selectedAbstractTypeId = nextProps.newlyCreatedPropertyTypeId;
     }
+    else if (nextProps.newlyCreatedEntityTypeId
+        && nextProps.newlyCreatedEntityTypeId !== this.props.newlyCreatedEntityTypeId) {
+      selectedAbstractTypeId = nextProps.newlyCreatedEntityTypeId;
+    }
 
     this.setState({
       selectedAbstractTypeId,
@@ -180,6 +187,20 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
       filteredTypes,
       selectedAbstractTypeId: '',
       selectedAbstractTypeIndex: 0
+    });
+  }
+
+  hideCreateNewAbstractTypeCard = () => {
+
+    this.setState({
+      showCreateNewAbstractTypeCard: false
+    });
+  }
+
+  showCreateNewAbstractTypeCard = () => {
+
+    this.setState({
+      showCreateNewAbstractTypeCard: true
     });
   }
 
@@ -210,12 +231,7 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
       <AbstractTypeDirectoryCard>
         <AbstractTypeDirectoryCardTitle>
           <h1>{ cardTitle }</h1>
-          <StyledButton
-              onClick={() => {
-                this.setState({ showCreateNewAbstractTypeCard: true });
-              }}>
-            Create New
-          </StyledButton>
+          <StyledButton onClick={this.showCreateNewAbstractTypeCard}>Create New</StyledButton>
         </AbstractTypeDirectoryCardTitle>
         <AbstractTypeDirectoryCardSearch placeholder="Filter..." onChange={this.handleOnChangeFilter} />
         {
@@ -237,6 +253,7 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
   renderAbstractTypeDetailsCard = () => {
 
     const {
+      entityTypesById,
       propertyTypesById,
       workingAbstractTypeType
     } = this.props;
@@ -257,6 +274,9 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
         );
         break;
       case AbstractTypes.EntityType:
+        if (selectedAbstractTypeId) {
+          selectedAbstractType = entityTypesById.get(selectedAbstractTypeId, Immutable.Map());
+        }
         abstractTypeDetailsContainer = (
           <EntityTypeDetailsContainer entityType={selectedAbstractType} />
         );
@@ -289,14 +309,13 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
         abstractTypeDetailsContainer = null;
         break;
       case AbstractTypes.EntityType:
-        abstractTypeDetailsContainer = null;
+        abstractTypeDetailsContainer = (
+          <CreateNewEntityTypeContainer onCancel={this.hideCreateNewAbstractTypeCard} />
+        );
         break;
       case AbstractTypes.PropertyType:
         abstractTypeDetailsContainer = (
-          <CreateNewPropertyTypeContainer
-              onCancel={() => {
-                this.setState({ showCreateNewAbstractTypeCard: false });
-              }} />
+          <CreateNewPropertyTypeContainer onCancel={this.hideCreateNewAbstractTypeCard} />
         );
         break;
       default:
@@ -339,6 +358,8 @@ function mapStateToProps(state :Map<*, *>) :Object {
   return {
     associationTypes: state.getIn(['edm', 'associationTypes', 'associationTypes']),
     entityTypes: state.getIn(['edm', 'entityTypes', 'entityTypes']),
+    entityTypesById: state.getIn(['edm', 'entityTypes', 'entityTypesById']),
+    newlyCreatedEntityTypeId: state.getIn(['edm', 'entityTypes', 'newlyCreatedEntityTypeId']),
     newlyCreatedPropertyTypeId: state.getIn(['edm', 'propertyTypes', 'newlyCreatedPropertyTypeId']),
     propertyTypes: state.getIn(['edm', 'propertyTypes', 'propertyTypes']),
     propertyTypesById: state.getIn(['edm', 'propertyTypes', 'propertyTypesById'])

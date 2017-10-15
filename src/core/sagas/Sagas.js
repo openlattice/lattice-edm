@@ -24,6 +24,7 @@ export default function* sagas() :Generator<*, *, *> {
     fork(PropertyTypesSagas.watchFetchAllPropertyTypesRequest),
 
     // EntityTypesSagas
+    fork(EntityTypesSagas.watchCreateEntityTypeRequest),
     fork(EntityTypesSagas.watchFetchAllEntityTypesRequest),
 
     // AssociationTypesSagas

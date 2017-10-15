@@ -154,7 +154,7 @@ class AbstractDataTable extends React.Component<Props, State> {
       computedBodyGridHeight: 0,
       computedBodyGridWidth: 0,
       computedHeadGridHeight: 0,
-      computedHeadGridWidth: 0,
+      computedHeadGridWidth: 0
       // ...dimensions
     };
   }

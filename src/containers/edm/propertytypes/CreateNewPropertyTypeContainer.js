@@ -32,7 +32,8 @@ const {
  */
 
 const CreateNewPropertyTypeCard = StyledCard.extend`
-  flex: 0;
+  flex: 1 0 auto;
+  max-width: 1000px;
   min-width: 500px;
 `;
 
@@ -78,11 +79,11 @@ type Props = {
 type State = {
   datatypeValue :string,
   descriptionValue :string,
-  fqnNamespaceValue :string,
-  fqnNameValue :string,
   isInEditModeName :boolean,
   isInEditModeNamespace :boolean,
   isInEditModeTitle :boolean,
+  nameValue :string,
+  namespaceValue :string,
   phoneticValue :boolean,
   piiValue :boolean,
   titleValue :string
@@ -105,11 +106,11 @@ class CreateNewPropertyTypeContainer extends React.Component<Props, State> {
     this.state = {
       datatypeValue: 'String',
       descriptionValue: '',
-      fqnNamespaceValue: '',
-      fqnNameValue: '',
       isInEditModeName: true,
       isInEditModeNamespace: true,
       isInEditModeTitle: true,
+      nameValue: '',
+      namespaceValue: '',
       phoneticValue: false,
       piiValue: false,
       titleValue: ''
@@ -121,8 +122,8 @@ class CreateNewPropertyTypeContainer extends React.Component<Props, State> {
     return !this.state.isInEditModeNamespace
         && !this.state.isInEditModeName
         && !this.state.isInEditModeTitle
-        && !!this.state.fqnNamespaceValue
-        && !!this.state.fqnNameValue
+        && !!this.state.nameValue
+        && !!this.state.namespaceValue
         && !!this.state.titleValue
         && !!this.state.datatypeValue;
   }
@@ -144,7 +145,7 @@ class CreateNewPropertyTypeContainer extends React.Component<Props, State> {
   handleOnChangeName = (name :string) => {
 
     this.setState({
-      fqnNameValue: name || '',
+      nameValue: name || '',
       isInEditModeName: false
     });
   }
@@ -152,7 +153,7 @@ class CreateNewPropertyTypeContainer extends React.Component<Props, State> {
   handleOnChangeNamespace = (namespace :string) => {
 
     this.setState({
-      fqnNamespaceValue: namespace || '',
+      namespaceValue: namespace || '',
       isInEditModeNamespace: false
     });
   }
@@ -179,7 +180,7 @@ class CreateNewPropertyTypeContainer extends React.Component<Props, State> {
       : AnalyzerTypes.STANDARD;
 
     const newPropertyType :PropertyType = new PropertyTypeBuilder()
-      .setType(new FullyQualifiedName(this.state.fqnNamespaceValue, this.state.fqnNameValue))
+      .setType(new FullyQualifiedName(this.state.namespaceValue, this.state.nameValue))
       .setTitle(this.state.titleValue)
       .setDescription(this.state.descriptionValue)
       .setDataType(this.state.datatypeValue)
@@ -191,6 +192,7 @@ class CreateNewPropertyTypeContainer extends React.Component<Props, State> {
   }
 
   render() {
+
     return (
       <CreateNewPropertyTypeCard>
         <h1>Create New PropertyType</h1>

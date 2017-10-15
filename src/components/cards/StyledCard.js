@@ -27,6 +27,12 @@ const StyledCard = styled.div`
     margin: 18px 0 10px 0;
     padding: 0;
   }
+  h3 {
+    font-size: 14px;
+    font-weight: 600;
+    margin: 16px 0 8px 0;
+    padding: 0;
+  }
   p {
     margin: 0;
     padding: 0;
