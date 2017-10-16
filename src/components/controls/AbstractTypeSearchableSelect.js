@@ -161,6 +161,9 @@ class AbstractTypeSearchableSelect extends React.Component<Props, State> {
   handleOnAbstractTypeSelect = (selectedAbstractTypeId :string) => {
 
     this.props.onAbstractTypeSelect(selectedAbstractTypeId);
+    this.setState({
+      searchQuery: ''
+    });
   }
 
   handleOnChangeSearchQuery = (event :SyntheticInputEvent<*>) => {
@@ -172,7 +175,8 @@ class AbstractTypeSearchableSelect extends React.Component<Props, State> {
     };
 
     this.setState({
-      filteredTypes: filterAbstractTypes(filterParams)
+      filteredTypes: filterAbstractTypes(filterParams),
+      searchQuery: event.target.value
     });
   }
 
@@ -187,6 +191,7 @@ class AbstractTypeSearchableSelect extends React.Component<Props, State> {
           <SearchInput
               type="text"
               placeholder={this.props.searchPlaceholder}
+              value={this.state.searchQuery}
               onBlur={this.hideDataTable}
               onChange={this.handleOnChangeSearchQuery}
               onFocus={this.showDataTable} />
@@ -199,7 +204,7 @@ class AbstractTypeSearchableSelect extends React.Component<Props, State> {
                 <AbstractTypeDataTable
                     abstractTypes={this.state.filteredTypes}
                     maxHeight={this.props.maxHeight}
-                    type={this.props.workingAbstractTypeType}
+                    workingAbstractTypeType={this.props.workingAbstractTypeType}
                     onAbstractTypeSelect={this.handleOnAbstractTypeSelect} />
               </DataTableWrapper>
             )

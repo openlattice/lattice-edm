@@ -28,6 +28,7 @@ export default function* sagas() :Generator<*, *, *> {
     fork(EntityTypesSagas.watchFetchAllEntityTypesRequest),
 
     // AssociationTypesSagas
+    fork(AssociationTypesSagas.watchCreateAssociationTypeRequest),
     fork(AssociationTypesSagas.watchFetchAllAssociationTypesRequest)
   ];
 }

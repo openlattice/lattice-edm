@@ -43,6 +43,10 @@ const {
  * constants
  */
 
+const BIDI_RADIO_NAME :string = 'associationTypeBidi';
+const BIDI_YES_RADIO_ID :string = 'associationTypeBidi-1';
+const BIDI_NO_RADIO_ID :string = 'associationTypeBidi-2';
+
 const DATA_TYPE_OPTIONS = EDM_PRIMITIVE_TYPES.map((primitive :string) => {
   return (
     <option key={primitive} value={primitive}>{primitive}</option>
@@ -85,6 +89,17 @@ const PhoneticCheckboxWrapper = styled.label`
   }
 `;
 
+const BidiRadiosWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  label {
+    margin-right: 20px;
+  }
+  input {
+    margin-right: 8px;
+  }
+`;
+
 const AbstractTypeSearchableSelectWrapper = styled.div`
   margin: 20px 0;
 `;
@@ -107,12 +122,14 @@ type Props = {
     createEntityTypeRequest :Function,
     createPropertyTypeRequest :Function
   },
+  entityTypes :List<Map<*, *>>,
   propertyTypes :List<Map<*, *>>,
   workingAbstractTypeType :AbstractType,
   onCancel :Function
 }
 
 type State = {
+  bidiValue :boolean,
   datatypeValue :string,
   descriptionValue :string,
   filteredPrimaryKeyPropertyTypes :List<Map<*, *>>,
@@ -125,8 +142,10 @@ type State = {
   phoneticSearchesValue :boolean,
   piiValue :boolean,
   titleValue :string,
+  selectedDestinationEntityTypes :Set<Map<*, *>>,
   selectedPrimaryKeyPropertyTypes :Set<Map<*, *>>,
-  selectedPropertyTypes :Set<Map<*, *>>
+  selectedPropertyTypes :Set<Map<*, *>>,
+  selectedSourceEntityTypes :Set<Map<*, *>>
 }
 
 class AbstractTypeCreateContainer extends React.Component<Props, State> {
@@ -141,6 +160,7 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
     super(props);
 
     this.state = {
+      bidiValue: false,
       datatypeValue: 'String',
       descriptionValue: '',
       filteredPrimaryKeyPropertyTypes: props.propertyTypes,
@@ -152,8 +172,10 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
       namespaceValue: '',
       phoneticSearchesValue: false,
       piiValue: false,
+      selectedDestinationEntityTypes: Immutable.Set(),
       selectedPrimaryKeyPropertyTypes: Immutable.Set(),
       selectedPropertyTypes: Immutable.Set(),
+      selectedSourceEntityTypes: Immutable.Set(),
       titleValue: ''
     };
   }
@@ -211,19 +233,69 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
         })
         .concat(primaryKeyPropertyTypeIds);
 
-      const newEntityType :EntityType = new EntityTypeBuilder()
+      const entityTypeBuilder :EntityTypeBuilder = new EntityTypeBuilder()
         .setType(new FullyQualifiedName(this.state.namespaceValue, this.state.nameValue))
         .setTitle(this.state.titleValue)
         .setDescription(this.state.descriptionValue)
         .setKey(primaryKeyPropertyTypeIds.toJS())
-        .setPropertyTypes(propertyTypeIds.toJS())
-        .setCategory(SecurableTypes.EntityType)
-        .build();
+        .setPropertyTypes(propertyTypeIds.toJS());
 
       if (this.props.workingAbstractTypeType === AbstractTypes.EntityType) {
+
+        const newEntityType :EntityType = entityTypeBuilder
+          .setCategory(SecurableTypes.EntityType)
+          .build();
+
         this.props.actions.createEntityTypeRequest(newEntityType);
       }
+      else if (this.props.workingAbstractTypeType === AbstractTypes.AssociationType) {
+
+        const newAssociationEntityType :EntityType = entityTypeBuilder
+          .setCategory(SecurableTypes.AssociationType)
+          .build();
+
+        const sourceEntityTypeIds :Set<string> = this.state.selectedSourceEntityTypes
+          .map((entityType :Map<*, *>) => {
+            return entityType.get('id', '');
+          });
+
+        const destinationEntityTypeIds :Set<string> = this.state.selectedDestinationEntityTypes
+          .map((entityType :Map<*, *>) => {
+            return entityType.get('id', '');
+          });
+
+        const newAssociationType :AssociationType = new AssociationTypeBuilder()
+          .setEntityType(newAssociationEntityType)
+          .setSourceEntityTypeIds(sourceEntityTypeIds.toJS())
+          .setDestinationEntityTypeIds(destinationEntityTypeIds.toJS())
+          .setBidirectional(this.state.bidiValue)
+          .build();
+
+        this.props.actions.createAssociationTypeRequest(newAssociationType);
+      }
+      else {
+        // TODO: need a Logger class
+        console.error('invalid AbstractType: ', this.props.workingAbstractTypeType);
+      }
     }
+  }
+
+  addToSelectedDestinationEntityTypes = (selectedEntityTypeId :string) => {
+
+    const selectedEntityType :Map<*, *> = this.props.entityTypes.find((entityType :Map<*, *>) => {
+      return entityType.get('id', '') === selectedEntityTypeId;
+    });
+
+    const selectedDestinationEntityTypes :Set<Map<*, *>> = this.state.selectedDestinationEntityTypes
+      .add(selectedEntityType);
+
+    const selectedSourceEntityTypes :Set<Map<*, *>> = this.state.selectedSourceEntityTypes
+      .subtract(selectedDestinationEntityTypes);
+
+    this.setState({
+      selectedDestinationEntityTypes,
+      selectedSourceEntityTypes
+    });
   }
 
   addToSelectedPrimaryKeyPropertyTypes = (selectedPropertyTypeId :string) => {
@@ -256,26 +328,76 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
     });
   }
 
+  addToSelectedSourceEntityTypes = (selectedEntityTypeId :string) => {
+
+    const selectedEntityType :Map<*, *> = this.props.entityTypes.find((entityType :Map<*, *>) => {
+      return entityType.get('id', '') === selectedEntityTypeId;
+    });
+
+    const selectedSourceEntityTypes :Set<Map<*, *>> = this.state.selectedSourceEntityTypes
+      .add(selectedEntityType);
+
+    const selectedDestinationEntityTypes :Set<Map<*, *>> = this.state.selectedDestinationEntityTypes
+      .subtract(selectedSourceEntityTypes);
+
+    this.setState({
+      selectedDestinationEntityTypes,
+      selectedSourceEntityTypes
+    });
+  }
+
+  removeFromSelectedDestinationEntityTypes = (selectedEntityTypeId :string) => {
+
+    const selectedDestinationEntityTypes :Set<Map<*, *>> = this.state.selectedDestinationEntityTypes
+      .filterNot((entityType :Map<*, *>) => {
+        return entityType.get('id', '') === selectedEntityTypeId;
+      });
+
+    this.setState({
+      selectedDestinationEntityTypes
+    });
+  }
+
   removeFromSelectedPrimaryKeyPropertyTypes = (selectedPropertyTypeId :string) => {
 
-    const selectedPropertyType :Map<*, *> = this.state.selectedPrimaryKeyPropertyTypes
-      .find((propertyType :Map<*, *>) => {
+    const selectedPrimaryKeyPropertyTypes :Set<Map<*, *>> = this.state.selectedPrimaryKeyPropertyTypes
+      .filterNot((propertyType :Map<*, *>) => {
         return propertyType.get('id', '') === selectedPropertyTypeId;
       });
 
     this.setState({
-      selectedPrimaryKeyPropertyTypes: this.state.selectedPrimaryKeyPropertyTypes.remove(selectedPropertyType)
+      selectedPrimaryKeyPropertyTypes
     });
   }
 
   removeFromSelectedPropertyTypes = (selectedPropertyTypeId :string) => {
 
-    const selectedPropertyType :Map<*, *> = this.state.selectedPropertyTypes.find((propertyType :Map<*, *>) => {
-      return propertyType.get('id', '') === selectedPropertyTypeId;
-    });
+    const selectedPropertyTypes :Set<Map<*, *>> = this.state.selectedPropertyTypes
+      .filterNot((propertyType :Map<*, *>) => {
+        return propertyType.get('id', '') === selectedPropertyTypeId;
+      });
 
     this.setState({
-      selectedPropertyTypes: this.state.selectedPropertyTypes.remove(selectedPropertyType)
+      selectedPropertyTypes
+    });
+  }
+
+  removeFromSelectedSourceEntityTypes = (selectedEntityTypeId :string) => {
+
+    const selectedSourceEntityTypes :Set<Map<*, *>> = this.state.selectedSourceEntityTypes
+      .filterNot((entityType :Map<*, *>) => {
+        return entityType.get('id', '') === selectedEntityTypeId;
+      });
+
+    this.setState({
+      selectedSourceEntityTypes
+    });
+  }
+
+  handleOnChangeBidi = (event :SyntheticInputEvent<*>) => {
+
+    this.setState({
+      bidiValue: event.target.id === BIDI_YES_RADIO_ID
     });
   }
 
@@ -359,7 +481,7 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
     );
   }
 
-  renderPropertyTypeDataTypeSelect = () => {
+  renderPropertyTypeDataTypeSelectSection = () => {
 
     if (this.props.workingAbstractTypeType !== AbstractTypes.PropertyType) {
       return null;
@@ -389,9 +511,43 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
     );
   }
 
+  renderAssociationTypeBidirectionalSection = () => {
+
+    if (this.props.workingAbstractTypeType !== AbstractTypes.AssociationType) {
+      return null;
+    }
+
+    return (
+      <section>
+        <h2>Bidirectional</h2>
+        <BidiRadiosWrapper>
+          <label htmlFor={BIDI_YES_RADIO_ID}>
+            <input
+                type="radio"
+                id={BIDI_YES_RADIO_ID}
+                name={BIDI_RADIO_NAME}
+                onChange={this.handleOnChangeBidi}
+                checked={this.state.bidiValue === true} />
+            Yes
+          </label>
+          <label htmlFor={BIDI_NO_RADIO_ID}>
+            <input
+                type="radio"
+                id={BIDI_NO_RADIO_ID}
+                name={BIDI_RADIO_NAME}
+                onChange={this.handleOnChangeBidi}
+                checked={this.state.bidiValue === false} />
+            No
+          </label>
+        </BidiRadiosWrapper>
+      </section>
+    );
+  }
+
   renderSelectFromAvailableAbstractTypes = (
     abstractTypes :List<Map<*, *>>,
     abstractTypeType :AbstractType,
+    searchPlaceholder :string,
     onAbstractTypeSelect :Function
   ) => {
 
@@ -400,28 +556,22 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
         <AbstractTypeSearchableSelect
             abstractTypes={abstractTypes}
             maxHeight={400}
+            searchPlaceholder={searchPlaceholder}
             workingAbstractTypeType={abstractTypeType}
             onAbstractTypeSelect={onAbstractTypeSelect} />
       </AbstractTypeSearchableSelectWrapper>
     );
   }
 
-  renderPrimaryKeyPropertyTypesSelect = () => {
+  renderEntityTypePrimaryKeyPropertyTypesSelectSection = () => {
 
     // don't render if we're creating a new PropertyType
     if (this.props.workingAbstractTypeType === AbstractTypes.PropertyType) {
       return null;
     }
 
-    const {
-      propertyTypes
-    } = this.props;
-
-    const {
-      selectedPrimaryKeyPropertyTypes
-    } = this.state;
-
-    const availablePropertyTypes :Set<Map<*, *>> = propertyTypes.toSet().subtract(selectedPrimaryKeyPropertyTypes);
+    const availablePropertyTypes :Set<Map<*, *>> = this.props.propertyTypes.toSet()
+      .subtract(this.state.selectedPrimaryKeyPropertyTypes);
 
     return (
       <PrimaryKeyPropertyTypesSection>
@@ -433,10 +583,9 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
             )
             : (
               <AbstractTypeDataTable
-                  abstractTypes={selectedPrimaryKeyPropertyTypes.toList()}
+                  abstractTypes={this.state.selectedPrimaryKeyPropertyTypes.toList()}
                   maxHeight={400}
-                  type={AbstractTypes.PropertyType}
-                  zIndex={100}
+                  workingAbstractTypeType={AbstractTypes.PropertyType}
                   onAbstractTypeSelect={this.removeFromSelectedPrimaryKeyPropertyTypes} />
             )
         }
@@ -444,6 +593,7 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
           this.renderSelectFromAvailableAbstractTypes(
             availablePropertyTypes.toList(),
             AbstractTypes.PropertyType,
+            'Available PropertyTypes...',
             this.addToSelectedPrimaryKeyPropertyTypes
           )
         }
@@ -451,25 +601,16 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
     );
   }
 
-  renderPropertyTypesSelect = () => {
+  renderEntityTypePropertyTypesSelectSection = () => {
 
     // don't render if we're creating a new PropertyType
     if (this.props.workingAbstractTypeType === AbstractTypes.PropertyType) {
       return null;
     }
 
-    const {
-      propertyTypes
-    } = this.props;
-
-    const {
-      selectedPrimaryKeyPropertyTypes,
-      selectedPropertyTypes
-    } = this.state;
-
-    const availablePropertyTypes :Set<Map<*, *>> = propertyTypes.toSet()
-      .subtract(selectedPropertyTypes)
-      .subtract(selectedPrimaryKeyPropertyTypes);
+    const availablePropertyTypes :Set<Map<*, *>> = this.props.propertyTypes.toSet()
+      .subtract(this.state.selectedPropertyTypes)
+      .subtract(this.state.selectedPrimaryKeyPropertyTypes);
 
     return (
       <PropertyTypesSection>
@@ -481,10 +622,9 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
             )
             : (
               <AbstractTypeDataTable
-                  abstractTypes={selectedPropertyTypes.toList()}
+                  abstractTypes={this.state.selectedPropertyTypes.toList()}
                   maxHeight={400}
-                  type={AbstractTypes.PropertyType}
-                  zIndex={90}
+                  workingAbstractTypeType={AbstractTypes.PropertyType}
                   onAbstractTypeSelect={this.removeFromSelectedPropertyTypes} />
             )
         }
@@ -492,10 +632,89 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
           this.renderSelectFromAvailableAbstractTypes(
             availablePropertyTypes.toList(),
             AbstractTypes.PropertyType,
+            'Available PropertyTypes...',
             this.addToSelectedPropertyTypes
           )
         }
       </PropertyTypesSection>
+    );
+  }
+
+  renderAssociationTypeSourceEntityTypesSelectSection = () => {
+
+    // only render if we're creating a new AssociationType
+    if (this.props.workingAbstractTypeType !== AbstractTypes.AssociationType) {
+      return null;
+    }
+
+    const availableEntityTypes :Set<Map<*, *>> = this.props.entityTypes.toSet()
+      .subtract(this.state.selectedSourceEntityTypes)
+      .subtract(this.state.selectedDestinationEntityTypes);
+
+    return (
+      <section>
+        <h2>Source EntityTypes</h2>
+        {
+          this.state.selectedSourceEntityTypes.isEmpty()
+            ? (
+              <p>No Source EntityTypes selected</p>
+            )
+            : (
+              <AbstractTypeDataTable
+                  abstractTypes={this.state.selectedSourceEntityTypes.toList()}
+                  maxHeight={400}
+                  workingAbstractTypeType={AbstractTypes.EntityType}
+                  onAbstractTypeSelect={this.removeFromSelectedSourceEntityTypes} />
+            )
+        }
+        {
+          this.renderSelectFromAvailableAbstractTypes(
+            availableEntityTypes.toList(),
+            AbstractTypes.EntityType,
+            'Available EntityTypes...',
+            this.addToSelectedSourceEntityTypes
+          )
+        }
+      </section>
+    );
+  }
+
+  renderAssociationTypeDestinationEntityTypesSelectSection = () => {
+
+    // only render if we're creating a new AssociationType
+    if (this.props.workingAbstractTypeType !== AbstractTypes.AssociationType) {
+      return null;
+    }
+
+    const availableEntityTypes :Set<Map<*, *>> = this.props.entityTypes.toSet()
+      .subtract(this.state.selectedSourceEntityTypes)
+      .subtract(this.state.selectedDestinationEntityTypes);
+
+    return (
+      <section>
+        <h2>Destination EntityTypes</h2>
+        {
+          this.state.selectedDestinationEntityTypes.isEmpty()
+            ? (
+              <p>No Destination EntityTypes selected</p>
+            )
+            : (
+              <AbstractTypeDataTable
+                  abstractTypes={this.state.selectedDestinationEntityTypes.toList()}
+                  maxHeight={400}
+                  workingAbstractTypeType={AbstractTypes.EntityType}
+                  onAbstractTypeSelect={this.removeFromSelectedDestinationEntityTypes} />
+            )
+        }
+        {
+          this.renderSelectFromAvailableAbstractTypes(
+            availableEntityTypes.toList(),
+            AbstractTypes.EntityType,
+            'Available EntityTypes...',
+            this.addToSelectedDestinationEntityTypes
+          )
+        }
+      </section>
     );
   }
 
@@ -562,15 +781,12 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
             )
           }
         </section>
-        {
-          this.renderPropertyTypeDataTypeSelect()
-        }
-        {
-          this.renderPrimaryKeyPropertyTypesSelect()
-        }
-        {
-          this.renderPropertyTypesSelect()
-        }
+        { this.renderPropertyTypeDataTypeSelectSection() }
+        { this.renderAssociationTypeBidirectionalSection() }
+        { this.renderEntityTypePrimaryKeyPropertyTypesSelectSection() }
+        { this.renderEntityTypePropertyTypesSelectSection() }
+        { this.renderAssociationTypeSourceEntityTypesSelectSection() }
+        { this.renderAssociationTypeDestinationEntityTypesSelectSection() }
         <ActionButtons>
           {
             (this.isReadyToSubmit())

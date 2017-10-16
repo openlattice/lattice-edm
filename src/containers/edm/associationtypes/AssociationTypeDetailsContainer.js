@@ -66,14 +66,14 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
           <AbstractTypeDataTable
               abstractTypes={sourceEntityTypes}
               maxHeight={500}
-              type={AbstractTypes.EntityType} />
+              workingAbstractTypeType={AbstractTypes.EntityType} />
         </section>
         <section>
           <h2>Destination EntityTypes</h2>
           <AbstractTypeDataTable
               abstractTypes={destinationEntityTypes}
               maxHeight={500}
-              type={AbstractTypes.EntityType} />
+              workingAbstractTypeType={AbstractTypes.EntityType} />
         </section>
       </div>
     );

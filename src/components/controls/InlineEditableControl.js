@@ -256,6 +256,15 @@ export default class InlineEditableControl extends React.Component<Props, State>
     }
   }
 
+  moveCursorToEndOfText = (event :SyntheticInputEvent<*>) => {
+
+    /* eslint-disable no-param-reassign */
+    const currentValue :string = event.target.value;
+    event.target.value = '';
+    event.target.value = currentValue;
+    /* eslint-enable */
+  }
+
   toggleEditable = () => {
 
     if (this.props.viewOnly) {
@@ -309,6 +318,7 @@ export default class InlineEditableControl extends React.Component<Props, State>
             value={this.state.currentValue}
             onBlur={this.handleOnBlur}
             onChange={this.handleOnChange}
+            onFocus={this.moveCursorToEndOfText}
             onKeyDown={this.handleOnKeyDown}
             innerRef={(element) => {
               this.control = element;

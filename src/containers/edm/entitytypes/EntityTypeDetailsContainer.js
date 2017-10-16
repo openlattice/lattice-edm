@@ -85,7 +85,7 @@ class EntityTypeDetailsContainer extends React.Component<Props> {
           <AbstractTypeDataTable
               abstractTypes={keyPropertyTypes}
               maxHeight={500}
-              type={AbstractTypes.PropertyType} />
+              workingAbstractTypeType={AbstractTypes.PropertyType} />
         </section>
         {
           propertyTypes.isEmpty()
@@ -96,7 +96,7 @@ class EntityTypeDetailsContainer extends React.Component<Props> {
                 <AbstractTypeDataTable
                     abstractTypes={propertyTypes}
                     maxHeight={500}
-                    type={AbstractTypes.PropertyType} />
+                    workingAbstractTypeType={AbstractTypes.PropertyType} />
               </section>
             )
         }

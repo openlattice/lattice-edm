@@ -42,7 +42,7 @@ type Props = {
   headerIds :List<string>,
   height :number,
   maxHeight :number,
-  type :AbstractType,
+  workingAbstractTypeType :AbstractType,
   onAbstractTypeSelect :Function
 }
 
@@ -54,13 +54,18 @@ class AbstractTypeDataTable extends React.Component<Props> {
     headerIds: Immutable.List(),
     height: -1,
     maxHeight: -1,
-    type: AbstractTypes.PropertyType,
+    workingAbstractTypeType: AbstractTypes.PropertyType,
     onAbstractTypeSelect: () => {}
   }
 
   handleOnAbstractTypeSelect = (selectedRowIndex :number) => {
 
     const selectedAbstractType :Map<*, *> = this.props.abstractTypes.get(selectedRowIndex, Immutable.Map());
+    if (this.props.workingAbstractTypeType === AbstractTypes.AssociationType) {
+      const entityType :Map<*, *> = selectedAbstractType.get('entityType', Immutable.Map());
+      this.props.onAbstractTypeSelect(entityType.get('id', ''));
+      return;
+    }
     this.props.onAbstractTypeSelect(selectedAbstractType.get('id', ''));
   }
 
@@ -79,7 +84,7 @@ class AbstractTypeDataTable extends React.Component<Props> {
 
     const data :List<Map<string, string>> = this.props.abstractTypes.map((type :Map<*, *>) => {
 
-      const abstractType :Map<*, *> = (this.props.type === AbstractTypes.AssociationType)
+      const abstractType :Map<*, *> = (this.props.workingAbstractTypeType === AbstractTypes.AssociationType)
         ? type.get('entityType', Immutable.Map())
         : type;
 

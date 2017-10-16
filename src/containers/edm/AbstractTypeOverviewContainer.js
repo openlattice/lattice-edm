@@ -6,7 +6,6 @@ import React from 'react';
 
 import Immutable from 'immutable';
 import styled from 'styled-components';
-import { Models } from 'lattice';
 import { connect } from 'react-redux';
 
 import AbstractTypes from '../../utils/AbstractTypes';
@@ -17,16 +16,12 @@ import StyledCard from '../../components/cards/StyledCard';
 
 import AbstractTypeCreateContainer from './AbstractTypeCreateContainer';
 import AssociationTypeDetailsContainer from './associationtypes/AssociationTypeDetailsContainer';
-import CreateNewEntityTypeContainer from './entitytypes/CreateNewEntityTypeContainer';
-import CreateNewPropertyTypeContainer from './propertytypes/CreateNewPropertyTypeContainer';
 import EntityTypeDetailsContainer from './entitytypes/EntityTypeDetailsContainer';
 import PropertyTypeDetailsContainer from './propertytypes/PropertyTypeDetailsContainer';
 
 import { getWorkingAbstractTypes, filterAbstractTypes } from '../../utils/AbstractTypeUtils';
 
 import type { AbstractType } from '../../utils/AbstractTypes';
-
-const { FullyQualifiedName } = Models;
 
 /*
  * styled components
@@ -60,7 +55,7 @@ const AbstractTypeDirectoryCard = StyledCard.extend`
 
 const AbstractTypeDirectoryCardTitle = styled.div`
   align-items: flex-start;
-  display: inline-flex;
+  display: flex;
   flex-direction: row;
   justify-content: space-between;
 `;
@@ -82,8 +77,10 @@ const AbstractTypeDetailsCard = StyledCard.extend`
 
 type Props = {
   associationTypes :List<Map<*, *>>,
+  associationTypesById :Map<string, Map<*, *>>,
   entityTypes :List<Map<*, *>>,
   entityTypesById :Map<string, Map<*, *>>,
+  newlyCreatedAssociationTypeId :string,
   newlyCreatedEntityTypeId :string,
   newlyCreatedPropertyTypeId :string,
   propertyTypes :List<Map<*, *>>,
@@ -94,7 +91,6 @@ type Props = {
 type State = {
   filteredTypes :List<Map<*, *>>,
   selectedAbstractTypeId :string,
-  selectedAbstractTypeIndex :number,
   showCreateNewAbstractTypeCard :boolean
 }
 
@@ -118,14 +114,13 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
     this.state = {
       filteredTypes: getWorkingAbstractTypes(params),
       selectedAbstractTypeId: '',
-      selectedAbstractTypeIndex: 0,
       showCreateNewAbstractTypeCard: false
     };
   }
 
   componentWillReceiveProps(nextProps :Props) {
 
-    let selectedAbstractTypeId :string = this.state.selectedAbstractTypeId;
+    let selectedAbstractTypeId :string = '';
     if (nextProps.newlyCreatedPropertyTypeId
         && nextProps.newlyCreatedPropertyTypeId !== this.props.newlyCreatedPropertyTypeId) {
       selectedAbstractTypeId = nextProps.newlyCreatedPropertyTypeId;
@@ -133,6 +128,10 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
     else if (nextProps.newlyCreatedEntityTypeId
         && nextProps.newlyCreatedEntityTypeId !== this.props.newlyCreatedEntityTypeId) {
       selectedAbstractTypeId = nextProps.newlyCreatedEntityTypeId;
+    }
+    else if (nextProps.newlyCreatedAssociationTypeId
+        && nextProps.newlyCreatedAssociationTypeId !== this.props.newlyCreatedAssociationTypeId) {
+      selectedAbstractTypeId = nextProps.newlyCreatedAssociationTypeId;
     }
 
     const params :Object = {
@@ -145,8 +144,14 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
     this.setState({
       selectedAbstractTypeId,
       filteredTypes: getWorkingAbstractTypes(params),
-      selectedAbstractTypeIndex: 0,
       showCreateNewAbstractTypeCard: false
+    });
+  }
+
+  handleOnAbstractTypeSelect = (selectedAbstractTypeId :string) => {
+
+    this.setState({
+      selectedAbstractTypeId
     });
   }
 
@@ -167,8 +172,7 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
 
     this.setState({
       filteredTypes: filterAbstractTypes(filterParams),
-      selectedAbstractTypeId: '',
-      selectedAbstractTypeIndex: 0
+      selectedAbstractTypeId: ''
     });
   }
 
@@ -203,12 +207,6 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
         break;
     }
 
-    const onAbstractTypeSelect :Function = (selectedRowIndex :number) => {
-      this.setState({
-        selectedAbstractTypeIndex: selectedRowIndex
-      });
-    };
-
     return (
       <AbstractTypeDirectoryCard>
         <AbstractTypeDirectoryCardTitle>
@@ -226,8 +224,8 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
         <AbstractTypeDataTable
             abstractTypes={this.state.filteredTypes}
             maxHeight={600}
-            type={this.props.workingAbstractTypeType}
-            onAbstractTypeSelect={onAbstractTypeSelect} />
+            workingAbstractTypeType={this.props.workingAbstractTypeType}
+            onAbstractTypeSelect={this.handleOnAbstractTypeSelect} />
       </AbstractTypeDirectoryCard>
     );
   }
@@ -235,6 +233,7 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
   renderAbstractTypeDetailsCard = () => {
 
     const {
+      associationTypesById,
       entityTypesById,
       propertyTypesById,
       workingAbstractTypeType
@@ -242,15 +241,18 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
 
     const {
       filteredTypes,
-      selectedAbstractTypeId,
-      selectedAbstractTypeIndex
+      selectedAbstractTypeId
     } = this.state;
 
     let abstractTypeDetailsContainer;
-    let selectedAbstractType :Map<*, *> = filteredTypes.get(selectedAbstractTypeIndex, Immutable.Map());
+    // by default, grab the first element
+    let selectedAbstractType :Map<*, *> = filteredTypes.get(0, Immutable.Map());
 
     switch (workingAbstractTypeType) {
       case AbstractTypes.AssociationType:
+        if (selectedAbstractTypeId) {
+          selectedAbstractType = associationTypesById.get(selectedAbstractTypeId, Immutable.Map());
+        }
         abstractTypeDetailsContainer = (
           <AssociationTypeDetailsContainer associationType={selectedAbstractType} />
         );
@@ -321,8 +323,10 @@ function mapStateToProps(state :Map<*, *>) :Object {
 
   return {
     associationTypes: state.getIn(['edm', 'associationTypes', 'associationTypes']),
+    associationTypesById: state.getIn(['edm', 'associationTypes', 'associationTypesById']),
     entityTypes: state.getIn(['edm', 'entityTypes', 'entityTypes']),
     entityTypesById: state.getIn(['edm', 'entityTypes', 'entityTypesById']),
+    newlyCreatedAssociationTypeId: state.getIn(['edm', 'associationTypes', 'newlyCreatedAssociationTypeId']),
     newlyCreatedEntityTypeId: state.getIn(['edm', 'entityTypes', 'newlyCreatedEntityTypeId']),
     newlyCreatedPropertyTypeId: state.getIn(['edm', 'propertyTypes', 'newlyCreatedPropertyTypeId']),
     propertyTypes: state.getIn(['edm', 'propertyTypes', 'propertyTypes']),
