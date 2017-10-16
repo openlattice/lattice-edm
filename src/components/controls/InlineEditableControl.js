@@ -74,6 +74,7 @@ const TextControl = styled.div`
 
 const TextInputControl = styled.input`
   border: 1px solid #7a52ea;
+  font-family: 'Open Sans', sans-serif;
   margin: 0;
   width: 100%;
   font-size: ${(props) => {
@@ -163,9 +164,9 @@ type Props = {
   type :string,
   value :string,
   viewOnly :boolean,
-  onEditable :Function,
   onChange :Function,
-  onChangeConfirm :Function
+  // onChangeConfirm :Function,
+  onEditToggle :Function
 }
 
 type State = {
@@ -189,9 +190,9 @@ export default class InlineEditableControl extends React.Component<Props, State>
     type: 'text',
     value: '',
     viewOnly: false,
-    onEditable: () => {},
     onChange: () => {},
-    onChangeConfirm: () => {}
+    // onChangeConfirm: () => {},
+    onEditToggle: () => {}
   };
 
   constructor(props :Object) {
@@ -266,7 +267,7 @@ export default class InlineEditableControl extends React.Component<Props, State>
     }
 
     const editable = !this.state.editable;
-    this.props.onEditable(editable);
+    this.props.onEditToggle(editable);
 
     this.setState({
       editable,

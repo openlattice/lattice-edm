@@ -39,8 +39,6 @@ const Nav = styled.nav`
   flex: 0 0 auto;
   height: 50px;
   justify-content: center;
-  margin-bottom: 20px;
-  margin-top: 0;
   width: 100%;
 `;
 

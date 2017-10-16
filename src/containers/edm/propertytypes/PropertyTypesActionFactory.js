@@ -86,8 +86,8 @@ type CreatePropertyTypeSuccessAction = {
 };
 
 function createPropertyTypeSuccess(
-    propertyType :PropertyType,
-    propertyTypeId :string
+  propertyType :PropertyType,
+  propertyTypeId :string
 ) :CreatePropertyTypeSuccessAction {
 
   return {

@@ -58,6 +58,12 @@ class AbstractTypeDataTable extends React.Component<Props> {
     onAbstractTypeSelect: () => {}
   }
 
+  handleOnAbstractTypeSelect = (selectedRowIndex :number) => {
+
+    const selectedAbstractType :Map<*, *> = this.props.abstractTypes.get(selectedRowIndex, Immutable.Map());
+    this.props.onAbstractTypeSelect(selectedAbstractType.get('id', ''));
+  }
+
   render() {
 
     if (this.props.abstractTypes.isEmpty()) {
@@ -87,15 +93,11 @@ class AbstractTypeDataTable extends React.Component<Props> {
       });
     });
 
-    const onAbstractTypeSelect :Function = (selectedRowIndex :number) => {
-      this.props.onAbstractTypeSelect(selectedRowIndex);
-    };
-
     return (
       <AbstractDataTable
           data={data}
           headers={headers}
-          onRowClick={onAbstractTypeSelect}
+          onRowClick={this.handleOnAbstractTypeSelect}
           height={this.props.height}
           maxHeight={this.props.maxHeight} />
     );

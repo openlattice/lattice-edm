@@ -32,9 +32,9 @@ injectGlobal`
   body {
     background-color: #f9fcff;
     color: #113355;
+    font-family: 'Open Sans', sans-serif;
     height: 100%;
     width: 100%;
-    font-family: 'Open Sans', sans-serif;
   }
 
   * {

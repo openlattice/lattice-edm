@@ -12,8 +12,8 @@ import { AutoSizer, Grid, ScrollSync } from 'react-virtualized';
  * constants
  */
 
-const DEFAULT_GRID_MAX_HEIGHT :number = 500;
-const DEFAULT_GRID_MAX_WIDTH :number = 500;
+// const DEFAULT_GRID_MAX_HEIGHT :number = 500;
+// const DEFAULT_GRID_MAX_WIDTH :number = 500;
 
 const DEFAULT_COLUMN_MAX_WIDTH :number = 500;
 const DEFAULT_COLUMN_MIN_WIDTH :number = 100;
@@ -49,11 +49,14 @@ const HeadGrid = styled(Grid)`
   border: none;
   outline: none;
   overflow: hidden !important; /* hides horizontal scrollbar */
+  z-index: 100; /* arbitrarily chosen value */
 `;
 
 const BodyGrid = styled(Grid)`
   border: none;
   outline: none;
+  margin-top: -1px;
+  z-index: 99;
   &:hover {
     cursor: pointer;
   }
@@ -72,7 +75,6 @@ const BodyCell = styled.div`
   border-top: 1px solid #c5d5e5;
   display: flex;
   font-size: 14px;
-  margin-top: -1px;
   padding: ${CELL_PADDING}px;
 `;
 
@@ -374,7 +376,7 @@ class AbstractDataTable extends React.Component<Props, State> {
       <BodyCell
           key={params.key}
           style={params.style}
-          onClick={() => {
+          onMouseDown={() => {
             // setState({ selectedRowIndex: params.rowIndex });
             // params.parent.forceUpdate();
             this.props.onRowClick(params.rowIndex, this.props.data.get(params.rowIndex));

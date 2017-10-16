@@ -15,11 +15,14 @@ import SearchInput from '../../components/controls/SearchInput';
 import StyledButton from '../../components/buttons/StyledButton';
 import StyledCard from '../../components/cards/StyledCard';
 
+import AbstractTypeCreateContainer from './AbstractTypeCreateContainer';
 import AssociationTypeDetailsContainer from './associationtypes/AssociationTypeDetailsContainer';
 import CreateNewEntityTypeContainer from './entitytypes/CreateNewEntityTypeContainer';
 import CreateNewPropertyTypeContainer from './propertytypes/CreateNewPropertyTypeContainer';
 import EntityTypeDetailsContainer from './entitytypes/EntityTypeDetailsContainer';
 import PropertyTypeDetailsContainer from './propertytypes/PropertyTypeDetailsContainer';
+
+import { getWorkingAbstractTypes, filterAbstractTypes } from '../../utils/AbstractTypeUtils';
 
 import type { AbstractType } from '../../utils/AbstractTypes';
 
@@ -46,7 +49,7 @@ const OverviewContainerInnerWrapper = styled.div`
   flex: 1 0 auto;
   flex-direction: row;
   margin: 0;
-  padding: 20px;
+  padding: 40px 20px 20px 20px;
 `;
 
 const AbstractTypeDirectoryCard = StyledCard.extend`
@@ -68,7 +71,7 @@ const AbstractTypeDirectoryCardSearch = styled(SearchInput)`
 `;
 
 const AbstractTypeDetailsCard = StyledCard.extend`
-  flex: 1 0 auto;
+  flex: 3 0 auto;
   max-width: 1000px;
   min-width: 500px;
 `;
@@ -101,55 +104,19 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
     workingAbstractTypeType: AbstractTypes.PropertyType
   }
 
-  static getWorkingTypes(props :Props) :List<Map<*, *>> {
-
-    switch (props.workingAbstractTypeType) {
-      case AbstractTypes.AssociationType:
-        return props.associationTypes;
-      case AbstractTypes.EntityType:
-        return props.entityTypes;
-      case AbstractTypes.PropertyType:
-        return props.propertyTypes;
-      default:
-        return Immutable.List();
-    }
-  }
-
-  static filterAbstractTypes(props :Props, filterQuery :?string) :List<Map<*, *>> {
-
-    const workingTypes :List<Map<*, *>> = AbstractTypeOverviewContainer.getWorkingTypes(props);
-
-    return workingTypes.filter((type :Map<*, *>) => {
-
-      const abstractType :Map<*, *> = (props.workingAbstractTypeType === AbstractTypes.AssociationType)
-        ? type.get('entityType', Immutable.Map())
-        : type;
-
-      const abstractTypeId :string = abstractType.get('id', '');
-      const abstractTypeType :Map<string, string> = abstractType.get('type', Immutable.Map());
-      const abstractTypeFqn :string = FullyQualifiedName.toString(abstractTypeType);
-      const abstractTypeTitle :string = abstractType.get('title', '');
-
-      let includePropertyType :boolean = true;
-      if (filterQuery && filterQuery.trim()) {
-        const matchesId :boolean = (abstractTypeId === filterQuery);
-        const matchesFQN :boolean = abstractTypeFqn.includes(filterQuery.trim());
-        const matchesTitle :boolean = abstractTypeTitle.includes(filterQuery.trim());
-        if (!matchesId && !matchesFQN && !matchesTitle) {
-          includePropertyType = false;
-        }
-      }
-
-      return includePropertyType;
-    });
-  }
-
   constructor(props :Props) {
 
     super(props);
 
+    const params :Object = {
+      workingAbstractTypeType: props.workingAbstractTypeType,
+      associationTypes: props.associationTypes,
+      entityTypes: props.entityTypes,
+      propertyTypes: props.propertyTypes
+    };
+
     this.state = {
-      filteredTypes: AbstractTypeOverviewContainer.getWorkingTypes(props),
+      filteredTypes: getWorkingAbstractTypes(params),
       selectedAbstractTypeId: '',
       selectedAbstractTypeIndex: 0,
       showCreateNewAbstractTypeCard: false
@@ -168,9 +135,16 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
       selectedAbstractTypeId = nextProps.newlyCreatedEntityTypeId;
     }
 
+    const params :Object = {
+      workingAbstractTypeType: nextProps.workingAbstractTypeType,
+      associationTypes: nextProps.associationTypes,
+      entityTypes: nextProps.entityTypes,
+      propertyTypes: nextProps.propertyTypes
+    };
+
     this.setState({
       selectedAbstractTypeId,
-      filteredTypes: AbstractTypeOverviewContainer.getWorkingTypes(nextProps),
+      filteredTypes: getWorkingAbstractTypes(params),
       selectedAbstractTypeIndex: 0,
       showCreateNewAbstractTypeCard: false
     });
@@ -178,13 +152,21 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
 
   handleOnChangeFilter = (filter :string) => {
 
-    const filteredTypes :List<Map<*, *>> = AbstractTypeOverviewContainer.filterAbstractTypes(
-      this.props,
-      filter
-    );
+    const params :Object = {
+      workingAbstractTypeType: this.props.workingAbstractTypeType,
+      associationTypes: this.props.associationTypes,
+      entityTypes: this.props.entityTypes,
+      propertyTypes: this.props.propertyTypes
+    };
+
+    const filterParams :Object = {
+      abstractTypes: getWorkingAbstractTypes(params),
+      filterQuery: filter,
+      workingAbstractTypeType: this.props.workingAbstractTypeType
+    };
 
     this.setState({
-      filteredTypes,
+      filteredTypes: filterAbstractTypes(filterParams),
       selectedAbstractTypeId: '',
       selectedAbstractTypeIndex: 0
     });
@@ -301,30 +283,12 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
     );
   }
 
-  renderCreateNewAbstractTypeCard = () => {
-
-    let abstractTypeDetailsContainer;
-    switch (this.props.workingAbstractTypeType) {
-      case AbstractTypes.AssociationType:
-        abstractTypeDetailsContainer = null;
-        break;
-      case AbstractTypes.EntityType:
-        abstractTypeDetailsContainer = (
-          <CreateNewEntityTypeContainer onCancel={this.hideCreateNewAbstractTypeCard} />
-        );
-        break;
-      case AbstractTypes.PropertyType:
-        abstractTypeDetailsContainer = (
-          <CreateNewPropertyTypeContainer onCancel={this.hideCreateNewAbstractTypeCard} />
-        );
-        break;
-      default:
-        abstractTypeDetailsContainer = null;
-        break;
-    }
+  renderAbstractTypeCreateCard = () => {
 
     return (
-      abstractTypeDetailsContainer
+      <AbstractTypeCreateContainer
+          workingAbstractTypeType={this.props.workingAbstractTypeType}
+          onCancel={this.hideCreateNewAbstractTypeCard} />
     );
   }
 
@@ -344,7 +308,7 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
           { this.renderAbstractTypeDirectoryCard() }
           {
             this.state.showCreateNewAbstractTypeCard
-              ? this.renderCreateNewAbstractTypeCard()
+              ? this.renderAbstractTypeCreateCard()
               : this.renderAbstractTypeDetailsCard()
           }
         </OverviewContainerInnerWrapper>
