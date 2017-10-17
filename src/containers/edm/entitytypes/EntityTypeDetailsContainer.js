@@ -5,13 +5,13 @@
 import React from 'react';
 
 import Immutable from 'immutable';
-import { Models } from 'lattice';
 import { connect } from 'react-redux';
 
-import AbstractTypeDataTable from '../../../components/datatable/AbstractTypeDataTable';
 import AbstractTypes from '../../../utils/AbstractTypes';
-
-const { FullyQualifiedName } = Models;
+import AbstractTypeDataTable from '../../../components/datatable/AbstractTypeDataTable';
+import AbstractTypeFieldDescription from '../AbstractTypeFieldDescription';
+import AbstractTypeFieldTitle from '../AbstractTypeFieldTitle';
+import AbstractTypeFieldType from '../AbstractTypeFieldType';
 
 /*
  * types
@@ -19,7 +19,8 @@ const { FullyQualifiedName } = Models;
 
 type Props = {
   entityType :Map<*, *>,
-  propertyTypesById :Map<string, Map<*, *>>
+  propertyTypes :List<Map<*, *>>,
+  propertyTypesById :Map<string, number>
 }
 
 class EntityTypeDetailsContainer extends React.Component<Props> {
@@ -32,18 +33,26 @@ class EntityTypeDetailsContainer extends React.Component<Props> {
 
     const baseType :string = this.props.entityType.get('baseType', '');
 
-    const keyProperties :Set<string> = this.props.entityType.get('key', Immutable.List()).toSet();
-    const properties :Set<string> = this.props.entityType.get('properties', Immutable.List()).toSet();
+    const keyPropertyTypeIds :Set<string> = this.props.entityType.get('key', Immutable.List()).toSet();
+    const propertyTypeIds :Set<string> = this.props.entityType.get('properties', Immutable.List()).toSet();
 
-    const keyPropertyTypes :List<Map<*, *>> = keyProperties
+    const keyPropertyTypes :List<Map<*, *>> = keyPropertyTypeIds
       .map((propertyTypeId :string) => {
-        return this.props.propertyTypesById.get(propertyTypeId, Immutable.Map());
+        const index :number = this.props.propertyTypesById.get(propertyTypeId, -1);
+        if (index === -1) {
+          return Immutable.Map();
+        }
+        return this.props.propertyTypes.get(index, Immutable.Map());
       })
       .toList();
 
-    const propertyTypes :List<Map<*, *>> = properties.subtract(keyProperties)
+    const propertyTypes :List<Map<*, *>> = propertyTypeIds.subtract(keyPropertyTypeIds)
       .map((propertyTypeId :string) => {
-        return this.props.propertyTypesById.get(propertyTypeId, Immutable.Map());
+        const index :number = this.props.propertyTypesById.get(propertyTypeId, -1);
+        if (index === -1) {
+          return Immutable.Map();
+        }
+        return this.props.propertyTypes.get(index, Immutable.Map());
       })
       .toList();
 
@@ -55,16 +64,19 @@ class EntityTypeDetailsContainer extends React.Component<Props> {
           <p>{ this.props.entityType.get('id') }</p>
         </section>
         <section>
-          <h2>Type</h2>
-          <p>{ FullyQualifiedName.toString(this.props.entityType.get('type', {})) }</p>
+          <AbstractTypeFieldType
+              abstractType={this.props.entityType}
+              abstractTypeType={AbstractTypes.EntityType} />
         </section>
         <section>
-          <h2>Title</h2>
-          <p>{ this.props.entityType.get('title') }</p>
+          <AbstractTypeFieldTitle
+              abstractType={this.props.entityType}
+              abstractTypeType={AbstractTypes.EntityType} />
         </section>
         <section>
-          <h2>Description</h2>
-          <p>{ this.props.entityType.get('description') }</p>
+          <AbstractTypeFieldDescription
+              abstractType={this.props.entityType}
+              abstractTypeType={AbstractTypes.EntityType} />
         </section>
         {
           !baseType
@@ -112,7 +124,8 @@ class EntityTypeDetailsContainer extends React.Component<Props> {
 function mapStateToProps(state :Map<*, *>) :Object {
 
   return {
-    propertyTypesById: state.getIn(['edm', 'propertyTypes', 'propertyTypesById'], Immutable.List())
+    propertyTypes: state.getIn(['edm', 'propertyTypes', 'propertyTypes'], Immutable.List()),
+    propertyTypesById: state.getIn(['edm', 'propertyTypes', 'propertyTypesById'], Immutable.Map())
   };
 }
 

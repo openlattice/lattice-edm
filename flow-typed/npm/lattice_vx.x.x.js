@@ -1,4 +1,4 @@
-// flow-typed signature: be7990560de2e401f358938964bd25ad
+// flow-typed signature: 694a7e17c7f5addcd1dcb74290e385c3
 // flow-typed version: <<STUB>>/lattice_v^0.29.1/flow_v0.55.0
 
 /**
@@ -130,6 +130,10 @@ declare module 'lattice/src/constants/types/ActionTypes' {
   declare module.exports: any;
 }
 
+declare module 'lattice/src/constants/types/AnalyzerTypes' {
+  declare module.exports: any;
+}
+
 declare module 'lattice/src/constants/types/index' {
   declare module.exports: any;
 }
@@ -167,6 +171,10 @@ declare module 'lattice/src/models/Acl' {
 }
 
 declare module 'lattice/src/models/AclData' {
+  declare module.exports: any;
+}
+
+declare module 'lattice/src/models/AssociationType' {
   declare module.exports: any;
 }
 
@@ -247,6 +255,190 @@ declare module 'lattice/src/utils/Logger' {
 }
 
 declare module 'lattice/src/utils/ValidationUtils' {
+  declare module.exports: any;
+}
+
+declare module 'lattice/test/api/AuthorizationApi.test' {
+  declare module.exports: any;
+}
+
+declare module 'lattice/test/api/DataApi.test' {
+  declare module.exports: any;
+}
+
+declare module 'lattice/test/api/DataSourcesApi.test' {
+  declare module.exports: any;
+}
+
+declare module 'lattice/test/api/EntityDataModelApi.test' {
+  declare module.exports: any;
+}
+
+declare module 'lattice/test/api/LinkingApi.test' {
+  declare module.exports: any;
+}
+
+declare module 'lattice/test/api/OrganizationsApi.test' {
+  declare module.exports: any;
+}
+
+declare module 'lattice/test/api/PermissionsApi.test' {
+  declare module.exports: any;
+}
+
+declare module 'lattice/test/api/PrincipalsApi.test' {
+  declare module.exports: any;
+}
+
+declare module 'lattice/test/api/RequestsApi.test' {
+  declare module.exports: any;
+}
+
+declare module 'lattice/test/api/SearchApi.test' {
+  declare module.exports: any;
+}
+
+declare module 'lattice/test/config/Configuration.test' {
+  declare module.exports: any;
+}
+
+declare module 'lattice/test/constants/ActionTypes.test' {
+  declare module.exports: any;
+}
+
+declare module 'lattice/test/constants/ApiNames.test' {
+  declare module.exports: any;
+}
+
+declare module 'lattice/test/constants/ApiPaths.test' {
+  declare module.exports: any;
+}
+
+declare module 'lattice/test/constants/EnvToUrlMap.test' {
+  declare module.exports: any;
+}
+
+declare module 'lattice/test/constants/InvalidParams' {
+  declare module.exports: any;
+}
+
+declare module 'lattice/test/constants/MockDataModels' {
+  declare module.exports: any;
+}
+
+declare module 'lattice/test/constants/PermissionTypes.test' {
+  declare module.exports: any;
+}
+
+declare module 'lattice/test/constants/PrincipalTypes.test' {
+  declare module.exports: any;
+}
+
+declare module 'lattice/test/constants/RequestStateTypes.test' {
+  declare module.exports: any;
+}
+
+declare module 'lattice/test/constants/SecurableTypes.test' {
+  declare module.exports: any;
+}
+
+declare module 'lattice/test/index.test' {
+  declare module.exports: any;
+}
+
+declare module 'lattice/test/models/AccessCheck.test' {
+  declare module.exports: any;
+}
+
+declare module 'lattice/test/models/Ace.test' {
+  declare module.exports: any;
+}
+
+declare module 'lattice/test/models/Acl.test' {
+  declare module.exports: any;
+}
+
+declare module 'lattice/test/models/AclData.test' {
+  declare module.exports: any;
+}
+
+declare module 'lattice/test/models/DataSource.test' {
+  declare module.exports: any;
+}
+
+declare module 'lattice/test/models/EntitySet.test' {
+  declare module.exports: any;
+}
+
+declare module 'lattice/test/models/EntityType.test' {
+  declare module.exports: any;
+}
+
+declare module 'lattice/test/models/FullyQualifiedName.test' {
+  declare module.exports: any;
+}
+
+declare module 'lattice/test/models/index.test' {
+  declare module.exports: any;
+}
+
+declare module 'lattice/test/models/LinkingEntitySet.test' {
+  declare module.exports: any;
+}
+
+declare module 'lattice/test/models/LinkingEntityType.test' {
+  declare module.exports: any;
+}
+
+declare module 'lattice/test/models/LinkingRequest.test' {
+  declare module.exports: any;
+}
+
+declare module 'lattice/test/models/Organization.test' {
+  declare module.exports: any;
+}
+
+declare module 'lattice/test/models/Principal.test' {
+  declare module.exports: any;
+}
+
+declare module 'lattice/test/models/PropertyType.test' {
+  declare module.exports: any;
+}
+
+declare module 'lattice/test/models/Request.test' {
+  declare module.exports: any;
+}
+
+declare module 'lattice/test/models/RequestStatus.test' {
+  declare module.exports: any;
+}
+
+declare module 'lattice/test/models/Role.test' {
+  declare module.exports: any;
+}
+
+declare module 'lattice/test/models/Schema.test' {
+  declare module.exports: any;
+}
+
+declare module 'lattice/test/models/template' {
+  declare module.exports: any;
+}
+
+declare module 'lattice/test/TestSuite' {
+  declare module.exports: any;
+}
+
+declare module 'lattice/test/utils/ApiTestUtils' {
+  declare module.exports: any;
+}
+
+declare module 'lattice/test/utils/AxiosUtils.test' {
+  declare module.exports: any;
+}
+
+declare module 'lattice/test/utils/MockDataUtils' {
   declare module.exports: any;
 }
 
@@ -332,6 +524,9 @@ declare module 'lattice/src/constants/EnvToUrlMap.js' {
 declare module 'lattice/src/constants/types/ActionTypes.js' {
   declare module.exports: $Exports<'lattice/src/constants/types/ActionTypes'>;
 }
+declare module 'lattice/src/constants/types/AnalyzerTypes.js' {
+  declare module.exports: $Exports<'lattice/src/constants/types/AnalyzerTypes'>;
+}
 declare module 'lattice/src/constants/types/index.js' {
   declare module.exports: $Exports<'lattice/src/constants/types/index'>;
 }
@@ -361,6 +556,9 @@ declare module 'lattice/src/models/Acl.js' {
 }
 declare module 'lattice/src/models/AclData.js' {
   declare module.exports: $Exports<'lattice/src/models/AclData'>;
+}
+declare module 'lattice/src/models/AssociationType.js' {
+  declare module.exports: $Exports<'lattice/src/models/AssociationType'>;
 }
 declare module 'lattice/src/models/DataSource.js' {
   declare module.exports: $Exports<'lattice/src/models/DataSource'>;
@@ -421,4 +619,142 @@ declare module 'lattice/src/utils/Logger.js' {
 }
 declare module 'lattice/src/utils/ValidationUtils.js' {
   declare module.exports: $Exports<'lattice/src/utils/ValidationUtils'>;
+}
+declare module 'lattice/test/api/AuthorizationApi.test.js' {
+  declare module.exports: $Exports<'lattice/test/api/AuthorizationApi.test'>;
+}
+declare module 'lattice/test/api/DataApi.test.js' {
+  declare module.exports: $Exports<'lattice/test/api/DataApi.test'>;
+}
+declare module 'lattice/test/api/DataSourcesApi.test.js' {
+  declare module.exports: $Exports<'lattice/test/api/DataSourcesApi.test'>;
+}
+declare module 'lattice/test/api/EntityDataModelApi.test.js' {
+  declare module.exports: $Exports<'lattice/test/api/EntityDataModelApi.test'>;
+}
+declare module 'lattice/test/api/LinkingApi.test.js' {
+  declare module.exports: $Exports<'lattice/test/api/LinkingApi.test'>;
+}
+declare module 'lattice/test/api/OrganizationsApi.test.js' {
+  declare module.exports: $Exports<'lattice/test/api/OrganizationsApi.test'>;
+}
+declare module 'lattice/test/api/PermissionsApi.test.js' {
+  declare module.exports: $Exports<'lattice/test/api/PermissionsApi.test'>;
+}
+declare module 'lattice/test/api/PrincipalsApi.test.js' {
+  declare module.exports: $Exports<'lattice/test/api/PrincipalsApi.test'>;
+}
+declare module 'lattice/test/api/RequestsApi.test.js' {
+  declare module.exports: $Exports<'lattice/test/api/RequestsApi.test'>;
+}
+declare module 'lattice/test/api/SearchApi.test.js' {
+  declare module.exports: $Exports<'lattice/test/api/SearchApi.test'>;
+}
+declare module 'lattice/test/config/Configuration.test.js' {
+  declare module.exports: $Exports<'lattice/test/config/Configuration.test'>;
+}
+declare module 'lattice/test/constants/ActionTypes.test.js' {
+  declare module.exports: $Exports<'lattice/test/constants/ActionTypes.test'>;
+}
+declare module 'lattice/test/constants/ApiNames.test.js' {
+  declare module.exports: $Exports<'lattice/test/constants/ApiNames.test'>;
+}
+declare module 'lattice/test/constants/ApiPaths.test.js' {
+  declare module.exports: $Exports<'lattice/test/constants/ApiPaths.test'>;
+}
+declare module 'lattice/test/constants/EnvToUrlMap.test.js' {
+  declare module.exports: $Exports<'lattice/test/constants/EnvToUrlMap.test'>;
+}
+declare module 'lattice/test/constants/InvalidParams.js' {
+  declare module.exports: $Exports<'lattice/test/constants/InvalidParams'>;
+}
+declare module 'lattice/test/constants/MockDataModels.js' {
+  declare module.exports: $Exports<'lattice/test/constants/MockDataModels'>;
+}
+declare module 'lattice/test/constants/PermissionTypes.test.js' {
+  declare module.exports: $Exports<'lattice/test/constants/PermissionTypes.test'>;
+}
+declare module 'lattice/test/constants/PrincipalTypes.test.js' {
+  declare module.exports: $Exports<'lattice/test/constants/PrincipalTypes.test'>;
+}
+declare module 'lattice/test/constants/RequestStateTypes.test.js' {
+  declare module.exports: $Exports<'lattice/test/constants/RequestStateTypes.test'>;
+}
+declare module 'lattice/test/constants/SecurableTypes.test.js' {
+  declare module.exports: $Exports<'lattice/test/constants/SecurableTypes.test'>;
+}
+declare module 'lattice/test/index.test.js' {
+  declare module.exports: $Exports<'lattice/test/index.test'>;
+}
+declare module 'lattice/test/models/AccessCheck.test.js' {
+  declare module.exports: $Exports<'lattice/test/models/AccessCheck.test'>;
+}
+declare module 'lattice/test/models/Ace.test.js' {
+  declare module.exports: $Exports<'lattice/test/models/Ace.test'>;
+}
+declare module 'lattice/test/models/Acl.test.js' {
+  declare module.exports: $Exports<'lattice/test/models/Acl.test'>;
+}
+declare module 'lattice/test/models/AclData.test.js' {
+  declare module.exports: $Exports<'lattice/test/models/AclData.test'>;
+}
+declare module 'lattice/test/models/DataSource.test.js' {
+  declare module.exports: $Exports<'lattice/test/models/DataSource.test'>;
+}
+declare module 'lattice/test/models/EntitySet.test.js' {
+  declare module.exports: $Exports<'lattice/test/models/EntitySet.test'>;
+}
+declare module 'lattice/test/models/EntityType.test.js' {
+  declare module.exports: $Exports<'lattice/test/models/EntityType.test'>;
+}
+declare module 'lattice/test/models/FullyQualifiedName.test.js' {
+  declare module.exports: $Exports<'lattice/test/models/FullyQualifiedName.test'>;
+}
+declare module 'lattice/test/models/index.test.js' {
+  declare module.exports: $Exports<'lattice/test/models/index.test'>;
+}
+declare module 'lattice/test/models/LinkingEntitySet.test.js' {
+  declare module.exports: $Exports<'lattice/test/models/LinkingEntitySet.test'>;
+}
+declare module 'lattice/test/models/LinkingEntityType.test.js' {
+  declare module.exports: $Exports<'lattice/test/models/LinkingEntityType.test'>;
+}
+declare module 'lattice/test/models/LinkingRequest.test.js' {
+  declare module.exports: $Exports<'lattice/test/models/LinkingRequest.test'>;
+}
+declare module 'lattice/test/models/Organization.test.js' {
+  declare module.exports: $Exports<'lattice/test/models/Organization.test'>;
+}
+declare module 'lattice/test/models/Principal.test.js' {
+  declare module.exports: $Exports<'lattice/test/models/Principal.test'>;
+}
+declare module 'lattice/test/models/PropertyType.test.js' {
+  declare module.exports: $Exports<'lattice/test/models/PropertyType.test'>;
+}
+declare module 'lattice/test/models/Request.test.js' {
+  declare module.exports: $Exports<'lattice/test/models/Request.test'>;
+}
+declare module 'lattice/test/models/RequestStatus.test.js' {
+  declare module.exports: $Exports<'lattice/test/models/RequestStatus.test'>;
+}
+declare module 'lattice/test/models/Role.test.js' {
+  declare module.exports: $Exports<'lattice/test/models/Role.test'>;
+}
+declare module 'lattice/test/models/Schema.test.js' {
+  declare module.exports: $Exports<'lattice/test/models/Schema.test'>;
+}
+declare module 'lattice/test/models/template.js' {
+  declare module.exports: $Exports<'lattice/test/models/template'>;
+}
+declare module 'lattice/test/TestSuite.js' {
+  declare module.exports: $Exports<'lattice/test/TestSuite'>;
+}
+declare module 'lattice/test/utils/ApiTestUtils.js' {
+  declare module.exports: $Exports<'lattice/test/utils/ApiTestUtils'>;
+}
+declare module 'lattice/test/utils/AxiosUtils.test.js' {
+  declare module.exports: $Exports<'lattice/test/utils/AxiosUtils.test'>;
+}
+declare module 'lattice/test/utils/MockDataUtils.js' {
+  declare module.exports: $Exports<'lattice/test/utils/MockDataUtils'>;
 }

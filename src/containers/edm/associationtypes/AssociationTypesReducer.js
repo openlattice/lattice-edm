@@ -11,7 +11,10 @@ import {
   CREATE_ASSOCIATION_TYPE_SUCCESS,
   FETCH_ALL_ASSOCIATION_TYPES_FAILURE,
   FETCH_ALL_ASSOCIATION_TYPES_REQUEST,
-  FETCH_ALL_ASSOCIATION_TYPES_SUCCESS
+  FETCH_ALL_ASSOCIATION_TYPES_SUCCESS,
+  UPDATE_ASSOCIATION_TYPE_METADATA_FAILURE,
+  UPDATE_ASSOCIATION_TYPE_METADATA_REQUEST,
+  UPDATE_ASSOCIATION_TYPE_METADATA_SUCCESS
 } from './AssociationTypesActionFactory';
 
 import type { Action } from './AssociationTypesActionFactory';
@@ -29,6 +32,11 @@ const INITIAL_STATE :Map<*, *> = Immutable.fromJS({
 export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE, action :Action) {
 
   switch (action.type) {
+
+    case CREATE_ASSOCIATION_TYPE_FAILURE:
+      return state
+        .set('isCreatingNewAssociationType', false)
+        .set('newlyCreatedAssociationTypeId', '');
 
     case CREATE_ASSOCIATION_TYPE_REQUEST:
       return state
@@ -48,8 +56,8 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
       const current :List<Map<*, *>> = state.get('associationTypes', Immutable.List());
       const updated :List<Map<*, *>> = current.push(iAssociationType);
 
-      const currentById :Map<string, Map<*, *>> = state.get('associationTypesById', Immutable.Map());
-      const updatedById :Map<string, Map<*, *>> = currentById.set(action.associationTypeId, iAssociationType);
+      const currentById :Map<string, number> = state.get('associationTypesById', Immutable.Map());
+      const updatedById :Map<string, number> = currentById.set(action.associationTypeId, updated.size - 1);
 
       return state
         .set('isCreatingNewAssociationType', false)
@@ -58,10 +66,11 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
         .set('associationTypesById', updatedById);
     }
 
-    case CREATE_ASSOCIATION_TYPE_FAILURE:
+    case FETCH_ALL_ASSOCIATION_TYPES_FAILURE:
       return state
-        .set('isCreatingNewAssociationType', false)
-        .set('newlyCreatedAssociationTypeId', '');
+        .set('isFetchingAllAssociationTypes', false)
+        .set('associationTypes', Immutable.List())
+        .set('associationTypesById', Immutable.Map());
 
     case FETCH_ALL_ASSOCIATION_TYPES_REQUEST:
       return state.set('isFetchingAllAssociationTypes', true);
@@ -69,11 +78,11 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
     case FETCH_ALL_ASSOCIATION_TYPES_SUCCESS: {
 
       const allAssociationTypes :List<Map<*, *>> = Immutable.fromJS(action.associationTypes);
-      const associationTypesById :Map<string, Map<*, *>> = Immutable.Map()
-        .withMutations((map :Map<string, Map<*, *>>) => {
-          allAssociationTypes.forEach((associationType :Map<*, *>) => {
+      const associationTypesById :Map<string, number> = Immutable.Map()
+        .withMutations((byIdMap :Map<string, number>) => {
+          allAssociationTypes.forEach((associationType :Map<*, *>, associationTypeIndex :number) => {
             const entityType :Map<*, *> = associationType.get('entityType', Immutable.Map());
-            map.set(entityType.get('id'), associationType);
+            byIdMap.set(entityType.get('id'), associationTypeIndex);
           });
         });
 
@@ -83,10 +92,43 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
         .set('associationTypesById', associationTypesById);
     }
 
-    case FETCH_ALL_ASSOCIATION_TYPES_FAILURE:
-      return state
-        .set('isFetchingAllAssociationTypes', false)
-        .set('associationTypes', Immutable.List());
+    case UPDATE_ASSOCIATION_TYPE_METADATA_FAILURE:
+    case UPDATE_ASSOCIATION_TYPE_METADATA_REQUEST:
+      return state;
+
+    case UPDATE_ASSOCIATION_TYPE_METADATA_SUCCESS: {
+
+      debugger;
+
+      const associationTypeId :string = action.associationTypeId;
+      const associationTypeIndex :number = state.getIn(['associationTypesById', associationTypeId], -1);
+      if (associationTypeIndex < 0) {
+        return state;
+      }
+
+      if (action.metadata.description) {
+        return state.setIn(
+          ['associationTypes', associationTypeIndex, 'entityType', 'description'],
+          action.metadata.description
+        );
+      }
+      else if (action.metadata.title) {
+        return state.setIn(
+          ['associationTypes', associationTypeIndex, 'entityType', 'title'],
+          action.metadata.title
+        );
+      }
+      else if (action.metadata.type) {
+        // TODO: potential bug with how immutable.js deals with custom objects
+        // TODO: consider storing plain object instead of FullyQualifiedName object
+        return state.setIn(
+          ['associationTypes', associationTypeIndex, 'entityType', 'type'],
+          action.metadata.type
+        );
+      }
+
+      return state;
+    }
 
     default:
       return state;

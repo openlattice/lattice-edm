@@ -22,13 +22,16 @@ export default function* sagas() :Generator<*, *, *> {
     // PropertyTypesSagas
     fork(PropertyTypesSagas.watchCreatePropertyTypeRequest),
     fork(PropertyTypesSagas.watchFetchAllPropertyTypesRequest),
+    fork(PropertyTypesSagas.watchUpdatePropertyTypeMetaDataRequest),
 
     // EntityTypesSagas
     fork(EntityTypesSagas.watchCreateEntityTypeRequest),
     fork(EntityTypesSagas.watchFetchAllEntityTypesRequest),
+    fork(EntityTypesSagas.watchUpdateEntityTypeMetaDataRequest),
 
     // AssociationTypesSagas
     fork(AssociationTypesSagas.watchCreateAssociationTypeRequest),
-    fork(AssociationTypesSagas.watchFetchAllAssociationTypesRequest)
+    fork(AssociationTypesSagas.watchFetchAllAssociationTypesRequest),
+    fork(AssociationTypesSagas.watchUpdateAssociationTypeMetaDataRequest)
   ];
 }

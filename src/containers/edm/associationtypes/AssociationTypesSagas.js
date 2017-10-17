@@ -11,13 +11,21 @@ import {
   createAssociationTypeSuccess,
   FETCH_ALL_ASSOCIATION_TYPES_REQUEST,
   fetchAllAssociationTypesFailure,
-  fetchAllAssociationTypesSuccess
+  fetchAllAssociationTypesSuccess,
+  UPDATE_ASSOCIATION_TYPE_METADATA_REQUEST,
+  updateAssociationTypeMetaDataFailure,
+  updateAssociationTypeMetaDataSuccess
+} from './AssociationTypesActionFactory';
+
+import type {
+  CreateAssociationTypeRequestAction,
+  UpdateAssociationTypeMetaDataRequestAction
 } from './AssociationTypesActionFactory';
 
 export function* watchCreateAssociationTypeRequest() :Generator<*, *, *> {
 
   while (true) {
-    const action :Object = yield take(CREATE_ASSOCIATION_TYPE_REQUEST);
+    const action :CreateAssociationTypeRequestAction = yield take(CREATE_ASSOCIATION_TYPE_REQUEST);
     try {
       const response = yield call(EntityDataModelApi.createAssociationType, action.associationType);
       yield put(createAssociationTypeSuccess(action.associationType, response));
@@ -38,6 +46,25 @@ export function* watchFetchAllAssociationTypesRequest() :Generator<*, *, *> {
     }
     catch (error) {
       yield put(fetchAllAssociationTypesFailure(error));
+    }
+  }
+}
+
+export function* watchUpdateAssociationTypeMetaDataRequest() :Generator<*, *, *> {
+
+  while (true) {
+    const action :UpdateAssociationTypeMetaDataRequestAction = yield take(UPDATE_ASSOCIATION_TYPE_METADATA_REQUEST);
+    try {
+      yield call(
+        EntityDataModelApi.updateEntityTypeMetaData,
+        action.associationTypeId,
+        action.metadata
+      );
+      debugger;
+      yield put(updateAssociationTypeMetaDataSuccess(action.associationTypeId, action.metadata));
+    }
+    catch (error) {
+      yield put(updateAssociationTypeMetaDataFailure(action.associationTypeId, error));
     }
   }
 }

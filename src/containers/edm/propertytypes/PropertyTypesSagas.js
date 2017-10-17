@@ -11,13 +11,21 @@ import {
   createPropertyTypeSuccess,
   FETCH_ALL_PROPERTY_TYPES_REQUEST,
   fetchAllPropertyTypesFailure,
-  fetchAllPropertyTypesSuccess
+  fetchAllPropertyTypesSuccess,
+  UPDATE_PROPERTY_TYPE_METADATA_REQUEST,
+  updatePropertyTypeMetaDataFailure,
+  updatePropertyTypeMetaDataSuccess
+} from './PropertyTypesActionFactory';
+
+import type {
+  CreatePropertyTypeRequestAction,
+  UpdatePropertyTypeMetaDataRequestAction
 } from './PropertyTypesActionFactory';
 
 export function* watchCreatePropertyTypeRequest() :Generator<*, *, *> {
 
   while (true) {
-    const action :Object = yield take(CREATE_PROPERTY_TYPE_REQUEST);
+    const action :CreatePropertyTypeRequestAction = yield take(CREATE_PROPERTY_TYPE_REQUEST);
     try {
       const response = yield call(EntityDataModelApi.createPropertyType, action.propertyType);
       yield put(createPropertyTypeSuccess(action.propertyType, response));
@@ -38,6 +46,24 @@ export function* watchFetchAllPropertyTypesRequest() :Generator<*, *, *> {
     }
     catch (error) {
       yield put(fetchAllPropertyTypesFailure(error));
+    }
+  }
+}
+
+export function* watchUpdatePropertyTypeMetaDataRequest() :Generator<*, *, *> {
+
+  while (true) {
+    const action :UpdatePropertyTypeMetaDataRequestAction = yield take(UPDATE_PROPERTY_TYPE_METADATA_REQUEST);
+    try {
+      yield call(
+        EntityDataModelApi.updatePropertyTypeMetaData,
+        action.propertyTypeId,
+        action.metadata
+      );
+      yield put(updatePropertyTypeMetaDataSuccess(action.propertyTypeId, action.metadata));
+    }
+    catch (error) {
+      yield put(updatePropertyTypeMetaDataFailure(action.propertyTypeId, error));
     }
   }
 }

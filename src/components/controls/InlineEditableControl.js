@@ -7,7 +7,7 @@ import React from 'react';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 import styled from 'styled-components';
 
-import { isNonEmptyString } from '../../utils/LangUtils';
+import { isEmptyString, isNonEmptyString } from '../../utils/LangUtils';
 
 const ControlWrapper = styled.div`
   display: inline-flex;
@@ -166,7 +166,8 @@ type Props = {
   viewOnly :boolean,
   onChange :Function,
   // onChangeConfirm :Function,
-  onEditToggle :Function
+  onEditToggle :Function,
+  validate :Function
 }
 
 type State = {
@@ -192,7 +193,8 @@ export default class InlineEditableControl extends React.Component<Props, State>
     viewOnly: false,
     onChange: () => {},
     // onChangeConfirm: () => {},
-    onEditToggle: () => {}
+    onEditToggle: () => {},
+    validate: (value :string) :boolean => isNonEmptyString(value)
   };
 
   constructor(props :Object) {
@@ -200,7 +202,7 @@ export default class InlineEditableControl extends React.Component<Props, State>
     super(props);
 
     const initialValue :string = isNonEmptyString(this.props.value) ? this.props.value : '';
-    const initializeAsEditable :boolean = !isNonEmptyString(initialValue);
+    const initializeAsEditable :boolean = isEmptyString(initialValue);
 
     this.control = null;
 
@@ -211,7 +213,7 @@ export default class InlineEditableControl extends React.Component<Props, State>
     };
   }
 
-  componentDidUpdate(prevProps :Object, prevState :Object) {
+  componentDidUpdate(prevProps :Props, prevState :State) {
 
     if (this.control
         && prevState.editable === false
@@ -243,11 +245,11 @@ export default class InlineEditableControl extends React.Component<Props, State>
     }
   }
 
-  componentWillReceiveProps(nextProps :Object) {
+  componentWillReceiveProps(nextProps :Props) {
 
     if (this.props.value !== nextProps.value) {
       const newValue :string = isNonEmptyString(nextProps.value) ? nextProps.value : '';
-      const initializeAsEditable :boolean = !isNonEmptyString(newValue);
+      const initializeAsEditable :boolean = isEmptyString(newValue);
       this.setState({
         currentValue: newValue,
         editable: initializeAsEditable,
@@ -265,13 +267,36 @@ export default class InlineEditableControl extends React.Component<Props, State>
     /* eslint-enable */
   }
 
-  toggleEditable = () => {
+  escape = () => {
 
+    // edit mode is desabled when viewOnly is true
     if (this.props.viewOnly) {
       return;
     }
 
-    if (!isNonEmptyString(this.state.currentValue)) {
+    // currentValue must be valid
+    if (!this.props.validate(this.state.currentValue)) {
+      // TODO: update UI to indicate invalid input; onValidate callback
+      return;
+    }
+
+    this.setState({
+      currentValue: this.state.previousValue,
+      editable: false,
+      previousValue: this.state.previousValue
+    });
+  }
+
+  toggleEditable = () => {
+
+    // edit mode is desabled when viewOnly is true
+    if (this.props.viewOnly) {
+      return;
+    }
+
+    // currentValue must be valid
+    if (!this.props.validate(this.state.currentValue)) {
+      // TODO: update UI to indicate invalid input; onValidate callback
       return;
     }
 
@@ -300,8 +325,10 @@ export default class InlineEditableControl extends React.Component<Props, State>
 
     switch (event.keyCode) {
       case 13: // 'Enter' key code
-      case 27: // 'Esc' key code
         this.toggleEditable();
+        break;
+      case 27: // 'Esc' key code
+        this.escape();
         break;
       default:
         break;

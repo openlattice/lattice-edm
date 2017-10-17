@@ -18,8 +18,8 @@ type FetchAllEntityTypesFailureAction = {
 function fetchAllEntityTypesFailure(error :any) :FetchAllEntityTypesFailureAction {
 
   return {
-    type: FETCH_ALL_ENTITY_TYPES_FAILURE,
-    error
+    error,
+    type: FETCH_ALL_ENTITY_TYPES_FAILURE
   };
 }
 
@@ -42,8 +42,8 @@ type FetchAllEntityTypesSuccessAction = {
 function fetchAllEntityTypesSuccess(entityTypes :Object[]) :FetchAllEntityTypesSuccessAction {
 
   return {
-    type: FETCH_ALL_ENTITY_TYPES_SUCCESS,
-    entityTypes
+    entityTypes,
+    type: FETCH_ALL_ENTITY_TYPES_SUCCESS
   };
 }
 
@@ -60,9 +60,9 @@ type CreateEntityTypeFailureAction = {
 function createEntityTypeFailure(entityType :EntityType, error :any) :CreateEntityTypeFailureAction {
 
   return {
-    type: CREATE_ENTITY_TYPE_FAILURE,
     error,
-    entityType
+    entityType,
+    type: CREATE_ENTITY_TYPE_FAILURE
   };
 }
 
@@ -74,8 +74,8 @@ type CreateEntityTypeRequestAction = {
 function createEntityTypeRequest(entityType :EntityType) :CreateEntityTypeRequestAction {
 
   return {
-    type: CREATE_ENTITY_TYPE_REQUEST,
-    entityType
+    entityType,
+    type: CREATE_ENTITY_TYPE_REQUEST
   };
 }
 
@@ -88,9 +88,69 @@ type CreateEntityTypeSuccessAction = {
 function createEntityTypeSuccess(entityType :EntityType, entityTypeId :string) :CreateEntityTypeSuccessAction {
 
   return {
-    type: CREATE_ENTITY_TYPE_SUCCESS,
     entityType,
-    entityTypeId
+    entityTypeId,
+    type: CREATE_ENTITY_TYPE_SUCCESS
+  };
+}
+
+/* eslint-disable max-len */
+const UPDATE_ENTITY_TYPE_METADATA_FAILURE :'UPDATE_ENTITY_TYPE_METADATA_FAILURE' = 'UPDATE_ENTITY_TYPE_METADATA_FAILURE';
+const UPDATE_ENTITY_TYPE_METADATA_REQUEST :'UPDATE_ENTITY_TYPE_METADATA_REQUEST' = 'UPDATE_ENTITY_TYPE_METADATA_REQUEST';
+const UPDATE_ENTITY_TYPE_METADATA_SUCCESS :'UPDATE_ENTITY_TYPE_METADATA_SUCCESS' = 'UPDATE_ENTITY_TYPE_METADATA_SUCCESS';
+/* eslint-enable */
+
+type UpdateEntityTypeMetaDataFailureAction = {
+  entityTypeId :string,
+  error :any,
+  type :typeof UPDATE_ENTITY_TYPE_METADATA_FAILURE
+}
+
+function updateEntityTypeMetaDataFailure(
+  entityTypeId :string,
+  error :any
+) :UpdateEntityTypeMetaDataFailureAction {
+
+  return {
+    entityTypeId,
+    error,
+    type: UPDATE_ENTITY_TYPE_METADATA_FAILURE
+  };
+}
+
+type UpdateEntityTypeMetaDataRequestAction = {
+  entityTypeId :string,
+  metadata :Object,
+  type :typeof UPDATE_ENTITY_TYPE_METADATA_REQUEST
+}
+
+function updateEntityTypeMetaDataRequest(
+  entityTypeId :string,
+  metadata :Object
+) :UpdateEntityTypeMetaDataRequestAction {
+
+  return {
+    entityTypeId,
+    metadata,
+    type: UPDATE_ENTITY_TYPE_METADATA_REQUEST
+  };
+}
+
+type UpdateEntityTypeMetaDataSuccessAction = {
+  entityTypeId :string,
+  metadata :Object,
+  type :typeof UPDATE_ENTITY_TYPE_METADATA_SUCCESS
+}
+
+function updateEntityTypeMetaDataSuccess(
+  entityTypeId :string,
+  metadata :Object
+) :UpdateEntityTypeMetaDataSuccessAction {
+
+  return {
+    entityTypeId,
+    metadata,
+    type: UPDATE_ENTITY_TYPE_METADATA_SUCCESS
   };
 }
 
@@ -98,9 +158,12 @@ export {
   CREATE_ENTITY_TYPE_FAILURE,
   CREATE_ENTITY_TYPE_REQUEST,
   CREATE_ENTITY_TYPE_SUCCESS,
+  FETCH_ALL_ENTITY_TYPES_FAILURE,
   FETCH_ALL_ENTITY_TYPES_REQUEST,
   FETCH_ALL_ENTITY_TYPES_SUCCESS,
-  FETCH_ALL_ENTITY_TYPES_FAILURE
+  UPDATE_ENTITY_TYPE_METADATA_FAILURE,
+  UPDATE_ENTITY_TYPE_METADATA_REQUEST,
+  UPDATE_ENTITY_TYPE_METADATA_SUCCESS
 };
 
 export {
@@ -109,7 +172,22 @@ export {
   createEntityTypeSuccess,
   fetchAllEntityTypesFailure,
   fetchAllEntityTypesRequest,
-  fetchAllEntityTypesSuccess
+  fetchAllEntityTypesSuccess,
+  updateEntityTypeMetaDataFailure,
+  updateEntityTypeMetaDataRequest,
+  updateEntityTypeMetaDataSuccess
+};
+
+export type {
+  CreateEntityTypeFailureAction,
+  CreateEntityTypeRequestAction,
+  CreateEntityTypeSuccessAction,
+  FetchAllEntityTypesFailureAction,
+  FetchAllEntityTypesRequestAction,
+  FetchAllEntityTypesSuccessAction,
+  UpdateEntityTypeMetaDataFailureAction,
+  UpdateEntityTypeMetaDataRequestAction,
+  UpdateEntityTypeMetaDataSuccessAction
 };
 
 export type Action =
@@ -118,4 +196,7 @@ export type Action =
   | CreateEntityTypeSuccessAction
   | FetchAllEntityTypesFailureAction
   | FetchAllEntityTypesRequestAction
-  | FetchAllEntityTypesSuccessAction;
+  | FetchAllEntityTypesSuccessAction
+  | UpdateEntityTypeMetaDataFailureAction
+  | UpdateEntityTypeMetaDataRequestAction
+  | UpdateEntityTypeMetaDataSuccessAction;

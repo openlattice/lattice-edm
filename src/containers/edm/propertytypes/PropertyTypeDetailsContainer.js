@@ -7,6 +7,11 @@ import React from 'react';
 import Immutable from 'immutable';
 import { Models } from 'lattice';
 
+import AbstractTypes from '../../../utils/AbstractTypes';
+import AbstractTypeFieldDescription from '../AbstractTypeFieldDescription';
+import AbstractTypeFieldTitle from '../AbstractTypeFieldTitle';
+import AbstractTypeFieldType from '../AbstractTypeFieldType';
+
 const { FullyQualifiedName } = Models;
 
 /*
@@ -40,16 +45,19 @@ const PropertyTypeDetailsContainer = (props :Props) => {
         <p>{ props.propertyType.get('id') }</p>
       </section>
       <section>
-        <h2>Type</h2>
-        <p>{ fqnAsString }</p>
+        <AbstractTypeFieldType
+            abstractType={props.propertyType}
+            abstractTypeType={AbstractTypes.PropertyType} />
       </section>
       <section>
-        <h2>Title</h2>
-        <p>{ props.propertyType.get('title') }</p>
+        <AbstractTypeFieldTitle
+            abstractType={props.propertyType}
+            abstractTypeType={AbstractTypes.PropertyType} />
       </section>
       <section>
-        <h2>Description</h2>
-        <p>{ props.propertyType.get('description') }</p>
+        <AbstractTypeFieldDescription
+            abstractType={props.propertyType}
+            abstractTypeType={AbstractTypes.PropertyType} />
       </section>
       <section>
         <h2>DataType</h2>

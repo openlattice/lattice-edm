@@ -18,8 +18,8 @@ type FetchAllPropertyTypesFailureAction = {
 function fetchAllPropertyTypesFailure(error :any) :FetchAllPropertyTypesFailureAction {
 
   return {
-    type: FETCH_ALL_PROPERTY_TYPES_FAILURE,
-    error
+    error,
+    type: FETCH_ALL_PROPERTY_TYPES_FAILURE
   };
 }
 
@@ -42,8 +42,8 @@ type FetchAllPropertyTypesSuccessAction = {
 function fetchAllPropertyTypesSuccess(propertyTypes :PropertyType[]) :FetchAllPropertyTypesSuccessAction {
 
   return {
-    type: FETCH_ALL_PROPERTY_TYPES_SUCCESS,
-    propertyTypes
+    propertyTypes,
+    type: FETCH_ALL_PROPERTY_TYPES_SUCCESS
   };
 }
 
@@ -60,9 +60,9 @@ type CreatePropertyTypeFailureAction = {
 function createPropertyTypeFailure(propertyType :PropertyType, error :any) :CreatePropertyTypeFailureAction {
 
   return {
-    type: CREATE_PROPERTY_TYPE_FAILURE,
     error,
-    propertyType
+    propertyType,
+    type: CREATE_PROPERTY_TYPE_FAILURE
   };
 }
 
@@ -74,8 +74,8 @@ type CreatePropertyTypeRequestAction = {
 function createPropertyTypeRequest(propertyType :PropertyType) :CreatePropertyTypeRequestAction {
 
   return {
-    type: CREATE_PROPERTY_TYPE_REQUEST,
-    propertyType
+    propertyType,
+    type: CREATE_PROPERTY_TYPE_REQUEST
   };
 }
 
@@ -91,9 +91,69 @@ function createPropertyTypeSuccess(
 ) :CreatePropertyTypeSuccessAction {
 
   return {
-    type: CREATE_PROPERTY_TYPE_SUCCESS,
     propertyType,
-    propertyTypeId
+    propertyTypeId,
+    type: CREATE_PROPERTY_TYPE_SUCCESS
+  };
+}
+
+/* eslint-disable max-len */
+const UPDATE_PROPERTY_TYPE_METADATA_FAILURE :'UPDATE_PROPERTY_TYPE_METADATA_FAILURE' = 'UPDATE_PROPERTY_TYPE_METADATA_FAILURE';
+const UPDATE_PROPERTY_TYPE_METADATA_REQUEST :'UPDATE_PROPERTY_TYPE_METADATA_REQUEST' = 'UPDATE_PROPERTY_TYPE_METADATA_REQUEST';
+const UPDATE_PROPERTY_TYPE_METADATA_SUCCESS :'UPDATE_PROPERTY_TYPE_METADATA_SUCCESS' = 'UPDATE_PROPERTY_TYPE_METADATA_SUCCESS';
+/* eslint-enable */
+
+type UpdatePropertyTypeMetaDataFailureAction = {
+  error :any,
+  propertyTypeId :string,
+  type :typeof UPDATE_PROPERTY_TYPE_METADATA_FAILURE
+}
+
+function updatePropertyTypeMetaDataFailure(
+  propertyTypeId :string,
+  error :any
+) :UpdatePropertyTypeMetaDataFailureAction {
+
+  return {
+    error,
+    propertyTypeId,
+    type: UPDATE_PROPERTY_TYPE_METADATA_FAILURE
+  };
+}
+
+type UpdatePropertyTypeMetaDataRequestAction = {
+  metadata :Object,
+  propertyTypeId :string,
+  type :typeof UPDATE_PROPERTY_TYPE_METADATA_REQUEST
+}
+
+function updatePropertyTypeMetaDataRequest(
+  propertyTypeId :string,
+  metadata :Object
+) :UpdatePropertyTypeMetaDataRequestAction {
+
+  return {
+    metadata,
+    propertyTypeId,
+    type: UPDATE_PROPERTY_TYPE_METADATA_REQUEST
+  };
+}
+
+type UpdatePropertyTypeMetaDataSuccessAction = {
+  metadata :Object,
+  propertyTypeId :string,
+  type :typeof UPDATE_PROPERTY_TYPE_METADATA_SUCCESS
+}
+
+function updatePropertyTypeMetaDataSuccess(
+  propertyTypeId :string,
+  metadata :Object
+) :UpdatePropertyTypeMetaDataSuccessAction {
+
+  return {
+    metadata,
+    propertyTypeId,
+    type: UPDATE_PROPERTY_TYPE_METADATA_SUCCESS
   };
 }
 
@@ -101,9 +161,12 @@ export {
   CREATE_PROPERTY_TYPE_FAILURE,
   CREATE_PROPERTY_TYPE_REQUEST,
   CREATE_PROPERTY_TYPE_SUCCESS,
+  FETCH_ALL_PROPERTY_TYPES_FAILURE,
   FETCH_ALL_PROPERTY_TYPES_REQUEST,
   FETCH_ALL_PROPERTY_TYPES_SUCCESS,
-  FETCH_ALL_PROPERTY_TYPES_FAILURE
+  UPDATE_PROPERTY_TYPE_METADATA_FAILURE,
+  UPDATE_PROPERTY_TYPE_METADATA_REQUEST,
+  UPDATE_PROPERTY_TYPE_METADATA_SUCCESS
 };
 
 export {
@@ -112,7 +175,22 @@ export {
   createPropertyTypeSuccess,
   fetchAllPropertyTypesFailure,
   fetchAllPropertyTypesRequest,
-  fetchAllPropertyTypesSuccess
+  fetchAllPropertyTypesSuccess,
+  updatePropertyTypeMetaDataFailure,
+  updatePropertyTypeMetaDataRequest,
+  updatePropertyTypeMetaDataSuccess
+};
+
+export type {
+  CreatePropertyTypeFailureAction,
+  CreatePropertyTypeRequestAction,
+  CreatePropertyTypeSuccessAction,
+  FetchAllPropertyTypesFailureAction,
+  FetchAllPropertyTypesRequestAction,
+  FetchAllPropertyTypesSuccessAction,
+  UpdatePropertyTypeMetaDataFailureAction,
+  UpdatePropertyTypeMetaDataRequestAction,
+  UpdatePropertyTypeMetaDataSuccessAction
 };
 
 export type Action =
@@ -121,4 +199,7 @@ export type Action =
   | CreatePropertyTypeSuccessAction
   | FetchAllPropertyTypesFailureAction
   | FetchAllPropertyTypesRequestAction
-  | FetchAllPropertyTypesSuccessAction;
+  | FetchAllPropertyTypesSuccessAction
+  | UpdatePropertyTypeMetaDataFailureAction
+  | UpdatePropertyTypeMetaDataRequestAction
+  | UpdatePropertyTypeMetaDataSuccessAction;

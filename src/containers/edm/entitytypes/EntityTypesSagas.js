@@ -11,13 +11,21 @@ import {
   createEntityTypeSuccess,
   FETCH_ALL_ENTITY_TYPES_REQUEST,
   fetchAllEntityTypesFailure,
-  fetchAllEntityTypesSuccess
+  fetchAllEntityTypesSuccess,
+  UPDATE_ENTITY_TYPE_METADATA_REQUEST,
+  updateEntityTypeMetaDataFailure,
+  updateEntityTypeMetaDataSuccess
+} from './EntityTypesActionFactory';
+
+import type {
+  CreateEntityTypeRequestAction,
+  UpdateEntityTypeMetaDataRequestAction
 } from './EntityTypesActionFactory';
 
 export function* watchCreateEntityTypeRequest() :Generator<*, *, *> {
 
   while (true) {
-    const action :Object = yield take(CREATE_ENTITY_TYPE_REQUEST);
+    const action :CreateEntityTypeRequestAction = yield take(CREATE_ENTITY_TYPE_REQUEST);
     try {
       const response = yield call(EntityDataModelApi.createEntityType, action.entityType);
       yield put(createEntityTypeSuccess(action.entityType, response));
@@ -38,6 +46,24 @@ export function* watchFetchAllEntityTypesRequest() :Generator<*, *, *> {
     }
     catch (error) {
       yield put(fetchAllEntityTypesFailure(error));
+    }
+  }
+}
+
+export function* watchUpdateEntityTypeMetaDataRequest() :Generator<*, *, *> {
+
+  while (true) {
+    const action :UpdateEntityTypeMetaDataRequestAction = yield take(UPDATE_ENTITY_TYPE_METADATA_REQUEST);
+    try {
+      yield call(
+        EntityDataModelApi.updateEntityTypeMetaData,
+        action.entityTypeId,
+        action.metadata
+      );
+      yield put(updateEntityTypeMetaDataSuccess(action.entityTypeId, action.metadata));
+    }
+    catch (error) {
+      yield put(updateEntityTypeMetaDataFailure(action.entityTypeId, error));
     }
   }
 }

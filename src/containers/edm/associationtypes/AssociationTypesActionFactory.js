@@ -104,13 +104,76 @@ function createAssociationTypeSuccess(
   };
 }
 
+/* eslint-disable max-len */
+const UPDATE_ASSOCIATION_TYPE_METADATA_FAILURE :'UPDATE_ASSOCIATION_TYPE_METADATA_FAILURE' = 'UPDATE_ASSOCIATION_TYPE_METADATA_FAILURE';
+const UPDATE_ASSOCIATION_TYPE_METADATA_REQUEST :'UPDATE_ASSOCIATION_TYPE_METADATA_REQUEST' = 'UPDATE_ASSOCIATION_TYPE_METADATA_REQUEST';
+const UPDATE_ASSOCIATION_TYPE_METADATA_SUCCESS :'UPDATE_ASSOCIATION_TYPE_METADATA_SUCCESS' = 'UPDATE_ASSOCIATION_TYPE_METADATA_SUCCESS';
+/* eslint-enable */
+
+type UpdateAssociationTypeMetaDataFailureAction = {
+  associationTypeId :string,
+  error :any,
+  type :typeof UPDATE_ASSOCIATION_TYPE_METADATA_FAILURE
+}
+
+function updateAssociationTypeMetaDataFailure(
+  associationTypeId :string,
+  error :any
+) :UpdateAssociationTypeMetaDataFailureAction {
+
+  return {
+    associationTypeId,
+    error,
+    type: UPDATE_ASSOCIATION_TYPE_METADATA_FAILURE
+  };
+}
+
+type UpdateAssociationTypeMetaDataRequestAction = {
+  associationTypeId :string,
+  metadata :Object,
+  type :typeof UPDATE_ASSOCIATION_TYPE_METADATA_REQUEST
+}
+
+function updateAssociationTypeMetaDataRequest(
+  associationTypeId :string,
+  metadata :Object
+) :UpdateAssociationTypeMetaDataRequestAction {
+
+  return {
+    associationTypeId,
+    metadata,
+    type: UPDATE_ASSOCIATION_TYPE_METADATA_REQUEST
+  };
+}
+
+type UpdateAssociationTypeMetaDataSuccessAction = {
+  associationTypeId :string,
+  metadata :Object,
+  type :typeof UPDATE_ASSOCIATION_TYPE_METADATA_SUCCESS
+}
+
+function updateAssociationTypeMetaDataSuccess(
+  associationTypeId :string,
+  metadata :Object
+) :UpdateAssociationTypeMetaDataSuccessAction {
+
+  return {
+    associationTypeId,
+    metadata,
+    type: UPDATE_ASSOCIATION_TYPE_METADATA_SUCCESS
+  };
+}
+
 export {
-  CREATE_ASSOCIATION_TYPE_REQUEST,
   CREATE_ASSOCIATION_TYPE_FAILURE,
+  CREATE_ASSOCIATION_TYPE_REQUEST,
   CREATE_ASSOCIATION_TYPE_SUCCESS,
+  FETCH_ALL_ASSOCIATION_TYPES_FAILURE,
   FETCH_ALL_ASSOCIATION_TYPES_REQUEST,
   FETCH_ALL_ASSOCIATION_TYPES_SUCCESS,
-  FETCH_ALL_ASSOCIATION_TYPES_FAILURE
+  UPDATE_ASSOCIATION_TYPE_METADATA_FAILURE,
+  UPDATE_ASSOCIATION_TYPE_METADATA_REQUEST,
+  UPDATE_ASSOCIATION_TYPE_METADATA_SUCCESS
 };
 
 export {
@@ -119,7 +182,22 @@ export {
   createAssociationTypeSuccess,
   fetchAllAssociationTypesFailure,
   fetchAllAssociationTypesRequest,
-  fetchAllAssociationTypesSuccess
+  fetchAllAssociationTypesSuccess,
+  updateAssociationTypeMetaDataFailure,
+  updateAssociationTypeMetaDataRequest,
+  updateAssociationTypeMetaDataSuccess
+};
+
+export type {
+  CreateAssociationTypeFailureAction,
+  CreateAssociationTypeRequestAction,
+  CreateAssociationTypeSuccessAction,
+  FetchAllAssociationTypesFailureAction,
+  FetchAllAssociationTypesRequestAction,
+  FetchAllAssociationTypesSuccessAction,
+  UpdateAssociationTypeMetaDataFailureAction,
+  UpdateAssociationTypeMetaDataRequestAction,
+  UpdateAssociationTypeMetaDataSuccessAction
 };
 
 export type Action =
@@ -128,4 +206,7 @@ export type Action =
   | CreateAssociationTypeSuccessAction
   | FetchAllAssociationTypesFailureAction
   | FetchAllAssociationTypesRequestAction
-  | FetchAllAssociationTypesSuccessAction;
+  | FetchAllAssociationTypesSuccessAction
+  | UpdateAssociationTypeMetaDataFailureAction
+  | UpdateAssociationTypeMetaDataRequestAction
+  | UpdateAssociationTypeMetaDataSuccessAction;

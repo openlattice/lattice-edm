@@ -58,7 +58,7 @@ const DATA_TYPE_OPTIONS = EDM_PRIMITIVE_TYPES.map((primitive :string) => {
  */
 
 const AbstractTypeCreateCard = StyledCard.extend`
-  flex: 3 0 auto;
+  flex: 50%;
   max-width: 1000px;
   min-width: 500px;
 `;

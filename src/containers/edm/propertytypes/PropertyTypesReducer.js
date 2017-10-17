@@ -11,7 +11,10 @@ import {
   CREATE_PROPERTY_TYPE_SUCCESS,
   FETCH_ALL_PROPERTY_TYPES_FAILURE,
   FETCH_ALL_PROPERTY_TYPES_REQUEST,
-  FETCH_ALL_PROPERTY_TYPES_SUCCESS
+  FETCH_ALL_PROPERTY_TYPES_SUCCESS,
+  UPDATE_PROPERTY_TYPE_METADATA_FAILURE,
+  UPDATE_PROPERTY_TYPE_METADATA_REQUEST,
+  UPDATE_PROPERTY_TYPE_METADATA_SUCCESS
 } from './PropertyTypesActionFactory';
 
 import type { Action } from './PropertyTypesActionFactory';
@@ -29,6 +32,11 @@ const INITIAL_STATE :Map<*, *> = Immutable.fromJS({
 export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, action :Action) {
 
   switch (action.type) {
+
+    case CREATE_PROPERTY_TYPE_FAILURE:
+      return state
+        .set('isCreatingNewPropertyType', false)
+        .set('newlyCreatedPropertyTypeId', '');
 
     case CREATE_PROPERTY_TYPE_REQUEST:
       return state
@@ -51,8 +59,8 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
       const current :List<Map<*, *>> = state.get('propertyTypes', Immutable.List());
       const updated :List<Map<*, *>> = current.push(iPropertyType);
 
-      const currentById :Map<string, Map<*, *>> = state.get('propertyTypesById', Immutable.Map());
-      const updatedById :Map<string, Map<*, *>> = currentById.set(action.propertyTypeId, iPropertyType);
+      const currentById :Map<string, number> = state.get('propertyTypesById', Immutable.Map());
+      const updatedById :Map<string, number> = currentById.set(action.propertyTypeId, updated.size - 1);
 
       return state
         .set('isCreatingNewPropertyType', false)
@@ -61,10 +69,11 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
         .set('propertyTypesById', updatedById);
     }
 
-    case CREATE_PROPERTY_TYPE_FAILURE:
+    case FETCH_ALL_PROPERTY_TYPES_FAILURE:
       return state
-        .set('isCreatingNewPropertyType', false)
-        .set('newlyCreatedPropertyTypeId', '');
+        .set('isFetchingAllPropertyTypes', false)
+        .set('propertyTypes', Immutable.List())
+        .set('propertyTypesById', Immutable.Map());
 
     case FETCH_ALL_PROPERTY_TYPES_REQUEST:
       return state.set('isFetchingAllPropertyTypes', true);
@@ -72,10 +81,10 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
     case FETCH_ALL_PROPERTY_TYPES_SUCCESS: {
 
       const propertyTypes :List<Map<*, *>> = Immutable.fromJS(action.propertyTypes);
-      const propertyTypesById :Map<string, Map<*, *>> = Immutable.Map()
-        .withMutations((map :Map<string, Map<*, *>>) => {
-          propertyTypes.forEach((propertyType :Map<*, *>) => {
-            map.set(propertyType.get('id'), propertyType);
+      const propertyTypesById :Map<string, number> = Immutable.Map()
+        .withMutations((byIdMap :Map<string, number>) => {
+          propertyTypes.forEach((propertyType :Map<*, *>, propertyTypeIndex :number) => {
+            byIdMap.set(propertyType.get('id'), propertyTypeIndex);
           });
         });
 
@@ -85,10 +94,32 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
         .set('propertyTypesById', propertyTypesById);
     }
 
-    case FETCH_ALL_PROPERTY_TYPES_FAILURE:
-      return state
-        .set('isFetchingAllPropertyTypes', false)
-        .set('propertyTypes', Immutable.List());
+    case UPDATE_PROPERTY_TYPE_METADATA_FAILURE:
+    case UPDATE_PROPERTY_TYPE_METADATA_REQUEST:
+      return state;
+
+    case UPDATE_PROPERTY_TYPE_METADATA_SUCCESS: {
+
+      const propertyTypeId :string = action.propertyTypeId;
+      const propertyTypeIndex :number = state.getIn(['propertyTypesById', propertyTypeId], -1);
+      if (propertyTypeIndex < 0) {
+        return state;
+      }
+
+      if (action.metadata.description) {
+        return state.setIn(['propertyTypes', propertyTypeIndex, 'description'], action.metadata.description);
+      }
+      else if (action.metadata.title) {
+        return state.setIn(['propertyTypes', propertyTypeIndex, 'title'], action.metadata.title);
+      }
+      else if (action.metadata.type) {
+        // TODO: potential bug with how immutable.js deals with custom objects
+        // TODO: consider storing plain object instead of FullyQualifiedName object
+        return state.setIn(['propertyTypes', propertyTypeIndex, 'type'], action.metadata.type);
+      }
+
+      return state;
+    }
 
     default:
       return state;

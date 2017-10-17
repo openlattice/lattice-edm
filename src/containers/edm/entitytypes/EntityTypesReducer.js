@@ -11,7 +11,10 @@ import {
   CREATE_ENTITY_TYPE_SUCCESS,
   FETCH_ALL_ENTITY_TYPES_FAILURE,
   FETCH_ALL_ENTITY_TYPES_REQUEST,
-  FETCH_ALL_ENTITY_TYPES_SUCCESS
+  FETCH_ALL_ENTITY_TYPES_SUCCESS,
+  UPDATE_ENTITY_TYPE_METADATA_FAILURE,
+  UPDATE_ENTITY_TYPE_METADATA_REQUEST,
+  UPDATE_ENTITY_TYPE_METADATA_SUCCESS
 } from './EntityTypesActionFactory';
 
 import type { Action } from './EntityTypesActionFactory';
@@ -29,6 +32,11 @@ const INITIAL_STATE :Map<*, *> = Immutable.fromJS({
 export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, action :Action) {
 
   switch (action.type) {
+
+    case CREATE_ENTITY_TYPE_FAILURE:
+      return state
+        .set('isCreatingNewEntityType', false)
+        .set('newlyCreatedEntityTypeId', '');
 
     case CREATE_ENTITY_TYPE_REQUEST:
       return state
@@ -51,8 +59,8 @@ export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, act
       const current :List<Map<*, *>> = state.get('entityTypes', Immutable.List());
       const updated :List<Map<*, *>> = current.push(iEntityType);
 
-      const currentById :Map<string, Map<*, *>> = state.get('propertyTypesById', Immutable.Map());
-      const updatedById :Map<string, Map<*, *>> = currentById.set(action.entityTypeId, iEntityType);
+      const currentById :Map<string, number> = state.get('entityTypesById', Immutable.Map());
+      const updatedById :Map<string, number> = currentById.set(action.entityTypeId, updated.size - 1);
 
       return state
         .set('isCreatingNewEntityType', false)
@@ -61,10 +69,11 @@ export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, act
         .set('entityTypesById', updatedById);
     }
 
-    case CREATE_ENTITY_TYPE_FAILURE:
+    case FETCH_ALL_ENTITY_TYPES_FAILURE:
       return state
-        .set('isCreatingNewEntityType', false)
-        .set('newlyCreatedEntityTypeId', '');
+        .set('isFetchingAllEntityTypes', false)
+        .set('entityTypes', Immutable.List())
+        .set('entityTypesById', Immutable.Map());
 
     case FETCH_ALL_ENTITY_TYPES_REQUEST:
       return state.set('isFetchingAllEntityTypes', true);
@@ -76,10 +85,10 @@ export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, act
         return entityType.get('category') === 'EntityType';
       });
 
-      const entityTypesById :Map<string, Map<*, *>> = Immutable.Map()
-        .withMutations((map :Map<string, Map<*, *>>) => {
-          entityTypesStrict.forEach((entityType :Map<*, *>) => {
-            map.set(entityType.get('id'), entityType);
+      const entityTypesById :Map<string, number> = Immutable.Map()
+        .withMutations((byIdMap :Map<string, number>) => {
+          entityTypesStrict.forEach((entityType :Map<*, *>, entityTypeIndex :number) => {
+            byIdMap.set(entityType.get('id'), entityTypeIndex);
           });
         });
 
@@ -89,10 +98,32 @@ export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, act
         .set('entityTypesById', entityTypesById);
     }
 
-    case FETCH_ALL_ENTITY_TYPES_FAILURE:
-      return state
-        .set('isFetchingAllEntityTypes', false)
-        .set('entityTypes', Immutable.List());
+    case UPDATE_ENTITY_TYPE_METADATA_FAILURE:
+    case UPDATE_ENTITY_TYPE_METADATA_REQUEST:
+      return state;
+
+    case UPDATE_ENTITY_TYPE_METADATA_SUCCESS: {
+
+      const entityTypeId :string = action.entityTypeId;
+      const entityTypeIndex :number = state.getIn(['entityTypesById', entityTypeId], -1);
+      if (entityTypeIndex < 0) {
+        return state;
+      }
+
+      if (action.metadata.description) {
+        return state.setIn(['entityTypes', entityTypeIndex, 'description'], action.metadata.description);
+      }
+      else if (action.metadata.title) {
+        return state.setIn(['entityTypes', entityTypeIndex, 'title'], action.metadata.title);
+      }
+      else if (action.metadata.type) {
+        // TODO: potential bug with how immutable.js deals with custom objects
+        // TODO: consider storing plain object instead of FullyQualifiedName object
+        return state.setIn(['entityTypes', entityTypeIndex, 'type'], action.metadata.type);
+      }
+
+      return state;
+    }
 
     default:
       return state;
