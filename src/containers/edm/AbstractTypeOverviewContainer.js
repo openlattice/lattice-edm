@@ -113,10 +113,12 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
       workingAbstractTypeType: props.workingAbstractTypeType
     };
 
+    const workingAbstractTypes :List<Map<*, *>> = getWorkingAbstractTypes(params);
+
     this.state = {
       filterQuery: '',
-      filteredTypes: getWorkingAbstractTypes(params),
-      selectedAbstractType: Immutable.Map(),
+      filteredTypes: workingAbstractTypes,
+      selectedAbstractType: workingAbstractTypes.get(0, Immutable.Map()),
       selectedAbstractTypeId: '',
       showCreateNewAbstractTypeCard: false
     };
