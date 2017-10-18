@@ -62,63 +62,63 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
     return (
       <section>
         <h2>EntityType Details</h2>
-        <section>
+        <div>
           <h2>ID</h2>
           <p>{ associationEntityType.get('id') }</p>
-        </section>
-        <section>
+        </div>
+        <div>
           <AbstractTypeFieldType
               abstractType={this.props.associationType}
               abstractTypeType={AbstractTypes.AssociationType} />
-        </section>
-        <section>
+        </div>
+        <div>
           <AbstractTypeFieldTitle
               abstractType={this.props.associationType}
               abstractTypeType={AbstractTypes.AssociationType} />
-        </section>
-        <section>
+        </div>
+        <div>
           <AbstractTypeFieldDescription
               abstractType={this.props.associationType}
               abstractTypeType={AbstractTypes.AssociationType} />
-        </section>
+        </div>
         {
           !baseType
             ? null
             : (
-              <section>
+              <div>
                 <h2>BaseType</h2>
                 <p>{ associationEntityType.get('baseType') }</p>
-              </section>
+              </div>
             )
         }
-        <section>
+        <div>
           <h2>Category</h2>
           <p>{ associationEntityType.get('category') }</p>
-        </section>
-        <section>
+        </div>
+        <div>
           <h2>Primary Key PropertyTypes</h2>
           <AbstractTypeDataTable
               abstractTypes={keyPropertyTypes}
               maxHeight={500}
               workingAbstractTypeType={AbstractTypes.PropertyType} />
-        </section>
+        </div>
         {
           propertyTypes.isEmpty()
             ? null
             : (
-              <section>
+              <div>
                 <h2>PropertyTypes</h2>
                 <AbstractTypeDataTable
                     abstractTypes={propertyTypes}
                     maxHeight={500}
                     workingAbstractTypeType={AbstractTypes.PropertyType} />
-              </section>
+              </div>
             )
         }
-        <section>
+        <div>
           <h2>Schemas</h2>
           <p>TODO</p>
-        </section>
+        </div>
       </section>
     );
   }

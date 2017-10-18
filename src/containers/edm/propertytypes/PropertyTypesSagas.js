@@ -9,6 +9,9 @@ import {
   CREATE_PROPERTY_TYPE_REQUEST,
   createPropertyTypeFailure,
   createPropertyTypeSuccess,
+  DELETE_PROPERTY_TYPE_REQUEST,
+  deletePropertyTypeFailure,
+  deletePropertyTypeSuccess,
   FETCH_ALL_PROPERTY_TYPES_REQUEST,
   fetchAllPropertyTypesFailure,
   fetchAllPropertyTypesSuccess,
@@ -19,6 +22,7 @@ import {
 
 import type {
   CreatePropertyTypeRequestAction,
+  DeletePropertyTypeRequestAction,
   UpdatePropertyTypeMetaDataRequestAction
 } from './PropertyTypesActionFactory';
 
@@ -32,6 +36,20 @@ export function* watchCreatePropertyTypeRequest() :Generator<*, *, *> {
     }
     catch (error) {
       yield put(createPropertyTypeFailure(action.propertyType, error));
+    }
+  }
+}
+
+export function* watchDeletePropertyTypeRequest() :Generator<*, *, *> {
+
+  while (true) {
+    const action :DeletePropertyTypeRequestAction = yield take(DELETE_PROPERTY_TYPE_REQUEST);
+    try {
+      yield call(EntityDataModelApi.deletePropertyType, action.propertyTypeId);
+      yield put(deletePropertyTypeSuccess(action.propertyTypeId));
+    }
+    catch (error) {
+      yield put(deletePropertyTypeFailure(action.propertyTypeId, error));
     }
   }
 }

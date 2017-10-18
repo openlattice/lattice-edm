@@ -157,10 +157,58 @@ function updatePropertyTypeMetaDataSuccess(
   };
 }
 
+const DELETE_PROPERTY_TYPE_FAILURE :'DELETE_PROPERTY_TYPE_FAILURE' = 'DELETE_PROPERTY_TYPE_FAILURE';
+const DELETE_PROPERTY_TYPE_REQUEST :'DELETE_PROPERTY_TYPE_REQUEST' = 'DELETE_PROPERTY_TYPE_REQUEST';
+const DELETE_PROPERTY_TYPE_SUCCESS :'DELETE_PROPERTY_TYPE_SUCCESS' = 'DELETE_PROPERTY_TYPE_SUCCESS';
+
+type DeletePropertyTypeFailureAction = {
+  error :any,
+  propertyTypeId :string,
+  type :typeof DELETE_PROPERTY_TYPE_FAILURE
+}
+
+function deletePropertyTypeFailure(propertyTypeId :string, error :any) :DeletePropertyTypeFailureAction {
+
+  return {
+    error,
+    propertyTypeId,
+    type: DELETE_PROPERTY_TYPE_FAILURE
+  };
+}
+
+type DeletePropertyTypeRequestAction = {
+  propertyTypeId :string,
+  type :typeof DELETE_PROPERTY_TYPE_REQUEST
+}
+
+function deletePropertyTypeRequest(propertyTypeId :string) :DeletePropertyTypeRequestAction {
+
+  return {
+    propertyTypeId,
+    type: DELETE_PROPERTY_TYPE_REQUEST
+  };
+}
+
+type DeletePropertyTypeSuccessAction = {
+  propertyTypeId :string,
+  type :typeof DELETE_PROPERTY_TYPE_SUCCESS
+}
+
+function deletePropertyTypeSuccess(propertyTypeId :string) :DeletePropertyTypeSuccessAction {
+
+  return {
+    propertyTypeId,
+    type: DELETE_PROPERTY_TYPE_SUCCESS
+  };
+}
+
 export {
   CREATE_PROPERTY_TYPE_FAILURE,
   CREATE_PROPERTY_TYPE_REQUEST,
   CREATE_PROPERTY_TYPE_SUCCESS,
+  DELETE_PROPERTY_TYPE_FAILURE,
+  DELETE_PROPERTY_TYPE_REQUEST,
+  DELETE_PROPERTY_TYPE_SUCCESS,
   FETCH_ALL_PROPERTY_TYPES_FAILURE,
   FETCH_ALL_PROPERTY_TYPES_REQUEST,
   FETCH_ALL_PROPERTY_TYPES_SUCCESS,
@@ -173,6 +221,9 @@ export {
   createPropertyTypeFailure,
   createPropertyTypeRequest,
   createPropertyTypeSuccess,
+  deletePropertyTypeFailure,
+  deletePropertyTypeRequest,
+  deletePropertyTypeSuccess,
   fetchAllPropertyTypesFailure,
   fetchAllPropertyTypesRequest,
   fetchAllPropertyTypesSuccess,
@@ -185,6 +236,9 @@ export type {
   CreatePropertyTypeFailureAction,
   CreatePropertyTypeRequestAction,
   CreatePropertyTypeSuccessAction,
+  DeletePropertyTypeFailureAction,
+  DeletePropertyTypeRequestAction,
+  DeletePropertyTypeSuccessAction,
   FetchAllPropertyTypesFailureAction,
   FetchAllPropertyTypesRequestAction,
   FetchAllPropertyTypesSuccessAction,
@@ -197,6 +251,9 @@ export type Action =
   | CreatePropertyTypeFailureAction
   | CreatePropertyTypeRequestAction
   | CreatePropertyTypeSuccessAction
+  | DeletePropertyTypeFailureAction
+  | DeletePropertyTypeRequestAction
+  | DeletePropertyTypeSuccessAction
   | FetchAllPropertyTypesFailureAction
   | FetchAllPropertyTypesRequestAction
   | FetchAllPropertyTypesSuccessAction

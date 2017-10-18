@@ -9,6 +9,9 @@ import {
   CREATE_PROPERTY_TYPE_FAILURE,
   CREATE_PROPERTY_TYPE_REQUEST,
   CREATE_PROPERTY_TYPE_SUCCESS,
+  DELETE_PROPERTY_TYPE_FAILURE,
+  DELETE_PROPERTY_TYPE_REQUEST,
+  DELETE_PROPERTY_TYPE_SUCCESS,
   FETCH_ALL_PROPERTY_TYPES_FAILURE,
   FETCH_ALL_PROPERTY_TYPES_REQUEST,
   FETCH_ALL_PROPERTY_TYPES_SUCCESS,
@@ -65,6 +68,29 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
       return state
         .set('isCreatingNewPropertyType', false)
         .set('newlyCreatedPropertyTypeId', action.propertyTypeId)
+        .set('propertyTypes', updated)
+        .set('propertyTypesById', updatedById);
+    }
+
+    case DELETE_PROPERTY_TYPE_FAILURE:
+    case DELETE_PROPERTY_TYPE_REQUEST:
+      return state;
+
+    case DELETE_PROPERTY_TYPE_SUCCESS: {
+
+      const propertyTypeId :string = action.propertyTypeId;
+      const propertyTypeIndex :number = state.getIn(['propertyTypesById', propertyTypeId], -1);
+
+      if (propertyTypeIndex === -1) {
+        return state;
+      }
+      const current :List<Map<*, *>> = state.get('propertyTypes', Immutable.List());
+      const updated :List<Map<*, *>> = current.delete(propertyTypeIndex);
+
+      const currentById :Map<string, number> = state.get('propertyTypesById', Immutable.Map());
+      const updatedById :Map<string, number> = currentById.delete(propertyTypeId);
+
+      return state
         .set('propertyTypes', updated)
         .set('propertyTypesById', updatedById);
     }
