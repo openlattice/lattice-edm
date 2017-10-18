@@ -27,6 +27,7 @@ export default function* sagas() :Generator<*, *, *> {
 
     // EntityTypesSagas
     fork(EntityTypesSagas.watchCreateEntityTypeRequest),
+    fork(EntityTypesSagas.watchDeleteEntityTypeRequest),
     fork(EntityTypesSagas.watchFetchAllEntityTypesRequest),
     fork(EntityTypesSagas.watchUpdateEntityTypeMetaDataRequest),
 

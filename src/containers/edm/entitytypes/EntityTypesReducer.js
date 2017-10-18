@@ -9,6 +9,9 @@ import {
   CREATE_ENTITY_TYPE_FAILURE,
   CREATE_ENTITY_TYPE_REQUEST,
   CREATE_ENTITY_TYPE_SUCCESS,
+  DELETE_ENTITY_TYPE_FAILURE,
+  DELETE_ENTITY_TYPE_REQUEST,
+  DELETE_ENTITY_TYPE_SUCCESS,
   FETCH_ALL_ENTITY_TYPES_FAILURE,
   FETCH_ALL_ENTITY_TYPES_REQUEST,
   FETCH_ALL_ENTITY_TYPES_SUCCESS,
@@ -65,6 +68,29 @@ export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, act
       return state
         .set('isCreatingNewEntityType', false)
         .set('newlyCreatedEntityTypeId', action.entityTypeId)
+        .set('entityTypes', updated)
+        .set('entityTypesById', updatedById);
+    }
+
+    case DELETE_ENTITY_TYPE_FAILURE:
+    case DELETE_ENTITY_TYPE_REQUEST:
+      return state;
+
+    case DELETE_ENTITY_TYPE_SUCCESS: {
+
+      const entityTypeId :string = action.entityTypeId;
+      const entityTypeIndex :number = state.getIn(['entityTypesById', entityTypeId], -1);
+
+      if (entityTypeIndex === -1) {
+        return state;
+      }
+      const current :List<Map<*, *>> = state.get('entityTypes', Immutable.List());
+      const updated :List<Map<*, *>> = current.delete(entityTypeIndex);
+
+      const currentById :Map<string, number> = state.get('entityTypesById', Immutable.Map());
+      const updatedById :Map<string, number> = currentById.delete(entityTypeId);
+
+      return state
         .set('entityTypes', updated)
         .set('entityTypesById', updatedById);
     }

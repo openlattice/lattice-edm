@@ -154,10 +154,58 @@ function updateEntityTypeMetaDataSuccess(
   };
 }
 
+const DELETE_ENTITY_TYPE_FAILURE :'DELETE_ENTITY_TYPE_FAILURE' = 'DELETE_ENTITY_TYPE_FAILURE';
+const DELETE_ENTITY_TYPE_REQUEST :'DELETE_ENTITY_TYPE_REQUEST' = 'DELETE_ENTITY_TYPE_REQUEST';
+const DELETE_ENTITY_TYPE_SUCCESS :'DELETE_ENTITY_TYPE_SUCCESS' = 'DELETE_ENTITY_TYPE_SUCCESS';
+
+type DeleteEntityTypeFailureAction = {
+  error :any,
+  entityTypeId :string,
+  type :typeof DELETE_ENTITY_TYPE_FAILURE
+}
+
+function deleteEntityTypeFailure(entityTypeId :string, error :any) :DeleteEntityTypeFailureAction {
+
+  return {
+    error,
+    entityTypeId,
+    type: DELETE_ENTITY_TYPE_FAILURE
+  };
+}
+
+type DeleteEntityTypeRequestAction = {
+  entityTypeId :string,
+  type :typeof DELETE_ENTITY_TYPE_REQUEST
+}
+
+function deleteEntityTypeRequest(entityTypeId :string) :DeleteEntityTypeRequestAction {
+
+  return {
+    entityTypeId,
+    type: DELETE_ENTITY_TYPE_REQUEST
+  };
+}
+
+type DeleteEntityTypeSuccessAction = {
+  entityTypeId :string,
+  type :typeof DELETE_ENTITY_TYPE_SUCCESS
+}
+
+function deleteEntityTypeSuccess(entityTypeId :string) :DeleteEntityTypeSuccessAction {
+
+  return {
+    entityTypeId,
+    type: DELETE_ENTITY_TYPE_SUCCESS
+  };
+}
+
 export {
   CREATE_ENTITY_TYPE_FAILURE,
   CREATE_ENTITY_TYPE_REQUEST,
   CREATE_ENTITY_TYPE_SUCCESS,
+  DELETE_ENTITY_TYPE_FAILURE,
+  DELETE_ENTITY_TYPE_REQUEST,
+  DELETE_ENTITY_TYPE_SUCCESS,
   FETCH_ALL_ENTITY_TYPES_FAILURE,
   FETCH_ALL_ENTITY_TYPES_REQUEST,
   FETCH_ALL_ENTITY_TYPES_SUCCESS,
@@ -170,6 +218,9 @@ export {
   createEntityTypeFailure,
   createEntityTypeRequest,
   createEntityTypeSuccess,
+  deleteEntityTypeFailure,
+  deleteEntityTypeRequest,
+  deleteEntityTypeSuccess,
   fetchAllEntityTypesFailure,
   fetchAllEntityTypesRequest,
   fetchAllEntityTypesSuccess,
@@ -182,6 +233,9 @@ export type {
   CreateEntityTypeFailureAction,
   CreateEntityTypeRequestAction,
   CreateEntityTypeSuccessAction,
+  DeleteEntityTypeFailureAction,
+  DeleteEntityTypeRequestAction,
+  DeleteEntityTypeSuccessAction,
   FetchAllEntityTypesFailureAction,
   FetchAllEntityTypesRequestAction,
   FetchAllEntityTypesSuccessAction,
@@ -194,6 +248,9 @@ export type Action =
   | CreateEntityTypeFailureAction
   | CreateEntityTypeRequestAction
   | CreateEntityTypeSuccessAction
+  | DeleteEntityTypeFailureAction
+  | DeleteEntityTypeRequestAction
+  | DeleteEntityTypeSuccessAction
   | FetchAllEntityTypesFailureAction
   | FetchAllEntityTypesRequestAction
   | FetchAllEntityTypesSuccessAction

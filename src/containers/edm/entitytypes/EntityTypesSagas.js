@@ -9,6 +9,9 @@ import {
   CREATE_ENTITY_TYPE_REQUEST,
   createEntityTypeFailure,
   createEntityTypeSuccess,
+  DELETE_ENTITY_TYPE_REQUEST,
+  deleteEntityTypeFailure,
+  deleteEntityTypeSuccess,
   FETCH_ALL_ENTITY_TYPES_REQUEST,
   fetchAllEntityTypesFailure,
   fetchAllEntityTypesSuccess,
@@ -19,6 +22,7 @@ import {
 
 import type {
   CreateEntityTypeRequestAction,
+  DeleteEntityTypeRequestAction,
   UpdateEntityTypeMetaDataRequestAction
 } from './EntityTypesActionFactory';
 
@@ -32,6 +36,20 @@ export function* watchCreateEntityTypeRequest() :Generator<*, *, *> {
     }
     catch (error) {
       yield put(createEntityTypeFailure(action.entityType, error));
+    }
+  }
+}
+
+export function* watchDeleteEntityTypeRequest() :Generator<*, *, *> {
+
+  while (true) {
+    const action :DeleteEntityTypeRequestAction = yield take(DELETE_ENTITY_TYPE_REQUEST);
+    try {
+      yield call(EntityDataModelApi.deleteEntityType, action.entityTypeId);
+      yield put(deleteEntityTypeSuccess(action.entityTypeId));
+    }
+    catch (error) {
+      yield put(deleteEntityTypeFailure(action.entityTypeId, error));
     }
   }
 }

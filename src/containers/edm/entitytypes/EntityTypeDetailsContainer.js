@@ -5,6 +5,7 @@
 import React from 'react';
 
 import Immutable from 'immutable';
+import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 
 import AbstractTypes from '../../../utils/AbstractTypes';
@@ -12,18 +13,37 @@ import AbstractTypeDataTable from '../../../components/datatable/AbstractTypeDat
 import AbstractTypeFieldDescription from '../AbstractTypeFieldDescription';
 import AbstractTypeFieldTitle from '../AbstractTypeFieldTitle';
 import AbstractTypeFieldType from '../AbstractTypeFieldType';
+import StyledButton from '../../../components/buttons/StyledButton';
+
+import { deleteEntityTypeRequest } from './EntityTypesActionFactory';
+
+/*
+ * styled components
+ */
+
+const DeleteButton = StyledButton.extend`
+  align-self: center;
+`;
 
 /*
  * types
  */
 
 type Props = {
+  actions :{
+    deleteEntityTypeRequest :Function,
+  },
   entityType :Map<*, *>,
   propertyTypes :List<Map<*, *>>,
   propertyTypesById :Map<string, number>
 }
 
 class EntityTypeDetailsContainer extends React.Component<Props> {
+
+  handleOnClickDelete = () => {
+
+    this.props.actions.deleteEntityTypeRequest(this.props.entityType.get('id'));
+  }
 
   render() {
 
@@ -116,6 +136,9 @@ class EntityTypeDetailsContainer extends React.Component<Props> {
           <h2>Schemas</h2>
           <p>TODO</p>
         </section>
+        <section>
+          <DeleteButton onClick={this.handleOnClickDelete}>Delete PropertyType</DeleteButton>
+        </section>
       </div>
     );
   }
@@ -129,4 +152,15 @@ function mapStateToProps(state :Map<*, *>) :Object {
   };
 }
 
-export default connect(mapStateToProps)(EntityTypeDetailsContainer);
+function mapDispatchToProps(dispatch :Function) :Object {
+
+  const actions = {
+    deleteEntityTypeRequest
+  };
+
+  return {
+    actions: bindActionCreators(actions, dispatch)
+  };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(EntityTypeDetailsContainer);
