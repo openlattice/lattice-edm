@@ -6,14 +6,14 @@ import React from 'react';
 
 import Immutable from 'immutable';
 import styled from 'styled-components';
-import { Grid, ScrollSync } from 'react-virtualized';
+import { AutoSizer, Grid, ScrollSync } from 'react-virtualized';
 
 /*
  * constants
  */
 
-const DEFAULT_GRID_MAX_HEIGHT :number = 500;
-const DEFAULT_GRID_MAX_WIDTH :number = 500;
+// const DEFAULT_GRID_MAX_HEIGHT :number = 500;
+// const DEFAULT_GRID_MAX_WIDTH :number = 500;
 
 const DEFAULT_COLUMN_MAX_WIDTH :number = 500;
 const DEFAULT_COLUMN_MIN_WIDTH :number = 100;
@@ -35,27 +35,28 @@ CANVAS_CONTEXT.font = '14px "Open Sans", sans-serif';
  * styled components
  */
 
-const DataGridOuterWrapper = styled.div`
+const DataTableOuterWrapper = styled.div`
+  display: flex;
+  flex: 1 1 auto;
   overflow: hidden;
 `;
 
-const DataGridInnerWrapper = styled.div``;
-
-const HeadGridWrapper = styled.div`
-  border-bottom: 1px solid #516a83;
+const DataTableInnerWrapper = styled.div`
+  flex: 1 1 auto;
 `;
-
-const BodyGridWrapper = styled.div``;
 
 const HeadGrid = styled(Grid)`
   border: none;
   outline: none;
   overflow: hidden !important; /* hides horizontal scrollbar */
+  z-index: 100; /* arbitrarily chosen value */
 `;
 
 const BodyGrid = styled(Grid)`
   border: none;
   outline: none;
+  margin-top: -1px;
+  z-index: 99;
   &:hover {
     cursor: pointer;
   }
@@ -63,6 +64,7 @@ const BodyGrid = styled(Grid)`
 
 const HeadCell = styled.div`
   align-items: center;
+  border-bottom: 1px solid #516a83;
   display: flex;
   font-weight: 600;
   padding: ${CELL_PADDING}px;
@@ -73,7 +75,6 @@ const BodyCell = styled.div`
   border-top: 1px solid #c5d5e5;
   display: flex;
   font-size: 14px;
-  margin-top: -1px;
   padding: ${CELL_PADDING}px;
 `;
 
@@ -89,18 +90,6 @@ const CellText = styled.p`
  * types
  */
 
-// const SORTING = {
-//   ORIG: 0,
-//   ASC: 1,
-//   DSC: 2
-// };
-
-// TODO: define a type for the header object to specifically check its structure:
-// type HeaderObject = {
-//   id :string,
-//   value :string
-// };
-
 type GridData = List<Map<string, string>>;
 type GridHeaders = List<Map<string, string>>;
 
@@ -115,15 +104,19 @@ type Props = {
 }
 
 type State = {
-  bodyGridHeight :number,
-  bodyGridWidth :number,
+  autosizerHeight :number,
+  autosizerWidth :number,
   columnWidths :Map<number, number>,
-  data :GridData,
-  headGridHeight :number,
-  headGridWidth :number,
-  headers :GridHeaders
+  computedBodyGridHeight :number,
+  computedBodyGridWidth :number,
+  computedHeadGridHeight :number,
+  computedHeadGridWidth :number
 }
 
+/*
+ * TODO: implement filtering
+ * TODO: allow configuration over dimensions & resizing
+ */
 class AbstractDataTable extends React.Component<Props, State> {
 
   headGrid :?Grid;
@@ -132,10 +125,10 @@ class AbstractDataTable extends React.Component<Props, State> {
   static defaultProps = {
     data: Immutable.List(),
     headers: Immutable.List(),
-    height: 0,
-    maxHeight: DEFAULT_GRID_MAX_HEIGHT,
-    maxWidth: DEFAULT_GRID_MAX_WIDTH,
-    width: 0,
+    height: -1,
+    maxHeight: -1,
+    maxWidth: -1,
+    width: -1,
     onRowClick: () => {}
   };
 
@@ -143,12 +136,28 @@ class AbstractDataTable extends React.Component<Props, State> {
 
     super(props);
 
-    const dimensions :Object = AbstractDataTable.computeDimensions(props);
+    // const dimensions :Object = AbstractDataTable.computeDimensions({
+    //   autosizerHeight: 0,
+    //   autosizerWidth: 0,
+    //   data: props.data,
+    //   headers: props.headers,
+    //   specifiedMaxHeight: props.maxHeight,
+    //   specifiedMaxWidth: props.maxWidth,
+    //   specifiedHeight: props.height,
+    //   specifiedWidth: props.width
+    // });
+
+    // console.log(dimensions);
 
     this.state = {
-      data: props.data,
-      headers: props.headers,
-      ...dimensions
+      autosizerHeight: 0,
+      autosizerWidth: 0,
+      columnWidths: Immutable.Map(),
+      computedBodyGridHeight: 0,
+      computedBodyGridWidth: 0,
+      computedHeadGridHeight: 0,
+      computedHeadGridWidth: 0
+      // ...dimensions
     };
   }
 
@@ -157,17 +166,17 @@ class AbstractDataTable extends React.Component<Props, State> {
     return Math.ceil(CANVAS_CONTEXT.measureText(text).width);
   }
 
-  static computeColumnWidths(headers :GridHeaders, data :GridData) :Map<number, number> {
+  static computeColumnWidths(params :Object) :Map<number, number> {
 
     return Immutable.OrderedMap().withMutations((map :OrderedMap<number, number>) => {
 
       // iterate through the headers, column by column, and compute an estimated width for each column
-      headers.forEach((header :Map<string, string>, columnIndex :number) => {
+      params.headers.forEach((header :Map<string, string>, columnIndex :number) => {
 
         // find the widest cell in the column
         let columnWidth :number = 0;
 
-        data.forEach((row :Map<string, string>) => {
+        params.data.forEach((row :Map<string, string>) => {
           // keeping it simple for now
           const cellValue :string = row.get(header.get('id', ''), '');
           const cellWidth :number = AbstractDataTable.measureTextWidth(cellValue);
@@ -198,11 +207,11 @@ class AbstractDataTable extends React.Component<Props, State> {
     });
   }
 
-  static computeDimensions(props :Props) :Object {
+  static computeDimensions(params :Object) :Object {
 
-    const rowCount :number = props.data.size;
+    const rowCount :number = params.data.size;
 
-    let columnWidths :Map<number, number> = AbstractDataTable.computeColumnWidths(props.headers, props.data);
+    let columnWidths :Map<number, number> = AbstractDataTable.computeColumnWidths(params);
     const totalWidth :number = columnWidths.reduce(
       (widthSum :number, columnWidth :number) :number => {
         return widthSum + columnWidth;
@@ -210,22 +219,25 @@ class AbstractDataTable extends React.Component<Props, State> {
       0
     );
 
-    let visibleWidth :number = (props.width > 0) ? props.width : totalWidth;
-    if (visibleWidth > props.maxWidth) {
-      visibleWidth = props.maxWidth;
+    let visibleWidth :number = (params.specifiedWidth !== -1) ? params.specifiedWidth : totalWidth;
+    if (params.autosizerWidth > 0) {
+      visibleWidth = params.autosizerWidth;
+    }
+    if (params.specifiedMaxWidth !== -1 && visibleWidth > params.specifiedMaxWidth) {
+      visibleWidth = params.specifiedMaxWidth;
     }
 
-    const headGridHeight :number = DEFAULT_ROW_MIN_HEIGHT;
-    const headGridWidth :number = visibleWidth;
+    const computedHeadGridHeight :number = DEFAULT_ROW_MIN_HEIGHT;
+    const computedHeadGridWidth :number = visibleWidth;
 
-    const totalHeight :number = headGridHeight + (rowCount * DEFAULT_ROW_MIN_HEIGHT);
-    let visibleHeight :number = (props.height > 0) ? props.height : totalHeight;
-    if (visibleHeight > props.maxHeight) {
-      visibleHeight = props.maxHeight;
+    const totalHeight :number = computedHeadGridHeight + (rowCount * DEFAULT_ROW_MIN_HEIGHT);
+    let visibleHeight :number = (params.specifiedHeight > 0) ? params.specifiedHeight : totalHeight;
+    if (params.specifiedMaxHeight !== -1 && visibleHeight > params.specifiedMaxHeight) {
+      visibleHeight = params.specifiedMaxHeight;
     }
 
-    const bodyGridHeight :number = visibleHeight - headGridHeight;
-    const bodyGridWidth :number = visibleWidth;
+    const computedBodyGridHeight :number = visibleHeight - computedHeadGridHeight;
+    const computedBodyGridWidth :number = visibleWidth;
 
     if (totalWidth < visibleWidth) {
       const lastColumnIndex :number = columnWidths.size - 1;
@@ -236,10 +248,10 @@ class AbstractDataTable extends React.Component<Props, State> {
 
     return {
       columnWidths,
-      headGridHeight,
-      headGridWidth,
-      bodyGridHeight,
-      bodyGridWidth
+      computedHeadGridHeight,
+      computedHeadGridWidth,
+      computedBodyGridHeight,
+      computedBodyGridWidth
     };
   }
 
@@ -253,12 +265,19 @@ class AbstractDataTable extends React.Component<Props, State> {
 
     if (haveHeadersChanged || hasDataChanged) {
 
-      const dimensions :Object = AbstractDataTable.computeDimensions(nextProps);
-
-      this.setState({
+      const newDimensions :Object = AbstractDataTable.computeDimensions({
+        autosizerHeight: this.state.autosizerHeight,
+        autosizerWidth: this.state.autosizerWidth,
         data: nextData,
         headers: nextHeaders,
-        ...dimensions
+        specifiedMaxHeight: nextProps.maxHeight,
+        specifiedMaxWidth: nextProps.maxWidth,
+        specifiedHeight: nextProps.height,
+        specifiedWidth: nextProps.width
+      });
+
+      this.setState({
+        ...newDimensions
       });
     }
   }
@@ -268,8 +287,8 @@ class AbstractDataTable extends React.Component<Props, State> {
     const headGrid :?Grid = this.headGrid;
     const bodyGrid :?Grid = this.bodyGrid;
 
-    const haveHeadersChanged :boolean = !this.state.headers.equals(nextState.headers);
-    const hasDataChanged :boolean = !this.state.data.equals(nextState.data);
+    const haveHeadersChanged :boolean = !this.props.headers.equals(nextProps.headers);
+    const hasDataChanged :boolean = !this.props.data.equals(nextProps.data);
     const haveColumnWidthsChanged :boolean = !this.state.columnWidths.equals(nextState.columnWidths);
 
     const shouldRecomputeGrids :boolean = haveHeadersChanged || hasDataChanged || haveColumnWidthsChanged;
@@ -309,8 +328,28 @@ class AbstractDataTable extends React.Component<Props, State> {
 
     // keeping it simple
     // TODO: handle various cell value types (string, number, array, object, etc.)
-    const header :string = this.state.headers.getIn([columnIndex, 'id']);
-    return this.state.data.getIn([rowIndex, header], '');
+    const header :string = this.props.headers.getIn([columnIndex, 'id']);
+    return this.props.data.getIn([rowIndex, header], '');
+  }
+
+  onAutoSizerResize = (params :Object) => {
+
+    const newDimensions :Object = AbstractDataTable.computeDimensions({
+      autosizerHeight: params.height,
+      autosizerWidth: params.width,
+      data: this.props.data,
+      headers: this.props.headers,
+      specifiedMaxHeight: this.props.maxHeight,
+      specifiedMaxWidth: this.props.maxWidth,
+      specifiedHeight: this.props.height,
+      specifiedWidth: this.props.width
+    });
+
+    this.setState({
+      autosizerHeight: params.height,
+      autosizerWidth: params.width,
+      ...newDimensions
+    });
   }
 
   renderHeadCell = (params :Object) => {
@@ -337,10 +376,10 @@ class AbstractDataTable extends React.Component<Props, State> {
       <BodyCell
           key={params.key}
           style={params.style}
-          onClick={() => {
+          onMouseDown={() => {
             // setState({ selectedRowIndex: params.rowIndex });
             // params.parent.forceUpdate();
-            this.props.onRowClick(params.rowIndex, this.state.data.get(params.rowIndex));
+            this.props.onRowClick(params.rowIndex, this.props.data.get(params.rowIndex));
           }}>
         <CellText>{ cellValue }</CellText>
       </BodyCell>
@@ -350,7 +389,7 @@ class AbstractDataTable extends React.Component<Props, State> {
   render() {
 
     const columnCount :number = this.props.headers.size;
-    const rowCount :number = this.state.data.size;
+    const rowCount :number = this.props.data.size;
 
     if (columnCount === 0 || rowCount === 0) {
       // TODO: need a better design for no data
@@ -358,48 +397,63 @@ class AbstractDataTable extends React.Component<Props, State> {
     }
 
     return (
-      <DataGridOuterWrapper>
+      <DataTableOuterWrapper /* innerRef={this.setOuterWrapperRef} */>
         <ScrollSync>
           {
             ({ onScroll, scrollLeft }) => {
               return (
-                <DataGridInnerWrapper>
-                  <HeadGridWrapper>
-                    <HeadGrid
-                        cellRenderer={this.renderHeadCell}
-                        columnCount={columnCount}
-                        columnWidth={this.getColumnWidth}
-                        estimatedColumnSize={DEFAULT_COLUMN_MIN_WIDTH}
-                        height={this.state.headGridHeight}
-                        innerRef={this.setHeadGridRef}
-                        overscanColumnCount={DEFAULT_OVERSCAN_COLUMN_COUNT}
-                        overscanRowCount={DEFAULT_OVERSCAN_ROW_COUNT}
-                        rowHeight={DEFAULT_ROW_MIN_HEIGHT}
-                        rowCount={1}
-                        scrollLeft={scrollLeft}
-                        width={this.state.headGridWidth} />
-                  </HeadGridWrapper>
-                  <BodyGridWrapper>
-                    <BodyGrid
-                        cellRenderer={this.renderBodyCell}
-                        columnCount={columnCount}
-                        columnWidth={this.getColumnWidth}
-                        estimatedColumnSize={DEFAULT_COLUMN_MIN_WIDTH}
-                        height={this.state.bodyGridHeight}
-                        innerRef={this.setBodyGridRef}
-                        onScroll={onScroll}
-                        overscanColumnCount={DEFAULT_OVERSCAN_COLUMN_COUNT}
-                        overscanRowCount={DEFAULT_OVERSCAN_ROW_COUNT}
-                        rowCount={rowCount}
-                        rowHeight={this.getRowHeight}
-                        width={this.state.bodyGridWidth} />
-                  </BodyGridWrapper>
-                </DataGridInnerWrapper>
+                <DataTableInnerWrapper>
+                  <AutoSizer disableHeight onResize={this.onAutoSizerResize}>
+                    {
+                      ({ height, width }) => {
+                        // if (height !== (this.state.computedHeadGridHeight + this.state.computedBodyGridHeight)
+                        //     || width !== this.state.computedHeadGridWidth
+                        //     || width !== this.state.computedBodyGridWidth) {
+                        //   return null;
+                        // }
+                        return (
+                          <div>
+                            <div>
+                              <HeadGrid
+                                  cellRenderer={this.renderHeadCell}
+                                  columnCount={columnCount}
+                                  columnWidth={this.getColumnWidth}
+                                  estimatedColumnSize={DEFAULT_COLUMN_MIN_WIDTH}
+                                  height={this.state.computedHeadGridHeight}
+                                  innerRef={this.setHeadGridRef}
+                                  overscanColumnCount={DEFAULT_OVERSCAN_COLUMN_COUNT}
+                                  overscanRowCount={DEFAULT_OVERSCAN_ROW_COUNT}
+                                  rowHeight={DEFAULT_ROW_MIN_HEIGHT}
+                                  rowCount={1}
+                                  scrollLeft={scrollLeft}
+                                  width={this.state.computedHeadGridWidth} />
+                            </div>
+                            <div>
+                              <BodyGrid
+                                  cellRenderer={this.renderBodyCell}
+                                  columnCount={columnCount}
+                                  columnWidth={this.getColumnWidth}
+                                  estimatedColumnSize={DEFAULT_COLUMN_MIN_WIDTH}
+                                  height={this.state.computedBodyGridHeight}
+                                  innerRef={this.setBodyGridRef}
+                                  onScroll={onScroll}
+                                  overscanColumnCount={DEFAULT_OVERSCAN_COLUMN_COUNT}
+                                  overscanRowCount={DEFAULT_OVERSCAN_ROW_COUNT}
+                                  rowCount={rowCount}
+                                  rowHeight={this.getRowHeight}
+                                  width={this.state.computedBodyGridWidth} />
+                            </div>
+                          </div>
+                        );
+                      }
+                    }
+                  </AutoSizer>
+                </DataTableInnerWrapper>
               );
             }
           }
         </ScrollSync>
-      </DataGridOuterWrapper>
+      </DataTableOuterWrapper>
     );
   }
 }

@@ -73,7 +73,7 @@ class AuthRoute extends React.Component<Props> {
     Auth0.getAuth0LockInstance().hide();
   }
 
-  componentWillReceiveProps(nextProps :Object) {
+  componentWillReceiveProps(nextProps :Props) {
 
     if (AuthUtils.hasAuthTokenExpired(nextProps.authTokenExpiration)) {
       // if nextProps.authTokenExpiration === -1, we've already dispatched AUTH_EXPIRED
