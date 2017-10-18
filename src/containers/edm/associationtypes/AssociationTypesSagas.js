@@ -9,6 +9,9 @@ import {
   CREATE_ASSOCIATION_TYPE_REQUEST,
   createAssociationTypeFailure,
   createAssociationTypeSuccess,
+  DELETE_ASSOCIATION_TYPE_REQUEST,
+  deleteAssociationTypeFailure,
+  deleteAssociationTypeSuccess,
   FETCH_ALL_ASSOCIATION_TYPES_REQUEST,
   fetchAllAssociationTypesFailure,
   fetchAllAssociationTypesSuccess,
@@ -19,6 +22,7 @@ import {
 
 import type {
   CreateAssociationTypeRequestAction,
+  DeleteAssociationTypeRequestAction,
   UpdateAssociationTypeMetaDataRequestAction
 } from './AssociationTypesActionFactory';
 
@@ -32,6 +36,20 @@ export function* watchCreateAssociationTypeRequest() :Generator<*, *, *> {
     }
     catch (error) {
       yield put(createAssociationTypeFailure(action.associationType, error));
+    }
+  }
+}
+
+export function* watchDeleteAssociationTypeRequest() :Generator<*, *, *> {
+
+  while (true) {
+    const action :DeleteAssociationTypeRequestAction = yield take(DELETE_ASSOCIATION_TYPE_REQUEST);
+    try {
+      yield call(EntityDataModelApi.deleteAssociationType, action.associationTypeId);
+      yield put(deleteAssociationTypeSuccess(action.associationTypeId));
+    }
+    catch (error) {
+      yield put(deleteAssociationTypeFailure(action.associationTypeId, error));
     }
   }
 }

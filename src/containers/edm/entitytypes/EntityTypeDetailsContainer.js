@@ -137,7 +137,7 @@ class EntityTypeDetailsContainer extends React.Component<Props> {
           <p>TODO</p>
         </section>
         <section>
-          <DeleteButton onClick={this.handleOnClickDelete}>Delete PropertyType</DeleteButton>
+          <DeleteButton onClick={this.handleOnClickDelete}>Delete EntityType</DeleteButton>
         </section>
       </div>
     );

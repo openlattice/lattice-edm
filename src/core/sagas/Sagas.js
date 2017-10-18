@@ -33,6 +33,7 @@ export default function* sagas() :Generator<*, *, *> {
 
     // AssociationTypesSagas
     fork(AssociationTypesSagas.watchCreateAssociationTypeRequest),
+    fork(AssociationTypesSagas.watchDeleteAssociationTypeRequest),
     fork(AssociationTypesSagas.watchFetchAllAssociationTypesRequest),
     fork(AssociationTypesSagas.watchUpdateAssociationTypeMetaDataRequest)
   ];

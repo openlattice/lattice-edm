@@ -5,6 +5,7 @@
 import React from 'react';
 
 import Immutable from 'immutable';
+import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 
 import AbstractTypes from '../../../utils/AbstractTypes';
@@ -12,12 +13,26 @@ import AbstractTypeDataTable from '../../../components/datatable/AbstractTypeDat
 import AbstractTypeFieldDescription from '../AbstractTypeFieldDescription';
 import AbstractTypeFieldTitle from '../AbstractTypeFieldTitle';
 import AbstractTypeFieldType from '../AbstractTypeFieldType';
+import StyledButton from '../../../components/buttons/StyledButton';
+
+import { deleteAssociationTypeRequest } from './AssociationTypesActionFactory';
+
+/*
+ * styled components
+ */
+
+const DeleteButton = StyledButton.extend`
+  align-self: center;
+`;
 
 /*
  * types
  */
 
 type Props = {
+  actions :{
+    deleteAssociationTypeRequest :Function,
+  },
   associationType :Map<*, *>,
   entityTypes :List<Map<*, *>>,
   entityTypesById :Map<string, number>,
@@ -26,6 +41,12 @@ type Props = {
 };
 
 class AssoctTypeDetailsContainer extends React.Component<Props> {
+
+  handleOnClickDelete = () => {
+
+    const associationEntityType :Map<*, *> = this.props.associationType.get('entityType', Immutable.Map());
+    this.props.actions.deleteAssociationTypeRequest(associationEntityType.get('id'));
+  }
 
   renderEntityTypeDetails = () => {
 
@@ -178,6 +199,9 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
               maxHeight={500}
               workingAbstractTypeType={AbstractTypes.EntityType} />
         </section>
+        <section>
+          <DeleteButton onClick={this.handleOnClickDelete}>Delete AssociationType</DeleteButton>
+        </section>
       </div>
     );
   }
@@ -193,4 +217,15 @@ function mapStateToProps(state :Map<*, *>) :Object {
   };
 }
 
-export default connect(mapStateToProps)(AssoctTypeDetailsContainer);
+function mapDispatchToProps(dispatch :Function) :Object {
+
+  const actions = {
+    deleteAssociationTypeRequest
+  };
+
+  return {
+    actions: bindActionCreators(actions, dispatch)
+  };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(AssoctTypeDetailsContainer);

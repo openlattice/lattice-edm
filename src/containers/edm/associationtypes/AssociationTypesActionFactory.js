@@ -164,10 +164,58 @@ function updateAssociationTypeMetaDataSuccess(
   };
 }
 
+const DELETE_ASSOCIATION_TYPE_FAILURE :'DELETE_ASSOCIATION_TYPE_FAILURE' = 'DELETE_ASSOCIATION_TYPE_FAILURE';
+const DELETE_ASSOCIATION_TYPE_REQUEST :'DELETE_ASSOCIATION_TYPE_REQUEST' = 'DELETE_ASSOCIATION_TYPE_REQUEST';
+const DELETE_ASSOCIATION_TYPE_SUCCESS :'DELETE_ASSOCIATION_TYPE_SUCCESS' = 'DELETE_ASSOCIATION_TYPE_SUCCESS';
+
+type DeleteAssociationTypeFailureAction = {
+  associationTypeId :string,
+  error :any,
+  type :typeof DELETE_ASSOCIATION_TYPE_FAILURE
+}
+
+function deleteAssociationTypeFailure(associationTypeId :string, error :any) :DeleteAssociationTypeFailureAction {
+
+  return {
+    associationTypeId,
+    error,
+    type: DELETE_ASSOCIATION_TYPE_FAILURE
+  };
+}
+
+type DeleteAssociationTypeRequestAction = {
+  associationTypeId :string,
+  type :typeof DELETE_ASSOCIATION_TYPE_REQUEST
+}
+
+function deleteAssociationTypeRequest(associationTypeId :string) :DeleteAssociationTypeRequestAction {
+
+  return {
+    associationTypeId,
+    type: DELETE_ASSOCIATION_TYPE_REQUEST
+  };
+}
+
+type DeleteAssociationTypeSuccessAction = {
+  associationTypeId :string,
+  type :typeof DELETE_ASSOCIATION_TYPE_SUCCESS
+}
+
+function deleteAssociationTypeSuccess(associationTypeId :string) :DeleteAssociationTypeSuccessAction {
+
+  return {
+    associationTypeId,
+    type: DELETE_ASSOCIATION_TYPE_SUCCESS
+  };
+}
+
 export {
   CREATE_ASSOCIATION_TYPE_FAILURE,
   CREATE_ASSOCIATION_TYPE_REQUEST,
   CREATE_ASSOCIATION_TYPE_SUCCESS,
+  DELETE_ASSOCIATION_TYPE_FAILURE,
+  DELETE_ASSOCIATION_TYPE_REQUEST,
+  DELETE_ASSOCIATION_TYPE_SUCCESS,
   FETCH_ALL_ASSOCIATION_TYPES_FAILURE,
   FETCH_ALL_ASSOCIATION_TYPES_REQUEST,
   FETCH_ALL_ASSOCIATION_TYPES_SUCCESS,
@@ -180,6 +228,9 @@ export {
   createAssociationTypeFailure,
   createAssociationTypeRequest,
   createAssociationTypeSuccess,
+  deleteAssociationTypeFailure,
+  deleteAssociationTypeRequest,
+  deleteAssociationTypeSuccess,
   fetchAllAssociationTypesFailure,
   fetchAllAssociationTypesRequest,
   fetchAllAssociationTypesSuccess,
@@ -192,6 +243,9 @@ export type {
   CreateAssociationTypeFailureAction,
   CreateAssociationTypeRequestAction,
   CreateAssociationTypeSuccessAction,
+  DeleteAssociationTypeFailureAction,
+  DeleteAssociationTypeRequestAction,
+  DeleteAssociationTypeSuccessAction,
   FetchAllAssociationTypesFailureAction,
   FetchAllAssociationTypesRequestAction,
   FetchAllAssociationTypesSuccessAction,
@@ -204,6 +258,9 @@ export type Action =
   | CreateAssociationTypeFailureAction
   | CreateAssociationTypeRequestAction
   | CreateAssociationTypeSuccessAction
+  | DeleteAssociationTypeFailureAction
+  | DeleteAssociationTypeRequestAction
+  | DeleteAssociationTypeSuccessAction
   | FetchAllAssociationTypesFailureAction
   | FetchAllAssociationTypesRequestAction
   | FetchAllAssociationTypesSuccessAction

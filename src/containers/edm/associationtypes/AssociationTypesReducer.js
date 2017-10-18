@@ -9,6 +9,9 @@ import {
   CREATE_ASSOCIATION_TYPE_FAILURE,
   CREATE_ASSOCIATION_TYPE_REQUEST,
   CREATE_ASSOCIATION_TYPE_SUCCESS,
+  DELETE_ASSOCIATION_TYPE_FAILURE,
+  DELETE_ASSOCIATION_TYPE_REQUEST,
+  DELETE_ASSOCIATION_TYPE_SUCCESS,
   FETCH_ALL_ASSOCIATION_TYPES_FAILURE,
   FETCH_ALL_ASSOCIATION_TYPES_REQUEST,
   FETCH_ALL_ASSOCIATION_TYPES_SUCCESS,
@@ -62,6 +65,29 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
       return state
         .set('isCreatingNewAssociationType', false)
         .set('newlyCreatedAssociationTypeId', action.associationTypeId)
+        .set('associationTypes', updated)
+        .set('associationTypesById', updatedById);
+    }
+
+    case DELETE_ASSOCIATION_TYPE_FAILURE:
+    case DELETE_ASSOCIATION_TYPE_REQUEST:
+      return state;
+
+    case DELETE_ASSOCIATION_TYPE_SUCCESS: {
+
+      const associationTypeId :string = action.associationTypeId;
+      const associationTypeIndex :number = state.getIn(['associationTypesById', associationTypeId], -1);
+
+      if (associationTypeIndex === -1) {
+        return state;
+      }
+      const current :List<Map<*, *>> = state.get('associationTypes', Immutable.List());
+      const updated :List<Map<*, *>> = current.delete(associationTypeIndex);
+
+      const currentById :Map<string, number> = state.get('associationTypesById', Immutable.Map());
+      const updatedById :Map<string, number> = currentById.delete(associationTypeId);
+
+      return state
         .set('associationTypes', updated)
         .set('associationTypesById', updatedById);
     }
