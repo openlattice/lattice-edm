@@ -289,12 +289,8 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
     const selectedDestinationEntityTypes :Set<Map<*, *>> = this.state.selectedDestinationEntityTypes
       .add(selectedEntityType);
 
-    const selectedSourceEntityTypes :Set<Map<*, *>> = this.state.selectedSourceEntityTypes
-      .subtract(selectedDestinationEntityTypes);
-
     this.setState({
-      selectedDestinationEntityTypes,
-      selectedSourceEntityTypes
+      selectedDestinationEntityTypes
     });
   }
 
@@ -337,11 +333,7 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
     const selectedSourceEntityTypes :Set<Map<*, *>> = this.state.selectedSourceEntityTypes
       .add(selectedEntityType);
 
-    const selectedDestinationEntityTypes :Set<Map<*, *>> = this.state.selectedDestinationEntityTypes
-      .subtract(selectedSourceEntityTypes);
-
     this.setState({
-      selectedDestinationEntityTypes,
       selectedSourceEntityTypes
     });
   }
@@ -647,10 +639,6 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
       return null;
     }
 
-    const availableEntityTypes :Set<Map<*, *>> = this.props.entityTypes.toSet()
-      .subtract(this.state.selectedSourceEntityTypes)
-      .subtract(this.state.selectedDestinationEntityTypes);
-
     return (
       <section>
         <h2>Source EntityTypes</h2>
@@ -669,7 +657,7 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
         }
         {
           this.renderSelectFromAvailableAbstractTypes(
-            availableEntityTypes.toList(),
+            this.props.entityTypes,
             AbstractTypes.EntityType,
             'Available EntityTypes...',
             this.addToSelectedSourceEntityTypes
@@ -685,10 +673,6 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
     if (this.props.workingAbstractTypeType !== AbstractTypes.AssociationType) {
       return null;
     }
-
-    const availableEntityTypes :Set<Map<*, *>> = this.props.entityTypes.toSet()
-      .subtract(this.state.selectedSourceEntityTypes)
-      .subtract(this.state.selectedDestinationEntityTypes);
 
     return (
       <section>
@@ -708,7 +692,7 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
         }
         {
           this.renderSelectFromAvailableAbstractTypes(
-            availableEntityTypes.toList(),
+            this.props.entityTypes,
             AbstractTypes.EntityType,
             'Available EntityTypes...',
             this.addToSelectedDestinationEntityTypes

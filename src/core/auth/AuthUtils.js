@@ -40,7 +40,6 @@ export function clearAuthToken() :void {
   localStorage.removeItem(AUTH0_ID_TOKEN_EXP);
 }
 
-
 export function getAuthTokenExpiration(maybeIdToken :?string) :number {
 
   let idToken :?string = maybeIdToken;
