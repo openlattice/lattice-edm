@@ -52,14 +52,15 @@ export function filterAbstractTypes(params :AbstractTypeFilterParams) :List<Map<
 
     const abstractTypeId :string = abstractType.get('id', '');
     const abstractTypeType :Map<string, string> = abstractType.get('type', Immutable.Map());
-    const abstractTypeFqn :string = FullyQualifiedName.toString(abstractTypeType);
-    const abstractTypeTitle :string = abstractType.get('title', '');
+    const abstractTypeFqn :string = FullyQualifiedName.toString(abstractTypeType).toLowerCase();
+    const abstractTypeTitle :string = abstractType.get('title', '').toLowerCase();
 
     let includeAbstractType :boolean = true;
     if (filterQuery && filterQuery.trim()) {
       const matchesId :boolean = (abstractTypeId === filterQuery);
-      const matchesFqn :boolean = abstractTypeFqn.includes(filterQuery.trim());
-      const matchesTitle :boolean = abstractTypeTitle.includes(filterQuery.trim());
+      const filterTrimLowerCase :string = filterQuery.trim().toLowerCase();
+      const matchesFqn :boolean = abstractTypeFqn.includes(filterTrimLowerCase);
+      const matchesTitle :boolean = abstractTypeTitle.includes(filterTrimLowerCase);
       if (!matchesId && !matchesFqn && !matchesTitle) {
         includeAbstractType = false;
       }
