@@ -10,6 +10,8 @@ import { connect } from 'react-redux';
 
 import AbstractTypes from '../../utils/AbstractTypes';
 import InlineEditableControl from '../../components/controls/InlineEditableControl';
+
+import * as AuthUtils from '../../core/auth/AuthUtils';
 import { isValidUuid } from '../../utils/Utils';
 import { updateAssociationTypeMetaDataRequest } from './associationtypes/AssociationTypesActionFactory';
 import { updateEntityTypeMetaDataRequest } from './entitytypes/EntityTypesActionFactory';
@@ -94,7 +96,8 @@ class AbstractTypeFieldTitle extends React.Component<Props, State> {
             placeholder={`${FIELD_TITLE}...`}
             value={abstractType.get('title')}
             onChange={this.handleOnChange}
-            onEditToggle={this.handleOnEditToggle} />
+            onEditToggle={this.handleOnEditToggle}
+            viewOnly={!AuthUtils.isAuthenticated()} />
       </div>
     );
   }

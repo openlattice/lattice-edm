@@ -15,6 +15,7 @@ import AbstractTypeFieldTitle from '../AbstractTypeFieldTitle';
 import AbstractTypeFieldType from '../AbstractTypeFieldType';
 import StyledButton from '../../../components/buttons/StyledButton';
 
+import * as AuthUtils from '../../../core/auth/AuthUtils';
 import { deleteAssociationTypeRequest } from './AssociationTypesActionFactory';
 
 /*
@@ -44,8 +45,10 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
 
   handleOnClickDelete = () => {
 
-    const associationEntityType :Map<*, *> = this.props.associationType.get('entityType', Immutable.Map());
-    this.props.actions.deleteAssociationTypeRequest(associationEntityType.get('id'));
+    if (AuthUtils.isAuthenticated()) {
+      const associationEntityType :Map<*, *> = this.props.associationType.get('entityType', Immutable.Map());
+      this.props.actions.deleteAssociationTypeRequest(associationEntityType.get('id'));
+    }
   }
 
   renderEntityTypeDetails = () => {
@@ -199,9 +202,15 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
               maxHeight={500}
               workingAbstractTypeType={AbstractTypes.EntityType} />
         </section>
-        <section>
-          <DeleteButton onClick={this.handleOnClickDelete}>Delete AssociationType</DeleteButton>
-        </section>
+        {
+          AuthUtils.isAuthenticated()
+            ? (
+              <section>
+                <DeleteButton onClick={this.handleOnClickDelete}>Delete AssociationType</DeleteButton>
+              </section>
+            )
+            : null
+        }
       </div>
     );
   }

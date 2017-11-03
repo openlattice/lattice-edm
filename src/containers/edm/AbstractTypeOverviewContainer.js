@@ -19,6 +19,7 @@ import AssociationTypeDetailsContainer from './associationtypes/AssociationTypeD
 import EntityTypeDetailsContainer from './entitytypes/EntityTypeDetailsContainer';
 import PropertyTypeDetailsContainer from './propertytypes/PropertyTypeDetailsContainer';
 
+import * as AuthUtils from '../../core/auth/AuthUtils';
 import { getWorkingAbstractTypes, filterAbstractTypes } from '../../utils/AbstractTypeUtils';
 
 import type { AbstractType } from '../../utils/AbstractTypes';
@@ -292,9 +293,11 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
 
   showCreateNewAbstractTypeCard = () => {
 
-    this.setState({
-      showCreateNewAbstractTypeCard: true
-    });
+    if (AuthUtils.isAuthenticated()) {
+      this.setState({
+        showCreateNewAbstractTypeCard: true
+      });
+    }
   }
 
   renderAbstractTypeDirectoryCard = () => {
@@ -318,7 +321,13 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
       <AbstractTypeDirectoryCard>
         <AbstractTypeDirectoryCardTitle>
           <h1>{ cardTitle }</h1>
-          <StyledButton onClick={this.showCreateNewAbstractTypeCard}>Create New</StyledButton>
+          {
+            AuthUtils.isAuthenticated()
+              ? (
+                <StyledButton onClick={this.showCreateNewAbstractTypeCard}>Create New</StyledButton>
+              )
+              : null
+          }
         </AbstractTypeDirectoryCardTitle>
         <AbstractTypeDirectoryCardSearch placeholder="Filter..." onChange={this.handleOnChangeFilter} />
         {
@@ -370,6 +379,10 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
   }
 
   renderAbstractTypeCreateCard = () => {
+
+    if (!AuthUtils.isAuthenticated()) {
+      return null;
+    }
 
     return (
       <AbstractTypeCreateContainer

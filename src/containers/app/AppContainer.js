@@ -63,8 +63,7 @@ type Props = {
   actions :{
     login :Function,
     logout :Function
-  },
-  isAuthenticated :boolean
+  }
 };
 
 const AppContainer = (props :Props) => {
@@ -75,7 +74,7 @@ const AppContainer = (props :Props) => {
         <AppHeaderInnerWrapper>
           <Title>OpenLattice Entity Data Model</Title>
           {
-            props.isAuthenticated
+            AuthUtils.isAuthenticated()
               ? (
                 <StyledActionButton onClick={props.actions.logout}>Logout</StyledActionButton>
               )
@@ -93,14 +92,6 @@ const AppContainer = (props :Props) => {
   );
 };
 
-function mapStateToProps() :Object {
-
-  return {
-    isAuthenticated: AuthUtils.isAuthenticated()
-  };
-}
-
-
 function mapDispatchToProps(dispatch :Function) :Object {
 
   return {
@@ -108,4 +99,4 @@ function mapDispatchToProps(dispatch :Function) :Object {
   };
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(AppContainer);
+export default connect(null, mapDispatchToProps)(AppContainer);

@@ -14,6 +14,7 @@ import { isValidUuid } from '../../utils/Utils';
 import { updateAssociationTypeMetaDataRequest } from './associationtypes/AssociationTypesActionFactory';
 import { updateEntityTypeMetaDataRequest } from './entitytypes/EntityTypesActionFactory';
 import { updatePropertyTypeMetaDataRequest } from './propertytypes/PropertyTypesActionFactory';
+import * as AuthUtils from '../../core/auth/AuthUtils';
 
 import type { AbstractType } from '../../utils/AbstractTypes';
 
@@ -94,7 +95,8 @@ class AbstractTypeFieldDescription extends React.Component<Props, State> {
             placeholder={`${FIELD_TITLE}...`}
             value={abstractType.get('description')}
             onChange={this.handleOnChange}
-            onEditToggle={this.handleOnEditToggle} />
+            onEditToggle={this.handleOnEditToggle}
+            viewOnly={!AuthUtils.isAuthenticated()} />
       </div>
     );
   }
