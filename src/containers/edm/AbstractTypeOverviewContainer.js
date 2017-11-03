@@ -263,7 +263,7 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
     });
   }
 
-  handleOnChangeFilter = (filter :string) => {
+  handleOnChangeFilter = (filterQuery :string) => {
 
     const params :Object = {
       associationTypes: this.props.associationTypes,
@@ -273,14 +273,20 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
     };
 
     const filterParams :Object = {
+      filterQuery,
       abstractTypes: getWorkingAbstractTypes(params),
-      filterQuery: filter,
       workingAbstractTypeType: this.props.workingAbstractTypeType
     };
 
+    const filteredTypes :List<Map<*, *>> = filterAbstractTypes(filterParams);
+    const selectedAbstractType :Map<*, *> = filteredTypes.get(0, Immutable.Map());
+    const selectedAbstractTypeId :string = selectedAbstractType.get('id', '');
+
     this.setState({
-      filterQuery: filter,
-      filteredTypes: filterAbstractTypes(filterParams)
+      filterQuery,
+      filteredTypes,
+      selectedAbstractType,
+      selectedAbstractTypeId
     });
   }
 
