@@ -9,9 +9,18 @@ import * as Routes from '../router/Routes';
 import * as Utils from '../../utils/Utils';
 
 import * as Auth0 from './Auth0';
-import * as AuthActionFactory from './AuthActionFactory';
-import * as AuthActionTypes from './AuthActionTypes';
 import * as AuthUtils from './AuthUtils';
+
+import {
+  AUTH_ATTEMPT,
+  AUTH_EXPIRED,
+  AUTH_FAILURE,
+  AUTH_SUCCESS,
+  LOGIN,
+  LOGOUT,
+  authFailure,
+  authSuccess
+} from './AuthActionFactory';
 
 /*
  * An interesting discussion around authentication flow with redux-saga:
@@ -21,7 +30,7 @@ import * as AuthUtils from './AuthUtils';
 export function* watchAuthAttempt() :Generator<*, *, *> {
 
   while (true) {
-    yield take(AuthActionTypes.AUTH_ATTEMPT);
+    yield take(AUTH_ATTEMPT);
     try {
       const authToken :string = yield call(Auth0.authenticate);
       /*
@@ -31,11 +40,11 @@ export function* watchAuthAttempt() :Generator<*, *, *> {
        */
       yield call(AuthUtils.storeAuthToken, authToken);
       yield call(Utils.configureLattice, authToken);
-      yield put(AuthActionFactory.authSuccess());
+      yield put(authSuccess());
     }
     catch (error) {
       // TODO: need better error handling depending on the error that comes through
-      yield put(AuthActionFactory.authFailure(error));
+      yield put(authFailure(error));
       Auth0.getAuth0LockInstance().show();
     }
   }
@@ -44,7 +53,7 @@ export function* watchAuthAttempt() :Generator<*, *, *> {
 export function* watchAuthSuccess() :Generator<*, *, *> {
 
   while (true) {
-    const { authToken } = yield take(AuthActionTypes.AUTH_SUCCESS);
+    const { authToken } = yield take(AUTH_SUCCESS);
     /*
      * AUTH_SUCCESS will be dispatched in one of two possible scenarios:
      *
@@ -66,7 +75,7 @@ export function* watchAuthSuccess() :Generator<*, *, *> {
 export function* watchAuthExpired() :Generator<*, *, *> {
 
   while (true) {
-    yield take(AuthActionTypes.AUTH_EXPIRED);
+    yield take(AUTH_EXPIRED);
     yield call(AuthUtils.clearAuthToken);
   }
 }
@@ -74,16 +83,24 @@ export function* watchAuthExpired() :Generator<*, *, *> {
 export function* watchAuthFailure() :Generator<*, *, *> {
 
   while (true) {
-    yield take(AuthActionTypes.AUTH_FAILURE);
+    yield take(AUTH_FAILURE);
     yield call(AuthUtils.clearAuthToken);
+  }
+}
+
+export function* watchLogin() :Generator<*, *, *> {
+
+  while (true) {
+    yield take(LOGIN);
+    yield put(push(Routes.LOGIN));
   }
 }
 
 export function* watchLogout() :Generator<*, *, *> {
 
   while (true) {
-    yield take(AuthActionTypes.LOGOUT);
+    yield take(LOGOUT);
     yield call(AuthUtils.clearAuthToken);
-    yield put(push(Routes.LOGIN));
+    yield put(push(Routes.ROOT));
   }
 }

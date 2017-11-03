@@ -24,9 +24,9 @@
     "auth0-lock": "^10.20.0",
     "babel-polyfill": "^6.26.0",
     "history": "^4.7.2",
-    "immutable": "^4.0.0-rc.8",
+    "immutable": "4.0.0-rc.9",
     "jwt-decode": "^2.2.0",
-    "lattice": "^0.30.0",
+    "lattice": "^0.30.2",
     "lodash": "^4.17.4",
     "moment": "^2.18.1",
     "polished": "^1.7.0",
@@ -41,7 +41,7 @@
     "redux": "^3.7.2",
     "redux-immutable": "^4.0.0",
     "redux-saga": "^0.15.6",
-    "styled-components": "^2.2.0",
+    "styled-components": "^2.2.2",
     "validator": "^9.0.0"
   },
   "devDependencies": {

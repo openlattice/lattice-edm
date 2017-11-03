@@ -104,13 +104,6 @@ class EntityDataModelContainer extends React.Component<Props> {
     );
   }
 
-  renderSchemasContainer = () => {
-
-    return (
-      <p>TODO</p>
-    );
-  }
-
   render() {
 
     return (
@@ -119,13 +112,11 @@ class EntityDataModelContainer extends React.Component<Props> {
           <NavTab to={Routes.PROPERTY_TYPES}>PropertyTypes</NavTab>
           <NavTab to={Routes.ENTITY_TYPES}>EntityTypes</NavTab>
           <NavTab to={Routes.ASSOCIATION_TYPES}>AssociationTypes</NavTab>
-          <NavTab to={Routes.SCHEMAS}>Schemas</NavTab>
         </Nav>
         <Switch>
           <Route path={Routes.PROPERTY_TYPES} render={this.renderPropertyTypesContainer} />
           <Route path={Routes.ENTITY_TYPES} render={this.renderEntityTypesContainer} />
           <Route path={Routes.ASSOCIATION_TYPES} render={this.renderAssociationTypesContainer} />
-          <Route path={Routes.SCHEMAS} render={this.renderSchemasContainer} />
           <Redirect to={Routes.PROPERTY_TYPES} />
         </Switch>
       </EDMContainerWrapper>

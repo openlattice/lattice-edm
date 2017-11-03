@@ -17,6 +17,7 @@ export default function* sagas() :Generator<*, *, *> {
     fork(AuthSagas.watchAuthSuccess),
     fork(AuthSagas.watchAuthFailure),
     fork(AuthSagas.watchAuthExpired),
+    fork(AuthSagas.watchLogin),
     fork(AuthSagas.watchLogout),
 
     // PropertyTypesSagas

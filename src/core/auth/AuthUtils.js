@@ -86,3 +86,8 @@ export function hasAuthTokenExpired(idTokenOrExpiration :string | number) :boole
     return true;
   }
 }
+
+export function isAuthenticated() :boolean {
+
+  return !hasAuthTokenExpired(getAuthTokenExpiration());
+}
