@@ -19,6 +19,7 @@ import AssociationTypeDetailsContainer from './associationtypes/AssociationTypeD
 import EntityTypeDetailsContainer from './entitytypes/EntityTypeDetailsContainer';
 import PropertyTypeDetailsContainer from './propertytypes/PropertyTypeDetailsContainer';
 
+import * as AuthUtils from '../../core/auth/AuthUtils';
 import { getWorkingAbstractTypes, filterAbstractTypes } from '../../utils/AbstractTypeUtils';
 
 import type { AbstractType } from '../../utils/AbstractTypes';
@@ -262,7 +263,7 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
     });
   }
 
-  handleOnChangeFilter = (filter :string) => {
+  handleOnChangeFilter = (filterQuery :string) => {
 
     const params :Object = {
       associationTypes: this.props.associationTypes,
@@ -272,14 +273,20 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
     };
 
     const filterParams :Object = {
+      filterQuery,
       abstractTypes: getWorkingAbstractTypes(params),
-      filterQuery: filter,
       workingAbstractTypeType: this.props.workingAbstractTypeType
     };
 
+    const filteredTypes :List<Map<*, *>> = filterAbstractTypes(filterParams);
+    const selectedAbstractType :Map<*, *> = filteredTypes.get(0, Immutable.Map());
+    const selectedAbstractTypeId :string = selectedAbstractType.get('id', '');
+
     this.setState({
-      filterQuery: filter,
-      filteredTypes: filterAbstractTypes(filterParams)
+      filterQuery,
+      filteredTypes,
+      selectedAbstractType,
+      selectedAbstractTypeId
     });
   }
 
@@ -292,9 +299,11 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
 
   showCreateNewAbstractTypeCard = () => {
 
-    this.setState({
-      showCreateNewAbstractTypeCard: true
-    });
+    if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
+      this.setState({
+        showCreateNewAbstractTypeCard: true
+      });
+    }
   }
 
   renderAbstractTypeDirectoryCard = () => {
@@ -318,7 +327,13 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
       <AbstractTypeDirectoryCard>
         <AbstractTypeDirectoryCardTitle>
           <h1>{ cardTitle }</h1>
-          <StyledButton onClick={this.showCreateNewAbstractTypeCard}>Create New</StyledButton>
+          {
+            AuthUtils.isAuthenticated() && AuthUtils.isAdmin()
+              ? (
+                <StyledButton onClick={this.showCreateNewAbstractTypeCard}>Create New</StyledButton>
+              )
+              : null
+          }
         </AbstractTypeDirectoryCardTitle>
         <AbstractTypeDirectoryCardSearch placeholder="Filter..." onChange={this.handleOnChangeFilter} />
         {
@@ -370,6 +385,10 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
   }
 
   renderAbstractTypeCreateCard = () => {
+
+    if (!AuthUtils.isAuthenticated() || !AuthUtils.isAdmin()) {
+      return null;
+    }
 
     return (
       <AbstractTypeCreateContainer

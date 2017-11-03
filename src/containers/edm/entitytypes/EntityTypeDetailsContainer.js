@@ -15,6 +15,7 @@ import AbstractTypeFieldTitle from '../AbstractTypeFieldTitle';
 import AbstractTypeFieldType from '../AbstractTypeFieldType';
 import StyledButton from '../../../components/buttons/StyledButton';
 
+import * as AuthUtils from '../../../core/auth/AuthUtils';
 import { deleteEntityTypeRequest } from './EntityTypesActionFactory';
 
 /*
@@ -42,7 +43,9 @@ class EntityTypeDetailsContainer extends React.Component<Props> {
 
   handleOnClickDelete = () => {
 
-    this.props.actions.deleteEntityTypeRequest(this.props.entityType.get('id'));
+    if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
+      this.props.actions.deleteEntityTypeRequest(this.props.entityType.get('id'));
+    }
   }
 
   render() {
@@ -136,9 +139,15 @@ class EntityTypeDetailsContainer extends React.Component<Props> {
           <h2>Schemas</h2>
           <p>TODO</p>
         </section>
-        <section>
-          <DeleteButton onClick={this.handleOnClickDelete}>Delete EntityType</DeleteButton>
-        </section>
+        {
+          AuthUtils.isAuthenticated() && AuthUtils.isAdmin()
+            ? (
+              <section>
+                <DeleteButton onClick={this.handleOnClickDelete}>Delete EntityType</DeleteButton>
+              </section>
+            )
+            : null
+        }
       </div>
     );
   }

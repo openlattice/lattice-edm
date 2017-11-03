@@ -14,6 +14,7 @@ import AbstractTypeFieldTitle from '../AbstractTypeFieldTitle';
 import AbstractTypeFieldType from '../AbstractTypeFieldType';
 import StyledButton from '../../../components/buttons/StyledButton';
 
+import * as AuthUtils from '../../../core/auth/AuthUtils';
 import { deletePropertyTypeRequest } from './PropertyTypesActionFactory';
 
 /*
@@ -39,7 +40,9 @@ class PropertyTypeDetailsContainer extends React.Component<Props> {
 
   handleOnClickDelete = () => {
 
-    this.props.actions.deletePropertyTypeRequest(this.props.propertyType.get('id'));
+    if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
+      this.props.actions.deletePropertyTypeRequest(this.props.propertyType.get('id'));
+    }
   }
 
   render() {
@@ -92,9 +95,15 @@ class PropertyTypeDetailsContainer extends React.Component<Props> {
           <h2>Analyzer</h2>
           <p>{ this.props.propertyType.get('analyzer') }</p>
         </section>
-        <section>
-          <DeleteButton onClick={this.handleOnClickDelete}>Delete PropertyType</DeleteButton>
-        </section>
+        {
+          AuthUtils.isAuthenticated() && AuthUtils.isAdmin()
+            ? (
+              <section>
+                <DeleteButton onClick={this.handleOnClickDelete}>Delete PropertyType</DeleteButton>
+              </section>
+            )
+            : null
+        }
       </div>
     );
   }

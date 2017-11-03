@@ -10,10 +10,15 @@ import { bindActionCreators } from 'redux';
 import { Redirect, Route, Switch } from 'react-router-dom';
 
 import StyledButton from '../../components/buttons/StyledButton';
+import * as AuthUtils from '../../core/auth/AuthUtils';
 import * as Routes from '../../core/router/Routes';
-import { logout } from '../../core/auth/AuthActionFactory';
+import { login, logout } from '../../core/auth/AuthActionFactory';
 
 import EntityDataModelContainer from '../edm/EntityDataModelContainer';
+
+/*
+ * styled components
+ */
 
 const AppWrapper = styled.div`
   display: flex;
@@ -45,20 +50,18 @@ const Title = styled.h1`
   margin: 0;
 `;
 
-const StyledLogoutButton = StyledButton.extend`
+const StyledActionButton = StyledButton.extend`
   position: absolute;
   right: 50px;
 `;
 
-function mapDispatchToProps(dispatch :Function) {
-
-  return {
-    actions: bindActionCreators({ logout }, dispatch)
-  };
-}
+/*
+ * types
+ */
 
 type Props = {
   actions :{
+    login :Function,
     logout :Function
   }
 };
@@ -70,7 +73,15 @@ const AppContainer = (props :Props) => {
       <AppHeaderOuterWrapper>
         <AppHeaderInnerWrapper>
           <Title>OpenLattice Entity Data Model</Title>
-          <StyledLogoutButton onClick={props.actions.logout}>Logout</StyledLogoutButton>
+          {
+            AuthUtils.isAuthenticated()
+              ? (
+                <StyledActionButton onClick={props.actions.logout}>Logout</StyledActionButton>
+              )
+              : (
+                <StyledActionButton onClick={props.actions.login}>Login</StyledActionButton>
+              )
+          }
         </AppHeaderInnerWrapper>
       </AppHeaderOuterWrapper>
       <Switch>
@@ -80,5 +91,12 @@ const AppContainer = (props :Props) => {
     </AppWrapper>
   );
 };
+
+function mapDispatchToProps(dispatch :Function) :Object {
+
+  return {
+    actions: bindActionCreators({ login, logout }, dispatch)
+  };
+}
 
 export default connect(null, mapDispatchToProps)(AppContainer);

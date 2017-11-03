@@ -11,6 +11,8 @@ import { connect } from 'react-redux';
 
 import AbstractTypes from '../../utils/AbstractTypes';
 import InlineEditableControl from '../../components/controls/InlineEditableControl';
+
+import * as AuthUtils from '../../core/auth/AuthUtils';
 import { isValidUuid } from '../../utils/Utils';
 import { updateAssociationTypeMetaDataRequest } from './associationtypes/AssociationTypesActionFactory';
 import { updateEntityTypeMetaDataRequest } from './entitytypes/EntityTypesActionFactory';
@@ -120,7 +122,8 @@ class AbstractTypeFieldType extends React.Component<Props, State> {
             value={FullyQualifiedName.toString(abstractTypeFqn)}
             onChange={this.handleOnChange}
             onEditToggle={this.handleOnEditToggle}
-            validate={FullyQualifiedName.isValid} />
+            validate={FullyQualifiedName.isValid}
+            viewOnly={!AuthUtils.isAuthenticated() || !AuthUtils.isAdmin()} />
       </div>
     );
   }
