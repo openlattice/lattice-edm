@@ -215,14 +215,6 @@ export default class InlineEditableControl extends React.Component<Props, State>
 
   componentDidUpdate(prevProps :Props, prevState :State) {
 
-    if (this.control
-        && prevState.editable === false
-        && this.state.editable === true) {
-      // BUG: if there's multiple InlineEditableControl components on the page, the focus might not be on the desired
-      // element. perhaps need to take in a prop to indicate focus
-      this.control.focus();
-    }
-
     // going from editable to not editable should invoke the onChange callback only if the value actually changed
     if (prevState.previousValue !== this.state.currentValue
         && prevState.editable === true
@@ -303,10 +295,19 @@ export default class InlineEditableControl extends React.Component<Props, State>
     const editable = !this.state.editable;
     this.props.onEditToggle(editable);
 
-    this.setState({
-      editable,
-      previousValue: this.state.currentValue
-    });
+    this.setState(
+      {
+        editable,
+        previousValue: this.state.currentValue
+      },
+      () => {
+        // BUG: if there's multiple InlineEditableControl components on the page, the focus might not be on the desired
+        // element. perhaps we need to take in a prop to indicate focus
+        if (this.control && this.state.editable === true) {
+          this.control.focus();
+        }
+      }
+    );
   }
 
   handleOnBlur = () => {

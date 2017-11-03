@@ -43,7 +43,7 @@ class EntityTypeDetailsContainer extends React.Component<Props> {
 
   handleOnClickDelete = () => {
 
-    if (AuthUtils.isAuthenticated()) {
+    if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
       this.props.actions.deleteEntityTypeRequest(this.props.entityType.get('id'));
     }
   }
@@ -140,7 +140,7 @@ class EntityTypeDetailsContainer extends React.Component<Props> {
           <p>TODO</p>
         </section>
         {
-          AuthUtils.isAuthenticated()
+          AuthUtils.isAuthenticated() && AuthUtils.isAdmin()
             ? (
               <section>
                 <DeleteButton onClick={this.handleOnClickDelete}>Delete EntityType</DeleteButton>

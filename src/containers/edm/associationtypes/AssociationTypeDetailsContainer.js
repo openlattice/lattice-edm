@@ -45,7 +45,7 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
 
   handleOnClickDelete = () => {
 
-    if (AuthUtils.isAuthenticated()) {
+    if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
       const associationEntityType :Map<*, *> = this.props.associationType.get('entityType', Immutable.Map());
       this.props.actions.deleteAssociationTypeRequest(associationEntityType.get('id'));
     }
@@ -203,7 +203,7 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
               workingAbstractTypeType={AbstractTypes.EntityType} />
         </section>
         {
-          AuthUtils.isAuthenticated()
+          AuthUtils.isAuthenticated() && AuthUtils.isAdmin()
             ? (
               <section>
                 <DeleteButton onClick={this.handleOnClickDelete}>Delete AssociationType</DeleteButton>

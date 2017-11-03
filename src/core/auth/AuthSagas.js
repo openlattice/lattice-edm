@@ -32,14 +32,14 @@ export function* watchAuthAttempt() :Generator<*, *, *> {
   while (true) {
     yield take(AUTH_ATTEMPT);
     try {
-      const authToken :string = yield call(Auth0.authenticate);
+      const authInfo :Object = yield call(Auth0.authenticate);
       /*
        * our attempt to authenticate has succeeded. now, we need to store the Auth0 id token and configure lattice
        * before dispatching AUTH_SUCCESS in order to guarantee that AuthRoute will receive the correct props in the
        * next pass through its lifecycle.
        */
-      yield call(AuthUtils.storeAuthToken, authToken);
-      yield call(Utils.configureLattice, authToken);
+      yield call(AuthUtils.storeAuthInfo, authInfo);
+      yield call(Utils.configureLattice, authInfo.idToken);
       yield put(authSuccess());
     }
     catch (error) {
@@ -58,7 +58,7 @@ export function* watchAuthSuccess() :Generator<*, *, *> {
      * AUTH_SUCCESS will be dispatched in one of two possible scenarios:
      *
      *   1. the user is not authenticated, which means the Auth0 id token either is not stored locally or is expired.
-     *      in this scenario, AUTH_ATTEMPT *will* be dispatched, which means AuthUtils.storeAuthToken() and
+     *      in this scenario, AUTH_ATTEMPT *will* be dispatched, which means AuthUtils.storeAuthInfo() and
      *      Utils.configureLattice() will have already been invoked, so we don't need to do anything else here.
      *
      *   2. the user is already authenticated, which means the Auth0 id token is already stored locally, which means
@@ -76,7 +76,7 @@ export function* watchAuthExpired() :Generator<*, *, *> {
 
   while (true) {
     yield take(AUTH_EXPIRED);
-    yield call(AuthUtils.clearAuthToken);
+    yield call(AuthUtils.clearAuthInfo);
   }
 }
 
@@ -84,7 +84,7 @@ export function* watchAuthFailure() :Generator<*, *, *> {
 
   while (true) {
     yield take(AUTH_FAILURE);
-    yield call(AuthUtils.clearAuthToken);
+    yield call(AuthUtils.clearAuthInfo);
   }
 }
 
@@ -100,7 +100,7 @@ export function* watchLogout() :Generator<*, *, *> {
 
   while (true) {
     yield take(LOGOUT);
-    yield call(AuthUtils.clearAuthToken);
+    yield call(AuthUtils.clearAuthInfo);
     yield put(push(Routes.ROOT));
   }
 }

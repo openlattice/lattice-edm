@@ -123,7 +123,7 @@ class AbstractTypeFieldType extends React.Component<Props, State> {
             onChange={this.handleOnChange}
             onEditToggle={this.handleOnEditToggle}
             validate={FullyQualifiedName.isValid}
-            viewOnly={!AuthUtils.isAuthenticated()} />
+            viewOnly={!AuthUtils.isAuthenticated() || !AuthUtils.isAdmin()} />
       </div>
     );
   }

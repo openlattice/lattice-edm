@@ -299,7 +299,7 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
 
   showCreateNewAbstractTypeCard = () => {
 
-    if (AuthUtils.isAuthenticated()) {
+    if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
       this.setState({
         showCreateNewAbstractTypeCard: true
       });
@@ -328,7 +328,7 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
         <AbstractTypeDirectoryCardTitle>
           <h1>{ cardTitle }</h1>
           {
-            AuthUtils.isAuthenticated()
+            AuthUtils.isAuthenticated() && AuthUtils.isAdmin()
               ? (
                 <StyledButton onClick={this.showCreateNewAbstractTypeCard}>Create New</StyledButton>
               )
@@ -386,7 +386,7 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
 
   renderAbstractTypeCreateCard = () => {
 
-    if (!AuthUtils.isAuthenticated()) {
+    if (!AuthUtils.isAuthenticated() || !AuthUtils.isAdmin()) {
       return null;
     }
 

@@ -40,7 +40,7 @@ class PropertyTypeDetailsContainer extends React.Component<Props> {
 
   handleOnClickDelete = () => {
 
-    if (AuthUtils.isAuthenticated()) {
+    if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
       this.props.actions.deletePropertyTypeRequest(this.props.propertyType.get('id'));
     }
   }
@@ -96,7 +96,7 @@ class PropertyTypeDetailsContainer extends React.Component<Props> {
           <p>{ this.props.propertyType.get('analyzer') }</p>
         </section>
         {
-          AuthUtils.isAuthenticated()
+          AuthUtils.isAuthenticated() && AuthUtils.isAdmin()
             ? (
               <section>
                 <DeleteButton onClick={this.handleOnClickDelete}>Delete PropertyType</DeleteButton>

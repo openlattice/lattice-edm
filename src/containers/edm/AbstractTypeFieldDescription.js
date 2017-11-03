@@ -96,7 +96,7 @@ class AbstractTypeFieldDescription extends React.Component<Props, State> {
             value={abstractType.get('description')}
             onChange={this.handleOnChange}
             onEditToggle={this.handleOnEditToggle}
-            viewOnly={!AuthUtils.isAuthenticated()} />
+            viewOnly={!AuthUtils.isAuthenticated() || !AuthUtils.isAdmin()} />
       </div>
     );
   }
