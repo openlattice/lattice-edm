@@ -48,6 +48,10 @@ class AbstractTypeFieldTitle extends React.Component<Props, State> {
 
   handleOnChange = (titleValue :string) => {
 
+    if (!AuthUtils.isAuthenticated() || !AuthUtils.isAdmin()) {
+      return;
+    }
+
     let abstractType :Map<*, *> = this.props.abstractType;
     if (this.props.abstractTypeType === AbstractTypes.AssociationType) {
       abstractType = this.props.abstractType.get('entityType', Immutable.Map());

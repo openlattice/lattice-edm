@@ -68,6 +68,10 @@ class AbstractTypeFieldType extends React.Component<Props, State> {
 
   handleOnChange = (typeValue :string) => {
 
+    if (!AuthUtils.isAuthenticated() || !AuthUtils.isAdmin()) {
+      return;
+    }
+
     let abstractType :Map<*, *> = this.props.abstractType;
     if (this.props.abstractTypeType === AbstractTypes.AssociationType) {
       abstractType = this.props.abstractType.get('entityType', Immutable.Map());
