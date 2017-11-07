@@ -6,6 +6,8 @@ import { EntityDataModelApi } from 'lattice';
 import { call, put, take } from 'redux-saga/effects';
 
 import {
+  ADD_PROPERTY_TYPE_TO_ENTITY_TYPE,
+  addPropertyTypeToEntityType,
   CREATE_ENTITY_TYPE_REQUEST,
   createEntityTypeFailure,
   createEntityTypeSuccess,
@@ -27,6 +29,39 @@ import type {
   DeleteEntityTypeRequestAction,
   UpdateEntityTypeMetaDataRequestAction
 } from './EntityTypesActionFactory';
+
+export function* watchAddPropertyTypeToEntityType() :Generator<*, *, *> {
+
+  while (true) {
+    const action = yield take(ADD_PROPERTY_TYPE_TO_ENTITY_TYPE);
+    yield put(addPropertyTypeToEntityType.request());
+    try {
+      yield call(
+        EntityDataModelApi.addPropertyTypeToEntityType,
+        action.data.entityTypeId,
+        action.data.propertyTypeId
+      );
+      yield put(
+        addPropertyTypeToEntityType.success({
+          entityTypeId: action.data.entityTypeId,
+          propertyTypeId: action.data.propertyTypeId
+        })
+      );
+    }
+    catch (error) {
+      yield put(
+        addPropertyTypeToEntityType.failure({
+          error,
+          entityTypeId: action.data.entityTypeId,
+          propertyTypeId: action.data.propertyTypeId
+        })
+      );
+    }
+    finally {
+      yield put(addPropertyTypeToEntityType.finally());
+    }
+  }
+}
 
 export function* watchCreateEntityTypeRequest() :Generator<*, *, *> {
 

@@ -203,10 +203,14 @@ function deleteEntityTypeSuccess(entityTypeId :string) :DeleteEntityTypeSuccessA
   };
 }
 
+const ADD_PROPERTY_TYPE_TO_ENTITY_TYPE :'ADD_PROPERTY_TYPE_TO_ENTITY_TYPE' = 'ADD_PROPERTY_TYPE_TO_ENTITY_TYPE';
+const addPropertyTypeToEntityType :RequestSequence = newRequestSequence(ADD_PROPERTY_TYPE_TO_ENTITY_TYPE);
+
 const RM_PROPERTY_TYPE_FROM_ENTITY_TYPE :'RM_PROPERTY_TYPE_FROM_ENTITY_TYPE' = 'RM_PROPERTY_TYPE_FROM_ENTITY_TYPE';
 const removePropertyTypeFromEntityType :RequestSequence = newRequestSequence(RM_PROPERTY_TYPE_FROM_ENTITY_TYPE);
 
 export {
+  ADD_PROPERTY_TYPE_TO_ENTITY_TYPE,
   CREATE_ENTITY_TYPE_FAILURE,
   CREATE_ENTITY_TYPE_REQUEST,
   CREATE_ENTITY_TYPE_SUCCESS,
@@ -223,6 +227,7 @@ export {
 };
 
 export {
+  addPropertyTypeToEntityType,
   createEntityTypeFailure,
   createEntityTypeRequest,
   createEntityTypeSuccess,

@@ -5,6 +5,7 @@
 import React from 'react';
 
 import Immutable from 'immutable';
+import styled from 'styled-components';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 
@@ -13,10 +14,15 @@ import AbstractTypeDataTable from '../../../components/datatable/AbstractTypeDat
 import AbstractTypeFieldDescription from '../AbstractTypeFieldDescription';
 import AbstractTypeFieldTitle from '../AbstractTypeFieldTitle';
 import AbstractTypeFieldType from '../AbstractTypeFieldType';
+import AbstractTypeSearchableSelect from '../../../components/controls/AbstractTypeSearchableSelect';
 import StyledButton from '../../../components/buttons/StyledButton';
 
 import * as AuthUtils from '../../../core/auth/AuthUtils';
-import { deleteEntityTypeRequest, removePropertyTypeFromEntityType } from './EntityTypesActionFactory';
+import {
+  addPropertyTypeToEntityType,
+  deleteEntityTypeRequest,
+  removePropertyTypeFromEntityType
+} from './EntityTypesActionFactory';
 
 import type { RequestSequence } from '../../../core/redux/RequestSequence';
 
@@ -28,12 +34,17 @@ const DeleteButton = StyledButton.extend`
   align-self: center;
 `;
 
+const AbstractTypeSearchableSelectWrapper = styled.div`
+  margin: 20px 0;
+`;
+
 /*
  * types
  */
 
 type Props = {
   actions :{
+    addPropertyTypeToEntityType :RequestSequence,
     deleteEntityTypeRequest :Function,
     removePropertyTypeFromEntityType :RequestSequence
   },
@@ -43,6 +54,16 @@ type Props = {
 }
 
 class EntityTypeDetailsContainer extends React.Component<Props> {
+
+  handleOnPropertyTypeAdd = (selectedPropertyTypeId :string) => {
+
+    if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
+      this.props.actions.addPropertyTypeToEntityType({
+        entityTypeId: this.props.entityType.get('id'),
+        propertyTypeId: selectedPropertyTypeId
+      });
+    }
+  }
 
   handleOnPropertyTypeRemove = (removedAbstractTypeId :string) => {
 
@@ -86,6 +107,29 @@ class EntityTypeDetailsContainer extends React.Component<Props> {
       <section>
         <h2>PropertyTypes</h2>
         { propertyTypesDataTable }
+      </section>
+    );
+  }
+
+  renderAddPropertyTypesSection = () => {
+
+    const availablePropertyTypes :List<Map<*, *>> = this.props.propertyTypes
+      .filterNot((propertyType :Map<*, *>) => {
+        const propertyTypeIds :List<string> = this.props.entityType.get('properties', Immutable.List());
+        return propertyTypeIds.includes(propertyType.get('id', ''));
+      });
+
+    return (
+      <section>
+        <h2>Add PropertyTypes</h2>
+        <AbstractTypeSearchableSelectWrapper>
+          <AbstractTypeSearchableSelect
+              abstractTypes={availablePropertyTypes}
+              maxHeight={400}
+              searchPlaceholder="Available PropertyTypes..."
+              workingAbstractTypeType={AbstractTypes.PropertyType}
+              onAbstractTypeSelect={this.handleOnPropertyTypeAdd} />
+        </AbstractTypeSearchableSelectWrapper>
       </section>
     );
   }
@@ -169,6 +213,7 @@ class EntityTypeDetailsContainer extends React.Component<Props> {
             ? null
             : this.renderPropertyTypesSection(propertyTypes)
         }
+        { this.renderAddPropertyTypesSection() }
         {/*
           <section>
             <h2>Schemas</h2>
@@ -200,6 +245,7 @@ function mapStateToProps(state :Map<*, *>) :Object {
 function mapDispatchToProps(dispatch :Function) :Object {
 
   const actions = {
+    addPropertyTypeToEntityType,
     deleteEntityTypeRequest,
     removePropertyTypeFromEntityType
   };

@@ -7,7 +7,6 @@ import React from 'react';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 import Immutable from 'immutable';
 import styled, { css } from 'styled-components';
-import { Models, Types } from 'lattice';
 
 import AbstractTypes from '../../utils/AbstractTypes';
 import AbstractTypeDataTable from '../datatable/AbstractTypeDataTable';
@@ -15,16 +14,6 @@ import { filterAbstractTypes } from '../../utils/AbstractTypeUtils';
 
 import type { AbstractType } from '../../utils/AbstractTypes';
 import type { AbstractTypeFilterParams } from '../../utils/AbstractTypeUtils';
-
-const {
-  FullyQualifiedName,
-  EntityType,
-  EntityTypeBuilder
-} = Models;
-
-const {
-  SecurableTypes
-} = Types;
 
 /*
  * styled components
@@ -203,6 +192,7 @@ class AbstractTypeSearchableSelect extends React.Component<Props, State> {
               <DataTableWrapper isVisible={this.state.isVisibleDataTable}>
                 <AbstractTypeDataTable
                     abstractTypes={this.state.filteredTypes}
+                    highlightOnHover
                     maxHeight={this.props.maxHeight}
                     workingAbstractTypeType={this.props.workingAbstractTypeType}
                     onAbstractTypeSelect={this.handleOnAbstractTypeSelect} />
