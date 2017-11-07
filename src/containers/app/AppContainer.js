@@ -16,6 +16,8 @@ import { login, logout } from '../../core/auth/AuthActionFactory';
 
 import EntityDataModelContainer from '../edm/EntityDataModelContainer';
 
+import OpenLatticeLogo from '../../assets/images/logo_and_name.png';
+
 /*
  * styled components
  */
@@ -55,6 +57,11 @@ const StyledActionButton = StyledButton.extend`
   right: 50px;
 `;
 
+const Logo = styled.img`
+  position: absolute;
+  left: 50px;
+`;
+
 /*
  * types
  */
@@ -72,7 +79,8 @@ const AppContainer = (props :Props) => {
     <AppWrapper>
       <AppHeaderOuterWrapper>
         <AppHeaderInnerWrapper>
-          <Title>OpenLattice Entity Data Model</Title>
+          <Logo src={OpenLatticeLogo} height="50" />
+          <Title>Entity Data Model</Title>
           {
             AuthUtils.isAuthenticated()
               ? (
