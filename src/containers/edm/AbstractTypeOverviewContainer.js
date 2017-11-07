@@ -114,13 +114,15 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
       workingAbstractTypeType: props.workingAbstractTypeType
     };
 
-    const workingAbstractTypes :List<Map<*, *>> = getWorkingAbstractTypes(params);
+    const filteredTypes :List<Map<*, *>> = getWorkingAbstractTypes(params);
+    const selectedAbstractType :Map<*, *> = filteredTypes.get(0, Immutable.Map());
+    const selectedAbstractTypeId :string = selectedAbstractType.get('id', '');
 
     this.state = {
+      filteredTypes,
+      selectedAbstractType,
+      selectedAbstractTypeId,
       filterQuery: '',
-      filteredTypes: workingAbstractTypes,
-      selectedAbstractType: workingAbstractTypes.get(0, Immutable.Map()),
-      selectedAbstractTypeId: '',
       showCreateNewAbstractTypeCard: false
     };
   }
@@ -151,9 +153,12 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
 
     // by default, use first element as the selected abstract type
     let selectedAbstractType :Map<*, *> = workingAbstractTypes.get(0, Immutable.Map());
+    let selectedAbstractTypeId :string = this.state.selectedAbstractTypeId;
+    if (!selectedAbstractTypeId) {
+      selectedAbstractTypeId = selectedAbstractType.get('id', '');
+    }
 
     // check if a new abstract type was created, and if so, use its id for selection
-    let selectedAbstractTypeId :string = this.state.selectedAbstractTypeId;
     if (newlyCreatedPropertyTypeId
         && newlyCreatedPropertyTypeId !== this.props.newlyCreatedPropertyTypeId) {
       selectedAbstractTypeId = newlyCreatedPropertyTypeId;
@@ -345,6 +350,8 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
         }
         <AbstractTypeDataTable
             abstractTypes={this.state.filteredTypes}
+            highlightOnHover
+            highlightOnSelect
             maxHeight={600}
             workingAbstractTypeType={this.props.workingAbstractTypeType}
             onAbstractTypeSelect={this.handleOnAbstractTypeSelect} />

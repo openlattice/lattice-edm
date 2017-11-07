@@ -8,7 +8,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 import FontAwesome from '@fortawesome/fontawesome';
-import { faCheck, faPencilAlt, faSearch } from '@fortawesome/fontawesome-free-solid';
+import { faCheck, faPencilAlt, faSearch, faTimes } from '@fortawesome/fontawesome-free-solid';
 
 import { ConnectedRouter } from 'react-router-redux';
 import { Provider } from 'react-redux';
@@ -62,7 +62,7 @@ injectGlobal`
 /* eslint-enable */
 
 // TODO: move styling into core/style
-FontAwesome.library.add(faCheck, faPencilAlt, faSearch);
+FontAwesome.library.add(faCheck, faPencilAlt, faSearch, faTimes);
 
 /*
  * // !!! MUST HAPPEN FIRST !!!
