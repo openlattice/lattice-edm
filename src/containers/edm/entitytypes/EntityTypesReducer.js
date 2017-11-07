@@ -17,10 +17,13 @@ import {
   FETCH_ALL_ENTITY_TYPES_SUCCESS,
   UPDATE_ENTITY_TYPE_METADATA_FAILURE,
   UPDATE_ENTITY_TYPE_METADATA_REQUEST,
-  UPDATE_ENTITY_TYPE_METADATA_SUCCESS
+  UPDATE_ENTITY_TYPE_METADATA_SUCCESS,
+  addPropertyTypeToEntityType,
+  removePropertyTypeFromEntityType
 } from './EntityTypesActionFactory';
 
 import type { Action } from './EntityTypesActionFactory';
+import type { SequenceAction } from '../../../core/redux/RequestSequence';
 
 const { EntityType, EntityTypeBuilder } = Models;
 
@@ -149,6 +152,68 @@ export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, act
       }
 
       return state;
+    }
+
+    case (addPropertyTypeToEntityType.case(action.type)): {
+      return addPropertyTypeToEntityType.reducer(state, action, {
+        SUCCESS: () => {
+
+          const seqAction = ((action :any) :SequenceAction);
+          const targetEntityTypeId :string = seqAction.data.entityTypeId;
+          const targetPropertyTypeId :string = seqAction.data.propertyTypeId;
+          const targetEntityTypeIndex :number = state.getIn(['entityTypesById', targetEntityTypeId], -1);
+
+          if (targetEntityTypeIndex === -1) {
+            return state;
+          }
+
+          const currentEntityType :Map<*, *> = state.getIn(['entityTypes', targetEntityTypeIndex], Immutable.Map());
+          const currentPropertyTypeIds :List<string> = currentEntityType.get('properties', Immutable.List());
+          const propertyTypeIndex :number = currentPropertyTypeIds.findIndex((propertyTypeId :string) => {
+            return propertyTypeId === targetPropertyTypeId;
+          });
+
+          // don't do anything if the PropertyType being added is already in the list
+          if (propertyTypeIndex !== -1) {
+            return state;
+          }
+
+          const updatedPropertyTypeIds :List<string> = currentPropertyTypeIds.push(targetPropertyTypeId);
+          const updatedEntityType :Map<*, *> = currentEntityType.set('properties', updatedPropertyTypeIds);
+          return state.setIn(['entityTypes', targetEntityTypeIndex], updatedEntityType);
+        }
+      });
+    }
+
+    case (removePropertyTypeFromEntityType.case(action.type)): {
+      return removePropertyTypeFromEntityType.reducer(state, action, {
+        SUCCESS: () => {
+
+          const seqAction = ((action :any) :SequenceAction);
+          const targetEntityTypeId :string = seqAction.data.entityTypeId;
+          const targetPropertyTypeId :string = seqAction.data.propertyTypeId;
+          const targetEntityTypeIndex :number = state.getIn(['entityTypesById', targetEntityTypeId], -1);
+
+          if (targetEntityTypeIndex === -1) {
+            return state;
+          }
+
+          const currentEntityType :Map<*, *> = state.getIn(['entityTypes', targetEntityTypeIndex], Immutable.Map());
+          const currentPropertyTypeIds :List<string> = currentEntityType.get('properties', Immutable.List());
+          const propertyTypeIndex :number = currentPropertyTypeIds.findIndex((propertyTypeId :string) => {
+            return propertyTypeId === targetPropertyTypeId;
+          });
+
+          // don't do anything if the PropertyType being removed is not actually in the list
+          if (propertyTypeIndex === -1) {
+            return state;
+          }
+
+          const updatedPropertyTypeIds :List<string> = currentPropertyTypeIds.delete(propertyTypeIndex);
+          const updatedEntityType :Map<*, *> = currentEntityType.set('properties', updatedPropertyTypeIds);
+          return state.setIn(['entityTypes', targetEntityTypeIndex], updatedEntityType);
+        }
+      });
     }
 
     default:

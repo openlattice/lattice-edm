@@ -8,6 +8,8 @@ import Immutable from 'immutable';
 import styled from 'styled-components';
 import { AutoSizer, Grid, ScrollSync } from 'react-virtualized';
 
+import AbstractCell, { AbstractCellTypes } from './AbstractCell';
+
 /*
  * constants
  */
@@ -16,7 +18,7 @@ import { AutoSizer, Grid, ScrollSync } from 'react-virtualized';
 // const DEFAULT_GRID_MAX_WIDTH :number = 500;
 
 const DEFAULT_COLUMN_MAX_WIDTH :number = 500;
-const DEFAULT_COLUMN_MIN_WIDTH :number = 100;
+const DEFAULT_COLUMN_MIN_WIDTH :number = 50;
 
 const DEFAULT_ROW_MIN_HEIGHT :number = 50;
 
@@ -57,33 +59,6 @@ const BodyGrid = styled(Grid)`
   outline: none;
   margin-top: -1px;
   z-index: 99;
-  &:hover {
-    cursor: pointer;
-  }
-`;
-
-const HeadCell = styled.div`
-  align-items: center;
-  border-bottom: 1px solid #516a83;
-  display: flex;
-  font-weight: 600;
-  padding: ${CELL_PADDING}px;
-`;
-
-const BodyCell = styled.div`
-  align-items: center;
-  border-top: 1px solid #c5d5e5;
-  display: flex;
-  font-size: 14px;
-  padding: ${CELL_PADDING}px;
-`;
-
-const CellText = styled.p`
-  line-height: normal;
-  margin: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 `;
 
 /*
@@ -94,23 +69,23 @@ type GridData = List<Map<string, string>>;
 type GridHeaders = List<Map<string, string>>;
 
 type Props = {
-  data :GridData,
-  headers :GridHeaders,
-  height :number,
-  maxHeight :number,
-  maxWidth :number,
-  width :number,
-  onRowClick :Function
+  data :GridData;
+  headers :GridHeaders;
+  height :number;
+  maxHeight :number;
+  maxWidth :number;
+  width :number;
+  bodyCellRenderer :(params :Object, cellValue :mixed) => mixed;
 }
 
 type State = {
-  autosizerHeight :number,
-  autosizerWidth :number,
-  columnWidths :Map<number, number>,
-  computedBodyGridHeight :number,
-  computedBodyGridWidth :number,
-  computedHeadGridHeight :number,
-  computedHeadGridWidth :number
+  autosizerHeight :number;
+  autosizerWidth :number;
+  columnWidths :Map<number, number>;
+  computedBodyGridHeight :number;
+  computedBodyGridWidth :number;
+  computedHeadGridHeight :number;
+  computedHeadGridWidth :number;
 }
 
 /*
@@ -129,25 +104,12 @@ class AbstractDataTable extends React.Component<Props, State> {
     maxHeight: -1,
     maxWidth: -1,
     width: -1,
-    onRowClick: () => {}
+    bodyCellRenderer: null
   };
 
   constructor(props :Props) {
 
     super(props);
-
-    // const dimensions :Object = AbstractDataTable.computeDimensions({
-    //   autosizerHeight: 0,
-    //   autosizerWidth: 0,
-    //   data: props.data,
-    //   headers: props.headers,
-    //   specifiedMaxHeight: props.maxHeight,
-    //   specifiedMaxWidth: props.maxWidth,
-    //   specifiedHeight: props.height,
-    //   specifiedWidth: props.width
-    // });
-
-    // console.log(dimensions);
 
     this.state = {
       autosizerHeight: 0,
@@ -157,7 +119,6 @@ class AbstractDataTable extends React.Component<Props, State> {
       computedBodyGridWidth: 0,
       computedHeadGridHeight: 0,
       computedHeadGridWidth: 0
-      // ...dimensions
     };
   }
 
@@ -328,7 +289,7 @@ class AbstractDataTable extends React.Component<Props, State> {
 
     // keeping it simple
     // TODO: handle various cell value types (string, number, array, object, etc.)
-    const header :string = this.props.headers.getIn([columnIndex, 'id']);
+    const header :string = this.props.headers.getIn([columnIndex, 'id'], '');
     return this.props.data.getIn([rowIndex, header], '');
   }
 
@@ -354,35 +315,31 @@ class AbstractDataTable extends React.Component<Props, State> {
 
   renderHeadCell = (params :Object) => {
 
-    const cellValue :string = this.props.headers.getIn([params.columnIndex, 'value']);
+    const cellValue :string = this.props.headers.getIn([params.columnIndex, 'value'], '');
 
     return (
-      <HeadCell
+      <AbstractCell
           key={params.key}
-          style={params.style}>
-        <CellText>{ cellValue }</CellText>
-      </HeadCell>
+          params={params}
+          type={AbstractCellTypes.HEAD}
+          value={cellValue} />
     );
   }
 
   renderBodyCell = (params :Object) => {
 
-    // TODO: handle hover effects
-
-    // const setState = this.setState.bind(this);
+    const { bodyCellRenderer } = this.props;
     const cellValue :string = this.getCellValue(params.rowIndex, params.columnIndex);
 
+    if (bodyCellRenderer && typeof bodyCellRenderer === 'function') {
+      return bodyCellRenderer(params, cellValue);
+    }
+
     return (
-      <BodyCell
+      <AbstractCell
           key={params.key}
-          style={params.style}
-          onMouseDown={() => {
-            // setState({ selectedRowIndex: params.rowIndex });
-            // params.parent.forceUpdate();
-            this.props.onRowClick(params.rowIndex, this.props.data.get(params.rowIndex));
-          }}>
-        <CellText>{ cellValue }</CellText>
-      </BodyCell>
+          params={params}
+          value={cellValue} />
     );
   }
 
@@ -405,7 +362,7 @@ class AbstractDataTable extends React.Component<Props, State> {
                 <DataTableInnerWrapper>
                   <AutoSizer disableHeight onResize={this.onAutoSizerResize}>
                     {
-                      ({ height, width }) => {
+                      (/* { height, width } */) => {
                         // if (height !== (this.state.computedHeadGridHeight + this.state.computedBodyGridHeight)
                         //     || width !== this.state.computedHeadGridWidth
                         //     || width !== this.state.computedBodyGridWidth) {

@@ -4,6 +4,10 @@
 
 import { Models } from 'lattice';
 
+import { newRequestSequence } from '../../../core/redux/RequestSequence';
+
+import type { RequestSequence } from '../../../core/redux/RequestSequence';
+
 const { EntityType } = Models;
 
 const FETCH_ALL_ENTITY_TYPES_FAILURE :'FETCH_ALL_ENTITY_TYPES_FAILURE' = 'FETCH_ALL_ENTITY_TYPES_FAILURE';
@@ -199,7 +203,14 @@ function deleteEntityTypeSuccess(entityTypeId :string) :DeleteEntityTypeSuccessA
   };
 }
 
+const ADD_PROPERTY_TYPE_TO_ENTITY_TYPE :'ADD_PROPERTY_TYPE_TO_ENTITY_TYPE' = 'ADD_PROPERTY_TYPE_TO_ENTITY_TYPE';
+const addPropertyTypeToEntityType :RequestSequence = newRequestSequence(ADD_PROPERTY_TYPE_TO_ENTITY_TYPE);
+
+const RM_PROPERTY_TYPE_FROM_ENTITY_TYPE :'RM_PROPERTY_TYPE_FROM_ENTITY_TYPE' = 'RM_PROPERTY_TYPE_FROM_ENTITY_TYPE';
+const removePropertyTypeFromEntityType :RequestSequence = newRequestSequence(RM_PROPERTY_TYPE_FROM_ENTITY_TYPE);
+
 export {
+  ADD_PROPERTY_TYPE_TO_ENTITY_TYPE,
   CREATE_ENTITY_TYPE_FAILURE,
   CREATE_ENTITY_TYPE_REQUEST,
   CREATE_ENTITY_TYPE_SUCCESS,
@@ -209,12 +220,14 @@ export {
   FETCH_ALL_ENTITY_TYPES_FAILURE,
   FETCH_ALL_ENTITY_TYPES_REQUEST,
   FETCH_ALL_ENTITY_TYPES_SUCCESS,
+  RM_PROPERTY_TYPE_FROM_ENTITY_TYPE,
   UPDATE_ENTITY_TYPE_METADATA_FAILURE,
   UPDATE_ENTITY_TYPE_METADATA_REQUEST,
   UPDATE_ENTITY_TYPE_METADATA_SUCCESS
 };
 
 export {
+  addPropertyTypeToEntityType,
   createEntityTypeFailure,
   createEntityTypeRequest,
   createEntityTypeSuccess,
@@ -224,6 +237,7 @@ export {
   fetchAllEntityTypesFailure,
   fetchAllEntityTypesRequest,
   fetchAllEntityTypesSuccess,
+  removePropertyTypeFromEntityType,
   updateEntityTypeMetaDataFailure,
   updateEntityTypeMetaDataRequest,
   updateEntityTypeMetaDataSuccess
