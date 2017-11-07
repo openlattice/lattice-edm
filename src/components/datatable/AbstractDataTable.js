@@ -59,9 +59,6 @@ const BodyGrid = styled(Grid)`
   outline: none;
   margin-top: -1px;
   z-index: 99;
-  &:hover {
-    cursor: pointer;
-  }
 `;
 
 /*

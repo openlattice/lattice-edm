@@ -215,7 +215,7 @@ class AbstractTypeDataTable extends React.Component<Props, State> {
       return (
         <AbstractCell
             highlight={shouldHighlightCell}
-            justifyContent="center"
+            justifyContent="flex-end"
             key={params.key}
             params={params}
             value={(
