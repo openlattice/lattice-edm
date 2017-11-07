@@ -15,6 +15,8 @@ import {
   FETCH_ALL_ENTITY_TYPES_REQUEST,
   fetchAllEntityTypesFailure,
   fetchAllEntityTypesSuccess,
+  RM_PROPERTY_TYPE_FROM_ENTITY_TYPE,
+  removePropertyTypeFromEntityType,
   UPDATE_ENTITY_TYPE_METADATA_REQUEST,
   updateEntityTypeMetaDataFailure,
   updateEntityTypeMetaDataSuccess
@@ -64,6 +66,39 @@ export function* watchFetchAllEntityTypesRequest() :Generator<*, *, *> {
     }
     catch (error) {
       yield put(fetchAllEntityTypesFailure(error));
+    }
+  }
+}
+
+export function* watchRemovePropertyTypeFromEntityType() :Generator<*, *, *> {
+
+  while (true) {
+    const action = yield take(RM_PROPERTY_TYPE_FROM_ENTITY_TYPE);
+    yield put(removePropertyTypeFromEntityType.request());
+    try {
+      yield call(
+        EntityDataModelApi.removePropertyTypeFromEntityType,
+        action.data.entityTypeId,
+        action.data.propertyTypeId
+      );
+      yield put(
+        removePropertyTypeFromEntityType.success({
+          entityTypeId: action.data.entityTypeId,
+          propertyTypeId: action.data.propertyTypeId
+        })
+      );
+    }
+    catch (error) {
+      yield put(
+        removePropertyTypeFromEntityType.failure({
+          error,
+          entityTypeId: action.data.entityTypeId,
+          propertyTypeId: action.data.propertyTypeId
+        })
+      );
+    }
+    finally {
+      yield put(removePropertyTypeFromEntityType.finally());
     }
   }
 }

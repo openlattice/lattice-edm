@@ -74,7 +74,7 @@ const CellWrapper = styled.div`
   ${getFontWeight}
 `;
 
-const CellValue = styled.p`
+const CellValueWrapper = styled.div`
   line-height: normal;
   margin: 0;
   overflow: hidden;
@@ -124,7 +124,7 @@ class AbstractCell extends React.Component<Props> {
           onMouseDown={this.props.onMouseDown}
           onMouseLeave={this.props.onMouseLeave}
           onMouseOver={this.props.onMouseOver}>
-        <CellValue>{ this.props.value }</CellValue>
+        <CellValueWrapper>{ this.props.value }</CellValueWrapper>
       </CellWrapper>
     );
   }

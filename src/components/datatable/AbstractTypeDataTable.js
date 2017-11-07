@@ -6,6 +6,7 @@ import React from 'react';
 
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 import Immutable from 'immutable';
+import styled from 'styled-components';
 import { Models } from 'lattice';
 
 import AbstractCell from './AbstractCell';
@@ -38,6 +39,17 @@ const DEFAULT_HEADERS :List<Map<string, string>> = Immutable.fromJS([
   TYPE_HEADER,
   TITLE_HEADER
 ]);
+
+/*
+ * styled components
+ */
+
+const RemoveButtonWrapper = styled.div`
+  padding: 10px;
+  &:hover {
+   cursor: pointer;
+  }
+`;
 
 /*
  * types
@@ -219,12 +231,14 @@ class AbstractTypeDataTable extends React.Component<Props, State> {
             key={params.key}
             params={params}
             value={(
-              <FontAwesomeIcon pack="fas" name="times" />
+              <RemoveButtonWrapper
+                  onMouseDown={() => {
+                    this.handleOnAbstractTypeRemove(params.rowIndex);
+                    params.parent.forceUpdate();
+                  }}>
+                <FontAwesomeIcon pack="fas" name="times" />
+              </RemoveButtonWrapper>
             )}
-            onMouseDown={() => {
-              this.handleOnAbstractTypeRemove(params.rowIndex);
-              params.parent.forceUpdate();
-            }}
             onMouseLeave={() => {
               this.setState({
                 hoveredRowIndex: -1

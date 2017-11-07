@@ -16,7 +16,9 @@ import AbstractTypeFieldType from '../AbstractTypeFieldType';
 import StyledButton from '../../../components/buttons/StyledButton';
 
 import * as AuthUtils from '../../../core/auth/AuthUtils';
-import { deleteEntityTypeRequest } from './EntityTypesActionFactory';
+import { deleteEntityTypeRequest, removePropertyTypeFromEntityType } from './EntityTypesActionFactory';
+
+import type { RequestSequence } from '../../../core/redux/RequestSequence';
 
 /*
  * styled components
@@ -33,6 +35,7 @@ const DeleteButton = StyledButton.extend`
 type Props = {
   actions :{
     deleteEntityTypeRequest :Function,
+    removePropertyTypeFromEntityType :RequestSequence
   },
   entityType :Map<*, *>,
   propertyTypes :List<Map<*, *>>,
@@ -41,11 +44,50 @@ type Props = {
 
 class EntityTypeDetailsContainer extends React.Component<Props> {
 
+  handleOnPropertyTypeRemove = (removedAbstractTypeId :string) => {
+
+    if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
+      this.props.actions.removePropertyTypeFromEntityType({
+        entityTypeId: this.props.entityType.get('id'),
+        propertyTypeId: removedAbstractTypeId
+      });
+    }
+  }
+
   handleOnClickDelete = () => {
 
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
       this.props.actions.deleteEntityTypeRequest(this.props.entityType.get('id'));
     }
+  }
+
+  renderPropertyTypesSection = (propertyTypes :List<Map<*, *>>) => {
+
+    let propertyTypesDataTable :React$Node = (
+      <AbstractTypeDataTable
+          abstractTypes={propertyTypes}
+          maxHeight={500}
+          workingAbstractTypeType={AbstractTypes.PropertyType} />
+    );
+
+    if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
+      propertyTypesDataTable = (
+        <AbstractTypeDataTable
+            abstractTypes={propertyTypes}
+            highlightOnHover
+            maxHeight={500}
+            showRemoveColumn
+            onAbstractTypeRemove={this.handleOnPropertyTypeRemove}
+            workingAbstractTypeType={AbstractTypes.PropertyType} />
+      );
+    }
+
+    return (
+      <section>
+        <h2>PropertyTypes</h2>
+        { propertyTypesDataTable }
+      </section>
+    );
   }
 
   render() {
@@ -125,20 +167,14 @@ class EntityTypeDetailsContainer extends React.Component<Props> {
         {
           propertyTypes.isEmpty()
             ? null
-            : (
-              <section>
-                <h2>PropertyTypes</h2>
-                <AbstractTypeDataTable
-                    abstractTypes={propertyTypes}
-                    maxHeight={500}
-                    workingAbstractTypeType={AbstractTypes.PropertyType} />
-              </section>
-            )
+            : this.renderPropertyTypesSection(propertyTypes)
         }
-        <section>
-          <h2>Schemas</h2>
-          <p>TODO</p>
-        </section>
+        {/*
+          <section>
+            <h2>Schemas</h2>
+            <p>TODO</p>
+          </section>
+        */}
         {
           AuthUtils.isAuthenticated() && AuthUtils.isAdmin()
             ? (
@@ -164,7 +200,8 @@ function mapStateToProps(state :Map<*, *>) :Object {
 function mapDispatchToProps(dispatch :Function) :Object {
 
   const actions = {
-    deleteEntityTypeRequest
+    deleteEntityTypeRequest,
+    removePropertyTypeFromEntityType
   };
 
   return {
