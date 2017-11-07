@@ -32,9 +32,9 @@ export default function prodWebpackConfig(env :Object) {
     }),
     new webpack.optimize.OccurrenceOrderPlugin(),
     new HtmlWebpackPlugin({
+      favicon: `${APP_PATHS.ABS.SOURCE}/assets/images/favicon.png`,
       inject: true,
       template: `${APP_PATHS.ABS.SOURCE}/${APP_CONFIG.APP_INDEX_HTML}`
-      // favicon: `${APP_PATHS.ABS.SOURCE}/images/favicon.png`
     }),
     new UglifyJsPlugin(),
     ...baseConfig.plugins
