@@ -154,23 +154,24 @@ export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, act
       return state;
     }
 
-    case (addPropertyTypeToEntityType.case(action.type)): {
+    case addPropertyTypeToEntityType.case(action.type): {
       return addPropertyTypeToEntityType.reducer(state, action, {
         SUCCESS: () => {
 
           const seqAction = ((action :any) :SequenceAction);
-          const targetEntityTypeId :string = seqAction.data.entityTypeId;
-          const targetPropertyTypeId :string = seqAction.data.propertyTypeId;
-          const targetEntityTypeIndex :number = state.getIn(['entityTypesById', targetEntityTypeId], -1);
+          const targetId :string = seqAction.data.entityTypeId;
+          const targetIndex :number = state.getIn(['entityTypesById', targetId], -1);
 
-          if (targetEntityTypeIndex === -1) {
+          // don't do anything if the EntityType being modified isn't available
+          if (targetIndex === -1) {
             return state;
           }
 
-          const currentEntityType :Map<*, *> = state.getIn(['entityTypes', targetEntityTypeIndex], Immutable.Map());
+          const propertyTypeIdToAdd :string = seqAction.data.propertyTypeId;
+          const currentEntityType :Map<*, *> = state.getIn(['entityTypes', targetIndex], Immutable.Map());
           const currentPropertyTypeIds :List<string> = currentEntityType.get('properties', Immutable.List());
           const propertyTypeIndex :number = currentPropertyTypeIds.findIndex((propertyTypeId :string) => {
-            return propertyTypeId === targetPropertyTypeId;
+            return propertyTypeId === propertyTypeIdToAdd;
           });
 
           // don't do anything if the PropertyType being added is already in the list
@@ -178,40 +179,40 @@ export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, act
             return state;
           }
 
-          const updatedPropertyTypeIds :List<string> = currentPropertyTypeIds.push(targetPropertyTypeId);
+          const updatedPropertyTypeIds :List<string> = currentPropertyTypeIds.push(propertyTypeIdToAdd);
           const updatedEntityType :Map<*, *> = currentEntityType.set('properties', updatedPropertyTypeIds);
-          return state.setIn(['entityTypes', targetEntityTypeIndex], updatedEntityType);
+          return state.setIn(['entityTypes', targetIndex], updatedEntityType);
         }
       });
     }
 
-    case (removePropertyTypeFromEntityType.case(action.type)): {
+    case removePropertyTypeFromEntityType.case(action.type): {
       return removePropertyTypeFromEntityType.reducer(state, action, {
         SUCCESS: () => {
 
           const seqAction = ((action :any) :SequenceAction);
-          const targetEntityTypeId :string = seqAction.data.entityTypeId;
-          const targetPropertyTypeId :string = seqAction.data.propertyTypeId;
-          const targetEntityTypeIndex :number = state.getIn(['entityTypesById', targetEntityTypeId], -1);
+          const targetId :string = seqAction.data.entityTypeId;
+          const targetIndex :number = state.getIn(['entityTypesById', targetId], -1);
 
-          if (targetEntityTypeIndex === -1) {
+          // don't do anything if the EntityType being modified isn't available
+          if (targetIndex === -1) {
             return state;
           }
 
-          const currentEntityType :Map<*, *> = state.getIn(['entityTypes', targetEntityTypeIndex], Immutable.Map());
+          const currentEntityType :Map<*, *> = state.getIn(['entityTypes', targetIndex], Immutable.Map());
           const currentPropertyTypeIds :List<string> = currentEntityType.get('properties', Immutable.List());
-          const propertyTypeIndex :number = currentPropertyTypeIds.findIndex((propertyTypeId :string) => {
-            return propertyTypeId === targetPropertyTypeId;
+          const removalIndex :number = currentPropertyTypeIds.findIndex((propertyTypeId :string) => {
+            return propertyTypeId === seqAction.data.propertyTypeId;
           });
 
           // don't do anything if the PropertyType being removed is not actually in the list
-          if (propertyTypeIndex === -1) {
+          if (removalIndex === -1) {
             return state;
           }
 
-          const updatedPropertyTypeIds :List<string> = currentPropertyTypeIds.delete(propertyTypeIndex);
+          const updatedPropertyTypeIds :List<string> = currentPropertyTypeIds.delete(removalIndex);
           const updatedEntityType :Map<*, *> = currentEntityType.set('properties', updatedPropertyTypeIds);
-          return state.setIn(['entityTypes', targetEntityTypeIndex], updatedEntityType);
+          return state.setIn(['entityTypes', targetIndex], updatedEntityType);
         }
       });
     }

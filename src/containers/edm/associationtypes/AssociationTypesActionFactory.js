@@ -4,6 +4,10 @@
 
 import { Models } from 'lattice';
 
+import { newRequestSequence } from '../../../core/redux/RequestSequence';
+
+import type { RequestSequence } from '../../../core/redux/RequestSequence';
+
 const { AssociationType } = Models;
 
 /* eslint-disable max-len */
@@ -209,7 +213,21 @@ function deleteAssociationTypeSuccess(associationTypeId :string) :DeleteAssociat
   };
 }
 
+const ADD_DST_ET_TO_AT :'ADD_DST_ET_TO_AT' = 'ADD_DST_ET_TO_AT';
+const addDestinationEntityTypeToAssociationType :RequestSequence = newRequestSequence(ADD_DST_ET_TO_AT);
+
+const ADD_SRC_ET_TO_AT :'ADD_SRC_ET_TO_AT' = 'ADD_SRC_ET_TO_AT';
+const addSourceEntityTypeToAssociationType :RequestSequence = newRequestSequence(ADD_SRC_ET_TO_AT);
+
+const RM_DST_ET_FROM_AT :'RM_DST_ET_FROM_AT' = 'RM_DST_ET_FROM_AT';
+const removeDestinationEntityTypeFromAssociationType :RequestSequence = newRequestSequence(RM_DST_ET_FROM_AT);
+
+const RM_SRC_ET_FROM_AT :'RM_SRC_ET_FROM_AT' = 'RM_SRC_ET_FROM_AT';
+const removeSourceEntityTypeFromAssociationType :RequestSequence = newRequestSequence(RM_SRC_ET_FROM_AT);
+
 export {
+  ADD_DST_ET_TO_AT,
+  ADD_SRC_ET_TO_AT,
   CREATE_ASSOCIATION_TYPE_FAILURE,
   CREATE_ASSOCIATION_TYPE_REQUEST,
   CREATE_ASSOCIATION_TYPE_SUCCESS,
@@ -219,12 +237,16 @@ export {
   FETCH_ALL_ASSOCIATION_TYPES_FAILURE,
   FETCH_ALL_ASSOCIATION_TYPES_REQUEST,
   FETCH_ALL_ASSOCIATION_TYPES_SUCCESS,
+  RM_DST_ET_FROM_AT,
+  RM_SRC_ET_FROM_AT,
   UPDATE_ASSOCIATION_TYPE_METADATA_FAILURE,
   UPDATE_ASSOCIATION_TYPE_METADATA_REQUEST,
   UPDATE_ASSOCIATION_TYPE_METADATA_SUCCESS
 };
 
 export {
+  addDestinationEntityTypeToAssociationType,
+  addSourceEntityTypeToAssociationType,
   createAssociationTypeFailure,
   createAssociationTypeRequest,
   createAssociationTypeSuccess,
@@ -234,6 +256,8 @@ export {
   fetchAllAssociationTypesFailure,
   fetchAllAssociationTypesRequest,
   fetchAllAssociationTypesSuccess,
+  removeDestinationEntityTypeFromAssociationType,
+  removeSourceEntityTypeFromAssociationType,
   updateAssociationTypeMetaDataFailure,
   updateAssociationTypeMetaDataRequest,
   updateAssociationTypeMetaDataSuccess
