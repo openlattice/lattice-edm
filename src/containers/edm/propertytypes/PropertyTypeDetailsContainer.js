@@ -51,9 +51,6 @@ class PropertyTypeDetailsContainer extends React.Component<Props> {
       return null;
     }
 
-    const ptSchemas :List<*> = this.props.propertyType.get('schemas', Immutable.List());
-    const schemasAsString :string = ptSchemas.isEmpty() ? '[]' : ptSchemas.toString();
-
     const ptPII :boolean = this.props.propertyType.get('piiField', false);
     const piiAsString :string = ptPII === true ? 'true' : 'false';
 
@@ -82,10 +79,6 @@ class PropertyTypeDetailsContainer extends React.Component<Props> {
         <section>
           <h2>DataType</h2>
           <p>{ this.props.propertyType.get('datatype') }</p>
-        </section>
-        <section>
-          <h2>Schemas</h2>
-          <p>{ schemasAsString }</p>
         </section>
         <section>
           <h2>PII</h2>

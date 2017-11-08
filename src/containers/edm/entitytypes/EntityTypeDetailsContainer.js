@@ -214,12 +214,6 @@ class EntityTypeDetailsContainer extends React.Component<Props> {
         </section>
         { this.renderPropertyTypesSection(propertyTypes) }
         { this.renderAddPropertyTypesSection() }
-        {/*
-          <section>
-            <h2>Schemas</h2>
-            <p>TODO</p>
-          </section>
-        */}
         {
           AuthUtils.isAuthenticated() && AuthUtils.isAdmin()
             ? (

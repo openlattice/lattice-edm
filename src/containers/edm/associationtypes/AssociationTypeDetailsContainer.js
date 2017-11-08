@@ -201,10 +201,6 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
               </div>
             )
         }
-        <div>
-          <h2>Schemas</h2>
-          <p>TODO</p>
-        </div>
       </section>
     );
   }
