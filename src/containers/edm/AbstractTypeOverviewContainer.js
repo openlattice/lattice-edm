@@ -406,9 +406,18 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
 
   render() {
 
-    if (this.props.associationTypes.isEmpty()
-        || this.props.entityTypes.isEmpty()
-        || this.props.propertyTypes.isEmpty()) {
+    const {
+      associationTypes,
+      entityTypes,
+      propertyTypes,
+      workingAbstractTypeType
+    } = this.props;
+
+    if (
+      (workingAbstractTypeType === AbstractTypes.AssociationType && associationTypes.isEmpty())
+      || (workingAbstractTypeType === AbstractTypes.EntityType && entityTypes.isEmpty())
+      || (workingAbstractTypeType === AbstractTypes.PropertyType && propertyTypes.isEmpty())
+    ) {
       return (
         <div>TODO: need a better UI to display loading or error state</div>
       );
