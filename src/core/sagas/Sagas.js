@@ -35,10 +35,12 @@ export default function* sagas() :Generator<*, *, *> {
     fork(EntityTypesSagas.watchUpdateEntityTypeMetaDataRequest),
 
     // AssociationTypesSagas
+    fork(AssociationTypesSagas.watchAddDestinationEntityTypeToAssociationType),
     fork(AssociationTypesSagas.watchAddSourceEntityTypeToAssociationType),
     fork(AssociationTypesSagas.watchCreateAssociationTypeRequest),
     fork(AssociationTypesSagas.watchDeleteAssociationTypeRequest),
     fork(AssociationTypesSagas.watchFetchAllAssociationTypesRequest),
+    fork(AssociationTypesSagas.watchRemoveDestinationEntityTypeFromAssociationType),
     fork(AssociationTypesSagas.watchRemoveSourceEntityTypeFromAssociationType),
     fork(AssociationTypesSagas.watchUpdateAssociationTypeMetaDataRequest)
   ];

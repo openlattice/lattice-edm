@@ -18,7 +18,9 @@ import {
   UPDATE_ASSOCIATION_TYPE_METADATA_FAILURE,
   UPDATE_ASSOCIATION_TYPE_METADATA_REQUEST,
   UPDATE_ASSOCIATION_TYPE_METADATA_SUCCESS,
+  addDestinationEntityTypeToAssociationType,
   addSourceEntityTypeToAssociationType,
+  removeDestinationEntityTypeFromAssociationType,
   removeSourceEntityTypeFromAssociationType
 } from './AssociationTypesActionFactory';
 
@@ -158,6 +160,38 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
       return state;
     }
 
+    case addDestinationEntityTypeToAssociationType.case(action.type): {
+      return addDestinationEntityTypeToAssociationType.reducer(state, action, {
+        SUCCESS: () => {
+
+          const seqAction = ((action :any) :SequenceAction);
+          const targetId :string = seqAction.data.associationTypeId;
+          const targetIndex :number = state.getIn(['associationTypesById', targetId], -1);
+
+          // don't do anything if the AssociationType being modified isn't available
+          if (targetIndex === -1) {
+            return state;
+          }
+
+          const entityTypeIdToAdd :string = seqAction.data.entityTypeId;
+          const currentAssociationType :Map<*, *> = state.getIn(['associationTypes', targetIndex], Immutable.Map());
+          const currentDestinationEntityTypeIds :List<string> = currentAssociationType.get('dst', Immutable.List());
+          const entityTypeIndex :number = currentDestinationEntityTypeIds.findIndex((entityTypeId :string) => {
+            return entityTypeId === entityTypeIdToAdd;
+          });
+
+          // don't do anything if the EntityType being added is already in the list
+          if (entityTypeIndex !== -1) {
+            return state;
+          }
+
+          const updatedDestinationEntityTypeIds :List<string> = currentDestinationEntityTypeIds.push(entityTypeIdToAdd);
+          const updatedAssociationType :Map<*, *> = currentAssociationType.set('dst', updatedDestinationEntityTypeIds);
+          return state.setIn(['associationTypes', targetIndex], updatedAssociationType);
+        }
+      });
+    }
+
     case addSourceEntityTypeToAssociationType.case(action.type): {
       return addSourceEntityTypeToAssociationType.reducer(state, action, {
         SUCCESS: () => {
@@ -185,6 +219,37 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
 
           const updatedSourceEntityTypeIds :List<string> = currentSourceEntityTypeIds.push(entityTypeIdToAdd);
           const updatedAssociationType :Map<*, *> = currentAssociationType.set('src', updatedSourceEntityTypeIds);
+          return state.setIn(['associationTypes', targetIndex], updatedAssociationType);
+        }
+      });
+    }
+
+    case removeDestinationEntityTypeFromAssociationType.case(action.type): {
+      return removeDestinationEntityTypeFromAssociationType.reducer(state, action, {
+        SUCCESS: () => {
+
+          const seqAction = ((action :any) :SequenceAction);
+          const targetId :string = seqAction.data.associationTypeId;
+          const targetIndex :number = state.getIn(['associationTypesById', targetId], -1);
+
+          // don't do anything if the AssociationType being modified isn't available
+          if (targetIndex === -1) {
+            return state;
+          }
+
+          const currentAssociationType :Map<*, *> = state.getIn(['associationTypes', targetIndex], Immutable.Map());
+          const currentDestinationEntityTypeIds :List<string> = currentAssociationType.get('dst', Immutable.List());
+          const removalIndex :number = currentDestinationEntityTypeIds.findIndex((entityTypeId :string) => {
+            return entityTypeId === seqAction.data.entityTypeId;
+          });
+
+          // don't do anything if the EntityType being removed is not actually in the list
+          if (removalIndex === -1) {
+            return state;
+          }
+
+          const updatedDestinationEntityTypeIds :List<string> = currentDestinationEntityTypeIds.delete(removalIndex);
+          const updatedAssociationType :Map<*, *> = currentAssociationType.set('dst', updatedDestinationEntityTypeIds);
           return state.setIn(['associationTypes', targetIndex], updatedAssociationType);
         }
       });
