@@ -67,8 +67,8 @@ FontAwesome.library.add(faCheck, faPencilAlt, faSearch, faTimes);
 /*
  * // !!! MUST HAPPEN FIRST !!!
  */
-Utils.configureLattice(AuthUtils.getAuthToken());
 Auth0.initialize();
+Utils.configureLattice(AuthUtils.getAuthToken());
 /*
  * // !!! MUST HAPPEN FIRST !!!
  */

@@ -53,7 +53,7 @@ export function getAuth0LockInstance() :Auth0Lock {
  * Here, we grab the Auth0 response from the URL and redirect to "#/login", which avoids the need for hash history
  * to invoke window.location.replace().
  */
-export function parseHashPath() {
+export function parseHashPath() :?string {
 
   const href :string = window.location.href;
   const hashIndex :number = href.indexOf('#');
@@ -67,12 +67,16 @@ export function parseHashPath() {
     return hashPath;
   }
 
-  return '';
+  return null;
 }
 
-export function initialize() {
+export function initialize() :void {
 
   auth0HashPath = parseHashPath();
+
+  if (AuthUtils.hasAuthTokenExpired(AuthUtils.getAuthToken())) {
+    AuthUtils.clearAuthInfo();
+  }
 }
 
 export function authenticate() :Promise<*> {

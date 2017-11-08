@@ -75,6 +75,7 @@ const CellWrapper = styled.div`
 `;
 
 const CellValueWrapper = styled.div`
+  cursor: default;
   line-height: normal;
   margin: 0;
   overflow: hidden;

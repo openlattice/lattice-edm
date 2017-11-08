@@ -84,7 +84,7 @@ export function getAuthTokenExpiration(maybeIdToken :?string) :number {
   }
 }
 
-export function hasAuthTokenExpired(idTokenOrExpiration :string | number) :boolean {
+export function hasAuthTokenExpired(idTokenOrExpiration :?string | number) :boolean {
 
   if (!idTokenOrExpiration || idTokenOrExpiration === -1) {
     return true;
