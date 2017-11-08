@@ -5,6 +5,7 @@
 import React from 'react';
 
 import Immutable from 'immutable';
+import styled from 'styled-components';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 
@@ -13,10 +14,17 @@ import AbstractTypeDataTable from '../../../components/datatable/AbstractTypeDat
 import AbstractTypeFieldDescription from '../AbstractTypeFieldDescription';
 import AbstractTypeFieldTitle from '../AbstractTypeFieldTitle';
 import AbstractTypeFieldType from '../AbstractTypeFieldType';
+import AbstractTypeSearchableSelect from '../../../components/controls/AbstractTypeSearchableSelect';
 import StyledButton from '../../../components/buttons/StyledButton';
 
 import * as AuthUtils from '../../../core/auth/AuthUtils';
-import { deleteAssociationTypeRequest } from './AssociationTypesActionFactory';
+import {
+  addSourceEntityTypeToAssociationType,
+  deleteAssociationTypeRequest,
+  removeSourceEntityTypeFromAssociationType
+} from './AssociationTypesActionFactory';
+
+import type { RequestSequence } from '../../../core/redux/RequestSequence';
 
 /*
  * styled components
@@ -26,13 +34,19 @@ const DeleteButton = StyledButton.extend`
   align-self: center;
 `;
 
+const AbstractTypeSearchableSelectWrapper = styled.div`
+  margin: 20px 0;
+`;
+
 /*
  * types
  */
 
 type Props = {
   actions :{
+    addSourceEntityTypeToAssociationType :RequestSequence,
     deleteAssociationTypeRequest :Function,
+    removeSourceEntityTypeFromAssociationType :RequestSequence
   },
   associationType :Map<*, *>,
   entityTypes :List<Map<*, *>>,
@@ -42,6 +56,28 @@ type Props = {
 };
 
 class AssoctTypeDetailsContainer extends React.Component<Props> {
+
+  handleAddSourceEntityTypeToAssociationType = (entityTypeIdToAdd :string) => {
+
+    if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
+      const associationEntityType :Map<*, *> = this.props.associationType.get('entityType', Immutable.Map());
+      this.props.actions.addSourceEntityTypeToAssociationType({
+        associationTypeId: associationEntityType.get('id'),
+        entityTypeId: entityTypeIdToAdd
+      });
+    }
+  }
+
+  handleRemoveSourceEntityTypeFromAssociationType = (entityTypeIdToRemove :string) => {
+
+    if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
+      const associationEntityType :Map<*, *> = this.props.associationType.get('entityType', Immutable.Map());
+      this.props.actions.removeSourceEntityTypeFromAssociationType({
+        associationTypeId: associationEntityType.get('id'),
+        entityTypeId: entityTypeIdToRemove
+      });
+    }
+  }
 
   handleOnClickDelete = () => {
 
@@ -147,6 +183,62 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
     );
   }
 
+  renderSourceEntityTypesSection = (sourceEntityTypes :List<Map<*, *>>) => {
+
+    if (sourceEntityTypes.isEmpty()) {
+      return null;
+    }
+
+    let entityTypesDataTable :React$Node = (
+      <AbstractTypeDataTable
+          abstractTypes={sourceEntityTypes}
+          maxHeight={500}
+          workingAbstractTypeType={AbstractTypes.EntityType} />
+    );
+
+    if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
+      entityTypesDataTable = (
+        <AbstractTypeDataTable
+            abstractTypes={sourceEntityTypes}
+            highlightOnHover
+            maxHeight={500}
+            showRemoveColumn
+            onAbstractTypeRemove={this.handleRemoveSourceEntityTypeFromAssociationType}
+            workingAbstractTypeType={AbstractTypes.EntityType} />
+      );
+    }
+
+    return (
+      <section>
+        <h2>Source EntityTypes</h2>
+        { entityTypesDataTable }
+      </section>
+    );
+  }
+
+  renderAddSourceEntityTypesSection = () => {
+
+    const availableEntityTypes :List<Map<*, *>> = this.props.entityTypes
+      .filterNot((entityType :Map<*, *>) => {
+        const sourceEntityTypeIds :List<string> = this.props.associationType.get('src', Immutable.List());
+        return sourceEntityTypeIds.includes(entityType.get('id', ''));
+      });
+
+    return (
+      <section>
+        <h2>Add Source EntityTypes</h2>
+        <AbstractTypeSearchableSelectWrapper>
+          <AbstractTypeSearchableSelect
+              abstractTypes={availableEntityTypes}
+              maxHeight={400}
+              searchPlaceholder="Available EntityTypes..."
+              workingAbstractTypeType={AbstractTypes.EntityType}
+              onAbstractTypeSelect={this.handleAddSourceEntityTypeToAssociationType} />
+        </AbstractTypeSearchableSelectWrapper>
+      </section>
+    );
+  }
+
   render() {
 
     if (!this.props.associationType || this.props.associationType.isEmpty()) {
@@ -188,13 +280,8 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
           <h2>Bi-directional</h2>
           <p>{ bidiAsString }</p>
         </section>
-        <section>
-          <h2>Source EntityTypes</h2>
-          <AbstractTypeDataTable
-              abstractTypes={sourceEntityTypes}
-              maxHeight={500}
-              workingAbstractTypeType={AbstractTypes.EntityType} />
-        </section>
+        { this.renderSourceEntityTypesSection(sourceEntityTypes) }
+        { this.renderAddSourceEntityTypesSection() }
         <section>
           <h2>Destination EntityTypes</h2>
           <AbstractTypeDataTable
@@ -229,7 +316,9 @@ function mapStateToProps(state :Map<*, *>) :Object {
 function mapDispatchToProps(dispatch :Function) :Object {
 
   const actions = {
-    deleteAssociationTypeRequest
+    addSourceEntityTypeToAssociationType,
+    deleteAssociationTypeRequest,
+    removeSourceEntityTypeFromAssociationType
   };
 
   return {

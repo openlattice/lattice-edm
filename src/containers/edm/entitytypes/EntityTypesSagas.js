@@ -49,13 +49,7 @@ export function* watchAddPropertyTypeToEntityType() :Generator<*, *, *> {
       );
     }
     catch (error) {
-      yield put(
-        addPropertyTypeToEntityType.failure({
-          error,
-          entityTypeId: action.data.entityTypeId,
-          propertyTypeId: action.data.propertyTypeId
-        })
-      );
+      yield put(addPropertyTypeToEntityType.failure({ error }));
     }
     finally {
       yield put(addPropertyTypeToEntityType.finally());
@@ -124,13 +118,7 @@ export function* watchRemovePropertyTypeFromEntityType() :Generator<*, *, *> {
       );
     }
     catch (error) {
-      yield put(
-        removePropertyTypeFromEntityType.failure({
-          error,
-          entityTypeId: action.data.entityTypeId,
-          propertyTypeId: action.data.propertyTypeId
-        })
-      );
+      yield put(removePropertyTypeFromEntityType.failure({ error }));
     }
     finally {
       yield put(removePropertyTypeFromEntityType.finally());

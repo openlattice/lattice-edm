@@ -6,6 +6,8 @@ import { EntityDataModelApi } from 'lattice';
 import { call, put, take } from 'redux-saga/effects';
 
 import {
+  ADD_SRC_ET_TO_AT,
+  addSourceEntityTypeToAssociationType,
   CREATE_ASSOCIATION_TYPE_REQUEST,
   createAssociationTypeFailure,
   createAssociationTypeSuccess,
@@ -15,6 +17,8 @@ import {
   FETCH_ALL_ASSOCIATION_TYPES_REQUEST,
   fetchAllAssociationTypesFailure,
   fetchAllAssociationTypesSuccess,
+  RM_SRC_ET_FROM_AT,
+  removeSourceEntityTypeFromAssociationType,
   UPDATE_ASSOCIATION_TYPE_METADATA_REQUEST,
   updateAssociationTypeMetaDataFailure,
   updateAssociationTypeMetaDataSuccess
@@ -25,6 +29,33 @@ import type {
   DeleteAssociationTypeRequestAction,
   UpdateAssociationTypeMetaDataRequestAction
 } from './AssociationTypesActionFactory';
+
+export function* watchAddSourceEntityTypeToAssociationType() :Generator<*, *, *> {
+
+  while (true) {
+    const action = yield take(ADD_SRC_ET_TO_AT);
+    yield put(addSourceEntityTypeToAssociationType.request());
+    try {
+      yield call(
+        EntityDataModelApi.addSrcEntityTypeToAssociationType,
+        action.data.associationTypeId,
+        action.data.entityTypeId
+      );
+      yield put(
+        addSourceEntityTypeToAssociationType.success({
+          associationTypeId: action.data.associationTypeId,
+          entityTypeId: action.data.entityTypeId
+        })
+      );
+    }
+    catch (error) {
+      yield put(addSourceEntityTypeToAssociationType.failure({ error }));
+    }
+    finally {
+      yield put(addSourceEntityTypeToAssociationType.finally());
+    }
+  }
+}
 
 export function* watchCreateAssociationTypeRequest() :Generator<*, *, *> {
 
@@ -68,6 +99,33 @@ export function* watchFetchAllAssociationTypesRequest() :Generator<*, *, *> {
   }
 }
 
+export function* watchRemoveSourceEntityTypeFromAssociationType() :Generator<*, *, *> {
+
+  while (true) {
+    const action = yield take(RM_SRC_ET_FROM_AT);
+    yield put(removeSourceEntityTypeFromAssociationType.request());
+    try {
+      yield call(
+        EntityDataModelApi.removeSrcEntityTypeFromAssociationType,
+        action.data.associationTypeId,
+        action.data.entityTypeId
+      );
+      yield put(
+        removeSourceEntityTypeFromAssociationType.success({
+          associationTypeId: action.data.associationTypeId,
+          entityTypeId: action.data.entityTypeId
+        })
+      );
+    }
+    catch (error) {
+      yield put(removeSourceEntityTypeFromAssociationType.failure({ error }));
+    }
+    finally {
+      yield put(removeSourceEntityTypeFromAssociationType.finally());
+    }
+  }
+}
+
 export function* watchUpdateAssociationTypeMetaDataRequest() :Generator<*, *, *> {
 
   while (true) {
@@ -78,7 +136,6 @@ export function* watchUpdateAssociationTypeMetaDataRequest() :Generator<*, *, *>
         action.associationTypeId,
         action.metadata
       );
-      debugger;
       yield put(updateAssociationTypeMetaDataSuccess(action.associationTypeId, action.metadata));
     }
     catch (error) {

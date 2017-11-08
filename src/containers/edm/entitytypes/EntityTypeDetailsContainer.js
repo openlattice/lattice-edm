@@ -84,6 +84,10 @@ class EntityTypeDetailsContainer extends React.Component<Props> {
 
   renderPropertyTypesSection = (propertyTypes :List<Map<*, *>>) => {
 
+    if (propertyTypes.isEmpty()) {
+      return null;
+    }
+
     let propertyTypesDataTable :React$Node = (
       <AbstractTypeDataTable
           abstractTypes={propertyTypes}
@@ -208,11 +212,7 @@ class EntityTypeDetailsContainer extends React.Component<Props> {
               maxHeight={500}
               workingAbstractTypeType={AbstractTypes.PropertyType} />
         </section>
-        {
-          propertyTypes.isEmpty()
-            ? null
-            : this.renderPropertyTypesSection(propertyTypes)
-        }
+        { this.renderPropertyTypesSection(propertyTypes) }
         { this.renderAddPropertyTypesSection() }
         {/*
           <section>
