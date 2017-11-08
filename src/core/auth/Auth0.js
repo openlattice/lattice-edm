@@ -7,6 +7,8 @@ import Auth0Lock from 'auth0-lock';
 import * as Routes from '../router/Routes';
 import * as AuthUtils from './AuthUtils';
 
+import OpenLatticeLogo from '../../assets/images/logo.png';
+
 // injected by Webpack.DefinePlugin
 declare var __AUTH0_CLIENT_ID__;
 declare var __AUTH0_DOMAIN__;
@@ -29,7 +31,10 @@ const auth0Lock :Auth0Lock = new Auth0Lock(__AUTH0_CLIENT_ID__, __AUTH0_DOMAIN__
   closable: false,
   hashCleanup: false,
   languageDictionary: {
-    title: 'Lattice EDM'
+    title: 'OpenLattice EDM'
+  },
+  theme: {
+    logo: OpenLatticeLogo
   }
 });
 
