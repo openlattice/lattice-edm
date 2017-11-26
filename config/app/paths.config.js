@@ -25,6 +25,8 @@ const BUILD_STATIC_ASSETS :string = path.resolve(BUILD_STATIC, 'assets');
 const BUILD_STATIC_CSS :string = path.resolve(BUILD_STATIC, 'css');
 const BUILD_STATIC_JS :string = path.resolve(BUILD_STATIC, 'js');
 
+const SOURCE_ASSETS_IMAGES :string = path.resolve(SOURCE, 'assets/images');
+
 /*
  * relative paths
  */
@@ -46,6 +48,7 @@ export default {
     NODE,
     ROOT,
     SOURCE,
+    SOURCE_ASSETS_IMAGES,
     TEST
   },
   REL: {

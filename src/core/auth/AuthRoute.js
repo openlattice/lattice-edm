@@ -29,12 +29,12 @@ const EXPIRED :number = -1;
 
 type Props = {
   actions :{
-    authAttempt :Function,
-    authExpired :Function,
-    authSuccess :Function
-  },
-  authTokenExpiration :number,
-  component :Function
+    authAttempt :Function;
+    authExpired :Function;
+    authSuccess :Function;
+  };
+  authTokenExpiration :number;
+  component :Function;
 };
 
 class AuthRoute extends React.Component<Props> {
@@ -126,6 +126,4 @@ function mapDispatchToProps(dispatch :Function) :Object {
   };
 }
 
-export default withRouter(
-  connect(mapStateToProps, mapDispatchToProps)(AuthRoute)
-);
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(AuthRoute));
