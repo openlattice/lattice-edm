@@ -6,8 +6,8 @@ import React from 'react';
 
 import styled from 'styled-components';
 import { connect } from 'react-redux';
-import { bindActionCreators } from 'redux';
 import { Redirect, Route, Switch } from 'react-router-dom';
+import { bindActionCreators } from 'redux';
 
 import StyledButton from '../../components/buttons/StyledButton';
 import * as AuthUtils from '../../core/auth/AuthUtils';

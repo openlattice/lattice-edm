@@ -32,7 +32,7 @@ export default function prodWebpackConfig(env :Object) {
     }),
     new webpack.optimize.OccurrenceOrderPlugin(),
     new HtmlWebpackPlugin({
-      favicon: `${APP_PATHS.ABS.SOURCE}/assets/images/favicon.png`,
+      favicon: `${APP_PATHS.ABS.SOURCE_ASSETS_IMAGES}/favicon.png`,
       inject: true,
       template: `${APP_PATHS.ABS.SOURCE}/${APP_CONFIG.APP_INDEX_HTML}`
     }),

@@ -10,11 +10,11 @@ import ReactDOM from 'react-dom';
 import FontAwesome from '@fortawesome/fontawesome';
 import { faCheck, faPencilAlt, faSearch, faTimes } from '@fortawesome/fontawesome-free-solid';
 
-import { ConnectedRouter } from 'react-router-redux';
+import { normalize } from 'polished';
 import { Provider } from 'react-redux';
 import { Route, Switch } from 'react-router-dom';
+import { ConnectedRouter } from 'react-router-redux';
 import { injectGlobal } from 'styled-components';
-import { normalize } from 'polished';
 
 import AuthRoute from './core/auth/AuthRoute';
 import initializeReduxStore from './core/redux/ReduxStore';

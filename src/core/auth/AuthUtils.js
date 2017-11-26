@@ -15,8 +15,8 @@ const AUTH0_ID_TOKEN :'auth0_id_token' = 'auth0_id_token';
 const AUTH0_USER_INFO :'auth0_user_info' = 'auth0_user_info';
 
 type UserInfo = {
-  id :string;
   email :string;
+  id :string;
   picture :string;
   roles :string[];
 };
@@ -46,8 +46,8 @@ export function storeAuthInfo(authInfo :?Object) :void {
   }
 
   const userInfo :UserInfo = {
-    id: authInfo.idTokenPayload.user_id,
     email: authInfo.idTokenPayload.email,
+    id: authInfo.idTokenPayload.user_id,
     picture: authInfo.idTokenPayload.picture,
     roles: authInfo.idTokenPayload.roles
   };
