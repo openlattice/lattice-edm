@@ -58,7 +58,9 @@ export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, act
         .setDescription(action.entityType.description)
         .setKey(action.entityType.key)
         .setPropertyTypes(action.entityType.properties)
+        .setBaseType(action.entityType.baseType)
         .setCategory(action.entityType.category)
+        .setSchemas(action.entityType.schemas)
         .build();
 
       const iEntityType :Map<*, *> = entityType.asImmutable();

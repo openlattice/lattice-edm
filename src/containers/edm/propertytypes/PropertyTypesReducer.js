@@ -54,8 +54,9 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
         .setTitle(action.propertyType.title)
         .setDescription(action.propertyType.description)
         .setDataType(action.propertyType.datatype)
-        .setPii(action.propertyType.piiValue)
+        .setPii(action.propertyType.piiField)
         .setAnalyzer(action.propertyType.analyzer)
+        .setSchemas(action.propertyType.schemas)
         .build();
 
       const iPropertyType :Map<*, *> = propertyType.asImmutable();

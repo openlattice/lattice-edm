@@ -2,10 +2,12 @@
   "extends": "airbnb",
   "parser": "babel-eslint",
   "env": {
-    "browser": true
+    "browser": true,
+    "jest": true
   },
   "plugins": [
     "flowtype",
+    "jest",
     "react"
   ],
   "settings": {
@@ -23,6 +25,7 @@
     "arrow-body-style": ["error", "always"],
     "brace-style": ["error", "stroustrup"],
     "comma-dangle": ["error", "never"],
+    "function-paren-newline": ["error", "consistent"],
     "indent": [
       "error",
       2,
