@@ -16,9 +16,6 @@ import {
   DELETE_ASSOCIATION_TYPE_REQUEST,
   deleteAssociationTypeFailure,
   deleteAssociationTypeSuccess,
-  FETCH_ALL_ASSOCIATION_TYPES_REQUEST,
-  fetchAllAssociationTypesFailure,
-  fetchAllAssociationTypesSuccess,
   RM_DST_ET_FROM_AT,
   removeDestinationEntityTypeFromAssociationType,
   RM_SRC_ET_FROM_AT,
@@ -112,20 +109,6 @@ export function* watchDeleteAssociationTypeRequest() :Generator<*, *, *> {
     }
     catch (error) {
       yield put(deleteAssociationTypeFailure(action.associationTypeId, error));
-    }
-  }
-}
-
-export function* watchFetchAllAssociationTypesRequest() :Generator<*, *, *> {
-
-  while (true) {
-    yield take(FETCH_ALL_ASSOCIATION_TYPES_REQUEST);
-    try {
-      const response = yield call(EntityDataModelApi.getAllAssociationTypes);
-      yield put(fetchAllAssociationTypesSuccess(response));
-    }
-    catch (error) {
-      yield put(fetchAllAssociationTypesFailure(error));
     }
   }
 }

@@ -14,9 +14,6 @@ import {
   DELETE_ENTITY_TYPE_REQUEST,
   deleteEntityTypeFailure,
   deleteEntityTypeSuccess,
-  FETCH_ALL_ENTITY_TYPES_REQUEST,
-  fetchAllEntityTypesFailure,
-  fetchAllEntityTypesSuccess,
   RM_PROPERTY_TYPE_FROM_ENTITY_TYPE,
   removePropertyTypeFromEntityType,
   UPDATE_ENTITY_TYPE_METADATA_REQUEST,
@@ -81,20 +78,6 @@ export function* watchDeleteEntityTypeRequest() :Generator<*, *, *> {
     }
     catch (error) {
       yield put(deleteEntityTypeFailure(action.entityTypeId, error));
-    }
-  }
-}
-
-export function* watchFetchAllEntityTypesRequest() :Generator<*, *, *> {
-
-  while (true) {
-    yield take(FETCH_ALL_ENTITY_TYPES_REQUEST);
-    try {
-      const response = yield call(EntityDataModelApi.getAllEntityTypes);
-      yield put(fetchAllEntityTypesSuccess(response));
-    }
-    catch (error) {
-      yield put(fetchAllEntityTypesFailure(error));
     }
   }
 }

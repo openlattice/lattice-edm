@@ -12,9 +12,6 @@ import {
   DELETE_PROPERTY_TYPE_REQUEST,
   deletePropertyTypeFailure,
   deletePropertyTypeSuccess,
-  FETCH_ALL_PROPERTY_TYPES_REQUEST,
-  fetchAllPropertyTypesFailure,
-  fetchAllPropertyTypesSuccess,
   UPDATE_PROPERTY_TYPE_METADATA_REQUEST,
   updatePropertyTypeMetaDataFailure,
   updatePropertyTypeMetaDataSuccess
@@ -50,20 +47,6 @@ export function* watchDeletePropertyTypeRequest() :Generator<*, *, *> {
     }
     catch (error) {
       yield put(deletePropertyTypeFailure(action.propertyTypeId, error));
-    }
-  }
-}
-
-export function* watchFetchAllPropertyTypesRequest() :Generator<*, *, *> {
-
-  while (true) {
-    yield take(FETCH_ALL_PROPERTY_TYPES_REQUEST);
-    try {
-      const response = yield call(EntityDataModelApi.getAllPropertyTypes);
-      yield put(fetchAllPropertyTypesSuccess(response));
-    }
-    catch (error) {
-      yield put(fetchAllPropertyTypesFailure(error));
     }
   }
 }
