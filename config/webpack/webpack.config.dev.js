@@ -1,7 +1,3 @@
-/*
- * @flow
- */
-
 /* eslint-disable import/no-extraneous-dependencies, import/extensions */
 
 import webpack from 'webpack';
@@ -13,9 +9,9 @@ import APP_PATHS from '../app/paths.config.js';
 
 import baseWebpackConfig from './webpack.config.base.js';
 
-export default function devWebpackConfig(env :Object) {
+export default function devWebpackConfig(env) {
 
-  const baseConfig :Object = baseWebpackConfig(env);
+  const baseConfig = baseWebpackConfig(env);
 
   const DEV_SERVER_PORT = 9100;
 

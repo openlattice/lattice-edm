@@ -1,7 +1,3 @@
-/*
- * @flow
- */
-
 /* eslint-disable import/no-extraneous-dependencies, import/extensions */
 
 import webpack from 'webpack';
@@ -14,9 +10,9 @@ import APP_PATHS from '../app/paths.config.js';
 
 import baseWebpackConfig from './webpack.config.base.js';
 
-export default function prodWebpackConfig(env :Object) {
+export default function prodWebpackConfig(env) {
 
-  const baseConfig :Object = baseWebpackConfig(env);
+  const baseConfig = baseWebpackConfig(env);
 
   const output = Object.assign({}, baseConfig.output, {
     filename: `${APP_PATHS.REL.STATIC_JS}/app.[hash:8].js`,

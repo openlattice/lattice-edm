@@ -1,7 +1,3 @@
-/*
- * @flow
- */
-
 /* eslint-disable no-underscore-dangle, import/no-extraneous-dependencies, import/extensions */
 
 import webpack from 'webpack';
@@ -14,13 +10,13 @@ import APP_PATHS from '../app/paths.config.js';
 import { isDev, isProd } from '../app/env.config.js';
 import { AUTH0_CLIENT_ID, AUTH0_DOMAIN } from '../auth/auth0.config.js';
 
-export default function baseWebpackConfig(env :Object) {
+export default function baseWebpackConfig(env) {
 
   /*
    * constants
    */
 
-  const BASE_PATH :string = `/${env.basePath || 'edm'}/`;
+  const BASE_PATH = `/${env.basePath || 'edm'}/`;
 
   /*
    * loaders
