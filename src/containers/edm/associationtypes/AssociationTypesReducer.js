@@ -4,6 +4,7 @@
 
 import Immutable from 'immutable';
 import { Models } from 'lattice';
+import { EntityDataModelApiActionFactory } from 'lattice-sagas';
 
 import {
   CREATE_ASSOCIATION_TYPE_FAILURE,
@@ -12,9 +13,6 @@ import {
   DELETE_ASSOCIATION_TYPE_FAILURE,
   DELETE_ASSOCIATION_TYPE_REQUEST,
   DELETE_ASSOCIATION_TYPE_SUCCESS,
-  FETCH_ALL_ASSOCIATION_TYPES_FAILURE,
-  FETCH_ALL_ASSOCIATION_TYPES_REQUEST,
-  FETCH_ALL_ASSOCIATION_TYPES_SUCCESS,
   UPDATE_ASSOCIATION_TYPE_METADATA_FAILURE,
   UPDATE_ASSOCIATION_TYPE_METADATA_REQUEST,
   UPDATE_ASSOCIATION_TYPE_METADATA_SUCCESS,
@@ -24,9 +22,9 @@ import {
   removeSourceEntityTypeFromAssociationType
 } from './AssociationTypesActionFactory';
 
-import type { Action } from './AssociationTypesActionFactory';
 import type { SequenceAction } from '../../../core/redux/RequestSequence';
 
+const { getAllAssociationTypes } = EntityDataModelApiActionFactory;
 const { AssociationType, AssociationTypeBuilder } = Models;
 
 const INITIAL_STATE :Map<*, *> = Immutable.fromJS({
@@ -37,7 +35,7 @@ const INITIAL_STATE :Map<*, *> = Immutable.fromJS({
   newlyCreatedAssociationTypeId: ''
 });
 
-export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE, action :Action) {
+export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE, action :Object) {
 
   switch (action.type) {
 
@@ -98,32 +96,6 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
         .set('associationTypesById', updatedById);
     }
 
-    case FETCH_ALL_ASSOCIATION_TYPES_FAILURE:
-      return state
-        .set('isFetchingAllAssociationTypes', false)
-        .set('associationTypes', Immutable.List())
-        .set('associationTypesById', Immutable.Map());
-
-    case FETCH_ALL_ASSOCIATION_TYPES_REQUEST:
-      return state.set('isFetchingAllAssociationTypes', true);
-
-    case FETCH_ALL_ASSOCIATION_TYPES_SUCCESS: {
-
-      const allAssociationTypes :List<Map<*, *>> = Immutable.fromJS(action.associationTypes);
-      const associationTypesById :Map<string, number> = Immutable.Map()
-        .withMutations((byIdMap :Map<string, number>) => {
-          allAssociationTypes.forEach((associationType :Map<*, *>, associationTypeIndex :number) => {
-            const entityType :Map<*, *> = associationType.get('entityType', Immutable.Map());
-            byIdMap.set(entityType.get('id'), associationTypeIndex);
-          });
-        });
-
-      return state
-        .set('isFetchingAllAssociationTypes', false)
-        .set('associationTypes', allAssociationTypes)
-        .set('associationTypesById', associationTypesById);
-    }
-
     case UPDATE_ASSOCIATION_TYPE_METADATA_FAILURE:
     case UPDATE_ASSOCIATION_TYPE_METADATA_REQUEST:
       return state;
@@ -158,6 +130,43 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
       }
 
       return state;
+    }
+
+    case getAllAssociationTypes.case(action.type): {
+      return getAllAssociationTypes.reducer(state, action, {
+        REQUEST: () => {
+          return state.set('isFetchingAllAssociationTypes', true);
+        },
+        SUCCESS: () => {
+
+          const seqAction :SequenceAction = (action :any);
+
+          if (seqAction.value) {
+            const allAssociationTypes :List<Map<*, *>> = Immutable.fromJS(seqAction.value);
+            const associationTypesById :Map<string, number> = Immutable.Map()
+              .withMutations((byIdMap :Map<string, number>) => {
+                allAssociationTypes.forEach((associationType :Map<*, *>, associationTypeIndex :number) => {
+                  const entityType :Map<*, *> = associationType.get('entityType', Immutable.Map());
+                  byIdMap.set(entityType.get('id'), associationTypeIndex);
+                });
+              });
+
+            return state
+              .set('associationTypes', allAssociationTypes)
+              .set('associationTypesById', associationTypesById);
+          }
+
+          return state;
+        },
+        FAILURE: () => {
+          return state
+            .set('associationTypes', Immutable.List())
+            .set('associationTypesById', Immutable.Map());
+        },
+        FINALLY: () => {
+          return state.set('isFetchingAllAssociationTypes', false);
+        }
+      });
     }
 
     case addDestinationEntityTypeToAssociationType.case(action.type): {

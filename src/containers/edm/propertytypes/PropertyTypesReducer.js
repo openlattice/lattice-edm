@@ -4,6 +4,7 @@
 
 import Immutable from 'immutable';
 import { Models } from 'lattice';
+import { EntityDataModelApiActionFactory } from 'lattice-sagas';
 
 import {
   CREATE_PROPERTY_TYPE_FAILURE,
@@ -12,9 +13,6 @@ import {
   DELETE_PROPERTY_TYPE_FAILURE,
   DELETE_PROPERTY_TYPE_REQUEST,
   DELETE_PROPERTY_TYPE_SUCCESS,
-  FETCH_ALL_PROPERTY_TYPES_FAILURE,
-  FETCH_ALL_PROPERTY_TYPES_REQUEST,
-  FETCH_ALL_PROPERTY_TYPES_SUCCESS,
   UPDATE_PROPERTY_TYPE_METADATA_FAILURE,
   UPDATE_PROPERTY_TYPE_METADATA_REQUEST,
   UPDATE_PROPERTY_TYPE_METADATA_SUCCESS
@@ -22,6 +20,7 @@ import {
 
 import type { Action } from './PropertyTypesActionFactory';
 
+const { getAllPropertyTypes } = EntityDataModelApiActionFactory;
 const { PropertyType, PropertyTypeBuilder } = Models;
 
 const INITIAL_STATE :Map<*, *> = Immutable.fromJS({
@@ -96,31 +95,6 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
         .set('propertyTypesById', updatedById);
     }
 
-    case FETCH_ALL_PROPERTY_TYPES_FAILURE:
-      return state
-        .set('isFetchingAllPropertyTypes', false)
-        .set('propertyTypes', Immutable.List())
-        .set('propertyTypesById', Immutable.Map());
-
-    case FETCH_ALL_PROPERTY_TYPES_REQUEST:
-      return state.set('isFetchingAllPropertyTypes', true);
-
-    case FETCH_ALL_PROPERTY_TYPES_SUCCESS: {
-
-      const propertyTypes :List<Map<*, *>> = Immutable.fromJS(action.propertyTypes);
-      const propertyTypesById :Map<string, number> = Immutable.Map()
-        .withMutations((byIdMap :Map<string, number>) => {
-          propertyTypes.forEach((propertyType :Map<*, *>, propertyTypeIndex :number) => {
-            byIdMap.set(propertyType.get('id'), propertyTypeIndex);
-          });
-        });
-
-      return state
-        .set('isFetchingAllPropertyTypes', false)
-        .set('propertyTypes', propertyTypes)
-        .set('propertyTypesById', propertyTypesById);
-    }
-
     case UPDATE_PROPERTY_TYPE_METADATA_FAILURE:
     case UPDATE_PROPERTY_TYPE_METADATA_REQUEST:
       return state;
@@ -146,6 +120,41 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
       }
 
       return state;
+    }
+
+    case getAllPropertyTypes.case(action.type): {
+      return getAllPropertyTypes.reducer(state, action, {
+        REQUEST: () => {
+          return state.set('isFetchingAllPropertyTypes', true);
+        },
+        SUCCESS: () => {
+
+          const seqAction :SequenceAction = (action :any);
+
+          if (seqAction.value) {
+            const propertyTypes :List<Map<*, *>> = Immutable.fromJS(seqAction.value);
+            const propertyTypesById :Map<string, number> = Immutable.Map()
+              .withMutations((byIdMap :Map<string, number>) => {
+                propertyTypes.forEach((propertyType :Map<*, *>, propertyTypeIndex :number) => {
+                  byIdMap.set(propertyType.get('id'), propertyTypeIndex);
+                });
+              });
+            return state
+              .set('propertyTypes', propertyTypes)
+              .set('propertyTypesById', propertyTypesById);
+          }
+
+          return state;
+        },
+        FAILURE: () => {
+          return state
+            .set('propertyTypes', Immutable.List())
+            .set('propertyTypesById', Immutable.Map());
+        },
+        FINALLY: () => {
+          return state.set('isFetchingAllPropertyTypes', false);
+        }
+      });
     }
 
     default:

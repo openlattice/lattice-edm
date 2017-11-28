@@ -10,47 +10,6 @@ import type { RequestSequence } from '../../../core/redux/RequestSequence';
 
 const { EntityType } = Models;
 
-const FETCH_ALL_ENTITY_TYPES_FAILURE :'FETCH_ALL_ENTITY_TYPES_FAILURE' = 'FETCH_ALL_ENTITY_TYPES_FAILURE';
-const FETCH_ALL_ENTITY_TYPES_REQUEST :'FETCH_ALL_ENTITY_TYPES_REQUEST' = 'FETCH_ALL_ENTITY_TYPES_REQUEST';
-const FETCH_ALL_ENTITY_TYPES_SUCCESS :'FETCH_ALL_ENTITY_TYPES_SUCCESS' = 'FETCH_ALL_ENTITY_TYPES_SUCCESS';
-
-type FetchAllEntityTypesFailureAction = {
-  error :any,
-  type :typeof FETCH_ALL_ENTITY_TYPES_FAILURE
-};
-
-function fetchAllEntityTypesFailure(error :any) :FetchAllEntityTypesFailureAction {
-
-  return {
-    error,
-    type: FETCH_ALL_ENTITY_TYPES_FAILURE
-  };
-}
-
-type FetchAllEntityTypesRequestAction = {
-  type :typeof FETCH_ALL_ENTITY_TYPES_REQUEST
-};
-
-function fetchAllEntityTypesRequest() :FetchAllEntityTypesRequestAction {
-
-  return {
-    type: FETCH_ALL_ENTITY_TYPES_REQUEST
-  };
-}
-
-type FetchAllEntityTypesSuccessAction = {
-  entityTypes :EntityType[],
-  type :typeof FETCH_ALL_ENTITY_TYPES_SUCCESS
-};
-
-function fetchAllEntityTypesSuccess(entityTypes :Object[]) :FetchAllEntityTypesSuccessAction {
-
-  return {
-    entityTypes,
-    type: FETCH_ALL_ENTITY_TYPES_SUCCESS
-  };
-}
-
 const CREATE_ENTITY_TYPE_FAILURE :'CREATE_ENTITY_TYPE_FAILURE' = 'CREATE_ENTITY_TYPE_FAILURE';
 const CREATE_ENTITY_TYPE_REQUEST :'CREATE_ENTITY_TYPE_REQUEST' = 'CREATE_ENTITY_TYPE_REQUEST';
 const CREATE_ENTITY_TYPE_SUCCESS :'CREATE_ENTITY_TYPE_SUCCESS' = 'CREATE_ENTITY_TYPE_SUCCESS';
@@ -217,9 +176,6 @@ export {
   DELETE_ENTITY_TYPE_FAILURE,
   DELETE_ENTITY_TYPE_REQUEST,
   DELETE_ENTITY_TYPE_SUCCESS,
-  FETCH_ALL_ENTITY_TYPES_FAILURE,
-  FETCH_ALL_ENTITY_TYPES_REQUEST,
-  FETCH_ALL_ENTITY_TYPES_SUCCESS,
   RM_PROPERTY_TYPE_FROM_ENTITY_TYPE,
   UPDATE_ENTITY_TYPE_METADATA_FAILURE,
   UPDATE_ENTITY_TYPE_METADATA_REQUEST,
@@ -234,9 +190,6 @@ export {
   deleteEntityTypeFailure,
   deleteEntityTypeRequest,
   deleteEntityTypeSuccess,
-  fetchAllEntityTypesFailure,
-  fetchAllEntityTypesRequest,
-  fetchAllEntityTypesSuccess,
   removePropertyTypeFromEntityType,
   updateEntityTypeMetaDataFailure,
   updateEntityTypeMetaDataRequest,
@@ -250,9 +203,6 @@ export type {
   DeleteEntityTypeFailureAction,
   DeleteEntityTypeRequestAction,
   DeleteEntityTypeSuccessAction,
-  FetchAllEntityTypesFailureAction,
-  FetchAllEntityTypesRequestAction,
-  FetchAllEntityTypesSuccessAction,
   UpdateEntityTypeMetaDataFailureAction,
   UpdateEntityTypeMetaDataRequestAction,
   UpdateEntityTypeMetaDataSuccessAction
@@ -265,9 +215,6 @@ export type Action =
   | DeleteEntityTypeFailureAction
   | DeleteEntityTypeRequestAction
   | DeleteEntityTypeSuccessAction
-  | FetchAllEntityTypesFailureAction
-  | FetchAllEntityTypesRequestAction
-  | FetchAllEntityTypesSuccessAction
   | UpdateEntityTypeMetaDataFailureAction
   | UpdateEntityTypeMetaDataRequestAction
   | UpdateEntityTypeMetaDataSuccessAction;

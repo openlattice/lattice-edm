@@ -5,6 +5,7 @@
 import React from 'react';
 
 import styled from 'styled-components';
+import { EntityDataModelApiActionFactory } from 'lattice-sagas';
 import { connect } from 'react-redux';
 import { NavLink, Redirect, Route, Switch, withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
@@ -13,9 +14,12 @@ import AbstractTypes from '../../utils/AbstractTypes';
 import * as Routes from '../../core/router/Routes';
 
 import AbstractTypeOverviewContainer from './AbstractTypeOverviewContainer';
-import { fetchAllAssociationTypesRequest } from './associationtypes/AssociationTypesActionFactory';
-import { fetchAllEntityTypesRequest } from './entitytypes/EntityTypesActionFactory';
-import { fetchAllPropertyTypesRequest } from './propertytypes/PropertyTypesActionFactory';
+
+const {
+  getAllAssociationTypes,
+  getAllEntityTypes,
+  getAllPropertyTypes
+} = EntityDataModelApiActionFactory;
 
 const SUB_NAV_LINK_ACTIVE_CLASSNAME :string = 'sub-nav-link-active';
 
@@ -68,19 +72,19 @@ const NavTab = styled(NavLink).attrs({
 
 type Props = {
   actions :{
-    fetchAllAssociationTypesRequest :Function,
-    fetchAllEntityTypesRequest :Function,
-    fetchAllPropertyTypesRequest :Function
-  }
-}
+    getAllPropertyTypes :Function;
+    getAllEntityTypes :Function;
+    getAllAssociationTypes :Function;
+  };
+};
 
 class EntityDataModelContainer extends React.Component<Props> {
 
   componentDidMount() {
 
-    this.props.actions.fetchAllPropertyTypesRequest();
-    this.props.actions.fetchAllEntityTypesRequest();
-    this.props.actions.fetchAllAssociationTypesRequest();
+    this.props.actions.getAllPropertyTypes();
+    this.props.actions.getAllEntityTypes();
+    this.props.actions.getAllAssociationTypes();
   }
 
   renderAssociationTypesContainer = () => {
@@ -127,9 +131,9 @@ class EntityDataModelContainer extends React.Component<Props> {
 function mapDispatchToProps(dispatch :Function) :Object {
 
   const actions = {
-    fetchAllAssociationTypesRequest,
-    fetchAllEntityTypesRequest,
-    fetchAllPropertyTypesRequest
+    getAllAssociationTypes,
+    getAllEntityTypes,
+    getAllPropertyTypes
   };
 
   return {

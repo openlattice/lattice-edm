@@ -6,47 +6,6 @@ import { Models } from 'lattice';
 
 const { PropertyType } = Models;
 
-const FETCH_ALL_PROPERTY_TYPES_FAILURE :'FETCH_ALL_PROPERTY_TYPES_FAILURE' = 'FETCH_ALL_PROPERTY_TYPES_FAILURE';
-const FETCH_ALL_PROPERTY_TYPES_REQUEST :'FETCH_ALL_PROPERTY_TYPES_REQUEST' = 'FETCH_ALL_PROPERTY_TYPES_REQUEST';
-const FETCH_ALL_PROPERTY_TYPES_SUCCESS :'FETCH_ALL_PROPERTY_TYPES_SUCCESS' = 'FETCH_ALL_PROPERTY_TYPES_SUCCESS';
-
-type FetchAllPropertyTypesFailureAction = {
-  error :any,
-  type :typeof FETCH_ALL_PROPERTY_TYPES_FAILURE
-};
-
-function fetchAllPropertyTypesFailure(error :any) :FetchAllPropertyTypesFailureAction {
-
-  return {
-    error,
-    type: FETCH_ALL_PROPERTY_TYPES_FAILURE
-  };
-}
-
-type FetchAllPropertyTypesRequestAction = {
-  type :typeof FETCH_ALL_PROPERTY_TYPES_REQUEST
-};
-
-function fetchAllPropertyTypesRequest() :FetchAllPropertyTypesRequestAction {
-
-  return {
-    type: FETCH_ALL_PROPERTY_TYPES_REQUEST
-  };
-}
-
-type FetchAllPropertyTypesSuccessAction = {
-  propertyTypes :PropertyType[],
-  type :typeof FETCH_ALL_PROPERTY_TYPES_SUCCESS
-};
-
-function fetchAllPropertyTypesSuccess(propertyTypes :PropertyType[]) :FetchAllPropertyTypesSuccessAction {
-
-  return {
-    propertyTypes,
-    type: FETCH_ALL_PROPERTY_TYPES_SUCCESS
-  };
-}
-
 const CREATE_PROPERTY_TYPE_FAILURE :'CREATE_PROPERTY_TYPE_FAILURE' = 'CREATE_PROPERTY_TYPE_FAILURE';
 const CREATE_PROPERTY_TYPE_REQUEST :'CREATE_PROPERTY_TYPE_REQUEST' = 'CREATE_PROPERTY_TYPE_REQUEST';
 const CREATE_PROPERTY_TYPE_SUCCESS :'CREATE_PROPERTY_TYPE_SUCCESS' = 'CREATE_PROPERTY_TYPE_SUCCESS';
@@ -209,9 +168,6 @@ export {
   DELETE_PROPERTY_TYPE_FAILURE,
   DELETE_PROPERTY_TYPE_REQUEST,
   DELETE_PROPERTY_TYPE_SUCCESS,
-  FETCH_ALL_PROPERTY_TYPES_FAILURE,
-  FETCH_ALL_PROPERTY_TYPES_REQUEST,
-  FETCH_ALL_PROPERTY_TYPES_SUCCESS,
   UPDATE_PROPERTY_TYPE_METADATA_FAILURE,
   UPDATE_PROPERTY_TYPE_METADATA_REQUEST,
   UPDATE_PROPERTY_TYPE_METADATA_SUCCESS
@@ -224,9 +180,6 @@ export {
   deletePropertyTypeFailure,
   deletePropertyTypeRequest,
   deletePropertyTypeSuccess,
-  fetchAllPropertyTypesFailure,
-  fetchAllPropertyTypesRequest,
-  fetchAllPropertyTypesSuccess,
   updatePropertyTypeMetaDataFailure,
   updatePropertyTypeMetaDataRequest,
   updatePropertyTypeMetaDataSuccess
@@ -239,9 +192,6 @@ export type {
   DeletePropertyTypeFailureAction,
   DeletePropertyTypeRequestAction,
   DeletePropertyTypeSuccessAction,
-  FetchAllPropertyTypesFailureAction,
-  FetchAllPropertyTypesRequestAction,
-  FetchAllPropertyTypesSuccessAction,
   UpdatePropertyTypeMetaDataFailureAction,
   UpdatePropertyTypeMetaDataRequestAction,
   UpdatePropertyTypeMetaDataSuccessAction
@@ -254,9 +204,6 @@ export type Action =
   | DeletePropertyTypeFailureAction
   | DeletePropertyTypeRequestAction
   | DeletePropertyTypeSuccessAction
-  | FetchAllPropertyTypesFailureAction
-  | FetchAllPropertyTypesRequestAction
-  | FetchAllPropertyTypesSuccessAction
   | UpdatePropertyTypeMetaDataFailureAction
   | UpdatePropertyTypeMetaDataRequestAction
   | UpdatePropertyTypeMetaDataSuccessAction;

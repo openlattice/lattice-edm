@@ -10,51 +10,6 @@ import type { RequestSequence } from '../../../core/redux/RequestSequence';
 
 const { AssociationType } = Models;
 
-/* eslint-disable max-len */
-const FETCH_ALL_ASSOCIATION_TYPES_FAILURE :'FETCH_ALL_ASSOCIATION_TYPES_FAILURE' = 'FETCH_ALL_ASSOCIATION_TYPES_FAILURE';
-const FETCH_ALL_ASSOCIATION_TYPES_REQUEST :'FETCH_ALL_ASSOCIATION_TYPES_REQUEST' = 'FETCH_ALL_ASSOCIATION_TYPES_REQUEST';
-const FETCH_ALL_ASSOCIATION_TYPES_SUCCESS :'FETCH_ALL_ASSOCIATION_TYPES_SUCCESS' = 'FETCH_ALL_ASSOCIATION_TYPES_SUCCESS';
-/* eslint-enable */
-
-type FetchAllAssociationTypesFailureAction = {
-  error :any,
-  type :typeof FETCH_ALL_ASSOCIATION_TYPES_FAILURE
-};
-
-function fetchAllAssociationTypesFailure(error :any) :FetchAllAssociationTypesFailureAction {
-
-  return {
-    type: FETCH_ALL_ASSOCIATION_TYPES_FAILURE,
-    error
-  };
-}
-
-type FetchAllAssociationTypesRequestAction = {
-  type :typeof FETCH_ALL_ASSOCIATION_TYPES_REQUEST
-};
-
-function fetchAllAssociationTypesRequest() :FetchAllAssociationTypesRequestAction {
-
-  return {
-    type: FETCH_ALL_ASSOCIATION_TYPES_REQUEST
-  };
-}
-
-type FetchAllAssociationTypesSuccessAction = {
-  associationTypes :AssociationType[],
-  type :typeof FETCH_ALL_ASSOCIATION_TYPES_SUCCESS
-};
-
-function fetchAllAssociationTypesSuccess(
-  associationTypes :AssociationType[]
-) :FetchAllAssociationTypesSuccessAction {
-
-  return {
-    type: FETCH_ALL_ASSOCIATION_TYPES_SUCCESS,
-    associationTypes
-  };
-}
-
 const CREATE_ASSOCIATION_TYPE_FAILURE :'CREATE_ASSOCIATION_TYPE_FAILURE' = 'CREATE_ASSOCIATION_TYPE_FAILURE';
 const CREATE_ASSOCIATION_TYPE_REQUEST :'CREATE_ASSOCIATION_TYPE_REQUEST' = 'CREATE_ASSOCIATION_TYPE_REQUEST';
 const CREATE_ASSOCIATION_TYPE_SUCCESS :'CREATE_ASSOCIATION_TYPE_SUCCESS' = 'CREATE_ASSOCIATION_TYPE_SUCCESS';
@@ -234,9 +189,6 @@ export {
   DELETE_ASSOCIATION_TYPE_FAILURE,
   DELETE_ASSOCIATION_TYPE_REQUEST,
   DELETE_ASSOCIATION_TYPE_SUCCESS,
-  FETCH_ALL_ASSOCIATION_TYPES_FAILURE,
-  FETCH_ALL_ASSOCIATION_TYPES_REQUEST,
-  FETCH_ALL_ASSOCIATION_TYPES_SUCCESS,
   RM_DST_ET_FROM_AT,
   RM_SRC_ET_FROM_AT,
   UPDATE_ASSOCIATION_TYPE_METADATA_FAILURE,
@@ -253,9 +205,6 @@ export {
   deleteAssociationTypeFailure,
   deleteAssociationTypeRequest,
   deleteAssociationTypeSuccess,
-  fetchAllAssociationTypesFailure,
-  fetchAllAssociationTypesRequest,
-  fetchAllAssociationTypesSuccess,
   removeDestinationEntityTypeFromAssociationType,
   removeSourceEntityTypeFromAssociationType,
   updateAssociationTypeMetaDataFailure,
@@ -270,9 +219,6 @@ export type {
   DeleteAssociationTypeFailureAction,
   DeleteAssociationTypeRequestAction,
   DeleteAssociationTypeSuccessAction,
-  FetchAllAssociationTypesFailureAction,
-  FetchAllAssociationTypesRequestAction,
-  FetchAllAssociationTypesSuccessAction,
   UpdateAssociationTypeMetaDataFailureAction,
   UpdateAssociationTypeMetaDataRequestAction,
   UpdateAssociationTypeMetaDataSuccessAction
@@ -285,9 +231,6 @@ export type Action =
   | DeleteAssociationTypeFailureAction
   | DeleteAssociationTypeRequestAction
   | DeleteAssociationTypeSuccessAction
-  | FetchAllAssociationTypesFailureAction
-  | FetchAllAssociationTypesRequestAction
-  | FetchAllAssociationTypesSuccessAction
   | UpdateAssociationTypeMetaDataFailureAction
   | UpdateAssociationTypeMetaDataRequestAction
   | UpdateAssociationTypeMetaDataSuccessAction;

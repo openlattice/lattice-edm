@@ -2,6 +2,7 @@
  * @flow
  */
 
+import { EntityDataModelApiSagas } from 'lattice-sagas';
 import { fork } from 'redux-saga/effects';
 
 import * as AuthSagas from '../auth/AuthSagas';
@@ -20,17 +21,20 @@ export default function* sagas() :Generator<*, *, *> {
     fork(AuthSagas.watchLogin),
     fork(AuthSagas.watchLogout),
 
+    // Lattice Sagas
+    fork(EntityDataModelApiSagas.getAllAssociationTypesWatcher),
+    fork(EntityDataModelApiSagas.getAllEntityTypesWatcher),
+    fork(EntityDataModelApiSagas.getAllPropertyTypesWatcher),
+
     // PropertyTypesSagas
     fork(PropertyTypesSagas.watchCreatePropertyTypeRequest),
     fork(PropertyTypesSagas.watchDeletePropertyTypeRequest),
-    fork(PropertyTypesSagas.watchFetchAllPropertyTypesRequest),
     fork(PropertyTypesSagas.watchUpdatePropertyTypeMetaDataRequest),
 
     // EntityTypesSagas
     fork(EntityTypesSagas.watchAddPropertyTypeToEntityType),
     fork(EntityTypesSagas.watchCreateEntityTypeRequest),
     fork(EntityTypesSagas.watchDeleteEntityTypeRequest),
-    fork(EntityTypesSagas.watchFetchAllEntityTypesRequest),
     fork(EntityTypesSagas.watchRemovePropertyTypeFromEntityType),
     fork(EntityTypesSagas.watchUpdateEntityTypeMetaDataRequest),
 
@@ -39,7 +43,6 @@ export default function* sagas() :Generator<*, *, *> {
     fork(AssociationTypesSagas.watchAddSourceEntityTypeToAssociationType),
     fork(AssociationTypesSagas.watchCreateAssociationTypeRequest),
     fork(AssociationTypesSagas.watchDeleteAssociationTypeRequest),
-    fork(AssociationTypesSagas.watchFetchAllAssociationTypesRequest),
     fork(AssociationTypesSagas.watchRemoveDestinationEntityTypeFromAssociationType),
     fork(AssociationTypesSagas.watchRemoveSourceEntityTypeFromAssociationType),
     fork(AssociationTypesSagas.watchUpdateAssociationTypeMetaDataRequest)

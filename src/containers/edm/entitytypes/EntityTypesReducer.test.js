@@ -1,71 +1,59 @@
 /*
- * @flow
+ *
  */
 
 import Immutable from 'immutable';
+import { EntityDataModelApiActionFactory } from 'lattice-sagas';
 
 import reducer from './EntityTypesReducer';
+import { MOCK_ENTITY_TYPE_JSON } from '../../../utils/MockDataModels';
 
-import {
-  MOCK_ENTITY_TYPE_DM
-} from '../../../utils/MockDataModels';
-
-import {
-  createEntityTypeFailure,
-  createEntityTypeRequest,
-  createEntityTypeSuccess
-} from './EntityTypesActionFactory';
+const { GET_ALL_ENTITY_TYPES, getAllEntityTypes } = EntityDataModelApiActionFactory;
 
 describe('EntityTypesReducer', () => {
 
-  test('initial state', () => {
+  const INITIAL_STATE :Map<*, *> = reducer(undefined, { type: '__TEST__' });
 
-    const state :Map<*, *> = reducer(undefined, { type: '__TEST__' });
-
-    expect(state).toBeInstanceOf(Immutable.Map);
-    expect(state.get('entityTypes')).toEqual(Immutable.List());
-    expect(state.get('entityTypesById')).toEqual(Immutable.Map());
-    expect(state.get('isCreatingNewEntityType')).toEqual(false);
-    expect(state.get('isFetchingAllEntityTypes')).toEqual(false);
-    expect(state.get('newlyCreatedEntityTypeId')).toEqual('');
+  test('INITIAL_STATE', () => {
+    expect(INITIAL_STATE).toBeInstanceOf(Immutable.Map);
+    expect(INITIAL_STATE.get('entityTypes')).toEqual(Immutable.List());
+    expect(INITIAL_STATE.get('entityTypesById')).toEqual(Immutable.Map());
+    expect(INITIAL_STATE.get('isCreatingNewEntityType')).toEqual(false);
+    expect(INITIAL_STATE.get('isFetchingAllEntityTypes')).toEqual(false);
+    expect(INITIAL_STATE.get('newlyCreatedEntityTypeId')).toEqual('');
   });
 
-  describe('CREATE_ENTITY_TYPE', () => {
+  describe(GET_ALL_ENTITY_TYPES, () => {
 
-    test('REQUEST', () => {
-
-      const INITIAL_STATE :Map<*, *> = reducer(undefined, { type: '__TEST__' });
-
-      const state :Map<*, *> = reducer(INITIAL_STATE, createEntityTypeRequest());
-      expect(state.get('isCreatingNewEntityType')).toEqual(true);
+    test(getAllEntityTypes.REQUEST, () => {
+      const state :Map<*, *> = reducer(INITIAL_STATE, getAllEntityTypes.request());
+      expect(state.get('isFetchingAllEntityTypes')).toEqual(true);
     });
 
-    test('FAILURE', () => {
+    // TODO: test SUCCESS with variable size result
+    test(getAllEntityTypes.SUCCESS, () => {
 
-      let state = reducer(undefined, { type: '__TEST__' });
+      const response = [MOCK_ENTITY_TYPE_JSON];
+      const state :Map<*, *> = reducer(INITIAL_STATE, getAllEntityTypes.success(response));
 
-      state = reducer(state, createEntityTypeRequest());
-      expect(state.get('isCreatingNewEntityType')).toEqual(true);
+      expect(state.get('entityTypes')).toEqual(
+        Immutable.fromJS([MOCK_ENTITY_TYPE_JSON])
+      );
 
-      state = reducer(state, createEntityTypeFailure());
-      expect(state.get('isCreatingNewEntityType')).toEqual(false);
+      expect(state.get('entityTypesById')).toEqual(
+        Immutable.fromJS({ [MOCK_ENTITY_TYPE_JSON.id]: 0 })
+      );
     });
 
-    test('SUCCESS', () => {
+    test(getAllEntityTypes.FAILURE, () => {
+      const state :Map<*, *> = reducer(INITIAL_STATE, getAllEntityTypes.failure());
+      expect(state.get('entityTypes')).toEqual(Immutable.List());
+      expect(state.get('entityTypesById')).toEqual(Immutable.Map());
+    });
 
-      let state = reducer(undefined, { type: '__TEST__' });
-
-      state = reducer(state, createEntityTypeRequest());
-      expect(state.get('isCreatingNewEntityType')).toEqual(true);
-
-      state = reducer(state, createEntityTypeSuccess(MOCK_ENTITY_TYPE_DM, MOCK_ENTITY_TYPE_DM.id));
-      expect(state.get('isCreatingNewEntityType')).toEqual(false);
-
-      expect(state.get('entityTypes').size).toEqual(1);
-      expect(state.getIn(['entityTypes', 0]).toJS()).toEqual(MOCK_ENTITY_TYPE_DM);
-
-      expect(state.get('entityTypesById').size).toEqual(1);
-      expect(state.getIn(['entityTypesById', MOCK_ENTITY_TYPE_DM.id])).toEqual(0);
+    test(getAllEntityTypes.FINALLY, () => {
+      const state :Map<*, *> = reducer(INITIAL_STATE, getAllEntityTypes.finally());
+      expect(state.get('isFetchingAllEntityTypes')).toEqual(false);
     });
 
   });

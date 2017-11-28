@@ -4,6 +4,7 @@
 
 import Immutable from 'immutable';
 import { Models } from 'lattice';
+import { EntityDataModelApiActionFactory } from 'lattice-sagas';
 
 import {
   CREATE_ENTITY_TYPE_FAILURE,
@@ -12,9 +13,6 @@ import {
   DELETE_ENTITY_TYPE_FAILURE,
   DELETE_ENTITY_TYPE_REQUEST,
   DELETE_ENTITY_TYPE_SUCCESS,
-  FETCH_ALL_ENTITY_TYPES_FAILURE,
-  FETCH_ALL_ENTITY_TYPES_REQUEST,
-  FETCH_ALL_ENTITY_TYPES_SUCCESS,
   UPDATE_ENTITY_TYPE_METADATA_FAILURE,
   UPDATE_ENTITY_TYPE_METADATA_REQUEST,
   UPDATE_ENTITY_TYPE_METADATA_SUCCESS,
@@ -25,6 +23,7 @@ import {
 import type { Action } from './EntityTypesActionFactory';
 import type { SequenceAction } from '../../../core/redux/RequestSequence';
 
+const { getAllEntityTypes } = EntityDataModelApiActionFactory;
 const { EntityType, EntityTypeBuilder } = Models;
 
 const INITIAL_STATE :Map<*, *> = Immutable.fromJS({
@@ -100,35 +99,6 @@ export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, act
         .set('entityTypesById', updatedById);
     }
 
-    case FETCH_ALL_ENTITY_TYPES_FAILURE:
-      return state
-        .set('isFetchingAllEntityTypes', false)
-        .set('entityTypes', Immutable.List())
-        .set('entityTypesById', Immutable.Map());
-
-    case FETCH_ALL_ENTITY_TYPES_REQUEST:
-      return state.set('isFetchingAllEntityTypes', true);
-
-    case FETCH_ALL_ENTITY_TYPES_SUCCESS: {
-
-      const allEntityTypes :List<Map<*, *>> = Immutable.fromJS(action.entityTypes);
-      const entityTypesStrict :List<Map<*, *>> = allEntityTypes.filter((entityType :Map<*, *>) => {
-        return entityType.get('category') === 'EntityType';
-      });
-
-      const entityTypesById :Map<string, number> = Immutable.Map()
-        .withMutations((byIdMap :Map<string, number>) => {
-          entityTypesStrict.forEach((entityType :Map<*, *>, entityTypeIndex :number) => {
-            byIdMap.set(entityType.get('id'), entityTypeIndex);
-          });
-        });
-
-      return state
-        .set('isFetchingAllEntityTypes', false)
-        .set('entityTypes', entityTypesStrict)
-        .set('entityTypesById', entityTypesById);
-    }
-
     case UPDATE_ENTITY_TYPE_METADATA_FAILURE:
     case UPDATE_ENTITY_TYPE_METADATA_REQUEST:
       return state;
@@ -154,6 +124,44 @@ export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, act
       }
 
       return state;
+    }
+
+    case getAllEntityTypes.case(action.type): {
+      return getAllEntityTypes.reducer(state, action, {
+        REQUEST: () => {
+          return state.set('isFetchingAllEntityTypes', true);
+        },
+        SUCCESS: () => {
+
+          const seqAction :SequenceAction = (action :any);
+
+          if (seqAction.value) {
+            const allEntityTypes :List<Map<*, *>> = Immutable.fromJS(seqAction.value);
+            const entityTypesStrict :List<Map<*, *>> = allEntityTypes.filter((entityType :Map<*, *>) => {
+              return entityType.get('category') === 'EntityType';
+            });
+            const entityTypesById :Map<string, number> = Immutable.Map()
+              .withMutations((byIdMap :Map<string, number>) => {
+                entityTypesStrict.forEach((entityType :Map<*, *>, entityTypeIndex :number) => {
+                  byIdMap.set(entityType.get('id'), entityTypeIndex);
+                });
+              });
+            return state
+              .set('entityTypes', entityTypesStrict)
+              .set('entityTypesById', entityTypesById);
+          }
+
+          return state;
+        },
+        FAILURE: () => {
+          return state
+            .set('entityTypes', Immutable.List())
+            .set('entityTypesById', Immutable.Map());
+        },
+        FINALLY: () => {
+          return state.set('isFetchingAllEntityTypes', false);
+        }
+      });
     }
 
     case addPropertyTypeToEntityType.case(action.type): {

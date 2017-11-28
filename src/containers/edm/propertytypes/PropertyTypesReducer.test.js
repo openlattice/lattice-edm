@@ -1,71 +1,59 @@
 /*
- * @flow
+ *
  */
 
 import Immutable from 'immutable';
+import { EntityDataModelApiActionFactory } from 'lattice-sagas';
 
 import reducer from './PropertyTypesReducer';
+import { MOCK_PROPERTY_TYPE_JSON } from '../../../utils/MockDataModels';
 
-import {
-  MOCK_PROPERTY_TYPE_DM
-} from '../../../utils/MockDataModels';
-
-import {
-  createPropertyTypeFailure,
-  createPropertyTypeRequest,
-  createPropertyTypeSuccess
-} from './PropertyTypesActionFactory';
+const { GET_ALL_PROPERTY_TYPES, getAllPropertyTypes } = EntityDataModelApiActionFactory;
 
 describe('PropertyTypesReducer', () => {
 
-  test('initial state', () => {
+  const INITIAL_STATE :Map<*, *> = reducer(undefined, { type: '__TEST__' });
 
-    const state :Map<*, *> = reducer(undefined, { type: '__TEST__' });
-
-    expect(state).toBeInstanceOf(Immutable.Map);
-    expect(state.get('propertyTypes')).toEqual(Immutable.List());
-    expect(state.get('propertyTypesById')).toEqual(Immutable.Map());
-    expect(state.get('isCreatingNewPropertyType')).toEqual(false);
-    expect(state.get('isFetchingAllPropertyTypes')).toEqual(false);
-    expect(state.get('newlyCreatedPropertyTypeId')).toEqual('');
+  test('INITIAL_STATE', () => {
+    expect(INITIAL_STATE).toBeInstanceOf(Immutable.Map);
+    expect(INITIAL_STATE.get('propertyTypes')).toEqual(Immutable.List());
+    expect(INITIAL_STATE.get('propertyTypesById')).toEqual(Immutable.Map());
+    expect(INITIAL_STATE.get('isCreatingNewPropertyType')).toEqual(false);
+    expect(INITIAL_STATE.get('isFetchingAllPropertyTypes')).toEqual(false);
+    expect(INITIAL_STATE.get('newlyCreatedPropertyTypeId')).toEqual('');
   });
 
-  describe('CREATE_PROPERTY_TYPE', () => {
+  describe(GET_ALL_PROPERTY_TYPES, () => {
 
-    test('REQUEST', () => {
-
-      const INITIAL_STATE :Map<*, *> = reducer(undefined, { type: '__TEST__' });
-
-      const state :Map<*, *> = reducer(INITIAL_STATE, createPropertyTypeRequest());
-      expect(state.get('isCreatingNewPropertyType')).toEqual(true);
+    test(getAllPropertyTypes.REQUEST, () => {
+      const state :Map<*, *> = reducer(INITIAL_STATE, getAllPropertyTypes.request());
+      expect(state.get('isFetchingAllPropertyTypes')).toEqual(true);
     });
 
-    test('FAILURE', () => {
+    // TODO: test SUCCESS with variable size result
+    test(getAllPropertyTypes.SUCCESS, () => {
 
-      let state = reducer(undefined, { type: '__TEST__' });
+      const response = [MOCK_PROPERTY_TYPE_JSON];
+      const state :Map<*, *> = reducer(INITIAL_STATE, getAllPropertyTypes.success(response));
 
-      state = reducer(state, createPropertyTypeRequest());
-      expect(state.get('isCreatingNewPropertyType')).toEqual(true);
+      expect(state.get('propertyTypes')).toEqual(
+        Immutable.fromJS([MOCK_PROPERTY_TYPE_JSON])
+      );
 
-      state = reducer(state, createPropertyTypeFailure());
-      expect(state.get('isCreatingNewPropertyType')).toEqual(false);
+      expect(state.get('propertyTypesById')).toEqual(
+        Immutable.fromJS({ [MOCK_PROPERTY_TYPE_JSON.id]: 0 })
+      );
     });
 
-    test('SUCCESS', () => {
+    test(getAllPropertyTypes.FAILURE, () => {
+      const state :Map<*, *> = reducer(INITIAL_STATE, getAllPropertyTypes.failure());
+      expect(state.get('propertyTypes')).toEqual(Immutable.List());
+      expect(state.get('propertyTypesById')).toEqual(Immutable.Map());
+    });
 
-      let state = reducer(undefined, { type: '__TEST__' });
-
-      state = reducer(state, createPropertyTypeRequest());
-      expect(state.get('isCreatingNewPropertyType')).toEqual(true);
-
-      state = reducer(state, createPropertyTypeSuccess(MOCK_PROPERTY_TYPE_DM, MOCK_PROPERTY_TYPE_DM.id));
-      expect(state.get('isCreatingNewPropertyType')).toEqual(false);
-
-      expect(state.get('propertyTypes').size).toEqual(1);
-      expect(state.getIn(['propertyTypes', 0]).toJS()).toEqual(MOCK_PROPERTY_TYPE_DM);
-
-      expect(state.get('propertyTypesById').size).toEqual(1);
-      expect(state.getIn(['propertyTypesById', MOCK_PROPERTY_TYPE_DM.id])).toEqual(0);
+    test(getAllPropertyTypes.FINALLY, () => {
+      const state :Map<*, *> = reducer(INITIAL_STATE, getAllPropertyTypes.finally());
+      expect(state.get('isFetchingAllPropertyTypes')).toEqual(false);
     });
 
   });
