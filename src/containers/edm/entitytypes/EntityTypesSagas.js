@@ -8,9 +8,6 @@ import { call, put, take } from 'redux-saga/effects';
 import {
   ADD_PROPERTY_TYPE_TO_ENTITY_TYPE,
   addPropertyTypeToEntityType,
-  CREATE_ENTITY_TYPE_REQUEST,
-  createEntityTypeFailure,
-  createEntityTypeSuccess,
   DELETE_ENTITY_TYPE_REQUEST,
   deleteEntityTypeFailure,
   deleteEntityTypeSuccess,
@@ -22,7 +19,6 @@ import {
 } from './EntityTypesActionFactory';
 
 import type {
-  CreateEntityTypeRequestAction,
   DeleteEntityTypeRequestAction,
   UpdateEntityTypeMetaDataRequestAction
 } from './EntityTypesActionFactory';
@@ -50,20 +46,6 @@ export function* watchAddPropertyTypeToEntityType() :Generator<*, *, *> {
     }
     finally {
       yield put(addPropertyTypeToEntityType.finally());
-    }
-  }
-}
-
-export function* watchCreateEntityTypeRequest() :Generator<*, *, *> {
-
-  while (true) {
-    const action :CreateEntityTypeRequestAction = yield take(CREATE_ENTITY_TYPE_REQUEST);
-    try {
-      const response = yield call(EntityDataModelApi.createEntityType, action.entityType);
-      yield put(createEntityTypeSuccess(action.entityType, response));
-    }
-    catch (error) {
-      yield put(createEntityTypeFailure(action.entityType, error));
     }
   }
 }

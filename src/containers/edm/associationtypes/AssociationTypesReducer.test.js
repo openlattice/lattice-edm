@@ -6,9 +6,18 @@ import Immutable from 'immutable';
 import { EntityDataModelApiActionFactory } from 'lattice-sagas';
 
 import reducer from './AssociationTypesReducer';
-import { MOCK_ASSOCIATION_TYPE_JSON } from '../../../utils/MockDataModels';
 
-const { GET_ALL_ASSOCIATION_TYPES, getAllAssociationTypes } = EntityDataModelApiActionFactory;
+import {
+  MOCK_ASSOCIATION_TYPE,
+  MOCK_ASSOCIATION_TYPE_JSON
+} from '../../../utils/MockDataModels';
+
+const {
+  CREATE_ASSOCIATION_TYPE,
+  GET_ALL_ASSOCIATION_TYPES,
+  createAssociationType,
+  getAllAssociationTypes
+} = EntityDataModelApiActionFactory;
 
 describe('AssociationTypesReducer', () => {
 
@@ -21,6 +30,50 @@ describe('AssociationTypesReducer', () => {
     expect(INITIAL_STATE.get('isCreatingNewAssociationType')).toEqual(false);
     expect(INITIAL_STATE.get('isFetchingAllAssociationTypes')).toEqual(false);
     expect(INITIAL_STATE.get('newlyCreatedAssociationTypeId')).toEqual('');
+  });
+
+  describe(CREATE_ASSOCIATION_TYPE, () => {
+
+    test(createAssociationType.REQUEST, () => {
+      const state :Map<*, *> = reducer(INITIAL_STATE, createAssociationType.request(MOCK_ASSOCIATION_TYPE));
+      expect(state.get('isCreatingNewAssociationType')).toEqual(true);
+      expect(state.get('newlyCreatedAssociationTypeId')).toEqual('');
+      expect(state.get('tempAssociationType')).toEqual(MOCK_ASSOCIATION_TYPE);
+    });
+
+    test(createAssociationType.SUCCESS, () => {
+
+      let state :Map<*, *> = reducer(INITIAL_STATE, createAssociationType.request(MOCK_ASSOCIATION_TYPE));
+      state = reducer(state, createAssociationType.success(MOCK_ASSOCIATION_TYPE.entityType.id));
+      expect(state.get('isCreatingNewAssociationType')).toEqual(true);
+      expect(state.get('newlyCreatedAssociationTypeId')).toEqual(MOCK_ASSOCIATION_TYPE.entityType.id);
+
+      const expectedAssociationType = MOCK_ASSOCIATION_TYPE.asImmutable();
+      expect(state.get('associationTypes')).toEqual(
+        Immutable.fromJS([expectedAssociationType])
+      );
+
+      expect(state.get('associationTypesById')).toEqual(
+        Immutable.fromJS({ [MOCK_ASSOCIATION_TYPE.entityType.id]: 0 })
+      );
+    });
+
+    test(createAssociationType.FAILURE, () => {
+      // TODO: need to properly handle the failure case
+      let state :Map<*, *> = reducer(INITIAL_STATE, createAssociationType.request(MOCK_ASSOCIATION_TYPE));
+      state = reducer(state, createAssociationType.failure());
+      expect(state.get('isCreatingNewAssociationType')).toEqual(true);
+      expect(state.get('newlyCreatedAssociationTypeId')).toEqual('');
+      expect(state.get('tempAssociationType')).toEqual(MOCK_ASSOCIATION_TYPE);
+    });
+
+    test(createAssociationType.FINALLY, () => {
+      const state :Map<*, *> = reducer(INITIAL_STATE, createAssociationType.finally());
+      expect(state.get('isCreatingNewAssociationType')).toEqual(false);
+      expect(state.get('newlyCreatedAssociationTypeId')).toEqual('');
+      expect(state.get('tempAssociationType')).toEqual(null);
+    });
+
   });
 
   describe(GET_ALL_ASSOCIATION_TYPES, () => {

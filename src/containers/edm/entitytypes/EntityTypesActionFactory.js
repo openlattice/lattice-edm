@@ -2,60 +2,9 @@
  * @flow
  */
 
-import { Models } from 'lattice';
-
 import { newRequestSequence } from '../../../core/redux/RequestSequence';
 
 import type { RequestSequence } from '../../../core/redux/RequestSequence';
-
-const { EntityType } = Models;
-
-const CREATE_ENTITY_TYPE_FAILURE :'CREATE_ENTITY_TYPE_FAILURE' = 'CREATE_ENTITY_TYPE_FAILURE';
-const CREATE_ENTITY_TYPE_REQUEST :'CREATE_ENTITY_TYPE_REQUEST' = 'CREATE_ENTITY_TYPE_REQUEST';
-const CREATE_ENTITY_TYPE_SUCCESS :'CREATE_ENTITY_TYPE_SUCCESS' = 'CREATE_ENTITY_TYPE_SUCCESS';
-
-type CreateEntityTypeFailureAction = {
-  error :any,
-  entityType :EntityType,
-  type :typeof CREATE_ENTITY_TYPE_FAILURE
-};
-
-function createEntityTypeFailure(entityType :EntityType, error :any) :CreateEntityTypeFailureAction {
-
-  return {
-    error,
-    entityType,
-    type: CREATE_ENTITY_TYPE_FAILURE
-  };
-}
-
-type CreateEntityTypeRequestAction = {
-  entityType :EntityType,
-  type :typeof CREATE_ENTITY_TYPE_REQUEST
-};
-
-function createEntityTypeRequest(entityType :EntityType) :CreateEntityTypeRequestAction {
-
-  return {
-    entityType,
-    type: CREATE_ENTITY_TYPE_REQUEST
-  };
-}
-
-type CreateEntityTypeSuccessAction = {
-  entityType :EntityType,
-  entityTypeId :string,
-  type :typeof CREATE_ENTITY_TYPE_SUCCESS
-};
-
-function createEntityTypeSuccess(entityType :EntityType, entityTypeId :string) :CreateEntityTypeSuccessAction {
-
-  return {
-    entityType,
-    entityTypeId,
-    type: CREATE_ENTITY_TYPE_SUCCESS
-  };
-}
 
 /* eslint-disable max-len */
 const UPDATE_ENTITY_TYPE_METADATA_FAILURE :'UPDATE_ENTITY_TYPE_METADATA_FAILURE' = 'UPDATE_ENTITY_TYPE_METADATA_FAILURE';
@@ -170,9 +119,6 @@ const removePropertyTypeFromEntityType :RequestSequence = newRequestSequence(RM_
 
 export {
   ADD_PROPERTY_TYPE_TO_ENTITY_TYPE,
-  CREATE_ENTITY_TYPE_FAILURE,
-  CREATE_ENTITY_TYPE_REQUEST,
-  CREATE_ENTITY_TYPE_SUCCESS,
   DELETE_ENTITY_TYPE_FAILURE,
   DELETE_ENTITY_TYPE_REQUEST,
   DELETE_ENTITY_TYPE_SUCCESS,
@@ -184,9 +130,6 @@ export {
 
 export {
   addPropertyTypeToEntityType,
-  createEntityTypeFailure,
-  createEntityTypeRequest,
-  createEntityTypeSuccess,
   deleteEntityTypeFailure,
   deleteEntityTypeRequest,
   deleteEntityTypeSuccess,
@@ -197,9 +140,6 @@ export {
 };
 
 export type {
-  CreateEntityTypeFailureAction,
-  CreateEntityTypeRequestAction,
-  CreateEntityTypeSuccessAction,
   DeleteEntityTypeFailureAction,
   DeleteEntityTypeRequestAction,
   DeleteEntityTypeSuccessAction,
@@ -209,9 +149,6 @@ export type {
 };
 
 export type Action =
-  | CreateEntityTypeFailureAction
-  | CreateEntityTypeRequestAction
-  | CreateEntityTypeSuccessAction
   | DeleteEntityTypeFailureAction
   | DeleteEntityTypeRequestAction
   | DeleteEntityTypeSuccessAction

@@ -7,9 +7,6 @@ import { Models } from 'lattice';
 import { EntityDataModelApiActionFactory } from 'lattice-sagas';
 
 import {
-  CREATE_ENTITY_TYPE_FAILURE,
-  CREATE_ENTITY_TYPE_REQUEST,
-  CREATE_ENTITY_TYPE_SUCCESS,
   DELETE_ENTITY_TYPE_FAILURE,
   DELETE_ENTITY_TYPE_REQUEST,
   DELETE_ENTITY_TYPE_SUCCESS,
@@ -23,7 +20,7 @@ import {
 import type { Action } from './EntityTypesActionFactory';
 import type { SequenceAction } from '../../../core/redux/RequestSequence';
 
-const { getAllEntityTypes } = EntityDataModelApiActionFactory;
+const { createEntityType, getAllEntityTypes } = EntityDataModelApiActionFactory;
 const { EntityType, EntityTypeBuilder } = Models;
 
 const INITIAL_STATE :Map<*, *> = Immutable.fromJS({
@@ -31,50 +28,13 @@ const INITIAL_STATE :Map<*, *> = Immutable.fromJS({
   entityTypesById: Immutable.Map(),
   isCreatingNewEntityType: false,
   isFetchingAllEntityTypes: false,
-  newlyCreatedEntityTypeId: ''
+  newlyCreatedEntityTypeId: '',
+  tempEntityType: null
 });
 
 export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, action :Action) {
 
   switch (action.type) {
-
-    case CREATE_ENTITY_TYPE_FAILURE:
-      return state
-        .set('isCreatingNewEntityType', false)
-        .set('newlyCreatedEntityTypeId', '');
-
-    case CREATE_ENTITY_TYPE_REQUEST:
-      return state
-        .set('isCreatingNewEntityType', true)
-        .set('newlyCreatedEntityTypeId', '');
-
-    case CREATE_ENTITY_TYPE_SUCCESS: {
-
-      const entityType :EntityType = new EntityTypeBuilder()
-        .setId(action.entityTypeId)
-        .setType(action.entityType.type)
-        .setTitle(action.entityType.title)
-        .setDescription(action.entityType.description)
-        .setKey(action.entityType.key)
-        .setPropertyTypes(action.entityType.properties)
-        .setBaseType(action.entityType.baseType)
-        .setCategory(action.entityType.category)
-        .setSchemas(action.entityType.schemas)
-        .build();
-
-      const iEntityType :Map<*, *> = entityType.asImmutable();
-      const current :List<Map<*, *>> = state.get('entityTypes', Immutable.List());
-      const updated :List<Map<*, *>> = current.push(iEntityType);
-
-      const currentById :Map<string, number> = state.get('entityTypesById', Immutable.Map());
-      const updatedById :Map<string, number> = currentById.set(action.entityTypeId, updated.size - 1);
-
-      return state
-        .set('isCreatingNewEntityType', false)
-        .set('newlyCreatedEntityTypeId', action.entityTypeId)
-        .set('entityTypes', updated)
-        .set('entityTypesById', updatedById);
-    }
 
     case DELETE_ENTITY_TYPE_FAILURE:
     case DELETE_ENTITY_TYPE_REQUEST:
@@ -124,6 +84,58 @@ export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, act
       }
 
       return state;
+    }
+
+    case createEntityType.case(action.type): {
+      return createEntityType.reducer(state, action, {
+        REQUEST: () => {
+          const seqAction :SequenceAction = (action :any);
+          return state
+            .set('isCreatingNewEntityType', true)
+            .set('newlyCreatedEntityTypeId', '')
+            .set('tempEntityType', seqAction.value);
+        },
+        SUCCESS: () => {
+
+          const seqAction :SequenceAction = (action :any);
+          const newEntityTypeId :string = seqAction.value;
+          const tempEntityType :EntityType = state.get('tempEntityType');
+
+          const newEntityType :EntityType = new EntityTypeBuilder()
+            .setId(newEntityTypeId)
+            .setType(tempEntityType.type)
+            .setTitle(tempEntityType.title)
+            .setDescription(tempEntityType.description)
+            .setKey(tempEntityType.key)
+            .setPropertyTypes(tempEntityType.properties)
+            .setBaseType(tempEntityType.baseType)
+            .setCategory(tempEntityType.category)
+            .setSchemas(tempEntityType.schemas)
+            .build();
+
+          const iEntityType :Map<*, *> = newEntityType.asImmutable();
+          const current :List<Map<*, *>> = state.get('entityTypes', Immutable.List());
+          const updated :List<Map<*, *>> = current.push(iEntityType);
+
+          const currentById :Map<string, number> = state.get('entityTypesById', Immutable.Map());
+          const updatedById :Map<string, number> = currentById.set(newEntityTypeId, updated.size - 1);
+
+          return state
+            .set('newlyCreatedEntityTypeId', newEntityTypeId)
+            .set('entityTypes', updated)
+            .set('entityTypesById', updatedById);
+        },
+        FAILURE: () => {
+          // TODO: need to properly handle the failure case
+          return state;
+        },
+        FINALLY: () => {
+          return state
+            .set('isCreatingNewEntityType', false)
+            .set('newlyCreatedEntityTypeId', '')
+            .set('tempEntityType', null);
+        }
+      });
     }
 
     case getAllEntityTypes.case(action.type): {

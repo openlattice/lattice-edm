@@ -18,7 +18,7 @@ const {
   PropertyTypeBuilder
 } = Models;
 
-export const MOCK_ENTITY_TYPE_DM :EntityType = new EntityTypeBuilder()
+export const MOCK_ENTITY_TYPE :EntityType = new EntityTypeBuilder()
   .setId('ec6865e6-e60e-424b-a071-6a9c1603d735')
   .setType({ namespace: 'OpenLattice', name: 'MockType' })
   .setTitle('title')
@@ -56,7 +56,7 @@ export const MOCK_ENTITY_TYPE_JSON = {
   schemas: [{ namespace: 'OpenLattice', name: 'MockSchema' }]
 };
 
-export const MOCK_PROPERTY_TYPE_DM :PropertyType = new PropertyTypeBuilder()
+export const MOCK_PROPERTY_TYPE :PropertyType = new PropertyTypeBuilder()
   .setId('ec6865e6-e60e-424b-a071-6a9c1603d735')
   .setType({ namespace: 'OpenLattice', name: 'MockType' })
   .setTitle('title')
@@ -78,8 +78,8 @@ export const MOCK_PROPERTY_TYPE_JSON = {
   schemas: [{ namespace: 'OpenLattice', name: 'MockSchema' }]
 };
 
-export const MOCK_ASSOCIATION_TYPE_DM :AssociationType = new AssociationTypeBuilder()
-  .setEntityType(MOCK_ENTITY_TYPE_DM)
+export const MOCK_ASSOCIATION_TYPE :AssociationType = new AssociationTypeBuilder()
+  .setEntityType(MOCK_ENTITY_TYPE)
   .setSourceEntityTypeIds(['c49832e9-8c49-4d24-984a-2221b4fa249b'])
   .setDestinationEntityTypeIds(['91385fae-babc-4bd3-ba42-74decb9036f0'])
   .setBidirectional(false)

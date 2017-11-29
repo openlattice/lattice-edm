@@ -7,9 +7,6 @@ import { Models } from 'lattice';
 import { EntityDataModelApiActionFactory } from 'lattice-sagas';
 
 import {
-  CREATE_PROPERTY_TYPE_FAILURE,
-  CREATE_PROPERTY_TYPE_REQUEST,
-  CREATE_PROPERTY_TYPE_SUCCESS,
   DELETE_PROPERTY_TYPE_FAILURE,
   DELETE_PROPERTY_TYPE_REQUEST,
   DELETE_PROPERTY_TYPE_SUCCESS,
@@ -20,7 +17,7 @@ import {
 
 import type { Action } from './PropertyTypesActionFactory';
 
-const { getAllPropertyTypes } = EntityDataModelApiActionFactory;
+const { createPropertyType, getAllPropertyTypes } = EntityDataModelApiActionFactory;
 const { PropertyType, PropertyTypeBuilder } = Models;
 
 const INITIAL_STATE :Map<*, *> = Immutable.fromJS({
@@ -28,49 +25,13 @@ const INITIAL_STATE :Map<*, *> = Immutable.fromJS({
   propertyTypesById: Immutable.Map(),
   isCreatingNewPropertyType: false,
   isFetchingAllPropertyTypes: false,
-  newlyCreatedPropertyTypeId: ''
+  newlyCreatedPropertyTypeId: '',
+  tempPropertyType: null
 });
 
 export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, action :Action) {
 
   switch (action.type) {
-
-    case CREATE_PROPERTY_TYPE_FAILURE:
-      return state
-        .set('isCreatingNewPropertyType', false)
-        .set('newlyCreatedPropertyTypeId', '');
-
-    case CREATE_PROPERTY_TYPE_REQUEST:
-      return state
-        .set('isCreatingNewPropertyType', true)
-        .set('newlyCreatedPropertyTypeId', '');
-
-    case CREATE_PROPERTY_TYPE_SUCCESS: {
-
-      const propertyType :PropertyType = new PropertyTypeBuilder()
-        .setId(action.propertyTypeId)
-        .setType(action.propertyType.type)
-        .setTitle(action.propertyType.title)
-        .setDescription(action.propertyType.description)
-        .setDataType(action.propertyType.datatype)
-        .setPii(action.propertyType.piiField)
-        .setAnalyzer(action.propertyType.analyzer)
-        .setSchemas(action.propertyType.schemas)
-        .build();
-
-      const iPropertyType :Map<*, *> = propertyType.asImmutable();
-      const current :List<Map<*, *>> = state.get('propertyTypes', Immutable.List());
-      const updated :List<Map<*, *>> = current.push(iPropertyType);
-
-      const currentById :Map<string, number> = state.get('propertyTypesById', Immutable.Map());
-      const updatedById :Map<string, number> = currentById.set(action.propertyTypeId, updated.size - 1);
-
-      return state
-        .set('isCreatingNewPropertyType', false)
-        .set('newlyCreatedPropertyTypeId', action.propertyTypeId)
-        .set('propertyTypes', updated)
-        .set('propertyTypesById', updatedById);
-    }
 
     case DELETE_PROPERTY_TYPE_FAILURE:
     case DELETE_PROPERTY_TYPE_REQUEST:
@@ -120,6 +81,57 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
       }
 
       return state;
+    }
+
+    case createPropertyType.case(action.type): {
+      return createPropertyType.reducer(state, action, {
+        REQUEST: () => {
+          const seqAction :SequenceAction = (action :any);
+          return state
+            .set('isCreatingNewPropertyType', true)
+            .set('newlyCreatedPropertyTypeId', '')
+            .set('tempPropertyType', seqAction.value);
+        },
+        SUCCESS: () => {
+
+          const seqAction :SequenceAction = (action :any);
+          const newPropertyTypeId :string = seqAction.value;
+          const tempPropertyType :PropertyType = state.get('tempPropertyType');
+
+          const newPropertyType :PropertyType = new PropertyTypeBuilder()
+            .setId(newPropertyTypeId)
+            .setType(tempPropertyType.type)
+            .setTitle(tempPropertyType.title)
+            .setDescription(tempPropertyType.description)
+            .setDataType(tempPropertyType.datatype)
+            .setPii(tempPropertyType.piiField)
+            .setAnalyzer(tempPropertyType.analyzer)
+            .setSchemas(tempPropertyType.schemas)
+            .build();
+
+          const iPropertyType :Map<*, *> = newPropertyType.asImmutable();
+          const current :List<Map<*, *>> = state.get('propertyTypes', Immutable.List());
+          const updated :List<Map<*, *>> = current.push(iPropertyType);
+
+          const currentById :Map<string, number> = state.get('propertyTypesById', Immutable.Map());
+          const updatedById :Map<string, number> = currentById.set(newPropertyTypeId, updated.size - 1);
+
+          return state
+            .set('newlyCreatedPropertyTypeId', newPropertyTypeId)
+            .set('propertyTypes', updated)
+            .set('propertyTypesById', updatedById);
+        },
+        FAILURE: () => {
+          // TODO: need to properly handle the failure case
+          return state;
+        },
+        FINALLY: () => {
+          return state
+            .set('isCreatingNewPropertyType', false)
+            .set('newlyCreatedPropertyTypeId', '')
+            .set('tempPropertyType', null);
+        }
+      });
     }
 
     case getAllPropertyTypes.case(action.type): {

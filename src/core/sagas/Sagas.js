@@ -22,18 +22,19 @@ export default function* sagas() :Generator<*, *, *> {
     fork(AuthSagas.watchLogout),
 
     // Lattice Sagas
+    fork(EntityDataModelApiSagas.createAssociationTypeWatcher),
+    fork(EntityDataModelApiSagas.createEntityTypeWatcher),
+    fork(EntityDataModelApiSagas.createPropertyTypeWatcher),
     fork(EntityDataModelApiSagas.getAllAssociationTypesWatcher),
     fork(EntityDataModelApiSagas.getAllEntityTypesWatcher),
     fork(EntityDataModelApiSagas.getAllPropertyTypesWatcher),
 
     // PropertyTypesSagas
-    fork(PropertyTypesSagas.watchCreatePropertyTypeRequest),
     fork(PropertyTypesSagas.watchDeletePropertyTypeRequest),
     fork(PropertyTypesSagas.watchUpdatePropertyTypeMetaDataRequest),
 
     // EntityTypesSagas
     fork(EntityTypesSagas.watchAddPropertyTypeToEntityType),
-    fork(EntityTypesSagas.watchCreateEntityTypeRequest),
     fork(EntityTypesSagas.watchDeleteEntityTypeRequest),
     fork(EntityTypesSagas.watchRemovePropertyTypeFromEntityType),
     fork(EntityTypesSagas.watchUpdateEntityTypeMetaDataRequest),
@@ -41,7 +42,6 @@ export default function* sagas() :Generator<*, *, *> {
     // AssociationTypesSagas
     fork(AssociationTypesSagas.watchAddDestinationEntityTypeToAssociationType),
     fork(AssociationTypesSagas.watchAddSourceEntityTypeToAssociationType),
-    fork(AssociationTypesSagas.watchCreateAssociationTypeRequest),
     fork(AssociationTypesSagas.watchDeleteAssociationTypeRequest),
     fork(AssociationTypesSagas.watchRemoveDestinationEntityTypeFromAssociationType),
     fork(AssociationTypesSagas.watchRemoveSourceEntityTypeFromAssociationType),

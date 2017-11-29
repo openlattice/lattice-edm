@@ -7,6 +7,7 @@ import React from 'react';
 import Immutable from 'immutable';
 import styled from 'styled-components';
 import { Models, Types } from 'lattice';
+import { EntityDataModelApiActionFactory } from 'lattice-sagas';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 
@@ -18,11 +19,14 @@ import StyledButton from '../../components/buttons/StyledButton';
 import StyledCard from '../../components/cards/StyledCard';
 
 import { EDM_PRIMITIVE_TYPES } from '../../utils/EdmPrimitiveTypes';
-import { createAssociationTypeRequest } from './associationtypes/AssociationTypesActionFactory';
-import { createEntityTypeRequest } from './entitytypes/EntityTypesActionFactory';
-import { createPropertyTypeRequest } from './propertytypes/PropertyTypesActionFactory';
 
 import type { AbstractType } from '../../utils/AbstractTypes';
+
+const {
+  createAssociationType,
+  createEntityType,
+  createPropertyType
+} = EntityDataModelApiActionFactory;
 
 const {
   FullyQualifiedName,
@@ -118,35 +122,35 @@ const PropertyTypesSection = styled.section`
 
 type Props = {
   actions :{
-    createAssociationTypeRequest :Function,
-    createEntityTypeRequest :Function,
-    createPropertyTypeRequest :Function
-  },
-  entityTypes :List<Map<*, *>>,
-  propertyTypes :List<Map<*, *>>,
-  workingAbstractTypeType :AbstractType,
-  onCancel :Function
-}
+    createAssociationType :Function;
+    createEntityType :Function;
+    createPropertyType :Function;
+  };
+  entityTypes :List<Map<*, *>>;
+  propertyTypes :List<Map<*, *>>;
+  workingAbstractTypeType :AbstractType;
+  onCancel :Function;
+};
 
 type State = {
-  bidiValue :boolean,
-  datatypeValue :string,
-  descriptionValue :string,
-  filteredPrimaryKeyPropertyTypes :List<Map<*, *>>,
-  filteredPropertyTypes :List<Map<*, *>>,
-  isInEditModeName :boolean,
-  isInEditModeNamespace :boolean,
-  isInEditModeTitle :boolean,
-  nameValue :string,
-  namespaceValue :string,
-  phoneticSearchesValue :boolean,
-  piiValue :boolean,
-  titleValue :string,
-  selectedDestinationEntityTypes :Set<Map<*, *>>,
-  selectedPrimaryKeyPropertyTypes :Set<Map<*, *>>,
-  selectedPropertyTypes :Set<Map<*, *>>,
-  selectedSourceEntityTypes :Set<Map<*, *>>
-}
+  bidiValue :boolean;
+  datatypeValue :string;
+  descriptionValue :string;
+  filteredPrimaryKeyPropertyTypes :List<Map<*, *>>;
+  filteredPropertyTypes :List<Map<*, *>>;
+  isInEditModeName :boolean;
+  isInEditModeNamespace :boolean;
+  isInEditModeTitle :boolean;
+  nameValue :string;
+  namespaceValue :string;
+  phoneticSearchesValue :boolean;
+  piiValue :boolean;
+  titleValue :string;
+  selectedDestinationEntityTypes :Set<Map<*, *>>;
+  selectedPrimaryKeyPropertyTypes :Set<Map<*, *>>;
+  selectedPropertyTypes :Set<Map<*, *>>;
+  selectedSourceEntityTypes :Set<Map<*, *>>;
+};
 
 class AbstractTypeCreateContainer extends React.Component<Props, State> {
 
@@ -218,7 +222,7 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
         .setAnalyzer(analyzer)
         .build();
 
-      this.props.actions.createPropertyTypeRequest(newPropertyType);
+      this.props.actions.createPropertyType(newPropertyType);
     }
     else {
 
@@ -246,7 +250,7 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
           .setCategory(SecurableTypes.EntityType)
           .build();
 
-        this.props.actions.createEntityTypeRequest(newEntityType);
+        this.props.actions.createEntityType(newEntityType);
       }
       else if (this.props.workingAbstractTypeType === AbstractTypes.AssociationType) {
 
@@ -271,7 +275,7 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
           .setBidirectional(this.state.bidiValue)
           .build();
 
-        this.props.actions.createAssociationTypeRequest(newAssociationType);
+        this.props.actions.createAssociationType(newAssociationType);
       }
       else {
         // TODO: need a Logger class
@@ -798,9 +802,9 @@ function mapStateToProps(state :Map<*, *>) :Object {
 function mapDispatchToProps(dispatch :Function) :Object {
 
   const actions = {
-    createAssociationTypeRequest,
-    createEntityTypeRequest,
-    createPropertyTypeRequest
+    createAssociationType,
+    createEntityType,
+    createPropertyType,
   };
 
   return {

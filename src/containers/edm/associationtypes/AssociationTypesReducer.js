@@ -7,9 +7,6 @@ import { Models } from 'lattice';
 import { EntityDataModelApiActionFactory } from 'lattice-sagas';
 
 import {
-  CREATE_ASSOCIATION_TYPE_FAILURE,
-  CREATE_ASSOCIATION_TYPE_REQUEST,
-  CREATE_ASSOCIATION_TYPE_SUCCESS,
   DELETE_ASSOCIATION_TYPE_FAILURE,
   DELETE_ASSOCIATION_TYPE_REQUEST,
   DELETE_ASSOCIATION_TYPE_SUCCESS,
@@ -24,53 +21,30 @@ import {
 
 import type { SequenceAction } from '../../../core/redux/RequestSequence';
 
-const { getAllAssociationTypes } = EntityDataModelApiActionFactory;
-const { AssociationType, AssociationTypeBuilder } = Models;
+const {
+  createAssociationType,
+  getAllAssociationTypes
+} = EntityDataModelApiActionFactory;
+
+const {
+  AssociationType,
+  AssociationTypeBuilder,
+  EntityType,
+  EntityTypeBuilder
+} = Models;
 
 const INITIAL_STATE :Map<*, *> = Immutable.fromJS({
   associationTypes: Immutable.List(),
   associationTypesById: Immutable.Map(),
   isCreatingNewAssociationType: false,
   isFetchingAllAssociationTypes: false,
-  newlyCreatedAssociationTypeId: ''
+  newlyCreatedAssociationTypeId: '',
+  tempAssociationType: null
 });
 
 export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE, action :Object) {
 
   switch (action.type) {
-
-    case CREATE_ASSOCIATION_TYPE_FAILURE:
-      return state
-        .set('isCreatingNewAssociationType', false)
-        .set('newlyCreatedAssociationTypeId', '');
-
-    case CREATE_ASSOCIATION_TYPE_REQUEST:
-      return state
-        .set('isCreatingNewAssociationType', true)
-        .set('newlyCreatedAssociationTypeId', '');
-
-    case CREATE_ASSOCIATION_TYPE_SUCCESS: {
-
-      const associationType :AssociationType = new AssociationTypeBuilder()
-        .setEntityType(action.associationType.entityType)
-        .setSourceEntityTypeIds(action.associationType.src)
-        .setDestinationEntityTypeIds(action.associationType.dst)
-        .setBidirectional(action.associationType.bidirectional)
-        .build();
-
-      const iAssociationType :Map<*, *> = associationType.asImmutable();
-      const current :List<Map<*, *>> = state.get('associationTypes', Immutable.List());
-      const updated :List<Map<*, *>> = current.push(iAssociationType);
-
-      const currentById :Map<string, number> = state.get('associationTypesById', Immutable.Map());
-      const updatedById :Map<string, number> = currentById.set(action.associationTypeId, updated.size - 1);
-
-      return state
-        .set('isCreatingNewAssociationType', false)
-        .set('newlyCreatedAssociationTypeId', action.associationTypeId)
-        .set('associationTypes', updated)
-        .set('associationTypesById', updatedById);
-    }
 
     case DELETE_ASSOCIATION_TYPE_FAILURE:
     case DELETE_ASSOCIATION_TYPE_REQUEST:
@@ -130,6 +104,65 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
       }
 
       return state;
+    }
+
+    case createAssociationType.case(action.type): {
+      return createAssociationType.reducer(state, action, {
+        REQUEST: () => {
+          const seqAction :SequenceAction = (action :any);
+          return state
+            .set('isCreatingNewAssociationType', true)
+            .set('newlyCreatedAssociationTypeId', '')
+            .set('tempAssociationType', seqAction.value);
+        },
+        SUCCESS: () => {
+
+          const seqAction :SequenceAction = (action :any);
+          const newAssociationEntityTypeId :string = seqAction.value;
+          const tempAssociationType :AssociationType = state.get('tempAssociationType');
+
+          const newAssociationEntityType :EntityType = new EntityTypeBuilder()
+            .setId(newAssociationEntityTypeId)
+            .setType(tempAssociationType.entityType.type)
+            .setTitle(tempAssociationType.entityType.title)
+            .setDescription(tempAssociationType.entityType.description)
+            .setKey(tempAssociationType.entityType.key)
+            .setPropertyTypes(tempAssociationType.entityType.properties)
+            .setBaseType(tempAssociationType.entityType.baseType)
+            .setCategory(tempAssociationType.entityType.category)
+            .setSchemas(tempAssociationType.entityType.schemas)
+            .build();
+
+          const newAssociationType :AssociationType = new AssociationTypeBuilder()
+            .setEntityType(newAssociationEntityType)
+            .setSourceEntityTypeIds(tempAssociationType.src)
+            .setDestinationEntityTypeIds(tempAssociationType.dst)
+            .setBidirectional(tempAssociationType.bidirectional)
+            .build();
+
+          const iAssociationType :Map<*, *> = newAssociationType.asImmutable();
+          const current :List<Map<*, *>> = state.get('associationTypes', Immutable.List());
+          const updated :List<Map<*, *>> = current.push(iAssociationType);
+
+          const currentById :Map<string, number> = state.get('associationTypesById', Immutable.Map());
+          const updatedById :Map<string, number> = currentById.set(newAssociationEntityTypeId, updated.size - 1);
+
+          return state
+            .set('newlyCreatedAssociationTypeId', newAssociationEntityTypeId)
+            .set('associationTypes', updated)
+            .set('associationTypesById', updatedById);
+        },
+        FAILURE: () => {
+          // TODO: need to properly handle the failure case
+          return state;
+        },
+        FINALLY: () => {
+          return state
+            .set('isCreatingNewAssociationType', false)
+            .set('newlyCreatedAssociationTypeId', '')
+            .set('tempAssociationType', null);
+        }
+      });
     }
 
     case getAllAssociationTypes.case(action.type): {

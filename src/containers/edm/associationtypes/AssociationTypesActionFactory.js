@@ -2,66 +2,9 @@
  * @flow
  */
 
-import { Models } from 'lattice';
-
 import { newRequestSequence } from '../../../core/redux/RequestSequence';
 
 import type { RequestSequence } from '../../../core/redux/RequestSequence';
-
-const { AssociationType } = Models;
-
-const CREATE_ASSOCIATION_TYPE_FAILURE :'CREATE_ASSOCIATION_TYPE_FAILURE' = 'CREATE_ASSOCIATION_TYPE_FAILURE';
-const CREATE_ASSOCIATION_TYPE_REQUEST :'CREATE_ASSOCIATION_TYPE_REQUEST' = 'CREATE_ASSOCIATION_TYPE_REQUEST';
-const CREATE_ASSOCIATION_TYPE_SUCCESS :'CREATE_ASSOCIATION_TYPE_SUCCESS' = 'CREATE_ASSOCIATION_TYPE_SUCCESS';
-
-type CreateAssociationTypeFailureAction = {
-  error :any,
-  associationType :AssociationType,
-  type :typeof CREATE_ASSOCIATION_TYPE_FAILURE
-};
-
-function createAssociationTypeFailure(
-  associationType :AssociationType,
-  error :any
-) :CreateAssociationTypeFailureAction {
-
-  return {
-    type: CREATE_ASSOCIATION_TYPE_FAILURE,
-    error,
-    associationType
-  };
-}
-
-type CreateAssociationTypeRequestAction = {
-  associationType :AssociationType,
-  type :typeof CREATE_ASSOCIATION_TYPE_REQUEST
-};
-
-function createAssociationTypeRequest(associationType :AssociationType) :CreateAssociationTypeRequestAction {
-
-  return {
-    type: CREATE_ASSOCIATION_TYPE_REQUEST,
-    associationType
-  };
-}
-
-type CreateAssociationTypeSuccessAction = {
-  associationType :AssociationType,
-  associationTypeId :string,
-  type :typeof CREATE_ASSOCIATION_TYPE_SUCCESS
-};
-
-function createAssociationTypeSuccess(
-  associationType :AssociationType,
-  associationTypeId :string
-) :CreateAssociationTypeSuccessAction {
-
-  return {
-    type: CREATE_ASSOCIATION_TYPE_SUCCESS,
-    associationType,
-    associationTypeId
-  };
-}
 
 /* eslint-disable max-len */
 const UPDATE_ASSOCIATION_TYPE_METADATA_FAILURE :'UPDATE_ASSOCIATION_TYPE_METADATA_FAILURE' = 'UPDATE_ASSOCIATION_TYPE_METADATA_FAILURE';
@@ -183,9 +126,6 @@ const removeSourceEntityTypeFromAssociationType :RequestSequence = newRequestSeq
 export {
   ADD_DST_ET_TO_AT,
   ADD_SRC_ET_TO_AT,
-  CREATE_ASSOCIATION_TYPE_FAILURE,
-  CREATE_ASSOCIATION_TYPE_REQUEST,
-  CREATE_ASSOCIATION_TYPE_SUCCESS,
   DELETE_ASSOCIATION_TYPE_FAILURE,
   DELETE_ASSOCIATION_TYPE_REQUEST,
   DELETE_ASSOCIATION_TYPE_SUCCESS,
@@ -199,9 +139,6 @@ export {
 export {
   addDestinationEntityTypeToAssociationType,
   addSourceEntityTypeToAssociationType,
-  createAssociationTypeFailure,
-  createAssociationTypeRequest,
-  createAssociationTypeSuccess,
   deleteAssociationTypeFailure,
   deleteAssociationTypeRequest,
   deleteAssociationTypeSuccess,
@@ -213,9 +150,6 @@ export {
 };
 
 export type {
-  CreateAssociationTypeFailureAction,
-  CreateAssociationTypeRequestAction,
-  CreateAssociationTypeSuccessAction,
   DeleteAssociationTypeFailureAction,
   DeleteAssociationTypeRequestAction,
   DeleteAssociationTypeSuccessAction,
@@ -225,9 +159,6 @@ export type {
 };
 
 export type Action =
-  | CreateAssociationTypeFailureAction
-  | CreateAssociationTypeRequestAction
-  | CreateAssociationTypeSuccessAction
   | DeleteAssociationTypeFailureAction
   | DeleteAssociationTypeRequestAction
   | DeleteAssociationTypeSuccessAction
