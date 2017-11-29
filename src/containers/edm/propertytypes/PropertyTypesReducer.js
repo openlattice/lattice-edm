@@ -7,9 +7,6 @@ import { Models } from 'lattice';
 import { EntityDataModelApiActionFactory } from 'lattice-sagas';
 
 import {
-  DELETE_PROPERTY_TYPE_FAILURE,
-  DELETE_PROPERTY_TYPE_REQUEST,
-  DELETE_PROPERTY_TYPE_SUCCESS,
   UPDATE_PROPERTY_TYPE_METADATA_FAILURE,
   UPDATE_PROPERTY_TYPE_METADATA_REQUEST,
   UPDATE_PROPERTY_TYPE_METADATA_SUCCESS
@@ -17,44 +14,22 @@ import {
 
 import type { Action } from './PropertyTypesActionFactory';
 
-const { createPropertyType, getAllPropertyTypes } = EntityDataModelApiActionFactory;
+const { createPropertyType, deletePropertyType, getAllPropertyTypes } = EntityDataModelApiActionFactory;
 const { PropertyType, PropertyTypeBuilder } = Models;
 
 const INITIAL_STATE :Map<*, *> = Immutable.fromJS({
-  propertyTypes: Immutable.List(),
-  propertyTypesById: Immutable.Map(),
   isCreatingNewPropertyType: false,
   isFetchingAllPropertyTypes: false,
   newlyCreatedPropertyTypeId: '',
+  propertyTypeIdToDelete: '',
+  propertyTypes: Immutable.List(),
+  propertyTypesById: Immutable.Map(),
   tempPropertyType: null
 });
 
 export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, action :Action) {
 
   switch (action.type) {
-
-    case DELETE_PROPERTY_TYPE_FAILURE:
-    case DELETE_PROPERTY_TYPE_REQUEST:
-      return state;
-
-    case DELETE_PROPERTY_TYPE_SUCCESS: {
-
-      const propertyTypeId :string = action.propertyTypeId;
-      const propertyTypeIndex :number = state.getIn(['propertyTypesById', propertyTypeId], -1);
-
-      if (propertyTypeIndex === -1) {
-        return state;
-      }
-      const current :List<Map<*, *>> = state.get('propertyTypes', Immutable.List());
-      const updated :List<Map<*, *>> = current.delete(propertyTypeIndex);
-
-      const currentById :Map<string, number> = state.get('propertyTypesById', Immutable.Map());
-      const updatedById :Map<string, number> = currentById.delete(propertyTypeId);
-
-      return state
-        .set('propertyTypes', updated)
-        .set('propertyTypesById', updatedById);
-    }
 
     case UPDATE_PROPERTY_TYPE_METADATA_FAILURE:
     case UPDATE_PROPERTY_TYPE_METADATA_REQUEST:
@@ -134,6 +109,42 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
       });
     }
 
+    case deletePropertyType.case(action.type): {
+      return deletePropertyType.reducer(state, action, {
+        REQUEST: () => {
+          const seqAction :SequenceAction = (action :any);
+          return state.set('propertyTypeIdToDelete', seqAction.value);
+        },
+        SUCCESS: () => {
+
+          const propertyTypeId :string = state.get('propertyTypeIdToDelete', '');
+          const propertyTypeIndex :number = state.getIn(['propertyTypesById', propertyTypeId], -1);
+
+          if (propertyTypeIndex === -1) {
+            return state;
+          }
+
+          const current :List<Map<*, *>> = state.get('propertyTypes', Immutable.List());
+          const updated :List<Map<*, *>> = current.delete(propertyTypeIndex);
+
+          // !!! BUG !!! - need to update id -> index mapping
+          const currentById :Map<string, number> = state.get('propertyTypesById', Immutable.Map());
+          const updatedById :Map<string, number> = currentById.delete(propertyTypeId);
+
+          return state
+            .set('propertyTypes', updated)
+            .set('propertyTypesById', updatedById);
+        },
+        FAILURE: () => {
+          // TODO: need to properly handle the failure case
+          return state;
+        },
+        FINALLY: () => {
+          return state.set('propertyTypeIdToDelete', '');
+        }
+      });
+    }
+
     case getAllPropertyTypes.case(action.type): {
       return getAllPropertyTypes.reducer(state, action, {
         REQUEST: () => {
@@ -142,21 +153,16 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
         SUCCESS: () => {
 
           const seqAction :SequenceAction = (action :any);
-
-          if (seqAction.value) {
-            const propertyTypes :List<Map<*, *>> = Immutable.fromJS(seqAction.value);
-            const propertyTypesById :Map<string, number> = Immutable.Map()
-              .withMutations((byIdMap :Map<string, number>) => {
-                propertyTypes.forEach((propertyType :Map<*, *>, propertyTypeIndex :number) => {
-                  byIdMap.set(propertyType.get('id'), propertyTypeIndex);
-                });
+          const propertyTypes :List<Map<*, *>> = Immutable.fromJS(seqAction.value);
+          const propertyTypesById :Map<string, number> = Immutable.Map()
+            .withMutations((byIdMap :Map<string, number>) => {
+              propertyTypes.forEach((propertyType :Map<*, *>, propertyTypeIndex :number) => {
+                byIdMap.set(propertyType.get('id'), propertyTypeIndex);
               });
-            return state
-              .set('propertyTypes', propertyTypes)
-              .set('propertyTypesById', propertyTypesById);
-          }
-
-          return state;
+            });
+          return state
+            .set('propertyTypes', propertyTypes)
+            .set('propertyTypesById', propertyTypesById);
         },
         FAILURE: () => {
           return state

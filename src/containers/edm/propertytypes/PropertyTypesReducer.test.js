@@ -14,8 +14,10 @@ import {
 
 const {
   CREATE_PROPERTY_TYPE,
+  DELETE_PROPERTY_TYPE,
   GET_ALL_PROPERTY_TYPES,
   createPropertyType,
+  deletePropertyType,
   getAllPropertyTypes
 } = EntityDataModelApiActionFactory;
 
@@ -25,11 +27,13 @@ describe('PropertyTypesReducer', () => {
 
   test('INITIAL_STATE', () => {
     expect(INITIAL_STATE).toBeInstanceOf(Immutable.Map);
-    expect(INITIAL_STATE.get('propertyTypes')).toEqual(Immutable.List());
-    expect(INITIAL_STATE.get('propertyTypesById')).toEqual(Immutable.Map());
     expect(INITIAL_STATE.get('isCreatingNewPropertyType')).toEqual(false);
     expect(INITIAL_STATE.get('isFetchingAllPropertyTypes')).toEqual(false);
     expect(INITIAL_STATE.get('newlyCreatedPropertyTypeId')).toEqual('');
+    expect(INITIAL_STATE.get('propertyTypeIdToDelete')).toEqual('');
+    expect(INITIAL_STATE.get('propertyTypes')).toEqual(Immutable.List());
+    expect(INITIAL_STATE.get('propertyTypesById')).toEqual(Immutable.Map());
+    expect(INITIAL_STATE.get('tempPropertyType')).toEqual(null);
   });
 
   describe(CREATE_PROPERTY_TYPE, () => {
@@ -72,6 +76,43 @@ describe('PropertyTypesReducer', () => {
       expect(state.get('isCreatingNewPropertyType')).toEqual(false);
       expect(state.get('newlyCreatedPropertyTypeId')).toEqual('');
       expect(state.get('tempPropertyType')).toEqual(null);
+    });
+
+  });
+
+  describe(DELETE_PROPERTY_TYPE, () => {
+
+    test(deletePropertyType.REQUEST, () => {
+      const state :Map<*, *> = reducer(INITIAL_STATE, deletePropertyType.request(MOCK_PROPERTY_TYPE.id));
+      expect(state.get('propertyTypeIdToDelete')).toEqual(MOCK_PROPERTY_TYPE.id);
+    });
+
+    test(deletePropertyType.SUCCESS, () => {
+
+      let state :Map<*, *> = INITIAL_STATE
+        .set('propertyTypes', Immutable.fromJS([MOCK_PROPERTY_TYPE.asImmutable()]))
+        .set('propertyTypesById', Immutable.fromJS({ [MOCK_PROPERTY_TYPE.id]: 0 }));
+
+      state = reducer(state, deletePropertyType.request(MOCK_PROPERTY_TYPE.id));
+      state = reducer(state, deletePropertyType.success());
+
+      expect(state.get('propertyTypeIdToDelete')).toEqual(MOCK_PROPERTY_TYPE.id);
+      expect(state.get('propertyTypes')).toEqual(Immutable.List());
+      expect(state.get('propertyTypesById')).toEqual(Immutable.Map());
+    });
+
+    test(deletePropertyType.FAILURE, () => {
+      let state :Map<*, *> = reducer(INITIAL_STATE, deletePropertyType.request(MOCK_PROPERTY_TYPE.id));
+      state = reducer(state, deletePropertyType.failure());
+      expect(state.get('propertyTypeIdToDelete')).toEqual(MOCK_PROPERTY_TYPE.id);
+    });
+
+    test(deletePropertyType.FINALLY, () => {
+      const propertyTypeId :string = MOCK_PROPERTY_TYPE.id;
+      let state :Map<*, *> = reducer(INITIAL_STATE, deletePropertyType.request(propertyTypeId));
+      expect(state.get('propertyTypeIdToDelete')).toEqual(propertyTypeId);
+      state = reducer(state, deletePropertyType.finally());
+      expect(state.get('propertyTypeIdToDelete')).toEqual('');
     });
 
   });

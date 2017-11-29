@@ -6,6 +6,7 @@ import React from 'react';
 
 import Immutable from 'immutable';
 import styled from 'styled-components';
+import { EntityDataModelApiActionFactory } from 'lattice-sagas';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 
@@ -21,12 +22,13 @@ import * as AuthUtils from '../../../core/auth/AuthUtils';
 import {
   addDestinationEntityTypeToAssociationType,
   addSourceEntityTypeToAssociationType,
-  deleteAssociationTypeRequest,
   removeDestinationEntityTypeFromAssociationType,
   removeSourceEntityTypeFromAssociationType
 } from './AssociationTypesActionFactory';
 
 import type { RequestSequence } from '../../../core/redux/RequestSequence';
+
+const { deleteAssociationType } = EntityDataModelApiActionFactory;
 
 /*
  * styled components
@@ -46,17 +48,17 @@ const AbstractTypeSearchableSelectWrapper = styled.div`
 
 type Props = {
   actions :{
-    addDestinationEntityTypeToAssociationType :RequestSequence,
-    addSourceEntityTypeToAssociationType :RequestSequence,
-    deleteAssociationTypeRequest :Function,
-    removeDestinationEntityTypeFromAssociationType :RequestSequence,
-    removeSourceEntityTypeFromAssociationType :RequestSequence
-  },
-  associationType :Map<*, *>,
-  entityTypes :List<Map<*, *>>,
-  entityTypesById :Map<string, number>,
-  propertyTypes :List<Map<*, *>>,
-  propertyTypesById :Map<string, number>
+    addDestinationEntityTypeToAssociationType :RequestSequence;
+    addSourceEntityTypeToAssociationType :RequestSequence;
+    deleteAssociationType :RequestSequence;
+    removeDestinationEntityTypeFromAssociationType :RequestSequence;
+    removeSourceEntityTypeFromAssociationType :RequestSequence;
+  };
+  associationType :Map<*, *>;
+  entityTypes :List<Map<*, *>>;
+  entityTypesById :Map<string, number>;
+  propertyTypes :List<Map<*, *>>;
+  propertyTypesById :Map<string, number>;
 };
 
 class AssoctTypeDetailsContainer extends React.Component<Props> {
@@ -109,7 +111,7 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
 
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
       const associationEntityType :Map<*, *> = this.props.associationType.get('entityType', Immutable.Map());
-      this.props.actions.deleteAssociationTypeRequest(associationEntityType.get('id'));
+      this.props.actions.deleteAssociationType(associationEntityType.get('id'));
     }
   }
 
@@ -390,7 +392,7 @@ function mapDispatchToProps(dispatch :Function) :Object {
   const actions = {
     addDestinationEntityTypeToAssociationType,
     addSourceEntityTypeToAssociationType,
-    deleteAssociationTypeRequest,
+    deleteAssociationType,
     removeDestinationEntityTypeFromAssociationType,
     removeSourceEntityTypeFromAssociationType
   };

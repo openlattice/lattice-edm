@@ -25,24 +25,24 @@ export default function* sagas() :Generator<*, *, *> {
     fork(EntityDataModelApiSagas.createAssociationTypeWatcher),
     fork(EntityDataModelApiSagas.createEntityTypeWatcher),
     fork(EntityDataModelApiSagas.createPropertyTypeWatcher),
+    fork(EntityDataModelApiSagas.deleteAssociationTypeWatcher),
+    fork(EntityDataModelApiSagas.deleteEntityTypeWatcher),
+    fork(EntityDataModelApiSagas.deletePropertyTypeWatcher),
     fork(EntityDataModelApiSagas.getAllAssociationTypesWatcher),
     fork(EntityDataModelApiSagas.getAllEntityTypesWatcher),
     fork(EntityDataModelApiSagas.getAllPropertyTypesWatcher),
 
     // PropertyTypesSagas
-    fork(PropertyTypesSagas.watchDeletePropertyTypeRequest),
     fork(PropertyTypesSagas.watchUpdatePropertyTypeMetaDataRequest),
 
     // EntityTypesSagas
     fork(EntityTypesSagas.watchAddPropertyTypeToEntityType),
-    fork(EntityTypesSagas.watchDeleteEntityTypeRequest),
     fork(EntityTypesSagas.watchRemovePropertyTypeFromEntityType),
     fork(EntityTypesSagas.watchUpdateEntityTypeMetaDataRequest),
 
     // AssociationTypesSagas
     fork(AssociationTypesSagas.watchAddDestinationEntityTypeToAssociationType),
     fork(AssociationTypesSagas.watchAddSourceEntityTypeToAssociationType),
-    fork(AssociationTypesSagas.watchDeleteAssociationTypeRequest),
     fork(AssociationTypesSagas.watchRemoveDestinationEntityTypeFromAssociationType),
     fork(AssociationTypesSagas.watchRemoveSourceEntityTypeFromAssociationType),
     fork(AssociationTypesSagas.watchUpdateAssociationTypeMetaDataRequest)

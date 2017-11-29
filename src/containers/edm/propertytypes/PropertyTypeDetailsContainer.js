@@ -4,6 +4,7 @@
 
 import React from 'react';
 
+import { EntityDataModelApiActionFactory } from 'lattice-sagas';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 
@@ -12,9 +13,9 @@ import AbstractTypeFieldDescription from '../AbstractTypeFieldDescription';
 import AbstractTypeFieldTitle from '../AbstractTypeFieldTitle';
 import AbstractTypeFieldType from '../AbstractTypeFieldType';
 import StyledButton from '../../../components/buttons/StyledButton';
-
 import * as AuthUtils from '../../../core/auth/AuthUtils';
-import { deletePropertyTypeRequest } from './PropertyTypesActionFactory';
+
+const { deletePropertyType } = EntityDataModelApiActionFactory;
 
 /*
  * styled components
@@ -30,17 +31,17 @@ const DeleteButton = StyledButton.extend`
 
 type Props = {
   actions :{
-    deletePropertyTypeRequest :Function,
-  },
-  propertyType :Map<*, *>
-}
+    deletePropertyType :RequestSequence;
+  };
+  propertyType :Map<*, *>;
+};
 
 class PropertyTypeDetailsContainer extends React.Component<Props> {
 
   handleOnClickDelete = () => {
 
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
-      this.props.actions.deletePropertyTypeRequest(this.props.propertyType.get('id'));
+      this.props.actions.deletePropertyType(this.props.propertyType.get('id'));
     }
   }
 
@@ -104,7 +105,7 @@ class PropertyTypeDetailsContainer extends React.Component<Props> {
 function mapDispatchToProps(dispatch :Function) :Object {
 
   const actions = {
-    deletePropertyTypeRequest
+    deletePropertyType
   };
 
   return {

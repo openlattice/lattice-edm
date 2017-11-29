@@ -14,8 +14,10 @@ import {
 
 const {
   CREATE_ASSOCIATION_TYPE,
+  DELETE_ASSOCIATION_TYPE,
   GET_ALL_ASSOCIATION_TYPES,
   createAssociationType,
+  deleteAssociationType,
   getAllAssociationTypes
 } = EntityDataModelApiActionFactory;
 
@@ -25,6 +27,7 @@ describe('AssociationTypesReducer', () => {
 
   test('INITIAL_STATE', () => {
     expect(INITIAL_STATE).toBeInstanceOf(Immutable.Map);
+    expect(INITIAL_STATE.get('associationTypeIdToDelete')).toEqual('');
     expect(INITIAL_STATE.get('associationTypes')).toEqual(Immutable.List());
     expect(INITIAL_STATE.get('associationTypesById')).toEqual(Immutable.Map());
     expect(INITIAL_STATE.get('isCreatingNewAssociationType')).toEqual(false);
@@ -72,6 +75,46 @@ describe('AssociationTypesReducer', () => {
       expect(state.get('isCreatingNewAssociationType')).toEqual(false);
       expect(state.get('newlyCreatedAssociationTypeId')).toEqual('');
       expect(state.get('tempAssociationType')).toEqual(null);
+    });
+
+  });
+
+  describe(DELETE_ASSOCIATION_TYPE, () => {
+
+    test(deleteAssociationType.REQUEST, () => {
+      const associationTypeId :string = MOCK_ASSOCIATION_TYPE.entityType.id;
+      const state :Map<*, *> = reducer(INITIAL_STATE, deleteAssociationType.request(associationTypeId));
+      expect(state.get('associationTypeIdToDelete')).toEqual(associationTypeId);
+    });
+
+    test(deleteAssociationType.SUCCESS, () => {
+
+      const associationTypeId :string = MOCK_ASSOCIATION_TYPE.entityType.id;
+      let state :Map<*, *> = INITIAL_STATE
+        .set('associationTypes', Immutable.fromJS([MOCK_ASSOCIATION_TYPE.asImmutable()]))
+        .set('associationTypesById', Immutable.fromJS({ [associationTypeId]: 0 }));
+
+      state = reducer(state, deleteAssociationType.request(associationTypeId));
+      state = reducer(state, deleteAssociationType.success());
+
+      expect(state.get('associationTypeIdToDelete')).toEqual(associationTypeId);
+      expect(state.get('associationTypes')).toEqual(Immutable.List());
+      expect(state.get('associationTypesById')).toEqual(Immutable.Map());
+    });
+
+    test(deleteAssociationType.FAILURE, () => {
+      const associationTypeId :string = MOCK_ASSOCIATION_TYPE.entityType.id;
+      let state :Map<*, *> = reducer(INITIAL_STATE, deleteAssociationType.request(associationTypeId));
+      state = reducer(state, deleteAssociationType.failure());
+      expect(state.get('associationTypeIdToDelete')).toEqual(associationTypeId);
+    });
+
+    test(deleteAssociationType.FINALLY, () => {
+      const associationTypeId :string = MOCK_ASSOCIATION_TYPE.entityType.id;
+      let state :Map<*, *> = reducer(INITIAL_STATE, deleteAssociationType.request(associationTypeId));
+      expect(state.get('associationTypeIdToDelete')).toEqual(associationTypeId);
+      state = reducer(state, deleteAssociationType.finally());
+      expect(state.get('associationTypeIdToDelete')).toEqual('');
     });
 
   });

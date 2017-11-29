@@ -66,51 +66,6 @@ function updateEntityTypeMetaDataSuccess(
   };
 }
 
-const DELETE_ENTITY_TYPE_FAILURE :'DELETE_ENTITY_TYPE_FAILURE' = 'DELETE_ENTITY_TYPE_FAILURE';
-const DELETE_ENTITY_TYPE_REQUEST :'DELETE_ENTITY_TYPE_REQUEST' = 'DELETE_ENTITY_TYPE_REQUEST';
-const DELETE_ENTITY_TYPE_SUCCESS :'DELETE_ENTITY_TYPE_SUCCESS' = 'DELETE_ENTITY_TYPE_SUCCESS';
-
-type DeleteEntityTypeFailureAction = {
-  error :any,
-  entityTypeId :string,
-  type :typeof DELETE_ENTITY_TYPE_FAILURE
-}
-
-function deleteEntityTypeFailure(entityTypeId :string, error :any) :DeleteEntityTypeFailureAction {
-
-  return {
-    error,
-    entityTypeId,
-    type: DELETE_ENTITY_TYPE_FAILURE
-  };
-}
-
-type DeleteEntityTypeRequestAction = {
-  entityTypeId :string,
-  type :typeof DELETE_ENTITY_TYPE_REQUEST
-}
-
-function deleteEntityTypeRequest(entityTypeId :string) :DeleteEntityTypeRequestAction {
-
-  return {
-    entityTypeId,
-    type: DELETE_ENTITY_TYPE_REQUEST
-  };
-}
-
-type DeleteEntityTypeSuccessAction = {
-  entityTypeId :string,
-  type :typeof DELETE_ENTITY_TYPE_SUCCESS
-}
-
-function deleteEntityTypeSuccess(entityTypeId :string) :DeleteEntityTypeSuccessAction {
-
-  return {
-    entityTypeId,
-    type: DELETE_ENTITY_TYPE_SUCCESS
-  };
-}
-
 const ADD_PROPERTY_TYPE_TO_ENTITY_TYPE :'ADD_PROPERTY_TYPE_TO_ENTITY_TYPE' = 'ADD_PROPERTY_TYPE_TO_ENTITY_TYPE';
 const addPropertyTypeToEntityType :RequestSequence = newRequestSequence(ADD_PROPERTY_TYPE_TO_ENTITY_TYPE);
 
@@ -119,9 +74,6 @@ const removePropertyTypeFromEntityType :RequestSequence = newRequestSequence(RM_
 
 export {
   ADD_PROPERTY_TYPE_TO_ENTITY_TYPE,
-  DELETE_ENTITY_TYPE_FAILURE,
-  DELETE_ENTITY_TYPE_REQUEST,
-  DELETE_ENTITY_TYPE_SUCCESS,
   RM_PROPERTY_TYPE_FROM_ENTITY_TYPE,
   UPDATE_ENTITY_TYPE_METADATA_FAILURE,
   UPDATE_ENTITY_TYPE_METADATA_REQUEST,
@@ -130,9 +82,6 @@ export {
 
 export {
   addPropertyTypeToEntityType,
-  deleteEntityTypeFailure,
-  deleteEntityTypeRequest,
-  deleteEntityTypeSuccess,
   removePropertyTypeFromEntityType,
   updateEntityTypeMetaDataFailure,
   updateEntityTypeMetaDataRequest,
@@ -140,18 +89,12 @@ export {
 };
 
 export type {
-  DeleteEntityTypeFailureAction,
-  DeleteEntityTypeRequestAction,
-  DeleteEntityTypeSuccessAction,
   UpdateEntityTypeMetaDataFailureAction,
   UpdateEntityTypeMetaDataRequestAction,
   UpdateEntityTypeMetaDataSuccessAction
 };
 
 export type Action =
-  | DeleteEntityTypeFailureAction
-  | DeleteEntityTypeRequestAction
-  | DeleteEntityTypeSuccessAction
   | UpdateEntityTypeMetaDataFailureAction
   | UpdateEntityTypeMetaDataRequestAction
   | UpdateEntityTypeMetaDataSuccessAction;

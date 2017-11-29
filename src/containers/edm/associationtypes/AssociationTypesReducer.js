@@ -7,9 +7,6 @@ import { Models } from 'lattice';
 import { EntityDataModelApiActionFactory } from 'lattice-sagas';
 
 import {
-  DELETE_ASSOCIATION_TYPE_FAILURE,
-  DELETE_ASSOCIATION_TYPE_REQUEST,
-  DELETE_ASSOCIATION_TYPE_SUCCESS,
   UPDATE_ASSOCIATION_TYPE_METADATA_FAILURE,
   UPDATE_ASSOCIATION_TYPE_METADATA_REQUEST,
   UPDATE_ASSOCIATION_TYPE_METADATA_SUCCESS,
@@ -23,6 +20,7 @@ import type { SequenceAction } from '../../../core/redux/RequestSequence';
 
 const {
   createAssociationType,
+  deleteAssociationType,
   getAllAssociationTypes
 } = EntityDataModelApiActionFactory;
 
@@ -34,6 +32,7 @@ const {
 } = Models;
 
 const INITIAL_STATE :Map<*, *> = Immutable.fromJS({
+  associationTypeIdToDelete: '',
   associationTypes: Immutable.List(),
   associationTypesById: Immutable.Map(),
   isCreatingNewAssociationType: false,
@@ -45,30 +44,6 @@ const INITIAL_STATE :Map<*, *> = Immutable.fromJS({
 export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE, action :Object) {
 
   switch (action.type) {
-
-    case DELETE_ASSOCIATION_TYPE_FAILURE:
-    case DELETE_ASSOCIATION_TYPE_REQUEST:
-      return state;
-
-    case DELETE_ASSOCIATION_TYPE_SUCCESS: {
-
-      const associationTypeId :string = action.associationTypeId;
-      const associationTypeIndex :number = state.getIn(['associationTypesById', associationTypeId], -1);
-
-      if (associationTypeIndex === -1) {
-        return state;
-      }
-      const current :List<Map<*, *>> = state.get('associationTypes', Immutable.List());
-      const updated :List<Map<*, *>> = current.delete(associationTypeIndex);
-
-      // !!! BUG !!! - need to update id -> index mapping
-      const currentById :Map<string, number> = state.get('associationTypesById', Immutable.Map());
-      const updatedById :Map<string, number> = currentById.delete(associationTypeId);
-
-      return state
-        .set('associationTypes', updated)
-        .set('associationTypesById', updatedById);
-    }
 
     case UPDATE_ASSOCIATION_TYPE_METADATA_FAILURE:
     case UPDATE_ASSOCIATION_TYPE_METADATA_REQUEST:
@@ -161,6 +136,42 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
             .set('isCreatingNewAssociationType', false)
             .set('newlyCreatedAssociationTypeId', '')
             .set('tempAssociationType', null);
+        }
+      });
+    }
+
+    case deleteAssociationType.case(action.type): {
+      return deleteAssociationType.reducer(state, action, {
+        REQUEST: () => {
+          const seqAction :SequenceAction = (action :any);
+          return state.set('associationTypeIdToDelete', seqAction.value);
+        },
+        SUCCESS: () => {
+
+          const associationTypeId :string = state.get('associationTypeIdToDelete', '');
+          const associationTypeIndex :number = state.getIn(['associationTypesById', associationTypeId], -1);
+
+          if (associationTypeIndex === -1) {
+            return state;
+          }
+
+          const current :List<Map<*, *>> = state.get('associationTypes', Immutable.List());
+          const updated :List<Map<*, *>> = current.delete(associationTypeIndex);
+
+          // !!! BUG !!! - need to update id -> index mapping
+          const currentById :Map<string, number> = state.get('associationTypesById', Immutable.Map());
+          const updatedById :Map<string, number> = currentById.delete(associationTypeId);
+
+          return state
+            .set('associationTypes', updated)
+            .set('associationTypesById', updatedById);
+        },
+        FAILURE: () => {
+          // TODO: need to properly handle the failure case
+          return state;
+        },
+        FINALLY: () => {
+          return state.set('associationTypeIdToDelete', '');
         }
       });
     }

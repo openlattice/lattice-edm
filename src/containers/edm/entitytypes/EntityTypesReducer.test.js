@@ -14,8 +14,10 @@ import {
 
 const {
   CREATE_ENTITY_TYPE,
+  DELETE_ENTITY_TYPE,
   GET_ALL_ENTITY_TYPES,
   createEntityType,
+  deleteEntityType,
   getAllEntityTypes
 } = EntityDataModelApiActionFactory;
 
@@ -25,11 +27,13 @@ describe('EntityTypesReducer', () => {
 
   test('INITIAL_STATE', () => {
     expect(INITIAL_STATE).toBeInstanceOf(Immutable.Map);
+    expect(INITIAL_STATE.get('entityTypeIdToDelete')).toEqual('');
     expect(INITIAL_STATE.get('entityTypes')).toEqual(Immutable.List());
     expect(INITIAL_STATE.get('entityTypesById')).toEqual(Immutable.Map());
     expect(INITIAL_STATE.get('isCreatingNewEntityType')).toEqual(false);
     expect(INITIAL_STATE.get('isFetchingAllEntityTypes')).toEqual(false);
     expect(INITIAL_STATE.get('newlyCreatedEntityTypeId')).toEqual('');
+    expect(INITIAL_STATE.get('tempEntityType')).toEqual(null);
   });
 
   describe(CREATE_ENTITY_TYPE, () => {
@@ -72,6 +76,43 @@ describe('EntityTypesReducer', () => {
       expect(state.get('isCreatingNewEntityType')).toEqual(false);
       expect(state.get('newlyCreatedEntityTypeId')).toEqual('');
       expect(state.get('tempEntityType')).toEqual(null);
+    });
+
+  });
+
+  describe(DELETE_ENTITY_TYPE, () => {
+
+    test(deleteEntityType.REQUEST, () => {
+      const state :Map<*, *> = reducer(INITIAL_STATE, deleteEntityType.request(MOCK_ENTITY_TYPE.id));
+      expect(state.get('entityTypeIdToDelete')).toEqual(MOCK_ENTITY_TYPE.id);
+    });
+
+    test(deleteEntityType.SUCCESS, () => {
+
+      let state :Map<*, *> = INITIAL_STATE
+        .set('entityTypes', Immutable.fromJS([MOCK_ENTITY_TYPE.asImmutable()]))
+        .set('entityTypesById', Immutable.fromJS({ [MOCK_ENTITY_TYPE.id]: 0 }));
+
+      state = reducer(state, deleteEntityType.request(MOCK_ENTITY_TYPE.id));
+      state = reducer(state, deleteEntityType.success());
+
+      expect(state.get('entityTypeIdToDelete')).toEqual(MOCK_ENTITY_TYPE.id);
+      expect(state.get('entityTypes')).toEqual(Immutable.List());
+      expect(state.get('entityTypesById')).toEqual(Immutable.Map());
+    });
+
+    test(deleteEntityType.FAILURE, () => {
+      let state :Map<*, *> = reducer(INITIAL_STATE, deleteEntityType.request(MOCK_ENTITY_TYPE.id));
+      state = reducer(state, deleteEntityType.failure());
+      expect(state.get('entityTypeIdToDelete')).toEqual(MOCK_ENTITY_TYPE.id);
+    });
+
+    test(deleteEntityType.FINALLY, () => {
+      const entityTypeId :string = MOCK_ENTITY_TYPE.id;
+      let state :Map<*, *> = reducer(INITIAL_STATE, deleteEntityType.request(entityTypeId));
+      expect(state.get('entityTypeIdToDelete')).toEqual(entityTypeId);
+      state = reducer(state, deleteEntityType.finally());
+      expect(state.get('entityTypeIdToDelete')).toEqual('');
     });
 
   });

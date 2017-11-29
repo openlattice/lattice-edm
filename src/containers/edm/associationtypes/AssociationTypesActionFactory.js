@@ -66,51 +66,6 @@ function updateAssociationTypeMetaDataSuccess(
   };
 }
 
-const DELETE_ASSOCIATION_TYPE_FAILURE :'DELETE_ASSOCIATION_TYPE_FAILURE' = 'DELETE_ASSOCIATION_TYPE_FAILURE';
-const DELETE_ASSOCIATION_TYPE_REQUEST :'DELETE_ASSOCIATION_TYPE_REQUEST' = 'DELETE_ASSOCIATION_TYPE_REQUEST';
-const DELETE_ASSOCIATION_TYPE_SUCCESS :'DELETE_ASSOCIATION_TYPE_SUCCESS' = 'DELETE_ASSOCIATION_TYPE_SUCCESS';
-
-type DeleteAssociationTypeFailureAction = {
-  associationTypeId :string,
-  error :any,
-  type :typeof DELETE_ASSOCIATION_TYPE_FAILURE
-}
-
-function deleteAssociationTypeFailure(associationTypeId :string, error :any) :DeleteAssociationTypeFailureAction {
-
-  return {
-    associationTypeId,
-    error,
-    type: DELETE_ASSOCIATION_TYPE_FAILURE
-  };
-}
-
-type DeleteAssociationTypeRequestAction = {
-  associationTypeId :string,
-  type :typeof DELETE_ASSOCIATION_TYPE_REQUEST
-}
-
-function deleteAssociationTypeRequest(associationTypeId :string) :DeleteAssociationTypeRequestAction {
-
-  return {
-    associationTypeId,
-    type: DELETE_ASSOCIATION_TYPE_REQUEST
-  };
-}
-
-type DeleteAssociationTypeSuccessAction = {
-  associationTypeId :string,
-  type :typeof DELETE_ASSOCIATION_TYPE_SUCCESS
-}
-
-function deleteAssociationTypeSuccess(associationTypeId :string) :DeleteAssociationTypeSuccessAction {
-
-  return {
-    associationTypeId,
-    type: DELETE_ASSOCIATION_TYPE_SUCCESS
-  };
-}
-
 const ADD_DST_ET_TO_AT :'ADD_DST_ET_TO_AT' = 'ADD_DST_ET_TO_AT';
 const addDestinationEntityTypeToAssociationType :RequestSequence = newRequestSequence(ADD_DST_ET_TO_AT);
 
@@ -126,9 +81,6 @@ const removeSourceEntityTypeFromAssociationType :RequestSequence = newRequestSeq
 export {
   ADD_DST_ET_TO_AT,
   ADD_SRC_ET_TO_AT,
-  DELETE_ASSOCIATION_TYPE_FAILURE,
-  DELETE_ASSOCIATION_TYPE_REQUEST,
-  DELETE_ASSOCIATION_TYPE_SUCCESS,
   RM_DST_ET_FROM_AT,
   RM_SRC_ET_FROM_AT,
   UPDATE_ASSOCIATION_TYPE_METADATA_FAILURE,
@@ -139,9 +91,6 @@ export {
 export {
   addDestinationEntityTypeToAssociationType,
   addSourceEntityTypeToAssociationType,
-  deleteAssociationTypeFailure,
-  deleteAssociationTypeRequest,
-  deleteAssociationTypeSuccess,
   removeDestinationEntityTypeFromAssociationType,
   removeSourceEntityTypeFromAssociationType,
   updateAssociationTypeMetaDataFailure,
@@ -150,18 +99,12 @@ export {
 };
 
 export type {
-  DeleteAssociationTypeFailureAction,
-  DeleteAssociationTypeRequestAction,
-  DeleteAssociationTypeSuccessAction,
   UpdateAssociationTypeMetaDataFailureAction,
   UpdateAssociationTypeMetaDataRequestAction,
   UpdateAssociationTypeMetaDataSuccessAction
 };
 
 export type Action =
-  | DeleteAssociationTypeFailureAction
-  | DeleteAssociationTypeRequestAction
-  | DeleteAssociationTypeSuccessAction
   | UpdateAssociationTypeMetaDataFailureAction
   | UpdateAssociationTypeMetaDataRequestAction
   | UpdateAssociationTypeMetaDataSuccessAction;

@@ -7,9 +7,6 @@ import { Models } from 'lattice';
 import { EntityDataModelApiActionFactory } from 'lattice-sagas';
 
 import {
-  DELETE_ENTITY_TYPE_FAILURE,
-  DELETE_ENTITY_TYPE_REQUEST,
-  DELETE_ENTITY_TYPE_SUCCESS,
   UPDATE_ENTITY_TYPE_METADATA_FAILURE,
   UPDATE_ENTITY_TYPE_METADATA_REQUEST,
   UPDATE_ENTITY_TYPE_METADATA_SUCCESS,
@@ -20,10 +17,11 @@ import {
 import type { Action } from './EntityTypesActionFactory';
 import type { SequenceAction } from '../../../core/redux/RequestSequence';
 
-const { createEntityType, getAllEntityTypes } = EntityDataModelApiActionFactory;
+const { createEntityType, deleteEntityType, getAllEntityTypes } = EntityDataModelApiActionFactory;
 const { EntityType, EntityTypeBuilder } = Models;
 
 const INITIAL_STATE :Map<*, *> = Immutable.fromJS({
+  entityTypeIdToDelete: '',
   entityTypes: Immutable.List(),
   entityTypesById: Immutable.Map(),
   isCreatingNewEntityType: false,
@@ -35,29 +33,6 @@ const INITIAL_STATE :Map<*, *> = Immutable.fromJS({
 export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, action :Action) {
 
   switch (action.type) {
-
-    case DELETE_ENTITY_TYPE_FAILURE:
-    case DELETE_ENTITY_TYPE_REQUEST:
-      return state;
-
-    case DELETE_ENTITY_TYPE_SUCCESS: {
-
-      const entityTypeId :string = action.entityTypeId;
-      const entityTypeIndex :number = state.getIn(['entityTypesById', entityTypeId], -1);
-
-      if (entityTypeIndex === -1) {
-        return state;
-      }
-      const current :List<Map<*, *>> = state.get('entityTypes', Immutable.List());
-      const updated :List<Map<*, *>> = current.delete(entityTypeIndex);
-
-      const currentById :Map<string, number> = state.get('entityTypesById', Immutable.Map());
-      const updatedById :Map<string, number> = currentById.delete(entityTypeId);
-
-      return state
-        .set('entityTypes', updated)
-        .set('entityTypesById', updatedById);
-    }
 
     case UPDATE_ENTITY_TYPE_METADATA_FAILURE:
     case UPDATE_ENTITY_TYPE_METADATA_REQUEST:
@@ -134,6 +109,42 @@ export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, act
             .set('isCreatingNewEntityType', false)
             .set('newlyCreatedEntityTypeId', '')
             .set('tempEntityType', null);
+        }
+      });
+    }
+
+    case deleteEntityType.case(action.type): {
+      return deleteEntityType.reducer(state, action, {
+        REQUEST: () => {
+          const seqAction :SequenceAction = (action :any);
+          return state.set('entityTypeIdToDelete', seqAction.value);
+        },
+        SUCCESS: () => {
+
+          const entityTypeId :string = state.get('entityTypeIdToDelete', '');
+          const entityTypeIndex :number = state.getIn(['entityTypesById', entityTypeId], -1);
+
+          if (entityTypeIndex === -1) {
+            return state;
+          }
+
+          const current :List<Map<*, *>> = state.get('entityTypes', Immutable.List());
+          const updated :List<Map<*, *>> = current.delete(entityTypeIndex);
+
+          // !!! BUG !!! - need to update id -> index mapping
+          const currentById :Map<string, number> = state.get('entityTypesById', Immutable.Map());
+          const updatedById :Map<string, number> = currentById.delete(entityTypeId);
+
+          return state
+            .set('entityTypes', updated)
+            .set('entityTypesById', updatedById);
+        },
+        FAILURE: () => {
+          // TODO: need to properly handle the failure case
+          return state;
+        },
+        FINALLY: () => {
+          return state.set('entityTypeIdToDelete', '');
         }
       });
     }

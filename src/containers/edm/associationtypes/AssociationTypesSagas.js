@@ -10,9 +10,6 @@ import {
   addDestinationEntityTypeToAssociationType,
   ADD_SRC_ET_TO_AT,
   addSourceEntityTypeToAssociationType,
-  DELETE_ASSOCIATION_TYPE_REQUEST,
-  deleteAssociationTypeFailure,
-  deleteAssociationTypeSuccess,
   RM_DST_ET_FROM_AT,
   removeDestinationEntityTypeFromAssociationType,
   RM_SRC_ET_FROM_AT,
@@ -23,7 +20,6 @@ import {
 } from './AssociationTypesActionFactory';
 
 import type {
-  DeleteAssociationTypeRequestAction,
   UpdateAssociationTypeMetaDataRequestAction
 } from './AssociationTypesActionFactory';
 
@@ -77,20 +73,6 @@ export function* watchAddSourceEntityTypeToAssociationType() :Generator<*, *, *>
     }
     finally {
       yield put(addSourceEntityTypeToAssociationType.finally());
-    }
-  }
-}
-
-export function* watchDeleteAssociationTypeRequest() :Generator<*, *, *> {
-
-  while (true) {
-    const action :DeleteAssociationTypeRequestAction = yield take(DELETE_ASSOCIATION_TYPE_REQUEST);
-    try {
-      yield call(EntityDataModelApi.deleteAssociationType, action.associationTypeId);
-      yield put(deleteAssociationTypeSuccess(action.associationTypeId));
-    }
-    catch (error) {
-      yield put(deleteAssociationTypeFailure(action.associationTypeId, error));
     }
   }
 }
