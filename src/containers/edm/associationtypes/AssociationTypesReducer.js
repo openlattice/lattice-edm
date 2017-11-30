@@ -7,9 +7,6 @@ import { Models } from 'lattice';
 import { EntityDataModelApiActionFactory } from 'lattice-sagas';
 
 import {
-  UPDATE_ASSOCIATION_TYPE_METADATA_FAILURE,
-  UPDATE_ASSOCIATION_TYPE_METADATA_REQUEST,
-  UPDATE_ASSOCIATION_TYPE_METADATA_SUCCESS,
   addDestinationEntityTypeToAssociationType,
   addSourceEntityTypeToAssociationType,
   removeDestinationEntityTypeFromAssociationType,
@@ -21,7 +18,8 @@ import type { SequenceAction } from '../../../core/redux/RequestSequence';
 const {
   createAssociationType,
   deleteAssociationType,
-  getAllAssociationTypes
+  getAllAssociationTypes,
+  updateAssociationTypeMetaData
 } = EntityDataModelApiActionFactory;
 
 const {
@@ -38,48 +36,13 @@ const INITIAL_STATE :Map<*, *> = Immutable.fromJS({
   isCreatingNewAssociationType: false,
   isFetchingAllAssociationTypes: false,
   newlyCreatedAssociationTypeId: '',
-  tempAssociationType: null
+  tempAssociationType: null,
+  updateActionsMap: Immutable.Map()
 });
 
 export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE, action :Object) {
 
   switch (action.type) {
-
-    case UPDATE_ASSOCIATION_TYPE_METADATA_FAILURE:
-    case UPDATE_ASSOCIATION_TYPE_METADATA_REQUEST:
-      return state;
-
-    case UPDATE_ASSOCIATION_TYPE_METADATA_SUCCESS: {
-
-      const associationTypeId :string = action.associationTypeId;
-      const associationTypeIndex :number = state.getIn(['associationTypesById', associationTypeId], -1);
-      if (associationTypeIndex < 0) {
-        return state;
-      }
-
-      if (action.metadata.description) {
-        return state.setIn(
-          ['associationTypes', associationTypeIndex, 'entityType', 'description'],
-          action.metadata.description
-        );
-      }
-      else if (action.metadata.title) {
-        return state.setIn(
-          ['associationTypes', associationTypeIndex, 'entityType', 'title'],
-          action.metadata.title
-        );
-      }
-      else if (action.metadata.type) {
-        // TODO: potential bug with how immutable.js deals with custom objects
-        // TODO: consider storing plain object instead of FullyQualifiedName object
-        return state.setIn(
-          ['associationTypes', associationTypeIndex, 'entityType', 'type'],
-          action.metadata.type
-        );
-      }
-
-      return state;
-    }
 
     case createAssociationType.case(action.type): {
       return createAssociationType.reducer(state, action, {
@@ -335,6 +298,63 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
           const updatedSourceEntityTypeIds :List<string> = currentSourceEntityTypeIds.delete(removalIndex);
           const updatedAssociationType :Map<*, *> = currentAssociationType.set('src', updatedSourceEntityTypeIds);
           return state.setIn(['associationTypes', targetIndex], updatedAssociationType);
+        }
+      });
+    }
+
+    case updateAssociationTypeMetaData.case(action.type): {
+      return updateAssociationTypeMetaData.reducer(state, action, {
+        REQUEST: () => {
+          // TODO: this is not ideal. figure out a better way to get access to the trigger action value
+          const seqAction :SequenceAction = (action :any);
+          return state.setIn(['updateActionsMap', seqAction.id], Immutable.fromJS(seqAction));
+        },
+        SUCCESS: () => {
+
+          const seqAction :SequenceAction = (action :any);
+          const updateSeqAction :Map<*, *> = state.getIn(['updateActionsMap', seqAction.id], Immutable.Map());
+
+          if (updateSeqAction.isEmpty()) {
+            return state;
+          }
+
+          const associationTypeId :string = updateSeqAction.getIn(['value', 'id'], '');
+          const associationTypeIndex :number = state.getIn(['associationTypesById', associationTypeId], -1);
+          if (associationTypeIndex < 0) {
+            return state;
+          }
+
+          const metadata :Map<*, *> = updateSeqAction.getIn(['value', 'metadata'], Immutable.Map());
+          if (metadata.has('description')) {
+            return state.setIn(
+              ['associationTypes', associationTypeIndex, 'entityType', 'description'],
+              metadata.get('description')
+            );
+          }
+          else if (metadata.has('title')) {
+            return state.setIn(
+              ['associationTypes', associationTypeIndex, 'entityType', 'title'],
+              metadata.get('title')
+            );
+          }
+          else if (metadata.has('type')) {
+            // TODO: potential bug with how immutable.js deals with custom objects
+            // TODO: consider storing plain object instead of FullyQualifiedName object
+            return state.setIn(
+              ['associationTypes', associationTypeIndex, 'entityType', 'type'],
+              metadata.get('type')
+            );
+          }
+
+          return state;
+        },
+        FAILURE: () => {
+          // TODO: need to properly handle the failure case
+          return state;
+        },
+        FINALLY: () => {
+          const seqAction :SequenceAction = (action :any);
+          return state.deleteIn(['updateActionsMap', seqAction.id]);
         }
       });
     }

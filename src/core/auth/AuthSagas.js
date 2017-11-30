@@ -5,11 +5,10 @@
 import { push } from 'react-router-redux';
 import { call, put, take } from 'redux-saga/effects';
 
-import * as Routes from '../router/Routes';
-import * as Utils from '../../utils/Utils';
-
 import * as Auth0 from './Auth0';
 import * as AuthUtils from './AuthUtils';
+import * as Routes from '../router/Routes';
+import * as Utils from '../../utils/Utils';
 
 import {
   AUTH_ATTEMPT,

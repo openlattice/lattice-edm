@@ -6,16 +6,17 @@ import Immutable from 'immutable';
 import { Models } from 'lattice';
 import { EntityDataModelApiActionFactory } from 'lattice-sagas';
 
-import {
-  UPDATE_PROPERTY_TYPE_METADATA_FAILURE,
-  UPDATE_PROPERTY_TYPE_METADATA_REQUEST,
-  UPDATE_PROPERTY_TYPE_METADATA_SUCCESS
-} from './PropertyTypesActionFactory';
+const {
+  createPropertyType,
+  deletePropertyType,
+  getAllPropertyTypes,
+  updatePropertyTypeMetaData
+} = EntityDataModelApiActionFactory;
 
-import type { Action } from './PropertyTypesActionFactory';
-
-const { createPropertyType, deletePropertyType, getAllPropertyTypes } = EntityDataModelApiActionFactory;
-const { PropertyType, PropertyTypeBuilder } = Models;
+const {
+  PropertyType,
+  PropertyTypeBuilder
+} = Models;
 
 const INITIAL_STATE :Map<*, *> = Immutable.fromJS({
   isCreatingNewPropertyType: false,
@@ -24,39 +25,13 @@ const INITIAL_STATE :Map<*, *> = Immutable.fromJS({
   propertyTypeIdToDelete: '',
   propertyTypes: Immutable.List(),
   propertyTypesById: Immutable.Map(),
-  tempPropertyType: null
+  tempPropertyType: null,
+  updateActionsMap: Immutable.Map()
 });
 
-export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, action :Action) {
+export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, action :Object) {
 
   switch (action.type) {
-
-    case UPDATE_PROPERTY_TYPE_METADATA_FAILURE:
-    case UPDATE_PROPERTY_TYPE_METADATA_REQUEST:
-      return state;
-
-    case UPDATE_PROPERTY_TYPE_METADATA_SUCCESS: {
-
-      const propertyTypeId :string = action.propertyTypeId;
-      const propertyTypeIndex :number = state.getIn(['propertyTypesById', propertyTypeId], -1);
-      if (propertyTypeIndex < 0) {
-        return state;
-      }
-
-      if (action.metadata.description) {
-        return state.setIn(['propertyTypes', propertyTypeIndex, 'description'], action.metadata.description);
-      }
-      else if (action.metadata.title) {
-        return state.setIn(['propertyTypes', propertyTypeIndex, 'title'], action.metadata.title);
-      }
-      else if (action.metadata.type) {
-        // TODO: potential bug with how immutable.js deals with custom objects
-        // TODO: consider storing plain object instead of FullyQualifiedName object
-        return state.setIn(['propertyTypes', propertyTypeIndex, 'type'], action.metadata.type);
-      }
-
-      return state;
-    }
 
     case createPropertyType.case(action.type): {
       return createPropertyType.reducer(state, action, {
@@ -171,6 +146,54 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
         },
         FINALLY: () => {
           return state.set('isFetchingAllPropertyTypes', false);
+        }
+      });
+    }
+
+    case updatePropertyTypeMetaData.case(action.type): {
+      return updatePropertyTypeMetaData.reducer(state, action, {
+        REQUEST: () => {
+          // TODO: this is not ideal. figure out a better way to get access to the trigger action value
+          const seqAction :SequenceAction = (action :any);
+          return state.setIn(['updateActionsMap', seqAction.id], Immutable.fromJS(seqAction));
+        },
+        SUCCESS: () => {
+
+          const seqAction :SequenceAction = (action :any);
+          const updateSeqAction :Map<*, *> = state.getIn(['updateActionsMap', seqAction.id], Immutable.Map());
+
+          if (updateSeqAction.isEmpty()) {
+            return state;
+          }
+
+          const propertyTypeId :string = updateSeqAction.getIn(['value', 'id'], '');
+          const propertyTypeIndex :number = state.getIn(['propertyTypesById', propertyTypeId], -1);
+          if (propertyTypeIndex < 0) {
+            return state;
+          }
+
+          const metadata :Map<*, *> = updateSeqAction.getIn(['value', 'metadata'], Immutable.Map());
+          if (metadata.has('description')) {
+            return state.setIn(['propertyTypes', propertyTypeIndex, 'description'], metadata.get('description'));
+          }
+          else if (metadata.has('title')) {
+            return state.setIn(['propertyTypes', propertyTypeIndex, 'title'], metadata.get('title'));
+          }
+          else if (metadata.has('type')) {
+            // TODO: potential bug with how immutable.js deals with custom objects
+            // TODO: consider storing plain object instead of FullyQualifiedName object
+            return state.setIn(['propertyTypes', propertyTypeIndex, 'type'], metadata.get('type'));
+          }
+
+          return state;
+        },
+        FAILURE: () => {
+          // TODO: need to properly handle the failure case
+          return state;
+        },
+        FINALLY: () => {
+          const seqAction :SequenceAction = (action :any);
+          return state.deleteIn(['updateActionsMap', seqAction.id]);
         }
       });
     }

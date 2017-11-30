@@ -32,6 +32,22 @@ export function getAuthToken() :?string {
   return null;
 }
 
+export function getUserInfo() :?UserInfo {
+
+  const userInfoStr :?string = localStorage.getItem(AUTH0_USER_INFO);
+
+  if (typeof userInfoStr !== 'string' || userInfoStr.length <= 0) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(userInfoStr);
+  }
+  catch (error) {
+    return null;
+  }
+}
+
 export function storeAuthInfo(authInfo :?Object) :void {
 
   if (!authInfo || !authInfo.idToken) {
@@ -115,15 +131,9 @@ export function isAuthenticated() :boolean {
 
 export function isAdmin() :boolean {
 
-  const userInfoStr :?string = localStorage.getItem(AUTH0_USER_INFO);
-
-  if (typeof userInfoStr !== 'string' || userInfoStr.length <= 0) {
-    return false;
-  }
-
   let hasAdminRole :boolean = false;
+  const userInfo :?UserInfo = getUserInfo();
 
-  const userInfo :UserInfo = JSON.parse(userInfoStr);
   if (userInfo && userInfo.roles && userInfo.roles.length > 0) {
     userInfo.roles.forEach((role :string) => {
       if (role === ADMIN_ROLE) {

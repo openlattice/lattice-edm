@@ -9,14 +9,7 @@ import {
   ADD_PROPERTY_TYPE_TO_ENTITY_TYPE,
   addPropertyTypeToEntityType,
   RM_PROPERTY_TYPE_FROM_ENTITY_TYPE,
-  removePropertyTypeFromEntityType,
-  UPDATE_ENTITY_TYPE_METADATA_REQUEST,
-  updateEntityTypeMetaDataFailure,
-  updateEntityTypeMetaDataSuccess
-} from './EntityTypesActionFactory';
-
-import type {
-  UpdateEntityTypeMetaDataRequestAction
+  removePropertyTypeFromEntityType
 } from './EntityTypesActionFactory';
 
 export function* watchAddPropertyTypeToEntityType() :Generator<*, *, *> {
@@ -69,24 +62,6 @@ export function* watchRemovePropertyTypeFromEntityType() :Generator<*, *, *> {
     }
     finally {
       yield put(removePropertyTypeFromEntityType.finally());
-    }
-  }
-}
-
-export function* watchUpdateEntityTypeMetaDataRequest() :Generator<*, *, *> {
-
-  while (true) {
-    const action :UpdateEntityTypeMetaDataRequestAction = yield take(UPDATE_ENTITY_TYPE_METADATA_REQUEST);
-    try {
-      yield call(
-        EntityDataModelApi.updateEntityTypeMetaData,
-        action.entityTypeId,
-        action.metadata
-      );
-      yield put(updateEntityTypeMetaDataSuccess(action.entityTypeId, action.metadata));
-    }
-    catch (error) {
-      yield put(updateEntityTypeMetaDataFailure(action.entityTypeId, error));
     }
   }
 }

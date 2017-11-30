@@ -16,9 +16,11 @@ const {
   CREATE_ENTITY_TYPE,
   DELETE_ENTITY_TYPE,
   GET_ALL_ENTITY_TYPES,
+  UPDATE_ENTITY_TYPE_METADATA,
   createEntityType,
   deleteEntityType,
-  getAllEntityTypes
+  getAllEntityTypes,
+  updateEntityTypeMetaData
 } = EntityDataModelApiActionFactory;
 
 describe('EntityTypesReducer', () => {
@@ -34,6 +36,7 @@ describe('EntityTypesReducer', () => {
     expect(INITIAL_STATE.get('isFetchingAllEntityTypes')).toEqual(false);
     expect(INITIAL_STATE.get('newlyCreatedEntityTypeId')).toEqual('');
     expect(INITIAL_STATE.get('tempEntityType')).toEqual(null);
+    expect(INITIAL_STATE.get('updateActionsMap')).toEqual(Immutable.Map());
   });
 
   describe(CREATE_ENTITY_TYPE, () => {
@@ -148,6 +151,67 @@ describe('EntityTypesReducer', () => {
     test(getAllEntityTypes.FINALLY, () => {
       const state :Map<*, *> = reducer(INITIAL_STATE, getAllEntityTypes.finally());
       expect(state.get('isFetchingAllEntityTypes')).toEqual(false);
+    });
+
+  });
+
+  describe(UPDATE_ENTITY_TYPE_METADATA, () => {
+
+    // TODO: beforeEach()?
+    // TODO: need tests for other metadata fields
+
+    describe('title', () => {
+
+      const mockActionValue = {
+        id: MOCK_ENTITY_TYPE.id,
+        metadata: {
+          title: 'new_title'
+        }
+      };
+
+      // TODO: this flow is confusing and feels messy. figure out a better approach
+      const triggerSeqAction :SequenceAction = updateEntityTypeMetaData(mockActionValue);
+
+      test(updateEntityTypeMetaData.REQUEST, () => {
+        const seqAction :SequenceAction = updateEntityTypeMetaData.request(mockActionValue);
+        const state :Map<*, *> = reducer(INITIAL_STATE, seqAction);
+        expect(state.get('updateActionsMap')).toEqual(Immutable.fromJS({
+          [triggerSeqAction.id]: seqAction
+        }));
+      });
+
+      test(updateEntityTypeMetaData.SUCCESS, () => {
+
+        let state :Map<*, *> = INITIAL_STATE
+          .set('entityTypes', Immutable.fromJS([MOCK_ENTITY_TYPE.asImmutable()]))
+          .set('entityTypesById', Immutable.fromJS({ [MOCK_ENTITY_TYPE.id]: 0 }));
+
+        state = reducer(state, updateEntityTypeMetaData.request(mockActionValue));
+        state = reducer(state, updateEntityTypeMetaData.success());
+
+        const expectedEntityType = MOCK_ENTITY_TYPE.asImmutable().set('title', mockActionValue.metadata.title);
+        expect(state.get('entityTypes')).toEqual(
+          Immutable.fromJS([expectedEntityType])
+        );
+
+        expect(state.get('entityTypesById')).toEqual(
+          Immutable.fromJS({ [MOCK_ENTITY_TYPE.id]: 0 })
+        );
+      });
+
+      test(updateEntityTypeMetaData.FAILURE, () => {
+        // TODO: need to properly handle the failure case
+        let state :Map<*, *> = reducer(INITIAL_STATE, updateEntityTypeMetaData.request(mockActionValue));
+        state = reducer(state, updateEntityTypeMetaData.failure());
+        expect(state.get('updateActionsMap').size).toEqual(1);
+      });
+
+      test(updateEntityTypeMetaData.FINALLY, () => {
+        let state :Map<*, *> = reducer(INITIAL_STATE, updateEntityTypeMetaData.request(mockActionValue));
+        state = reducer(state, updateEntityTypeMetaData.finally());
+        expect(state.get('updateActionsMap')).toEqual(Immutable.Map());
+      });
+
     });
 
   });

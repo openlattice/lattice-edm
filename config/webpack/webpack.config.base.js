@@ -1,6 +1,6 @@
 /* eslint-disable no-underscore-dangle, import/no-extraneous-dependencies, import/extensions */
 
-import webpack from 'webpack';
+import Webpack from 'webpack';
 
 import PACKAGE from '../../package.json';
 
@@ -47,12 +47,12 @@ export default function baseWebpackConfig(env) {
    * plugins
    */
 
-  const BANNER_PLUGIN = new webpack.BannerPlugin({
+  const BANNER_PLUGIN = new Webpack.BannerPlugin({
     banner: APP_CONFIG.BANNER,
     entryOnly: true
   });
 
-  const DEFINE_PLUGIN = new webpack.DefinePlugin({
+  const DEFINE_PLUGIN = new Webpack.DefinePlugin({
     __DEV__: JSON.stringify(isDev),
     __PROD__: JSON.stringify(isProd),
     __VERSION__: JSON.stringify(`v${PACKAGE.version}`),

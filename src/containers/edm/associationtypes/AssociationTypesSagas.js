@@ -13,14 +13,7 @@ import {
   RM_DST_ET_FROM_AT,
   removeDestinationEntityTypeFromAssociationType,
   RM_SRC_ET_FROM_AT,
-  removeSourceEntityTypeFromAssociationType,
-  UPDATE_ASSOCIATION_TYPE_METADATA_REQUEST,
-  updateAssociationTypeMetaDataFailure,
-  updateAssociationTypeMetaDataSuccess
-} from './AssociationTypesActionFactory';
-
-import type {
-  UpdateAssociationTypeMetaDataRequestAction
+  removeSourceEntityTypeFromAssociationType
 } from './AssociationTypesActionFactory';
 
 export function* watchAddDestinationEntityTypeToAssociationType() :Generator<*, *, *> {
@@ -127,24 +120,6 @@ export function* watchRemoveSourceEntityTypeFromAssociationType() :Generator<*, 
     }
     finally {
       yield put(removeSourceEntityTypeFromAssociationType.finally());
-    }
-  }
-}
-
-export function* watchUpdateAssociationTypeMetaDataRequest() :Generator<*, *, *> {
-
-  while (true) {
-    const action :UpdateAssociationTypeMetaDataRequestAction = yield take(UPDATE_ASSOCIATION_TYPE_METADATA_REQUEST);
-    try {
-      yield call(
-        EntityDataModelApi.updateEntityTypeMetaData,
-        action.associationTypeId,
-        action.metadata
-      );
-      yield put(updateAssociationTypeMetaDataSuccess(action.associationTypeId, action.metadata));
-    }
-    catch (error) {
-      yield put(updateAssociationTypeMetaDataFailure(action.associationTypeId, error));
     }
   }
 }

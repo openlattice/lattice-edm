@@ -5,6 +5,7 @@
 import React from 'react';
 
 import Immutable from 'immutable';
+import { EntityDataModelApiActionFactory } from 'lattice-sagas';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 
@@ -13,29 +14,30 @@ import InlineEditableControl from '../../components/controls/InlineEditableContr
 
 import * as AuthUtils from '../../core/auth/AuthUtils';
 import { isValidUuid } from '../../utils/Utils';
-import { updateAssociationTypeMetaDataRequest } from './associationtypes/AssociationTypesActionFactory';
-import { updateEntityTypeMetaDataRequest } from './entitytypes/EntityTypesActionFactory';
-import { updatePropertyTypeMetaDataRequest } from './propertytypes/PropertyTypesActionFactory';
 
 import type { AbstractType } from '../../utils/AbstractTypes';
+
+const {
+  updateAssociationTypeMetaData,
+  updateEntityTypeMetaData,
+  updatePropertyTypeMetaData
+} = EntityDataModelApiActionFactory;
 
 const FIELD_TITLE :string = 'Title';
 
 type Props = {
-  abstractType :Map<*, *>,
+  abstractType :Map<*, *>;
   actions :{
-    updateAssociationTypeMetaDataRequest :Function,
-    updateEntityTypeMetaDataRequest :Function,
-    updatePropertyTypeMetaDataRequest :Function
-  },
-  abstractTypeType :AbstractType,
-  onChange :Function,
-  onEditToggle :Function
+    updateAssociationTypeMetaData :RequestSequence;
+    updateEntityTypeMetaData :RequestSequence;
+    updatePropertyTypeMetaData :RequestSequence;
+  };
+  abstractTypeType :AbstractType;
+  onChange :Function;
+  onEditToggle :Function;
 }
 
-type State = {
-
-}
+type State = {};
 
 class AbstractTypeFieldTitle extends React.Component<Props, State> {
 
@@ -60,17 +62,26 @@ class AbstractTypeFieldTitle extends React.Component<Props, State> {
     if (isValidUuid(abstractType.get('id'))) {
 
       const abstractTypeId :string = abstractType.get('id', '');
-      const metadata :Object = { title: titleValue };
+      const abstractTypeMetaData :Object = { title: titleValue };
 
       switch (this.props.abstractTypeType) {
         case AbstractTypes.AssociationType:
-          this.props.actions.updateAssociationTypeMetaDataRequest(abstractTypeId, metadata);
+          this.props.actions.updateAssociationTypeMetaData({
+            id: abstractTypeId,
+            metadata: abstractTypeMetaData
+          });
           break;
         case AbstractTypes.EntityType:
-          this.props.actions.updateEntityTypeMetaDataRequest(abstractTypeId, metadata);
+          this.props.actions.updateEntityTypeMetaData({
+            id: abstractTypeId,
+            metadata: abstractTypeMetaData
+          });
           break;
         case AbstractTypes.PropertyType:
-          this.props.actions.updatePropertyTypeMetaDataRequest(abstractTypeId, metadata);
+          this.props.actions.updatePropertyTypeMetaData({
+            id: abstractTypeId,
+            metadata: abstractTypeMetaData
+          });
           break;
         default:
           break;
@@ -110,9 +121,9 @@ class AbstractTypeFieldTitle extends React.Component<Props, State> {
 function mapDispatchToProps(dispatch :Function) :Object {
 
   const actions = {
-    updateAssociationTypeMetaDataRequest,
-    updateEntityTypeMetaDataRequest,
-    updatePropertyTypeMetaDataRequest
+    updateAssociationTypeMetaData,
+    updateEntityTypeMetaData,
+    updatePropertyTypeMetaData
   };
 
   return {

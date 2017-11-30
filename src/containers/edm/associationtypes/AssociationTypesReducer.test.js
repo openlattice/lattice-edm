@@ -16,9 +16,11 @@ const {
   CREATE_ASSOCIATION_TYPE,
   DELETE_ASSOCIATION_TYPE,
   GET_ALL_ASSOCIATION_TYPES,
+  UPDATE_ASSOCIATION_TYPE_METADATA,
   createAssociationType,
   deleteAssociationType,
-  getAllAssociationTypes
+  getAllAssociationTypes,
+  updateAssociationTypeMetaData
 } = EntityDataModelApiActionFactory;
 
 describe('AssociationTypesReducer', () => {
@@ -33,6 +35,7 @@ describe('AssociationTypesReducer', () => {
     expect(INITIAL_STATE.get('isCreatingNewAssociationType')).toEqual(false);
     expect(INITIAL_STATE.get('isFetchingAllAssociationTypes')).toEqual(false);
     expect(INITIAL_STATE.get('newlyCreatedAssociationTypeId')).toEqual('');
+    expect(INITIAL_STATE.get('updateActionsMap')).toEqual(Immutable.Map());
   });
 
   describe(CREATE_ASSOCIATION_TYPE, () => {
@@ -150,6 +153,71 @@ describe('AssociationTypesReducer', () => {
     test(getAllAssociationTypes.FINALLY, () => {
       const state :Map<*, *> = reducer(INITIAL_STATE, getAllAssociationTypes.finally());
       expect(state.get('isFetchingAllAssociationTypes')).toEqual(false);
+    });
+
+  });
+
+  describe(UPDATE_ASSOCIATION_TYPE_METADATA, () => {
+
+    // TODO: beforeEach()?
+    // TODO: need tests for other metadata fields
+
+    describe('title', () => {
+
+      const associationTypeId :string = MOCK_ASSOCIATION_TYPE.entityType.id;
+      const mockActionValue = {
+        id: associationTypeId,
+        metadata: {
+          title: 'new_title'
+        }
+      };
+
+      // TODO: this flow is confusing and feels messy. figure out a better approach
+      const triggerSeqAction :SequenceAction = updateAssociationTypeMetaData(mockActionValue);
+
+      test(updateAssociationTypeMetaData.REQUEST, () => {
+        const seqAction :SequenceAction = updateAssociationTypeMetaData.request(mockActionValue);
+        const state :Map<*, *> = reducer(INITIAL_STATE, seqAction);
+        expect(state.get('updateActionsMap')).toEqual(Immutable.fromJS({
+          [triggerSeqAction.id]: seqAction
+        }));
+      });
+
+      test(updateAssociationTypeMetaData.SUCCESS, () => {
+
+        let state :Map<*, *> = INITIAL_STATE
+          .set('associationTypes', Immutable.fromJS([MOCK_ASSOCIATION_TYPE.asImmutable()]))
+          .set('associationTypesById', Immutable.fromJS({ [associationTypeId]: 0 }));
+
+        state = reducer(state, updateAssociationTypeMetaData.request(mockActionValue));
+        state = reducer(state, updateAssociationTypeMetaData.success());
+
+        const expectedAssociationType = MOCK_ASSOCIATION_TYPE
+          .asImmutable()
+          .setIn(['entityType', 'title'], mockActionValue.metadata.title);
+
+        expect(state.get('associationTypes')).toEqual(
+          Immutable.fromJS([expectedAssociationType])
+        );
+
+        expect(state.get('associationTypesById')).toEqual(
+          Immutable.fromJS({ [associationTypeId]: 0 })
+        );
+      });
+
+      test(updateAssociationTypeMetaData.FAILURE, () => {
+        // TODO: need to properly handle the failure case
+        let state :Map<*, *> = reducer(INITIAL_STATE, updateAssociationTypeMetaData.request(mockActionValue));
+        state = reducer(state, updateAssociationTypeMetaData.failure());
+        expect(state.get('updateActionsMap').size).toEqual(1);
+      });
+
+      test(updateAssociationTypeMetaData.FINALLY, () => {
+        let state :Map<*, *> = reducer(INITIAL_STATE, updateAssociationTypeMetaData.request(mockActionValue));
+        state = reducer(state, updateAssociationTypeMetaData.finally());
+        expect(state.get('updateActionsMap')).toEqual(Immutable.Map());
+      });
+
     });
 
   });

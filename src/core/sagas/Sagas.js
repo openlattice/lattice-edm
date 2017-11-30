@@ -8,7 +8,6 @@ import { fork } from 'redux-saga/effects';
 import * as AuthSagas from '../auth/AuthSagas';
 import * as AssociationTypesSagas from '../../containers/edm/associationtypes/AssociationTypesSagas';
 import * as EntityTypesSagas from '../../containers/edm/entitytypes/EntityTypesSagas';
-import * as PropertyTypesSagas from '../../containers/edm/propertytypes/PropertyTypesSagas';
 
 export default function* sagas() :Generator<*, *, *> {
 
@@ -31,20 +30,21 @@ export default function* sagas() :Generator<*, *, *> {
     fork(EntityDataModelApiSagas.getAllAssociationTypesWatcher),
     fork(EntityDataModelApiSagas.getAllEntityTypesWatcher),
     fork(EntityDataModelApiSagas.getAllPropertyTypesWatcher),
-
-    // PropertyTypesSagas
-    fork(PropertyTypesSagas.watchUpdatePropertyTypeMetaDataRequest),
+    fork(EntityDataModelApiSagas.updateAssociationTypeMetaDataWatcher),
+    fork(EntityDataModelApiSagas.updateAssociationTypeMetaDataWorker),
+    fork(EntityDataModelApiSagas.updateEntityTypeMetaDataWatcher),
+    fork(EntityDataModelApiSagas.updateEntityTypeMetaDataWorker),
+    fork(EntityDataModelApiSagas.updatePropertyTypeMetaDataWatcher),
+    fork(EntityDataModelApiSagas.updatePropertyTypeMetaDataWorker),
 
     // EntityTypesSagas
     fork(EntityTypesSagas.watchAddPropertyTypeToEntityType),
     fork(EntityTypesSagas.watchRemovePropertyTypeFromEntityType),
-    fork(EntityTypesSagas.watchUpdateEntityTypeMetaDataRequest),
 
     // AssociationTypesSagas
     fork(AssociationTypesSagas.watchAddDestinationEntityTypeToAssociationType),
     fork(AssociationTypesSagas.watchAddSourceEntityTypeToAssociationType),
     fork(AssociationTypesSagas.watchRemoveDestinationEntityTypeFromAssociationType),
-    fork(AssociationTypesSagas.watchRemoveSourceEntityTypeFromAssociationType),
-    fork(AssociationTypesSagas.watchUpdateAssociationTypeMetaDataRequest)
+    fork(AssociationTypesSagas.watchRemoveSourceEntityTypeFromAssociationType)
   ];
 }

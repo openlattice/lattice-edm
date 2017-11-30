@@ -1,6 +1,6 @@
 /* eslint-disable import/no-extraneous-dependencies, import/extensions */
 
-import webpack from 'webpack';
+import Webpack from 'webpack';
 
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import UglifyJsPlugin from 'uglifyjs-webpack-plugin';
@@ -21,12 +21,12 @@ export default function prodWebpackConfig(env) {
 
   const plugins = [
     // https://facebook.github.io/react/docs/optimizing-performance.html#use-the-production-build
-    new webpack.DefinePlugin({
+    new Webpack.DefinePlugin({
       'process.env': {
         NODE_ENV: JSON.stringify('production')
       }
     }),
-    new webpack.optimize.OccurrenceOrderPlugin(),
+    new Webpack.optimize.OccurrenceOrderPlugin(),
     new HtmlWebpackPlugin({
       favicon: `${APP_PATHS.ABS.SOURCE_ASSETS_IMAGES}/favicon.png`,
       inject: true,
