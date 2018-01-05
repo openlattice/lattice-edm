@@ -6,6 +6,7 @@ import React from 'react';
 
 import Immutable from 'immutable';
 import styled from 'styled-components';
+import { AuthUtils } from 'lattice-auth';
 import { connect } from 'react-redux';
 
 import AbstractTypes from '../../utils/AbstractTypes';
@@ -19,8 +20,6 @@ import AbstractTypeCreateContainer from './AbstractTypeCreateContainer';
 import AssociationTypeDetailsContainer from './associationtypes/AssociationTypeDetailsContainer';
 import EntityTypeDetailsContainer from './entitytypes/EntityTypeDetailsContainer';
 import PropertyTypeDetailsContainer from './propertytypes/PropertyTypeDetailsContainer';
-
-import * as AuthUtils from '../../core/auth/AuthUtils';
 import { getWorkingAbstractTypes, filterAbstractTypes } from '../../utils/AbstractTypeUtils';
 
 import type { AbstractType } from '../../utils/AbstractTypes';

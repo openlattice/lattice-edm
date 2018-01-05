@@ -7,6 +7,7 @@ import React from 'react';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 import Immutable from 'immutable';
 import styled from 'styled-components';
+import { faTimes } from '@fortawesome/fontawesome-pro-regular';
 import { Models } from 'lattice';
 
 import AbstractCell from './AbstractCell';
@@ -236,7 +237,7 @@ class AbstractTypeDataTable extends React.Component<Props, State> {
                     this.handleOnAbstractTypeRemove(params.rowIndex);
                     params.parent.forceUpdate();
                   }}>
-                <FontAwesomeIcon pack="fas" name="times" />
+                <FontAwesomeIcon icon={faTimes} />
               </RemoveButtonWrapper>
             )}
             onMouseLeave={() => {

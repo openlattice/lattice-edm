@@ -7,24 +7,32 @@ import 'babel-polyfill';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import FontAwesome from '@fortawesome/fontawesome';
-import { faCheck, faPencilAlt, faSearch, faTimes } from '@fortawesome/fontawesome-free-solid';
-
+import LatticeAuth from 'lattice-auth';
 import { normalize } from 'polished';
 import { Provider } from 'react-redux';
 import { Route, Switch } from 'react-router-dom';
 import { ConnectedRouter } from 'react-router-redux';
 import { injectGlobal } from 'styled-components';
 
-import AuthRoute from './core/auth/AuthRoute';
+// import AuthRoute from './core/auth/AuthRoute';
+import OpenLatticeLogo from './assets/images/logo.png';
+import AppContainer from './containers/app/AppContainer';
 import initializeReduxStore from './core/redux/ReduxStore';
 import initializeRouterHistory from './core/router/RouterHistory';
-import * as Auth0 from './core/auth/Auth0';
-import * as AuthUtils from './core/auth/AuthUtils';
+// import * as Auth0 from './core/auth/Auth0';
+// import * as AuthUtils from './core/auth/AuthUtils';
 import * as Routes from './core/router/Routes';
-import * as Utils from './utils/Utils';
+// import * as Utils from './utils/Utils';
 
-import AppContainer from './containers/app/AppContainer';
+// injected by Webpack.DefinePlugin
+declare var __AUTH0_CLIENT_ID__ :string;
+declare var __AUTH0_DOMAIN__ :string;
+declare var __ENV_DEV__ :boolean;
+
+const {
+  AuthRoute,
+  AuthUtils
+} = LatticeAuth;
 
 /* eslint-disable */
 injectGlobal`${normalize()}`;
@@ -61,14 +69,21 @@ injectGlobal`
 `;
 /* eslint-enable */
 
-// TODO: move styling into core/style
-FontAwesome.library.add(faCheck, faPencilAlt, faSearch, faTimes);
-
 /*
  * // !!! MUST HAPPEN FIRST !!!
  */
-Auth0.initialize();
-Utils.configureLattice(AuthUtils.getAuthToken());
+
+LatticeAuth.configure({
+  auth0ClientId: __AUTH0_CLIENT_ID__,
+  auth0Domain: __AUTH0_DOMAIN__,
+  auth0Lock: {
+    logo: OpenLatticeLogo,
+    title: 'OpenLattice'
+  },
+  authToken: AuthUtils.getAuthToken(),
+  baseUrl: (__ENV_DEV__) ? 'localhost' : 'production'
+});
+
 /*
  * // !!! MUST HAPPEN FIRST !!!
  */

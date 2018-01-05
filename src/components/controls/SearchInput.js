@@ -6,6 +6,7 @@ import React from 'react';
 
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 import styled from 'styled-components';
+import { faSearch } from '@fortawesome/fontawesome-pro-regular';
 
 const SearchInputWrapper = styled.div`
   color: #113355;
@@ -102,7 +103,7 @@ class SearchInput extends React.Component<Props, State> {
     return (
       <SearchInputWrapper className={this.props.className}>
         <SearchIcon>
-          <FontAwesomeIcon pack="fas" name="search" transform={{ size: 13 }} />
+          <FontAwesomeIcon icon={faSearch} transform={{ size: 13 }} />
         </SearchIcon>
         <Input
             type="text"

@@ -4,6 +4,7 @@
 
 import React from 'react';
 
+import { AuthUtils } from 'lattice-auth';
 import { EntityDataModelApiActionFactory } from 'lattice-sagas';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
@@ -13,7 +14,6 @@ import AbstractTypeFieldDescription from '../AbstractTypeFieldDescription';
 import AbstractTypeFieldTitle from '../AbstractTypeFieldTitle';
 import AbstractTypeFieldType from '../AbstractTypeFieldType';
 import StyledButton from '../../../components/buttons/StyledButton';
-import * as AuthUtils from '../../../core/auth/AuthUtils';
 
 const { deletePropertyType } = EntityDataModelApiActionFactory;
 

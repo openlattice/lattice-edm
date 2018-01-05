@@ -2,10 +2,10 @@
  * @flow
  */
 
+import { AuthSagas } from 'lattice-auth';
 import { EntityDataModelApiSagas } from 'lattice-sagas';
 import { fork } from 'redux-saga/effects';
 
-import * as AuthSagas from '../auth/AuthSagas';
 import * as AssociationTypesSagas from '../../containers/edm/associationtypes/AssociationTypesSagas';
 import * as EntityTypesSagas from '../../containers/edm/entitytypes/EntityTypesSagas';
 

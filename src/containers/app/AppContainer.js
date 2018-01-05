@@ -5,18 +5,21 @@
 import React from 'react';
 
 import styled from 'styled-components';
+import { AuthActionFactory, AuthUtils } from 'lattice-auth';
 import { connect } from 'react-redux';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
 
+import OpenLatticeLogo from '../../assets/images/logo_and_name.png';
 import StyledButton from '../../components/buttons/StyledButton';
-import * as AuthUtils from '../../core/auth/AuthUtils';
 import * as Routes from '../../core/router/Routes';
-import { login, logout } from '../../core/auth/AuthActionFactory';
 
 import EntityDataModelContainer from '../edm/EntityDataModelContainer';
 
-import OpenLatticeLogo from '../../assets/images/logo_and_name.png';
+const {
+  login,
+  logout
+} = AuthActionFactory;
 
 /*
  * styled components

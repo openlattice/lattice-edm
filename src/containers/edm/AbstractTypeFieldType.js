@@ -6,14 +6,13 @@ import React from 'react';
 
 import Immutable from 'immutable';
 import { Models } from 'lattice';
+import { AuthUtils } from 'lattice-auth';
 import { EntityDataModelApiActionFactory } from 'lattice-sagas';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 
 import AbstractTypes from '../../utils/AbstractTypes';
 import InlineEditableControl from '../../components/controls/InlineEditableControl';
-
-import * as AuthUtils from '../../core/auth/AuthUtils';
 import { isValidUuid } from '../../utils/Utils';
 
 import type { AbstractType } from '../../utils/AbstractTypes';
