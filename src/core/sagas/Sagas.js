@@ -6,13 +6,10 @@ import { AuthSagas } from 'lattice-auth';
 import { EntityDataModelApiSagas } from 'lattice-sagas';
 import { fork } from 'redux-saga/effects';
 
-import * as AssociationTypesSagas from '../../containers/edm/associationtypes/AssociationTypesSagas';
-import * as EntityTypesSagas from '../../containers/edm/entitytypes/EntityTypesSagas';
-
 export default function* sagas() :Generator<*, *, *> {
 
   yield [
-    // AuthSagas
+    // "lattice-auth" Sagas
     fork(AuthSagas.watchAuthAttempt),
     fork(AuthSagas.watchAuthSuccess),
     fork(AuthSagas.watchAuthFailure),
@@ -20,7 +17,10 @@ export default function* sagas() :Generator<*, *, *> {
     fork(AuthSagas.watchLogin),
     fork(AuthSagas.watchLogout),
 
-    // Lattice Sagas
+    // "lattice-sagas" Sagas
+    fork(EntityDataModelApiSagas.addDestinationEntityTypeToAssociationTypeWatcher),
+    fork(EntityDataModelApiSagas.addPropertyTypeToEntityTypeWatcher),
+    fork(EntityDataModelApiSagas.addSourceEntityTypeToAssociationTypeWatcher),
     fork(EntityDataModelApiSagas.createAssociationTypeWatcher),
     fork(EntityDataModelApiSagas.createEntityTypeWatcher),
     fork(EntityDataModelApiSagas.createPropertyTypeWatcher),
@@ -30,18 +30,11 @@ export default function* sagas() :Generator<*, *, *> {
     fork(EntityDataModelApiSagas.getAllAssociationTypesWatcher),
     fork(EntityDataModelApiSagas.getAllEntityTypesWatcher),
     fork(EntityDataModelApiSagas.getAllPropertyTypesWatcher),
+    fork(EntityDataModelApiSagas.removeDestinationEntityTypeFromAssociationTypeWatcher),
+    fork(EntityDataModelApiSagas.removePropertyTypeFromEntityTypeWatcher),
+    fork(EntityDataModelApiSagas.removeSourceEntityTypeFromAssociationTypeWatcher),
     fork(EntityDataModelApiSagas.updateAssociationTypeMetaDataWatcher),
     fork(EntityDataModelApiSagas.updateEntityTypeMetaDataWatcher),
-    fork(EntityDataModelApiSagas.updatePropertyTypeMetaDataWatcher),
-
-    // EntityTypesSagas
-    fork(EntityTypesSagas.watchAddPropertyTypeToEntityType),
-    fork(EntityTypesSagas.watchRemovePropertyTypeFromEntityType),
-
-    // AssociationTypesSagas
-    fork(AssociationTypesSagas.watchAddDestinationEntityTypeToAssociationType),
-    fork(AssociationTypesSagas.watchAddSourceEntityTypeToAssociationType),
-    fork(AssociationTypesSagas.watchRemoveDestinationEntityTypeFromAssociationType),
-    fork(AssociationTypesSagas.watchRemoveSourceEntityTypeFromAssociationType)
+    fork(EntityDataModelApiSagas.updatePropertyTypeMetaDataWatcher)
   ];
 }

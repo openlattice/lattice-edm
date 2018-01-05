@@ -19,16 +19,13 @@ import AbstractTypeFieldType from '../AbstractTypeFieldType';
 import AbstractTypeSearchableSelect from '../../../components/controls/AbstractTypeSearchableSelect';
 import StyledButton from '../../../components/buttons/StyledButton';
 
-import {
+const {
   addDestinationEntityTypeToAssociationType,
   addSourceEntityTypeToAssociationType,
+  deleteAssociationType,
   removeDestinationEntityTypeFromAssociationType,
   removeSourceEntityTypeFromAssociationType
-} from './AssociationTypesActionFactory';
-
-import type { RequestSequence } from '../../../core/redux/RequestSequence';
-
-const { deleteAssociationType } = EntityDataModelApiActionFactory;
+} = EntityDataModelApiActionFactory;
 
 /*
  * styled components

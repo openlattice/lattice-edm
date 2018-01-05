@@ -19,14 +19,16 @@ const {
 } = Models;
 
 const INITIAL_STATE :Map<*, *> = Immutable.fromJS({
+  actions: {
+    createPropertyType: Immutable.Map(),
+    deletePropertyType: Immutable.Map(),
+    updatePropertyTypeMetaData: Immutable.Map()
+  },
   isCreatingNewPropertyType: false,
   isFetchingAllPropertyTypes: false,
   newlyCreatedPropertyTypeId: '',
-  propertyTypeIdToDelete: '',
   propertyTypes: Immutable.List(),
   propertyTypesById: Immutable.Map(),
-  tempPropertyType: null,
-  updateActionsMap: Immutable.Map()
 });
 
 export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, action :Object) {
@@ -36,17 +38,30 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
     case createPropertyType.case(action.type): {
       return createPropertyType.reducer(state, action, {
         REQUEST: () => {
+          // TODO: not ideal. perhaps there's a better way to get access to the trigger action value
           const seqAction :SequenceAction = (action :any);
           return state
             .set('isCreatingNewPropertyType', true)
             .set('newlyCreatedPropertyTypeId', '')
-            .set('tempPropertyType', seqAction.value);
+            .setIn(
+              ['actions', 'createPropertyType', seqAction.id],
+              Immutable.fromJS(seqAction)
+            );
         },
         SUCCESS: () => {
 
           const seqAction :SequenceAction = (action :any);
+          const storedSeqAction :Map<*, *> = state.getIn(
+            ['actions', 'createPropertyType', seqAction.id],
+            Immutable.Map()
+          );
+
+          if (storedSeqAction.isEmpty()) {
+            return state;
+          }
+
           const newPropertyTypeId :string = seqAction.value;
-          const tempPropertyType :PropertyType = state.get('tempPropertyType');
+          const tempPropertyType :PropertyType = storedSeqAction.get('value');
 
           const newPropertyType :PropertyType = new PropertyTypeBuilder()
             .setId(newPropertyTypeId)
@@ -76,10 +91,11 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
           return state;
         },
         FINALLY: () => {
+          const seqAction :SequenceAction = (action :any);
           return state
             .set('isCreatingNewPropertyType', false)
             .set('newlyCreatedPropertyTypeId', '')
-            .set('tempPropertyType', null);
+            .deleteIn(['actions', 'createPropertyType', seqAction.id]);
         }
       });
     }
@@ -87,12 +103,26 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
     case deletePropertyType.case(action.type): {
       return deletePropertyType.reducer(state, action, {
         REQUEST: () => {
+          // TODO: not ideal. perhaps there's a better way to get access to the trigger action value
           const seqAction :SequenceAction = (action :any);
-          return state.set('propertyTypeIdToDelete', seqAction.value);
+          return state.setIn(
+            ['actions', 'deletePropertyType', seqAction.id],
+            Immutable.fromJS(seqAction)
+          );
         },
         SUCCESS: () => {
 
-          const propertyTypeId :string = state.get('propertyTypeIdToDelete', '');
+          const seqAction :SequenceAction = (action :any);
+          const storedSeqAction :Map<*, *> = state.getIn(
+            ['actions', 'deletePropertyType', seqAction.id],
+            Immutable.Map()
+          );
+
+          if (storedSeqAction.isEmpty()) {
+            return state;
+          }
+
+          const propertyTypeId :string = storedSeqAction.get('value');
           const propertyTypeIndex :number = state.getIn(['propertyTypesById', propertyTypeId], -1);
 
           if (propertyTypeIndex === -1) {
@@ -103,6 +133,7 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
           const updated :List<Map<*, *>> = current.delete(propertyTypeIndex);
 
           // !!! BUG !!! - need to update id -> index mapping
+          // TODO: fix bug
           const currentById :Map<string, number> = state.get('propertyTypesById', Immutable.Map());
           const updatedById :Map<string, number> = currentById.delete(propertyTypeId);
 
@@ -115,7 +146,8 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
           return state;
         },
         FINALLY: () => {
-          return state.set('propertyTypeIdToDelete', '');
+          const seqAction :SequenceAction = (action :any);
+          return state.deleteIn(['actions', 'deletePropertyType', seqAction.id]);
         }
       });
     }
@@ -153,26 +185,32 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
     case updatePropertyTypeMetaData.case(action.type): {
       return updatePropertyTypeMetaData.reducer(state, action, {
         REQUEST: () => {
-          // TODO: this is not ideal. figure out a better way to get access to the trigger action value
+          // TODO: not ideal. perhaps there's a better way to get access to the trigger action value
           const seqAction :SequenceAction = (action :any);
-          return state.setIn(['updateActionsMap', seqAction.id], Immutable.fromJS(seqAction));
+          return state.setIn(
+            ['actions', 'updatePropertyTypeMetaData', seqAction.id],
+            Immutable.fromJS(seqAction)
+          );
         },
         SUCCESS: () => {
 
           const seqAction :SequenceAction = (action :any);
-          const updateSeqAction :Map<*, *> = state.getIn(['updateActionsMap', seqAction.id], Immutable.Map());
+          const storedSeqAction :Map<*, *> = state.getIn(
+            ['actions', 'updatePropertyTypeMetaData', seqAction.id],
+            Immutable.Map()
+          );
 
-          if (updateSeqAction.isEmpty()) {
+          if (storedSeqAction.isEmpty()) {
             return state;
           }
 
-          const propertyTypeId :string = updateSeqAction.getIn(['value', 'id'], '');
+          const propertyTypeId :string = storedSeqAction.getIn(['value', 'id']);
           const propertyTypeIndex :number = state.getIn(['propertyTypesById', propertyTypeId], -1);
           if (propertyTypeIndex < 0) {
             return state;
           }
 
-          const metadata :Map<*, *> = updateSeqAction.getIn(['value', 'metadata'], Immutable.Map());
+          const metadata :Map<*, *> = storedSeqAction.getIn(['value', 'metadata']);
           if (metadata.has('description')) {
             return state.setIn(['propertyTypes', propertyTypeIndex, 'description'], metadata.get('description'));
           }
@@ -193,7 +231,7 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
         },
         FINALLY: () => {
           const seqAction :SequenceAction = (action :any);
-          return state.deleteIn(['updateActionsMap', seqAction.id]);
+          return state.deleteIn(['actions', 'updatePropertyTypeMetaData', seqAction.id]);
         }
       });
     }

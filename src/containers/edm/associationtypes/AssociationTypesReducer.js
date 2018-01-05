@@ -6,19 +6,14 @@ import Immutable from 'immutable';
 import { Models } from 'lattice';
 import { EntityDataModelApiActionFactory } from 'lattice-sagas';
 
-import {
+const {
   addDestinationEntityTypeToAssociationType,
   addSourceEntityTypeToAssociationType,
-  removeDestinationEntityTypeFromAssociationType,
-  removeSourceEntityTypeFromAssociationType
-} from './AssociationTypesActionFactory';
-
-import type { SequenceAction } from '../../../core/redux/RequestSequence';
-
-const {
   createAssociationType,
   deleteAssociationType,
   getAllAssociationTypes,
+  removeDestinationEntityTypeFromAssociationType,
+  removeSourceEntityTypeFromAssociationType,
   updateAssociationTypeMetaData
 } = EntityDataModelApiActionFactory;
 
@@ -30,14 +25,20 @@ const {
 } = Models;
 
 const INITIAL_STATE :Map<*, *> = Immutable.fromJS({
-  associationTypeIdToDelete: '',
+  actions: {
+    addDestinationEntityTypeToAssociationType: Immutable.Map(),
+    addSourceEntityTypeToAssociationType: Immutable.Map(),
+    createAssociationType: Immutable.Map(),
+    deleteAssociationType: Immutable.Map(),
+    removeDestinationEntityTypeFromAssociationType: Immutable.Map(),
+    removeSourceEntityTypeFromAssociationType: Immutable.Map(),
+    updateAssociationTypeMetaData: Immutable.Map()
+  },
   associationTypes: Immutable.List(),
   associationTypesById: Immutable.Map(),
   isCreatingNewAssociationType: false,
   isFetchingAllAssociationTypes: false,
-  newlyCreatedAssociationTypeId: '',
-  tempAssociationType: null,
-  updateActionsMap: Immutable.Map()
+  newlyCreatedAssociationTypeId: ''
 });
 
 export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE, action :Object) {
@@ -47,17 +48,30 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
     case createAssociationType.case(action.type): {
       return createAssociationType.reducer(state, action, {
         REQUEST: () => {
+          // TODO: not ideal. perhaps there's a better way to get access to the trigger action value
           const seqAction :SequenceAction = (action :any);
           return state
             .set('isCreatingNewAssociationType', true)
             .set('newlyCreatedAssociationTypeId', '')
-            .set('tempAssociationType', seqAction.value);
+            .setIn(
+              ['actions', 'createAssociationType', seqAction.id],
+              Immutable.fromJS(seqAction)
+            );
         },
         SUCCESS: () => {
 
           const seqAction :SequenceAction = (action :any);
+          const storedSeqAction :Map<*, *> = state.getIn(
+            ['actions', 'createAssociationType', seqAction.id],
+            Immutable.Map()
+          );
+
+          if (storedSeqAction.isEmpty()) {
+            return state;
+          }
+
           const newAssociationEntityTypeId :string = seqAction.value;
-          const tempAssociationType :AssociationType = state.get('tempAssociationType');
+          const tempAssociationType :AssociationType = storedSeqAction.get('value');
 
           const newAssociationEntityType :EntityType = new EntityTypeBuilder()
             .setId(newAssociationEntityTypeId)
@@ -95,10 +109,11 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
           return state;
         },
         FINALLY: () => {
+          const seqAction :SequenceAction = (action :any);
           return state
             .set('isCreatingNewAssociationType', false)
             .set('newlyCreatedAssociationTypeId', '')
-            .set('tempAssociationType', null);
+            .deleteIn(['actions', 'createAssociationType', seqAction.id]);
         }
       });
     }
@@ -106,12 +121,26 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
     case deleteAssociationType.case(action.type): {
       return deleteAssociationType.reducer(state, action, {
         REQUEST: () => {
+          // TODO: not ideal. perhaps there's a better way to get access to the trigger action value
           const seqAction :SequenceAction = (action :any);
-          return state.set('associationTypeIdToDelete', seqAction.value);
+          return state.setIn(
+            ['actions', 'deleteAssociationType', seqAction.id],
+            Immutable.fromJS(seqAction)
+          );
         },
         SUCCESS: () => {
 
-          const associationTypeId :string = state.get('associationTypeIdToDelete', '');
+          const seqAction :SequenceAction = (action :any);
+          const storedSeqAction :Map<*, *> = state.getIn(
+            ['actions', 'deleteAssociationType', seqAction.id],
+            Immutable.Map()
+          );
+
+          if (storedSeqAction.isEmpty()) {
+            return state;
+          }
+
+          const associationTypeId :string = storedSeqAction.get('value');
           const associationTypeIndex :number = state.getIn(['associationTypesById', associationTypeId], -1);
 
           if (associationTypeIndex === -1) {
@@ -122,6 +151,7 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
           const updated :List<Map<*, *>> = current.delete(associationTypeIndex);
 
           // !!! BUG !!! - need to update id -> index mapping
+          // TODO: fix bug
           const currentById :Map<string, number> = state.get('associationTypesById', Immutable.Map());
           const updatedById :Map<string, number> = currentById.delete(associationTypeId);
 
@@ -134,7 +164,8 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
           return state;
         },
         FINALLY: () => {
-          return state.set('associationTypeIdToDelete', '');
+          const seqAction :SequenceAction = (action :any);
+          return state.deleteIn(['actions', 'deleteAssociationType', seqAction.id]);
         }
       });
     }
@@ -178,10 +209,27 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
 
     case addDestinationEntityTypeToAssociationType.case(action.type): {
       return addDestinationEntityTypeToAssociationType.reducer(state, action, {
+        REQUEST: () => {
+          // TODO: not ideal. perhaps there's a better way to get access to the trigger action value
+          const seqAction :SequenceAction = (action :any);
+          return state.setIn(
+            ['actions', 'addDestinationEntityTypeToAssociationType', seqAction.id],
+            Immutable.fromJS(seqAction)
+          );
+        },
         SUCCESS: () => {
 
-          const seqAction = ((action :any) :SequenceAction);
-          const targetId :string = seqAction.data.associationTypeId;
+          const seqAction :SequenceAction = (action :any);
+          const storedSeqAction :Map<*, *> = state.getIn(
+            ['actions', 'addDestinationEntityTypeToAssociationType', seqAction.id],
+            Immutable.Map()
+          );
+
+          if (storedSeqAction.isEmpty()) {
+            return state;
+          }
+
+          const targetId :string = storedSeqAction.getIn(['value', 'associationTypeId']);
           const targetIndex :number = state.getIn(['associationTypesById', targetId], -1);
 
           // don't do anything if the AssociationType being modified isn't available
@@ -189,7 +237,7 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
             return state;
           }
 
-          const entityTypeIdToAdd :string = seqAction.data.entityTypeId;
+          const entityTypeIdToAdd :string = storedSeqAction.getIn(['value', 'entityTypeId']);
           const currentAssociationType :Map<*, *> = state.getIn(['associationTypes', targetIndex], Immutable.Map());
           const currentDestinationEntityTypeIds :List<string> = currentAssociationType.get('dst', Immutable.List());
           const entityTypeIndex :number = currentDestinationEntityTypeIds.findIndex((entityTypeId :string) => {
@@ -204,16 +252,41 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
           const updatedDestinationEntityTypeIds :List<string> = currentDestinationEntityTypeIds.push(entityTypeIdToAdd);
           const updatedAssociationType :Map<*, *> = currentAssociationType.set('dst', updatedDestinationEntityTypeIds);
           return state.setIn(['associationTypes', targetIndex], updatedAssociationType);
+        },
+        FAILURE: () => {
+          // TODO: need to properly handle the failure case
+          return state;
+        },
+        FINALLY: () => {
+          const seqAction :SequenceAction = (action :any);
+          return state.deleteIn(['actions', 'addDestinationEntityTypeToAssociationType', seqAction.id]);
         }
       });
     }
 
     case addSourceEntityTypeToAssociationType.case(action.type): {
       return addSourceEntityTypeToAssociationType.reducer(state, action, {
+        REQUEST: () => {
+          // TODO: not ideal. perhaps there's a better way to get access to the trigger action value
+          const seqAction :SequenceAction = (action :any);
+          return state.setIn(
+            ['actions', 'addSourceEntityTypeToAssociationType', seqAction.id],
+            Immutable.fromJS(seqAction)
+          );
+        },
         SUCCESS: () => {
 
-          const seqAction = ((action :any) :SequenceAction);
-          const targetId :string = seqAction.data.associationTypeId;
+          const seqAction :SequenceAction = (action :any);
+          const storedSeqAction :Map<*, *> = state.getIn(
+            ['actions', 'addSourceEntityTypeToAssociationType', seqAction.id],
+            Immutable.Map()
+          );
+
+          if (storedSeqAction.isEmpty()) {
+            return state;
+          }
+
+          const targetId :string = storedSeqAction.getIn(['value', 'associationTypeId']);
           const targetIndex :number = state.getIn(['associationTypesById', targetId], -1);
 
           // don't do anything if the AssociationType being modified isn't available
@@ -221,7 +294,7 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
             return state;
           }
 
-          const entityTypeIdToAdd :string = seqAction.data.entityTypeId;
+          const entityTypeIdToAdd :string = storedSeqAction.getIn(['value', 'entityTypeId']);
           const currentAssociationType :Map<*, *> = state.getIn(['associationTypes', targetIndex], Immutable.Map());
           const currentSourceEntityTypeIds :List<string> = currentAssociationType.get('src', Immutable.List());
           const entityTypeIndex :number = currentSourceEntityTypeIds.findIndex((entityTypeId :string) => {
@@ -236,16 +309,41 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
           const updatedSourceEntityTypeIds :List<string> = currentSourceEntityTypeIds.push(entityTypeIdToAdd);
           const updatedAssociationType :Map<*, *> = currentAssociationType.set('src', updatedSourceEntityTypeIds);
           return state.setIn(['associationTypes', targetIndex], updatedAssociationType);
+        },
+        FAILURE: () => {
+          // TODO: need to properly handle the failure case
+          return state;
+        },
+        FINALLY: () => {
+          const seqAction :SequenceAction = (action :any);
+          return state.deleteIn(['actions', 'addSourceEntityTypeToAssociationType', seqAction.id]);
         }
       });
     }
 
     case removeDestinationEntityTypeFromAssociationType.case(action.type): {
       return removeDestinationEntityTypeFromAssociationType.reducer(state, action, {
+        REQUEST: () => {
+          // TODO: not ideal. perhaps there's a better way to get access to the trigger action value
+          const seqAction :SequenceAction = (action :any);
+          return state.setIn(
+            ['actions', 'removeDestinationEntityTypeFromAssociationType', seqAction.id],
+            Immutable.fromJS(seqAction)
+          );
+        },
         SUCCESS: () => {
 
-          const seqAction = ((action :any) :SequenceAction);
-          const targetId :string = seqAction.data.associationTypeId;
+          const seqAction :SequenceAction = (action :any);
+          const storedSeqAction :Map<*, *> = state.getIn(
+            ['actions', 'removeDestinationEntityTypeFromAssociationType', seqAction.id],
+            Immutable.Map()
+          );
+
+          if (storedSeqAction.isEmpty()) {
+            return state;
+          }
+
+          const targetId :string = storedSeqAction.getIn(['value', 'associationTypeId']);
           const targetIndex :number = state.getIn(['associationTypesById', targetId], -1);
 
           // don't do anything if the AssociationType being modified isn't available
@@ -256,7 +354,7 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
           const currentAssociationType :Map<*, *> = state.getIn(['associationTypes', targetIndex], Immutable.Map());
           const currentDestinationEntityTypeIds :List<string> = currentAssociationType.get('dst', Immutable.List());
           const removalIndex :number = currentDestinationEntityTypeIds.findIndex((entityTypeId :string) => {
-            return entityTypeId === seqAction.data.entityTypeId;
+            return entityTypeId === storedSeqAction.getIn(['value', 'entityTypeId']);
           });
 
           // don't do anything if the EntityType being removed is not actually in the list
@@ -267,16 +365,41 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
           const updatedDestinationEntityTypeIds :List<string> = currentDestinationEntityTypeIds.delete(removalIndex);
           const updatedAssociationType :Map<*, *> = currentAssociationType.set('dst', updatedDestinationEntityTypeIds);
           return state.setIn(['associationTypes', targetIndex], updatedAssociationType);
+        },
+        FAILURE: () => {
+          // TODO: need to properly handle the failure case
+          return state;
+        },
+        FINALLY: () => {
+          const seqAction :SequenceAction = (action :any);
+          return state.deleteIn(['actions', 'removeDestinationEntityTypeFromAssociationType', seqAction.id]);
         }
       });
     }
 
     case removeSourceEntityTypeFromAssociationType.case(action.type): {
       return removeSourceEntityTypeFromAssociationType.reducer(state, action, {
+        REQUEST: () => {
+          // TODO: not ideal. perhaps there's a better way to get access to the trigger action value
+          const seqAction :SequenceAction = (action :any);
+          return state.setIn(
+            ['actions', 'removeSourceEntityTypeFromAssociationType', seqAction.id],
+            Immutable.fromJS(seqAction)
+          );
+        },
         SUCCESS: () => {
 
-          const seqAction = ((action :any) :SequenceAction);
-          const targetId :string = seqAction.data.associationTypeId;
+          const seqAction :SequenceAction = (action :any);
+          const storedSeqAction :Map<*, *> = state.getIn(
+            ['actions', 'removeSourceEntityTypeFromAssociationType', seqAction.id],
+            Immutable.Map()
+          );
+
+          if (storedSeqAction.isEmpty()) {
+            return state;
+          }
+
+          const targetId :string = storedSeqAction.getIn(['value', 'associationTypeId']);
           const targetIndex :number = state.getIn(['associationTypesById', targetId], -1);
 
           // don't do anything if the AssociationType being modified isn't available
@@ -287,7 +410,7 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
           const currentAssociationType :Map<*, *> = state.getIn(['associationTypes', targetIndex], Immutable.Map());
           const currentSourceEntityTypeIds :List<string> = currentAssociationType.get('src', Immutable.List());
           const removalIndex :number = currentSourceEntityTypeIds.findIndex((entityTypeId :string) => {
-            return entityTypeId === seqAction.data.entityTypeId;
+            return entityTypeId === storedSeqAction.getIn(['value', 'entityTypeId']);
           });
 
           // don't do anything if the EntityType being removed is not actually in the list
@@ -298,6 +421,14 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
           const updatedSourceEntityTypeIds :List<string> = currentSourceEntityTypeIds.delete(removalIndex);
           const updatedAssociationType :Map<*, *> = currentAssociationType.set('src', updatedSourceEntityTypeIds);
           return state.setIn(['associationTypes', targetIndex], updatedAssociationType);
+        },
+        FAILURE: () => {
+          // TODO: need to properly handle the failure case
+          return state;
+        },
+        FINALLY: () => {
+          const seqAction :SequenceAction = (action :any);
+          return state.deleteIn(['actions', 'removeSourceEntityTypeFromAssociationType', seqAction.id]);
         }
       });
     }
@@ -305,26 +436,32 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
     case updateAssociationTypeMetaData.case(action.type): {
       return updateAssociationTypeMetaData.reducer(state, action, {
         REQUEST: () => {
-          // TODO: this is not ideal. figure out a better way to get access to the trigger action value
+          // TODO: not ideal. perhaps there's a better way to get access to the trigger action value
           const seqAction :SequenceAction = (action :any);
-          return state.setIn(['updateActionsMap', seqAction.id], Immutable.fromJS(seqAction));
+          return state.setIn(
+            ['actions', 'updateAssociationTypeMetaData', seqAction.id],
+            Immutable.fromJS(seqAction)
+          );
         },
         SUCCESS: () => {
 
           const seqAction :SequenceAction = (action :any);
-          const updateSeqAction :Map<*, *> = state.getIn(['updateActionsMap', seqAction.id], Immutable.Map());
+          const storedSeqAction :Map<*, *> = state.getIn(
+            ['actions', 'updateAssociationTypeMetaData', seqAction.id],
+            Immutable.Map()
+          );
 
-          if (updateSeqAction.isEmpty()) {
+          if (storedSeqAction.isEmpty()) {
             return state;
           }
 
-          const associationTypeId :string = updateSeqAction.getIn(['value', 'id'], '');
+          const associationTypeId :string = storedSeqAction.getIn(['value', 'id']);
           const associationTypeIndex :number = state.getIn(['associationTypesById', associationTypeId], -1);
           if (associationTypeIndex < 0) {
             return state;
           }
 
-          const metadata :Map<*, *> = updateSeqAction.getIn(['value', 'metadata'], Immutable.Map());
+          const metadata :Map<*, *> = storedSeqAction.getIn(['value', 'metadata']);
           if (metadata.has('description')) {
             return state.setIn(
               ['associationTypes', associationTypeIndex, 'entityType', 'description'],
@@ -354,7 +491,7 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
         },
         FINALLY: () => {
           const seqAction :SequenceAction = (action :any);
-          return state.deleteIn(['updateActionsMap', seqAction.id]);
+          return state.deleteIn(['actions', 'updateAssociationTypeMetaData', seqAction.id]);
         }
       });
     }
