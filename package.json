@@ -97,6 +97,7 @@
     "build:prod": "better-npm-run build:prod",
     "clean": "rimraf build/*",
     "flow": "flow",
+    "lint": "npm-run-all lint:css lint:js",
     "lint:css": "stylelint './src/**/*.js'",
     "lint:js": "eslint --config .eslintrc src",
     "test": "jest --config config/test/jest.config.js",
