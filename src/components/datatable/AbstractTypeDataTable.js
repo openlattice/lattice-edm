@@ -7,6 +7,7 @@ import React from 'react';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 import Immutable from 'immutable';
 import styled from 'styled-components';
+import { faTimes } from '@fortawesome/fontawesome-pro-regular';
 import { Models } from 'lattice';
 
 import AbstractCell from './AbstractCell';
@@ -110,9 +111,7 @@ class AbstractTypeDataTable extends React.Component<Props, State> {
 
     let headers :List<Map<string, string>> = DEFAULT_HEADERS;
     if (!props.headerIds.isEmpty()) {
-      headers = props.headerIds.map((headerId :string) => {
-        return HEADERS_MAP.get(headerId, Immutable.Map());
-      });
+      headers = props.headerIds.map((headerId :string) => HEADERS_MAP.get(headerId, Immutable.Map()));
     }
 
     if (props.showRemoveColumn) {
@@ -224,6 +223,7 @@ class AbstractTypeDataTable extends React.Component<Props, State> {
       // TODO: hover effects
       // possible red: #f44c44;
 
+      /* eslint-disable jsx-a11y/mouse-events-have-key-events */
       return (
         <AbstractCell
             highlight={shouldHighlightCell}
@@ -236,7 +236,7 @@ class AbstractTypeDataTable extends React.Component<Props, State> {
                     this.handleOnAbstractTypeRemove(params.rowIndex);
                     params.parent.forceUpdate();
                   }}>
-                <FontAwesomeIcon pack="fas" name="times" />
+                <FontAwesomeIcon icon={faTimes} />
               </RemoveButtonWrapper>
             )}
             onMouseLeave={() => {
@@ -252,8 +252,10 @@ class AbstractTypeDataTable extends React.Component<Props, State> {
               params.parent.forceUpdate();
             }} />
       );
+      /* eslint-enable */
     }
 
+    /* eslint-disable jsx-a11y/mouse-events-have-key-events */
     return (
       <AbstractCell
           highlight={shouldHighlightCell}
@@ -277,6 +279,7 @@ class AbstractTypeDataTable extends React.Component<Props, State> {
             params.parent.forceUpdate();
           }} />
     );
+    /* eslint-enable */
   }
 
   render() {

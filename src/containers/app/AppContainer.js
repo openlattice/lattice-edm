@@ -5,18 +5,21 @@
 import React from 'react';
 
 import styled from 'styled-components';
+import { AuthActionFactory, AuthUtils } from 'lattice-auth';
 import { connect } from 'react-redux';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
 
+import OpenLatticeLogo from '../../assets/images/logo_and_name.png';
 import StyledButton from '../../components/buttons/StyledButton';
-import * as AuthUtils from '../../core/auth/AuthUtils';
 import * as Routes from '../../core/router/Routes';
-import { login, logout } from '../../core/auth/AuthActionFactory';
 
 import EntityDataModelContainer from '../edm/EntityDataModelContainer';
 
-import OpenLatticeLogo from '../../assets/images/logo_and_name.png';
+const {
+  login,
+  logout
+} = AuthActionFactory;
 
 /*
  * styled components
@@ -73,32 +76,29 @@ type Props = {
   }
 };
 
-const AppContainer = (props :Props) => {
-
-  return (
-    <AppWrapper>
-      <AppHeaderOuterWrapper>
-        <AppHeaderInnerWrapper>
-          <Logo src={OpenLatticeLogo} height="50" />
-          <Title>Entity Data Model</Title>
-          {
-            AuthUtils.isAuthenticated()
-              ? (
-                <StyledActionButton onClick={props.actions.logout}>Logout</StyledActionButton>
-              )
-              : (
-                <StyledActionButton onClick={props.actions.login}>Login</StyledActionButton>
-              )
-          }
-        </AppHeaderInnerWrapper>
-      </AppHeaderOuterWrapper>
-      <Switch>
-        <Route path={Routes.ROOT} component={EntityDataModelContainer} />
-        <Redirect to={Routes.ROOT} />
-      </Switch>
-    </AppWrapper>
-  );
-};
+const AppContainer = (props :Props) => (
+  <AppWrapper>
+    <AppHeaderOuterWrapper>
+      <AppHeaderInnerWrapper>
+        <Logo src={OpenLatticeLogo} height="50" />
+        <Title>Entity Data Model</Title>
+        {
+          AuthUtils.isAuthenticated()
+            ? (
+              <StyledActionButton onClick={props.actions.logout}>Logout</StyledActionButton>
+            )
+            : (
+              <StyledActionButton onClick={props.actions.login}>Login</StyledActionButton>
+            )
+        }
+      </AppHeaderInnerWrapper>
+    </AppHeaderOuterWrapper>
+    <Switch>
+      <Route path={Routes.ROOT} component={EntityDataModelContainer} />
+      <Redirect to={Routes.ROOT} />
+    </Switch>
+  </AppWrapper>
+);
 
 function mapDispatchToProps(dispatch :Function) :Object {
 

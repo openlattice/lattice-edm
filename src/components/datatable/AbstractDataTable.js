@@ -357,57 +357,53 @@ class AbstractDataTable extends React.Component<Props, State> {
       <DataTableOuterWrapper /* innerRef={this.setOuterWrapperRef} */>
         <ScrollSync>
           {
-            ({ onScroll, scrollLeft }) => {
-              return (
-                <DataTableInnerWrapper>
-                  <AutoSizer disableHeight onResize={this.onAutoSizerResize}>
-                    {
-                      (/* { height, width } */) => {
-                        // if (height !== (this.state.computedHeadGridHeight + this.state.computedBodyGridHeight)
-                        //     || width !== this.state.computedHeadGridWidth
-                        //     || width !== this.state.computedBodyGridWidth) {
-                        //   return null;
-                        // }
-                        return (
-                          <div>
-                            <div>
-                              <HeadGrid
-                                  cellRenderer={this.renderHeadCell}
-                                  columnCount={columnCount}
-                                  columnWidth={this.getColumnWidth}
-                                  estimatedColumnSize={DEFAULT_COLUMN_MIN_WIDTH}
-                                  height={this.state.computedHeadGridHeight}
-                                  innerRef={this.setHeadGridRef}
-                                  overscanColumnCount={DEFAULT_OVERSCAN_COLUMN_COUNT}
-                                  overscanRowCount={DEFAULT_OVERSCAN_ROW_COUNT}
-                                  rowHeight={DEFAULT_ROW_MIN_HEIGHT}
-                                  rowCount={1}
-                                  scrollLeft={scrollLeft}
-                                  width={this.state.computedHeadGridWidth} />
-                            </div>
-                            <div>
-                              <BodyGrid
-                                  cellRenderer={this.renderBodyCell}
-                                  columnCount={columnCount}
-                                  columnWidth={this.getColumnWidth}
-                                  estimatedColumnSize={DEFAULT_COLUMN_MIN_WIDTH}
-                                  height={this.state.computedBodyGridHeight}
-                                  innerRef={this.setBodyGridRef}
-                                  onScroll={onScroll}
-                                  overscanColumnCount={DEFAULT_OVERSCAN_COLUMN_COUNT}
-                                  overscanRowCount={DEFAULT_OVERSCAN_ROW_COUNT}
-                                  rowCount={rowCount}
-                                  rowHeight={this.getRowHeight}
-                                  width={this.state.computedBodyGridWidth} />
-                            </div>
-                          </div>
-                        );
-                      }
-                    }
-                  </AutoSizer>
-                </DataTableInnerWrapper>
-              );
-            }
+            ({ onScroll, scrollLeft }) => (
+              <DataTableInnerWrapper>
+                <AutoSizer disableHeight onResize={this.onAutoSizerResize}>
+                  {
+                    (/* { height, width } */) => (
+                      // if (height !== (this.state.computedHeadGridHeight + this.state.computedBodyGridHeight)
+                      //     || width !== this.state.computedHeadGridWidth
+                      //     || width !== this.state.computedBodyGridWidth) {
+                      //   return null;
+                      // }
+                      <div>
+                        <div>
+                          <HeadGrid
+                              cellRenderer={this.renderHeadCell}
+                              columnCount={columnCount}
+                              columnWidth={this.getColumnWidth}
+                              estimatedColumnSize={DEFAULT_COLUMN_MIN_WIDTH}
+                              height={this.state.computedHeadGridHeight}
+                              innerRef={this.setHeadGridRef}
+                              overscanColumnCount={DEFAULT_OVERSCAN_COLUMN_COUNT}
+                              overscanRowCount={DEFAULT_OVERSCAN_ROW_COUNT}
+                              rowHeight={DEFAULT_ROW_MIN_HEIGHT}
+                              rowCount={1}
+                              scrollLeft={scrollLeft}
+                              width={this.state.computedHeadGridWidth} />
+                        </div>
+                        <div>
+                          <BodyGrid
+                              cellRenderer={this.renderBodyCell}
+                              columnCount={columnCount}
+                              columnWidth={this.getColumnWidth}
+                              estimatedColumnSize={DEFAULT_COLUMN_MIN_WIDTH}
+                              height={this.state.computedBodyGridHeight}
+                              innerRef={this.setBodyGridRef}
+                              onScroll={onScroll}
+                              overscanColumnCount={DEFAULT_OVERSCAN_COLUMN_COUNT}
+                              overscanRowCount={DEFAULT_OVERSCAN_ROW_COUNT}
+                              rowCount={rowCount}
+                              rowHeight={this.getRowHeight}
+                              width={this.state.computedBodyGridWidth} />
+                        </div>
+                      </div>
+                    )
+                  }
+                </AutoSizer>
+              </DataTableInnerWrapper>
+            )
           }
         </ScrollSync>
       </DataTableOuterWrapper>

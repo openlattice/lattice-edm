@@ -6,6 +6,7 @@ import React from 'react';
 
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 import styled from 'styled-components';
+import { faCheck, faPencil } from '@fortawesome/fontawesome-pro-solid';
 
 import { isEmptyString, isNonEmptyString } from '../../utils/LangUtils';
 
@@ -58,18 +59,10 @@ const SaveIcon = styled(Icon)`
 const TextControl = styled.div`
   border: 1px solid transparent;
   position: relative;
-  font-size: ${(props) => {
-    return props.styleMap.fontSize;
-  }};
-  line-height: ${(props) => {
-    return props.styleMap.lineHeight;
-  }};
-  margin: ${(props) => {
-    return props.styleMap.margin;
-  }};
-  padding: ${(props) => {
-    return props.styleMap.padding;
-  }};
+  font-size: ${props => props.styleMap.inputFontSize};
+  line-height: ${props => props.styleMap.lineHeight};
+  margin: ${props => props.styleMap.margin};
+  padding: ${props => props.styleMap.padding};
 `;
 
 const TextInputControl = styled.input`
@@ -77,18 +70,10 @@ const TextInputControl = styled.input`
   font-family: 'Open Sans', sans-serif;
   margin: 0;
   width: 100%;
-  font-size: ${(props) => {
-    return props.styleMap.inputFontSize;
-  }};
-  line-height: ${(props) => {
-    return props.styleMap.lineHeight;
-  }};
-  margin: ${(props) => {
-    return props.styleMap.margin;
-  }};
-  padding: ${(props) => {
-    return props.styleMap.padding;
-  }};
+  font-size: ${props => props.styleMap.inputFontSize};
+  line-height: ${props => props.styleMap.lineHeight};
+  margin: ${props => props.styleMap.margin};
+  padding: ${props => props.styleMap.padding};
   &:focus {
     outline: none;
   }
@@ -99,21 +84,11 @@ const TextAreaControl = styled.textarea`
   margin: 0;
   min-height: 100px;
   width: 100%;
-  font-size: ${(props) => {
-    return props.styleMap.inputFontSize;
-  }};
-  height: ${(props) => {
-    return props.styleMap.height ? props.styleMap.height : 'auto';
-  }};
-  line-height: ${(props) => {
-    return props.styleMap.lineHeight;
-  }};
-  margin: ${(props) => {
-    return props.styleMap.margin;
-  }};
-  padding: ${(props) => {
-    return props.styleMap.padding;
-  }};
+  font-size: ${props => props.styleMap.inputFontSize};
+  height: ${props => (props.styleMap.height ? props.styleMap.height : 'auto')};
+  line-height: ${props => props.styleMap.lineHeight};
+  margin: ${props => props.styleMap.margin};
+  padding: ${props => props.styleMap.padding};
   &:focus {
     outline: none;
   }
@@ -426,14 +401,14 @@ export default class InlineEditableControl extends React.Component<Props, State>
     if (!this.props.viewOnly && this.state.editable) {
       return (
         <SaveIcon className="icon" onClick={this.toggleEditable}>
-          <FontAwesomeIcon pack="fas" name="check" />
+          <FontAwesomeIcon icon={faCheck} />
         </SaveIcon>
       );
     }
 
     return (
       <EditIcon className="icon" onClick={this.toggleEditable}>
-        <FontAwesomeIcon pack="fas" name="pencil-alt" />
+        <FontAwesomeIcon icon={faPencil} />
       </EditIcon>
     );
   }

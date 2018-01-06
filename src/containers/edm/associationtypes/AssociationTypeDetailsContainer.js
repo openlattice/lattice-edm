@@ -6,6 +6,8 @@ import React from 'react';
 
 import Immutable from 'immutable';
 import styled from 'styled-components';
+import { AuthUtils } from 'lattice-auth';
+import { EntityDataModelApiActionFactory } from 'lattice-sagas';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 
@@ -17,16 +19,13 @@ import AbstractTypeFieldType from '../AbstractTypeFieldType';
 import AbstractTypeSearchableSelect from '../../../components/controls/AbstractTypeSearchableSelect';
 import StyledButton from '../../../components/buttons/StyledButton';
 
-import * as AuthUtils from '../../../core/auth/AuthUtils';
-import {
+const {
   addDestinationEntityTypeToAssociationType,
   addSourceEntityTypeToAssociationType,
-  deleteAssociationTypeRequest,
+  deleteAssociationType,
   removeDestinationEntityTypeFromAssociationType,
   removeSourceEntityTypeFromAssociationType
-} from './AssociationTypesActionFactory';
-
-import type { RequestSequence } from '../../../core/redux/RequestSequence';
+} = EntityDataModelApiActionFactory;
 
 /*
  * styled components
@@ -46,17 +45,17 @@ const AbstractTypeSearchableSelectWrapper = styled.div`
 
 type Props = {
   actions :{
-    addDestinationEntityTypeToAssociationType :RequestSequence,
-    addSourceEntityTypeToAssociationType :RequestSequence,
-    deleteAssociationTypeRequest :Function,
-    removeDestinationEntityTypeFromAssociationType :RequestSequence,
-    removeSourceEntityTypeFromAssociationType :RequestSequence
-  },
-  associationType :Map<*, *>,
-  entityTypes :List<Map<*, *>>,
-  entityTypesById :Map<string, number>,
-  propertyTypes :List<Map<*, *>>,
-  propertyTypesById :Map<string, number>
+    addDestinationEntityTypeToAssociationType :RequestSequence;
+    addSourceEntityTypeToAssociationType :RequestSequence;
+    deleteAssociationType :RequestSequence;
+    removeDestinationEntityTypeFromAssociationType :RequestSequence;
+    removeSourceEntityTypeFromAssociationType :RequestSequence;
+  };
+  associationType :Map<*, *>;
+  entityTypes :List<Map<*, *>>;
+  entityTypesById :Map<string, number>;
+  propertyTypes :List<Map<*, *>>;
+  propertyTypesById :Map<string, number>;
 };
 
 class AssoctTypeDetailsContainer extends React.Component<Props> {
@@ -109,7 +108,7 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
 
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
       const associationEntityType :Map<*, *> = this.props.associationType.get('entityType', Immutable.Map());
-      this.props.actions.deleteAssociationTypeRequest(associationEntityType.get('id'));
+      this.props.actions.deleteAssociationType(associationEntityType.get('id'));
     }
   }
 
@@ -390,7 +389,7 @@ function mapDispatchToProps(dispatch :Function) :Object {
   const actions = {
     addDestinationEntityTypeToAssociationType,
     addSourceEntityTypeToAssociationType,
-    deleteAssociationTypeRequest,
+    deleteAssociationType,
     removeDestinationEntityTypeFromAssociationType,
     removeSourceEntityTypeFromAssociationType
   };

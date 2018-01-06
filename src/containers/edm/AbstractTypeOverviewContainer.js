@@ -6,6 +6,7 @@ import React from 'react';
 
 import Immutable from 'immutable';
 import styled from 'styled-components';
+import { AuthUtils } from 'lattice-auth';
 import { connect } from 'react-redux';
 
 import AbstractTypes from '../../utils/AbstractTypes';
@@ -13,13 +14,12 @@ import AbstractTypeDataTable from '../../components/datatable/AbstractTypeDataTa
 import SearchInput from '../../components/controls/SearchInput';
 import StyledButton from '../../components/buttons/StyledButton';
 import StyledCard from '../../components/cards/StyledCard';
+import Spinner from '../../components/spinner/Spinner';
 
 import AbstractTypeCreateContainer from './AbstractTypeCreateContainer';
 import AssociationTypeDetailsContainer from './associationtypes/AssociationTypeDetailsContainer';
 import EntityTypeDetailsContainer from './entitytypes/EntityTypeDetailsContainer';
 import PropertyTypeDetailsContainer from './propertytypes/PropertyTypeDetailsContainer';
-
-import * as AuthUtils from '../../core/auth/AuthUtils';
 import { getWorkingAbstractTypes, filterAbstractTypes } from '../../utils/AbstractTypeUtils';
 
 import type { AbstractType } from '../../utils/AbstractTypes';
@@ -72,30 +72,39 @@ const AbstractTypeDetailsCard = StyledCard.extend`
   min-width: 500px;
 `;
 
+const Empty = styled.div`
+  display: flex;
+  padding-top: 40px;
+  text-align:center;
+`;
+
 /*
  * types
  */
 
 type Props = {
-  associationTypes :List<Map<*, *>>,
-  associationTypesById :Map<string, number>,
-  entityTypes :List<Map<*, *>>,
-  entityTypesById :Map<string, number>,
-  newlyCreatedAssociationTypeId :string,
-  newlyCreatedEntityTypeId :string,
-  newlyCreatedPropertyTypeId :string,
-  propertyTypes :List<Map<*, *>>,
-  propertyTypesById :Map<string, number>,
-  workingAbstractTypeType :AbstractType
-}
+  associationTypes :List<Map<*, *>>;
+  associationTypesById :Map<string, number>;
+  entityTypes :List<Map<*, *>>;
+  entityTypesById :Map<string, number>;
+  isFetchingAllAssociationTypes :boolean;
+  isFetchingAllEntityTypes :boolean;
+  isFetchingAllPropertyTypes :boolean;
+  newlyCreatedAssociationTypeId :string;
+  newlyCreatedEntityTypeId :string;
+  newlyCreatedPropertyTypeId :string;
+  propertyTypes :List<Map<*, *>>;
+  propertyTypesById :Map<string, number>;
+  workingAbstractTypeType :AbstractType;
+};
 
 type State = {
-  filterQuery :string,
-  filteredTypes :List<Map<*, *>>,
-  selectedAbstractType :Map<*, *>,
-  selectedAbstractTypeId :string,
-  showCreateNewAbstractTypeCard :boolean
-}
+  filterQuery :string;
+  filteredTypes :List<Map<*, *>>;
+  selectedAbstractType :Map<*, *>;
+  selectedAbstractTypeId :string;
+  showCreateNewAbstractTypeCard :boolean;
+};
 
 class AbstractTypeOverviewContainer extends React.Component<Props, State> {
 
@@ -414,12 +423,22 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
     } = this.props;
 
     if (
+      (workingAbstractTypeType === AbstractTypes.AssociationType && this.props.isFetchingAllAssociationTypes)
+      || (workingAbstractTypeType === AbstractTypes.EntityType && this.props.isFetchingAllEntityTypes)
+      || (workingAbstractTypeType === AbstractTypes.PropertyType && this.props.isFetchingAllPropertyTypes)
+    ) {
+      return (
+        <Spinner />
+      );
+    }
+
+    if (
       (workingAbstractTypeType === AbstractTypes.AssociationType && associationTypes.isEmpty())
       || (workingAbstractTypeType === AbstractTypes.EntityType && entityTypes.isEmpty())
       || (workingAbstractTypeType === AbstractTypes.PropertyType && propertyTypes.isEmpty())
     ) {
       return (
-        <div>TODO: need a better UI to display loading or error state</div>
+        <Empty>TODO: need a better UI to display loading or error state</Empty>
       );
     }
 
@@ -445,6 +464,9 @@ function mapStateToProps(state :Map<*, *>) :Object {
     associationTypesById: state.getIn(['edm', 'associationTypes', 'associationTypesById']),
     entityTypes: state.getIn(['edm', 'entityTypes', 'entityTypes']),
     entityTypesById: state.getIn(['edm', 'entityTypes', 'entityTypesById']),
+    isFetchingAllAssociationTypes: state.getIn(['edm', 'associationTypes', 'isFetchingAllAssociationTypes']),
+    isFetchingAllEntityTypes: state.getIn(['edm', 'entityTypes', 'isFetchingAllEntityTypes']),
+    isFetchingAllPropertyTypes: state.getIn(['edm', 'propertyTypes', 'isFetchingAllPropertyTypes']),
     newlyCreatedAssociationTypeId: state.getIn(['edm', 'associationTypes', 'newlyCreatedAssociationTypeId']),
     newlyCreatedEntityTypeId: state.getIn(['edm', 'entityTypes', 'newlyCreatedEntityTypeId']),
     newlyCreatedPropertyTypeId: state.getIn(['edm', 'propertyTypes', 'newlyCreatedPropertyTypeId']),

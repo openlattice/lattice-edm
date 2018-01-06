@@ -7,6 +7,7 @@ import React from 'react';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 import Immutable from 'immutable';
 import styled, { css } from 'styled-components';
+import { faSearch } from '@fortawesome/fontawesome-pro-regular';
 
 import AbstractTypes from '../../utils/AbstractTypes';
 import AbstractTypeDataTable from '../datatable/AbstractTypeDataTable';
@@ -77,9 +78,7 @@ const DataTableWrapper = styled.div`
   margin-top: -1px; /* - 1 for the bottom border of SearchInputWrapper */
   position: relative;
   width: 100%;
-  visibility: ${(props) => {
-    return props.isVisible ? 'visible' : 'hidden';
-  }};
+  visibility: ${props => (props.isVisible ? 'visible' : 'hidden')}};
 `;
 
 /*
@@ -175,7 +174,7 @@ class AbstractTypeSearchableSelect extends React.Component<Props, State> {
       <SearchableSelectWrapper isVisibleDataTable={this.state.isVisibleDataTable} className={this.props.className}>
         <SearchInputWrapper>
           <SearchIcon>
-            <FontAwesomeIcon pack="fas" name="search" transform={{ size: 13 }} />
+            <FontAwesomeIcon icon={faSearch} transform={{ size: 13 }} />
           </SearchIcon>
           <SearchInput
               type="text"

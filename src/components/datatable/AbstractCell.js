@@ -116,6 +116,7 @@ class AbstractCell extends React.Component<Props> {
     // TODO: hover effects
     // possible red: #f44c44;
 
+    /* eslint-disable jsx-a11y/mouse-events-have-key-events */
     return (
       <CellWrapper
           highlight={this.props.highlight}
@@ -128,6 +129,7 @@ class AbstractCell extends React.Component<Props> {
         <CellValueWrapper>{ this.props.value }</CellValueWrapper>
       </CellWrapper>
     );
+    /* eslint-enable */
   }
 }
 

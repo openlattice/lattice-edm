@@ -6,6 +6,8 @@ import React from 'react';
 
 import Immutable from 'immutable';
 import styled from 'styled-components';
+import { AuthUtils } from 'lattice-auth';
+import { EntityDataModelApiActionFactory } from 'lattice-sagas';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 
@@ -17,14 +19,11 @@ import AbstractTypeFieldType from '../AbstractTypeFieldType';
 import AbstractTypeSearchableSelect from '../../../components/controls/AbstractTypeSearchableSelect';
 import StyledButton from '../../../components/buttons/StyledButton';
 
-import * as AuthUtils from '../../../core/auth/AuthUtils';
-import {
+const {
   addPropertyTypeToEntityType,
-  deleteEntityTypeRequest,
+  deleteEntityType,
   removePropertyTypeFromEntityType
-} from './EntityTypesActionFactory';
-
-import type { RequestSequence } from '../../../core/redux/RequestSequence';
+} = EntityDataModelApiActionFactory;
 
 /*
  * styled components
@@ -44,13 +43,13 @@ const AbstractTypeSearchableSelectWrapper = styled.div`
 
 type Props = {
   actions :{
-    addPropertyTypeToEntityType :RequestSequence,
-    deleteEntityTypeRequest :Function,
-    removePropertyTypeFromEntityType :RequestSequence
-  },
-  entityType :Map<*, *>,
-  propertyTypes :List<Map<*, *>>,
-  propertyTypesById :Map<string, number>
+    addPropertyTypeToEntityType :RequestSequence;
+    deleteEntityType :RequestSequence;
+    removePropertyTypeFromEntityType :RequestSequence;
+  };
+  entityType :Map<*, *>;
+  propertyTypes :List<Map<*, *>>;
+  propertyTypesById :Map<string, number>;
 }
 
 class EntityTypeDetailsContainer extends React.Component<Props> {
@@ -78,7 +77,7 @@ class EntityTypeDetailsContainer extends React.Component<Props> {
   handleOnClickDelete = () => {
 
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
-      this.props.actions.deleteEntityTypeRequest(this.props.entityType.get('id'));
+      this.props.actions.deleteEntityType(this.props.entityType.get('id'));
     }
   }
 
@@ -240,7 +239,7 @@ function mapDispatchToProps(dispatch :Function) :Object {
 
   const actions = {
     addPropertyTypeToEntityType,
-    deleteEntityTypeRequest,
+    deleteEntityType,
     removePropertyTypeFromEntityType
   };
 
