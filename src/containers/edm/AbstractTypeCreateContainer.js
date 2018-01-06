@@ -51,11 +51,9 @@ const BIDI_RADIO_NAME :string = 'associationTypeBidi';
 const BIDI_YES_RADIO_ID :string = 'associationTypeBidi-1';
 const BIDI_NO_RADIO_ID :string = 'associationTypeBidi-2';
 
-const DATA_TYPE_OPTIONS = EDM_PRIMITIVE_TYPES.map((primitive :string) => {
-  return (
-    <option key={primitive} value={primitive}>{primitive}</option>
-  );
-});
+const DATA_TYPE_OPTIONS = EDM_PRIMITIVE_TYPES.map((primitive :string) => (
+  <option key={primitive} value={primitive}>{primitive}</option>
+));
 
 /*
  * styled components
@@ -136,8 +134,6 @@ type State = {
   bidiValue :boolean;
   datatypeValue :string;
   descriptionValue :string;
-  filteredPrimaryKeyPropertyTypes :List<Map<*, *>>;
-  filteredPropertyTypes :List<Map<*, *>>;
   isInEditModeName :boolean;
   isInEditModeNamespace :boolean;
   isInEditModeTitle :boolean;
@@ -167,8 +163,6 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
       bidiValue: false,
       datatypeValue: 'String',
       descriptionValue: '',
-      filteredPrimaryKeyPropertyTypes: props.propertyTypes,
-      filteredPropertyTypes: props.propertyTypes,
       isInEditModeName: true,
       isInEditModeNamespace: true,
       isInEditModeTitle: true,
@@ -227,14 +221,10 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
     else {
 
       const primaryKeyPropertyTypeIds :Set<string> = this.state.selectedPrimaryKeyPropertyTypes
-        .map((propertyType :Map<*, *>) => {
-          return propertyType.get('id', '');
-        });
+        .map((propertyType :Map<*, *>) => propertyType.get('id', ''));
 
       const propertyTypeIds :Set<string> = this.state.selectedPropertyTypes
-        .map((propertyType :Map<*, *>) => {
-          return propertyType.get('id', '');
-        })
+        .map((propertyType :Map<*, *>) => propertyType.get('id', ''))
         .concat(primaryKeyPropertyTypeIds);
 
       const entityTypeBuilder :EntityTypeBuilder = new EntityTypeBuilder()
@@ -259,14 +249,10 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
           .build();
 
         const sourceEntityTypeIds :Set<string> = this.state.selectedSourceEntityTypes
-          .map((entityType :Map<*, *>) => {
-            return entityType.get('id', '');
-          });
+          .map((entityType :Map<*, *>) => entityType.get('id', ''));
 
         const destinationEntityTypeIds :Set<string> = this.state.selectedDestinationEntityTypes
-          .map((entityType :Map<*, *>) => {
-            return entityType.get('id', '');
-          });
+          .map((entityType :Map<*, *>) => entityType.get('id', ''));
 
         const newAssociationType :AssociationType = new AssociationTypeBuilder()
           .setEntityType(newAssociationEntityType)
@@ -279,16 +265,16 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
       }
       else {
         // TODO: need a Logger class
-        console.error('invalid AbstractType: ', this.props.workingAbstractTypeType);
+        // console.error('invalid AbstractType: ', this.props.workingAbstractTypeType);
       }
     }
   }
 
   addToSelectedDestinationEntityTypes = (selectedEntityTypeId :string) => {
 
-    const selectedEntityType :Map<*, *> = this.props.entityTypes.find((entityType :Map<*, *>) => {
-      return entityType.get('id', '') === selectedEntityTypeId;
-    });
+    const selectedEntityType :Map<*, *> = this.props.entityTypes.find((entityType :Map<*, *>) => (
+      entityType.get('id', '') === selectedEntityTypeId
+    ));
 
     const selectedDestinationEntityTypes :Set<Map<*, *>> = this.state.selectedDestinationEntityTypes
       .add(selectedEntityType);
@@ -300,9 +286,9 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
 
   addToSelectedPrimaryKeyPropertyTypes = (selectedPropertyTypeId :string) => {
 
-    const selectedPropertyType :Map<*, *> = this.props.propertyTypes.find((propertyType :Map<*, *>) => {
-      return propertyType.get('id', '') === selectedPropertyTypeId;
-    });
+    const selectedPropertyType :Map<*, *> = this.props.propertyTypes.find((propertyType :Map<*, *>) => (
+      propertyType.get('id', '') === selectedPropertyTypeId
+    ));
 
     const selectedPrimaryKeyPropertyTypes = this.state.selectedPrimaryKeyPropertyTypes.add(selectedPropertyType);
     const selectedPropertyTypes = this.state.selectedPropertyTypes.subtract(selectedPrimaryKeyPropertyTypes);
@@ -315,9 +301,9 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
 
   addToSelectedPropertyTypes = (selectedPropertyTypeId :string) => {
 
-    const selectedPropertyType :Map<*, *> = this.props.propertyTypes.find((propertyType :Map<*, *>) => {
-      return propertyType.get('id', '') === selectedPropertyTypeId;
-    });
+    const selectedPropertyType :Map<*, *> = this.props.propertyTypes.find((propertyType :Map<*, *>) => (
+      propertyType.get('id', '') === selectedPropertyTypeId
+    ));
 
     if (this.state.selectedPrimaryKeyPropertyTypes.contains(selectedPropertyType)) {
       return;
@@ -330,9 +316,9 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
 
   addToSelectedSourceEntityTypes = (selectedEntityTypeId :string) => {
 
-    const selectedEntityType :Map<*, *> = this.props.entityTypes.find((entityType :Map<*, *>) => {
-      return entityType.get('id', '') === selectedEntityTypeId;
-    });
+    const selectedEntityType :Map<*, *> = this.props.entityTypes.find((entityType :Map<*, *>) => (
+      entityType.get('id', '') === selectedEntityTypeId
+    ));
 
     const selectedSourceEntityTypes :Set<Map<*, *>> = this.state.selectedSourceEntityTypes
       .add(selectedEntityType);
@@ -345,9 +331,7 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
   removeFromSelectedDestinationEntityTypes = (selectedEntityTypeId :string) => {
 
     const selectedDestinationEntityTypes :Set<Map<*, *>> = this.state.selectedDestinationEntityTypes
-      .filterNot((entityType :Map<*, *>) => {
-        return entityType.get('id', '') === selectedEntityTypeId;
-      });
+      .filterNot((entityType :Map<*, *>) => entityType.get('id', '') === selectedEntityTypeId);
 
     this.setState({
       selectedDestinationEntityTypes
@@ -357,9 +341,7 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
   removeFromSelectedPrimaryKeyPropertyTypes = (selectedPropertyTypeId :string) => {
 
     const selectedPrimaryKeyPropertyTypes :Set<Map<*, *>> = this.state.selectedPrimaryKeyPropertyTypes
-      .filterNot((propertyType :Map<*, *>) => {
-        return propertyType.get('id', '') === selectedPropertyTypeId;
-      });
+      .filterNot((propertyType :Map<*, *>) => propertyType.get('id', '') === selectedPropertyTypeId);
 
     this.setState({
       selectedPrimaryKeyPropertyTypes
@@ -369,9 +351,7 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
   removeFromSelectedPropertyTypes = (selectedPropertyTypeId :string) => {
 
     const selectedPropertyTypes :Set<Map<*, *>> = this.state.selectedPropertyTypes
-      .filterNot((propertyType :Map<*, *>) => {
-        return propertyType.get('id', '') === selectedPropertyTypeId;
-      });
+      .filterNot((propertyType :Map<*, *>) => propertyType.get('id', '') === selectedPropertyTypeId);
 
     this.setState({
       selectedPropertyTypes
@@ -381,9 +361,7 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
   removeFromSelectedSourceEntityTypes = (selectedEntityTypeId :string) => {
 
     const selectedSourceEntityTypes :Set<Map<*, *>> = this.state.selectedSourceEntityTypes
-      .filterNot((entityType :Map<*, *>) => {
-        return entityType.get('id', '') === selectedEntityTypeId;
-      });
+      .filterNot((entityType :Map<*, *>) => entityType.get('id', '') === selectedEntityTypeId);
 
     this.setState({
       selectedSourceEntityTypes
@@ -804,7 +782,7 @@ function mapDispatchToProps(dispatch :Function) :Object {
   const actions = {
     createAssociationType,
     createEntityType,
-    createPropertyType,
+    createPropertyType
   };
 
   return {

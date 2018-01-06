@@ -47,9 +47,7 @@ type Props = {
   onEditToggle :Function;
 };
 
-type State = {
-  isInEditMode :boolean;
-};
+type State = {};
 
 class AbstractTypeFieldType extends React.Component<Props, State> {
 
@@ -64,9 +62,7 @@ class AbstractTypeFieldType extends React.Component<Props, State> {
 
     super(props);
 
-    this.state = {
-      isInEditMode: false
-    };
+    this.state = {};
   }
 
   handleOnChange = (typeValue :string) => {
@@ -115,9 +111,6 @@ class AbstractTypeFieldType extends React.Component<Props, State> {
   handleOnEditToggle = (isInEditMode :boolean) => {
 
     this.props.onEditToggle(isInEditMode);
-    this.setState({
-      isInEditMode
-    });
   }
 
   render() {

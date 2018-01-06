@@ -2,6 +2,8 @@
  * @flow
  */
 
+/* eslint-disable arrow-body-style */
+
 import Immutable from 'immutable';
 import { Models } from 'lattice';
 import { EntityDataModelApiActionFactory } from 'lattice-sagas';

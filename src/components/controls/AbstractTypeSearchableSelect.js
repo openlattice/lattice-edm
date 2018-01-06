@@ -78,9 +78,7 @@ const DataTableWrapper = styled.div`
   margin-top: -1px; /* - 1 for the bottom border of SearchInputWrapper */
   position: relative;
   width: 100%;
-  visibility: ${(props) => {
-    return props.isVisible ? 'visible' : 'hidden';
-  }};
+  visibility: ${props => (props.isVisible ? 'visible' : 'hidden')}};
 `;
 
 /*

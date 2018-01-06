@@ -111,9 +111,7 @@ class AbstractTypeDataTable extends React.Component<Props, State> {
 
     let headers :List<Map<string, string>> = DEFAULT_HEADERS;
     if (!props.headerIds.isEmpty()) {
-      headers = props.headerIds.map((headerId :string) => {
-        return HEADERS_MAP.get(headerId, Immutable.Map());
-      });
+      headers = props.headerIds.map((headerId :string) => HEADERS_MAP.get(headerId, Immutable.Map()));
     }
 
     if (props.showRemoveColumn) {
@@ -225,6 +223,7 @@ class AbstractTypeDataTable extends React.Component<Props, State> {
       // TODO: hover effects
       // possible red: #f44c44;
 
+      /* eslint-disable jsx-a11y/mouse-events-have-key-events */
       return (
         <AbstractCell
             highlight={shouldHighlightCell}
@@ -253,8 +252,10 @@ class AbstractTypeDataTable extends React.Component<Props, State> {
               params.parent.forceUpdate();
             }} />
       );
+      /* eslint-enable */
     }
 
+    /* eslint-disable jsx-a11y/mouse-events-have-key-events */
     return (
       <AbstractCell
           highlight={shouldHighlightCell}
@@ -278,6 +279,7 @@ class AbstractTypeDataTable extends React.Component<Props, State> {
             params.parent.forceUpdate();
           }} />
     );
+    /* eslint-enable */
   }
 
   render() {

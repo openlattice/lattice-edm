@@ -2,6 +2,8 @@
  * @flow
  */
 
+/* eslint-disable arrow-body-style */
+
 import Immutable from 'immutable';
 import { Models } from 'lattice';
 import { EntityDataModelApiActionFactory } from 'lattice-sagas';
@@ -28,7 +30,7 @@ const INITIAL_STATE :Map<*, *> = Immutable.fromJS({
   isFetchingAllPropertyTypes: false,
   newlyCreatedPropertyTypeId: '',
   propertyTypes: Immutable.List(),
-  propertyTypesById: Immutable.Map(),
+  propertyTypesById: Immutable.Map()
 });
 
 export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, action :Object) {
