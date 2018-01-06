@@ -239,6 +239,10 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
 
   renderAddSourceEntityTypesSection = () => {
 
+    if (!AuthUtils.isAuthenticated() || !AuthUtils.isAdmin()) {
+      return null;
+    }
+
     const availableEntityTypes :List<Map<*, *>> = this.props.entityTypes
       .filterNot((entityType :Map<*, *>) => {
         const sourceEntityTypeIds :List<string> = this.props.associationType.get('src', Immutable.List());
@@ -293,6 +297,10 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
     );
   }
   renderAddDestinationEntityTypesSection = () => {
+
+    if (!AuthUtils.isAuthenticated() || !AuthUtils.isAdmin()) {
+      return null;
+    }
 
     const availableEntityTypes :List<Map<*, *>> = this.props.entityTypes
       .filterNot((entityType :Map<*, *>) => {

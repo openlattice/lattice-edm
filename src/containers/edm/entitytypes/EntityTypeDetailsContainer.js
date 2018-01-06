@@ -116,6 +116,10 @@ class EntityTypeDetailsContainer extends React.Component<Props> {
 
   renderAddPropertyTypesSection = () => {
 
+    if (!AuthUtils.isAuthenticated() || !AuthUtils.isAdmin()) {
+      return null;
+    }
+
     const availablePropertyTypes :List<Map<*, *>> = this.props.propertyTypes
       .filterNot((propertyType :Map<*, *>) => {
         const propertyTypeIds :List<string> = this.props.entityType.get('properties', Immutable.List());
