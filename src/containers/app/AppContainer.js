@@ -7,7 +7,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { AuthActionFactory, AuthUtils } from 'lattice-auth';
 import { connect } from 'react-redux';
-import { Redirect, Route, Switch } from 'react-router-dom';
+import { Redirect, Route, Switch } from 'react-router';
 import { bindActionCreators } from 'redux';
 
 import OpenLatticeLogo from '../../assets/images/logo_and_name.png';
@@ -17,7 +17,6 @@ import * as Routes from '../../core/router/Routes';
 import EntityDataModelContainer from '../edm/EntityDataModelContainer';
 
 const {
-  login,
   logout
 } = AuthActionFactory;
 
@@ -60,6 +59,8 @@ const StyledActionButton = StyledButton.extend`
   right: 50px;
 `;
 
+const LoginAnchor = StyledActionButton.withComponent('a');
+
 const Logo = styled.img`
   position: absolute;
   left: 50px;
@@ -71,9 +72,8 @@ const Logo = styled.img`
 
 type Props = {
   actions :{
-    login :Function,
-    logout :Function
-  }
+    logout :() => void;
+  };
 };
 
 const AppContainer = (props :Props) => (
@@ -88,7 +88,7 @@ const AppContainer = (props :Props) => (
               <StyledActionButton onClick={props.actions.logout}>Logout</StyledActionButton>
             )
             : (
-              <StyledActionButton onClick={props.actions.login}>Login</StyledActionButton>
+              <LoginAnchor href={`${window.location.origin}${Routes.LOGIN}`}>Login</LoginAnchor>
             )
         }
       </AppHeaderInnerWrapper>
@@ -103,7 +103,7 @@ const AppContainer = (props :Props) => (
 function mapDispatchToProps(dispatch :Function) :Object {
 
   return {
-    actions: bindActionCreators({ login, logout }, dispatch)
+    actions: bindActionCreators({ logout }, dispatch)
   };
 }
 
