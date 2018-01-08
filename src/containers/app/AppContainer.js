@@ -88,7 +88,7 @@ const AppContainer = (props :Props) => (
               <StyledActionButton onClick={props.actions.logout}>Logout</StyledActionButton>
             )
             : (
-              <LoginAnchor href={`${window.location.origin}${Routes.LOGIN}`}>Login</LoginAnchor>
+              <LoginAnchor href={`${window.location.origin}${Routes.LOGIN}/`}>Login</LoginAnchor>
             )
         }
       </AppHeaderInnerWrapper>
