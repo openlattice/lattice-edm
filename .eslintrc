@@ -17,7 +17,6 @@
     "flowtype": {
       "onlyFilesWithFlowAnnotation": true
     },
-    "import/extensions": [".js", ".jsx"],
     "import/resolver": {
       "webpack": {
         "config": "config/webpack/webpack.config.babel.js"
@@ -81,14 +80,15 @@
       "error",
       {
         "devDependencies": [
-          "config/**"
+          "config/**",
+          "**/*.test.js"
         ]
       }
     ],
     "import/order": [
       "warn",
       {
-        "groups": ["builtin", "external", "internal", ["sibling", "parent"], "index"]
+        "groups": ["builtin", "external", "internal", ["parent", "sibling"], "index"]
       }
     ],
     "import/prefer-default-export": "warn",
