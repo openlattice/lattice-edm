@@ -30,7 +30,6 @@ declare var __AUTH0_DOMAIN__ :string;
 declare var __ENV_DEV__ :boolean;
 
 const {
-  AuthRoute,
   AuthUtils
 } = LatticeAuth;
 
@@ -95,7 +94,6 @@ ReactDOM.render(
   <Provider store={reduxStore}>
     <ConnectedRouter history={routerHistory}>
       <Switch>
-        <AuthRoute exact strict path={Routes.LOGIN} />
         <Route path={Routes.ROOT} component={AppContainer} />
       </Switch>
     </ConnectedRouter>
