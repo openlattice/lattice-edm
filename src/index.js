@@ -14,7 +14,6 @@ import { Route, Switch } from 'react-router-dom';
 import { ConnectedRouter } from 'react-router-redux';
 import { injectGlobal } from 'styled-components';
 
-import OpenLatticeLogo from './assets/images/logo.png';
 import AppContainer from './containers/app/AppContainer';
 import initializeReduxStore from './core/redux/ReduxStore';
 import initializeRouterHistory from './core/router/RouterHistory';
@@ -26,6 +25,7 @@ declare var __AUTH0_DOMAIN__ :string;
 declare var __ENV_DEV__ :boolean;
 
 const {
+  AuthRoute,
   AuthUtils
 } = LatticeAuth;
 
@@ -71,10 +71,6 @@ injectGlobal`
 LatticeAuth.configure({
   auth0ClientId: __AUTH0_CLIENT_ID__,
   auth0Domain: __AUTH0_DOMAIN__,
-  auth0Lock: {
-    logo: OpenLatticeLogo,
-    title: 'OpenLattice'
-  },
   authToken: AuthUtils.getAuthToken(),
   baseUrl: (__ENV_DEV__) ? 'localhost' : 'production'
 });
@@ -90,6 +86,7 @@ ReactDOM.render(
   <Provider store={reduxStore}>
     <ConnectedRouter history={routerHistory}>
       <Switch>
+        <AuthRoute exact strict path={Routes.LOGIN} />
         <Route path={Routes.ROOT} component={AppContainer} />
       </Switch>
     </ConnectedRouter>

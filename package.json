@@ -34,13 +34,14 @@
     "immutable": "4.0.0-rc.9",
     "jwt-decode": "^2.2.0",
     "lattice": "^0.31.0",
-    "lattice-auth": "^0.4.0",
+    "lattice-auth": "^0.4.1",
     "lattice-sagas": "^0.0.18",
     "lodash": "^4.17.4",
     "loglevel": "^1.6.0",
     "moment": "^2.20.0",
     "polished": "^1.9.0",
     "prop-types": "^15.5.10",
+    "qs": "^6.5.1",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
     "react-redux": "^5.0.6",
@@ -101,8 +102,8 @@
     "lint": "npm-run-all lint:js",
     "lint:css": "stylelint './src/**/*.js'",
     "lint:js": "eslint --config .eslintrc src",
-    "test": "jest --config config/test/jest.config.js",
-    "test:watch": "jest --config config/test/jest.config.js --watch"
+    "test": "jest --config config/jest/jest.config.js",
+    "test:watch": "jest --config config/jest/jest.config.js --watch"
   },
   "betterScripts": {
     "build:prod": {
