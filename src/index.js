@@ -14,15 +14,11 @@ import { Route, Switch } from 'react-router-dom';
 import { ConnectedRouter } from 'react-router-redux';
 import { injectGlobal } from 'styled-components';
 
-// import AuthRoute from './core/auth/AuthRoute';
 import OpenLatticeLogo from './assets/images/logo.png';
 import AppContainer from './containers/app/AppContainer';
 import initializeReduxStore from './core/redux/ReduxStore';
 import initializeRouterHistory from './core/router/RouterHistory';
-// import * as Auth0 from './core/auth/Auth0';
-// import * as AuthUtils from './core/auth/AuthUtils';
 import * as Routes from './core/router/Routes';
-// import * as Utils from './utils/Utils';
 
 // injected by Webpack.DefinePlugin
 declare var __AUTH0_CLIENT_ID__ :string;
