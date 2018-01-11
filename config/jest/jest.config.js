@@ -5,7 +5,7 @@ module.exports = {
   },
   rootDir: '../..',
   setupFiles: [
-    '<rootDir>/config/test/polyfill.rAF.js',
-    '<rootDir>/config/test/enzyme.config.js'
+    '<rootDir>/config/jest/polyfill.rAF.js',
+    '<rootDir>/config/jest/enzyme.config.js'
   ]
 };
