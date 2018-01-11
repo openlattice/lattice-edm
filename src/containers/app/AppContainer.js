@@ -4,6 +4,7 @@
 
 import React from 'react';
 
+import qs from 'qs';
 import styled from 'styled-components';
 import { AuthActionFactory, AuthUtils } from 'lattice-auth';
 import { connect } from 'react-redux';
@@ -76,6 +77,16 @@ type Props = {
   };
 };
 
+function getLoginUrl() :string {
+
+  const queryString = qs.stringify(
+    { redirectUrl: `${window.location.origin}${window.location.pathname}` },
+    { addQueryPrefix: true }
+  );
+
+  return `${window.location.origin}${Routes.LOGIN}/${queryString}`;
+}
+
 const AppContainer = (props :Props) => (
   <AppWrapper>
     <AppHeaderOuterWrapper>
@@ -88,7 +99,7 @@ const AppContainer = (props :Props) => (
               <StyledActionButton onClick={props.actions.logout}>Logout</StyledActionButton>
             )
             : (
-              <LoginAnchor href={`${window.location.origin}${Routes.LOGIN}/`}>Login</LoginAnchor>
+              <LoginAnchor href={`${getLoginUrl()}`}>Login</LoginAnchor>
             )
         }
       </AppHeaderInnerWrapper>
