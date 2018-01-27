@@ -353,7 +353,7 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
         {
           this.state.filteredTypes.isEmpty()
             ? (
-              <div>TODO: need a better UI to display no matching results</div>
+              <div>No matching results.</div>
             )
             : null
         }
@@ -438,7 +438,7 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
       || (workingAbstractTypeType === AbstractTypes.PropertyType && propertyTypes.isEmpty())
     ) {
       return (
-        <Empty>TODO: need a better UI to display loading or error state</Empty>
+        <Empty>Sorry, something went wrong. Please try refreshing the page, or contact support.</Empty>
       );
     }
 
