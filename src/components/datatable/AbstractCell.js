@@ -135,6 +135,4 @@ class AbstractCell extends React.Component<Props> {
 
 export default AbstractCell;
 
-export {
-  TYPES as AbstractCellTypes
-};
+export { TYPES as AbstractCellTypes };
