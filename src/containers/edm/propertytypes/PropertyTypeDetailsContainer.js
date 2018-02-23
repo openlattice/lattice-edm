@@ -39,7 +39,7 @@ type Props = {
 class PropertyTypeDetailsContainer extends React.Component<Props> {
 
   handleOnClickDelete = () => {
-    return;
+
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
       this.props.actions.deletePropertyType(this.props.propertyType.get('id'));
     }
