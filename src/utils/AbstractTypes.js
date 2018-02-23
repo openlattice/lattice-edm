@@ -11,6 +11,4 @@ const AbstractTypes = {
 
 export type AbstractType = $Keys<typeof AbstractTypes>;
 
-export {
-  AbstractTypes as default
-};
+export { AbstractTypes as default };
