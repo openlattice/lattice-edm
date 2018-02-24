@@ -10,6 +10,7 @@ import { EntityDataModelApiActionFactory } from 'lattice-sagas';
 
 const {
   addDestinationEntityTypeToAssociationType,
+  addPropertyTypeToEntityType,
   addSourceEntityTypeToAssociationType,
   createAssociationType,
   deleteAssociationType,
@@ -30,6 +31,7 @@ const {
 const INITIAL_STATE :Map<*, *> = Immutable.fromJS({
   actions: {
     addDestinationEntityTypeToAssociationType: Immutable.Map(),
+    addPropertyTypeToEntityType: Immutable.Map(),
     addSourceEntityTypeToAssociationType: Immutable.Map(),
     createAssociationType: Immutable.Map(),
     deleteAssociationType: Immutable.Map(),
@@ -264,6 +266,69 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
         FINALLY: () => {
           const seqAction :SequenceAction = (action :any);
           return state.deleteIn(['actions', 'addDestinationEntityTypeToAssociationType', seqAction.id]);
+        }
+      });
+    }
+
+    case addPropertyTypeToEntityType.case(action.type): {
+      return addPropertyTypeToEntityType.reducer(state, action, {
+        REQUEST: () => {
+          // TODO: not ideal. perhaps there's a better way to get access to the trigger action value
+          const seqAction :SequenceAction = (action :any);
+          return state.setIn(
+            ['actions', 'addPropertyTypeToEntityType', seqAction.id],
+            Immutable.fromJS(seqAction)
+          );
+        },
+        SUCCESS: () => {
+
+          const seqAction :SequenceAction = (action :any);
+          const storedSeqAction :Map<*, *> = state.getIn(
+            ['actions', 'addPropertyTypeToEntityType', seqAction.id],
+            Immutable.Map()
+          );
+
+          if (storedSeqAction.isEmpty()) {
+            return state;
+          }
+
+          const targetId :string = storedSeqAction.getIn(['value', 'entityTypeId']);
+          const targetIndex :number = state.getIn(['associationTypesById', targetId], -1);
+
+          // don't do anything if the AssociationType being modified isn't available
+          if (targetIndex === -1) {
+            return state;
+          }
+
+          const propertyTypeIdToAdd :string = storedSeqAction.getIn(['value', 'propertyTypeId']);
+          const currentAssociationType :Map<*, *> = state.getIn(['associationTypes', targetIndex], Immutable.Map());
+          const currentPropertyTypeIds :List<string> = currentAssociationType.getIn(
+            ['entityType', 'properties'],
+            Immutable.List()
+          );
+          const propertyTypeIndex :number = currentPropertyTypeIds.findIndex((propertyTypeId :string) => {
+            return propertyTypeId === propertyTypeIdToAdd;
+          });
+
+          // don't do anything if the PropertyType being added is already in the list
+          if (propertyTypeIndex !== -1) {
+            return state;
+          }
+
+          const updatedPropertyTypeIds :List<string> = currentPropertyTypeIds.push(propertyTypeIdToAdd);
+          const updatedAssociationType :Map<*, *> = currentAssociationType.setIn(
+            ['entityType', 'properties'],
+            updatedPropertyTypeIds
+          );
+          return state.setIn(['associationTypes', targetIndex], updatedAssociationType);
+        },
+        FAILURE: () => {
+          // TODO: need to properly handle the failure case
+          return state;
+        },
+        FINALLY: () => {
+          const seqAction :SequenceAction = (action :any);
+          return state.deleteIn(['actions', 'addPropertyTypeToEntityType', seqAction.id]);
         }
       });
     }

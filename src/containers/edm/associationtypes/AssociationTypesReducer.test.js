@@ -37,6 +37,7 @@ describe('AssociationTypesReducer', () => {
     expect(INITIAL_STATE.get('newlyCreatedAssociationTypeId')).toEqual('');
     expect(INITIAL_STATE.get('actions').toJS()).toEqual({
       addDestinationEntityTypeToAssociationType: {},
+      addPropertyTypeToEntityType: {},
       addSourceEntityTypeToAssociationType: {},
       createAssociationType: {},
       deleteAssociationType: {},
