@@ -320,7 +320,7 @@ class AbstractDataTable extends React.Component<Props, State> {
     return (
       <AbstractCell
           key={params.key}
-          params={params}
+          style={params.style}
           type={AbstractCellTypes.HEAD}
           value={cellValue} />
     );
@@ -338,7 +338,7 @@ class AbstractDataTable extends React.Component<Props, State> {
     return (
       <AbstractCell
           key={params.key}
-          params={params}
+          style={params.style}
           value={cellValue} />
     );
   }

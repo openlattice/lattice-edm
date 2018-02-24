@@ -51,6 +51,10 @@ const BIDI_RADIO_NAME :string = 'associationTypeBidi';
 const BIDI_YES_RADIO_ID :string = 'associationTypeBidi-1';
 const BIDI_NO_RADIO_ID :string = 'associationTypeBidi-2';
 
+const PII_RADIO_NAME :string = 'propertyTypePii';
+const PII_YES_RADIO_ID :string = 'propertyTypePii-1';
+const PII_NO_RADIO_ID :string = 'propertyTypePii-2';
+
 const DATA_TYPE_OPTIONS = EDM_PRIMITIVE_TYPES.map((primitive :string) => (
   <option key={primitive} value={primitive}>{primitive}</option>
 ));
@@ -91,7 +95,7 @@ const PhoneticCheckboxWrapper = styled.label`
   }
 `;
 
-const BidiRadiosWrapper = styled.div`
+const RadiosRowWrapper = styled.div`
   display: flex;
   flex-direction: row;
   label {
@@ -412,6 +416,13 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
     });
   }
 
+  handleOnChangePii = (event :SyntheticInputEvent<*>) => {
+
+    this.setState({
+      piiValue: event.target.id === PII_YES_RADIO_ID
+    });
+  }
+
   handleOnChangeTitle = (title :string) => {
 
     this.setState({
@@ -485,6 +496,39 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
     );
   }
 
+  renderPropertyTypePiiSection = () => {
+
+    if (this.props.workingAbstractTypeType !== AbstractTypes.PropertyType) {
+      return null;
+    }
+
+    return (
+      <section>
+        <h2>PII</h2>
+        <RadiosRowWrapper>
+          <label htmlFor={PII_YES_RADIO_ID}>
+            <input
+                type="radio"
+                id={PII_YES_RADIO_ID}
+                name={PII_RADIO_NAME}
+                onChange={this.handleOnChangePii}
+                checked={this.state.piiValue === true} />
+            Yes
+          </label>
+          <label htmlFor={PII_NO_RADIO_ID}>
+            <input
+                type="radio"
+                id={PII_NO_RADIO_ID}
+                name={PII_RADIO_NAME}
+                onChange={this.handleOnChangePii}
+                checked={this.state.piiValue === false} />
+            No
+          </label>
+        </RadiosRowWrapper>
+      </section>
+    );
+  }
+
   renderAssociationTypeBidirectionalSection = () => {
 
     if (this.props.workingAbstractTypeType !== AbstractTypes.AssociationType) {
@@ -494,7 +538,7 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
     return (
       <section>
         <h2>Bidirectional</h2>
-        <BidiRadiosWrapper>
+        <RadiosRowWrapper>
           <label htmlFor={BIDI_YES_RADIO_ID}>
             <input
                 type="radio"
@@ -513,7 +557,7 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
                 checked={this.state.bidiValue === false} />
             No
           </label>
-        </BidiRadiosWrapper>
+        </RadiosRowWrapper>
       </section>
     );
   }
@@ -748,6 +792,7 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
           }
         </section>
         { this.renderPropertyTypeDataTypeSelectSection() }
+        { this.renderPropertyTypePiiSection() }
         { this.renderAssociationTypeBidirectionalSection() }
         { this.renderEntityTypePrimaryKeyPropertyTypesSelectSection() }
         { this.renderEntityTypePropertyTypesSelectSection() }

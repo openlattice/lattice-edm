@@ -90,7 +90,7 @@ const CellValueWrapper = styled.div`
 type Props = {
   highlight :boolean;
   justifyContent :string;
-  params :Object;
+  style :Object;
   type :string;
   value :mixed;
   onMouseDown :() => void;
@@ -103,7 +103,7 @@ class AbstractCell extends React.Component<Props> {
   static defaultProps = {
     highlight: false,
     justifyContent: 'flex-start',
-    params: {},
+    style: {},
     type: TYPES.BODY,
     value: '',
     onMouseDown: () => {},
@@ -122,7 +122,7 @@ class AbstractCell extends React.Component<Props> {
           highlight={this.props.highlight}
           justifyContent={this.props.justifyContent}
           type={this.props.type}
-          style={this.props.params.style}
+          style={this.props.style}
           onMouseDown={this.props.onMouseDown}
           onMouseLeave={this.props.onMouseLeave}
           onMouseOver={this.props.onMouseOver}>

@@ -229,7 +229,7 @@ class AbstractTypeDataTable extends React.Component<Props, State> {
             highlight={shouldHighlightCell}
             justifyContent="flex-end"
             key={params.key}
-            params={params}
+            style={params.style}
             value={(
               <RemoveButtonWrapper
                   onMouseDown={() => {
@@ -260,7 +260,7 @@ class AbstractTypeDataTable extends React.Component<Props, State> {
       <AbstractCell
           highlight={shouldHighlightCell}
           key={params.key}
-          params={params}
+          style={params.style}
           value={cellValue}
           onMouseDown={() => {
             this.handleOnAbstractTypeSelect(params.rowIndex);
