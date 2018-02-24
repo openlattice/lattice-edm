@@ -21,9 +21,11 @@ import StyledButton from '../../../components/buttons/StyledButton';
 
 const {
   addDestinationEntityTypeToAssociationType,
+  addPropertyTypeToEntityType,
   addSourceEntityTypeToAssociationType,
   deleteAssociationType,
   removeDestinationEntityTypeFromAssociationType,
+  removePropertyTypeFromEntityType,
   removeSourceEntityTypeFromAssociationType
 } = EntityDataModelApiActionFactory;
 
@@ -46,9 +48,11 @@ const AbstractTypeSearchableSelectWrapper = styled.div`
 type Props = {
   actions :{
     addDestinationEntityTypeToAssociationType :RequestSequence;
+    addPropertyTypeToEntityType :RequestSequence;
     addSourceEntityTypeToAssociationType :RequestSequence;
     deleteAssociationType :RequestSequence;
     removeDestinationEntityTypeFromAssociationType :RequestSequence;
+    removePropertyTypeFromEntityType :RequestSequence;
     removeSourceEntityTypeFromAssociationType :RequestSequence;
   };
   associationType :Map<*, *>;
@@ -71,6 +75,17 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
     }
   }
 
+  handleAddPropertyTypeToAssociationType = (propertyTypeIdToAdd :string) => {
+
+    if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
+      const associationEntityType :Map<*, *> = this.props.associationType.get('entityType', Immutable.Map());
+      this.props.actions.addPropertyTypeToEntityType({
+        entityTypeId: associationEntityType.get('id'),
+        propertyTypeId: propertyTypeIdToAdd
+      });
+    }
+  }
+
   handleAddSourceEntityTypeToAssociationType = (entityTypeIdToAdd :string) => {
 
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
@@ -89,6 +104,17 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
       this.props.actions.removeDestinationEntityTypeFromAssociationType({
         associationTypeId: associationEntityType.get('id'),
         entityTypeId: entityTypeIdToRemove
+      });
+    }
+  }
+
+  handleRemovePropertyTypeFromAssociationType = (propertyTypeIdToRemove :string) => {
+
+    if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
+      const associationEntityType :Map<*, *> = this.props.associationType.get('entityType', Immutable.Map());
+      this.props.actions.removePropertyTypeFromEntityType({
+        entityTypeId: associationEntityType.get('id'),
+        propertyTypeId: propertyTypeIdToRemove
       });
     }
   }
@@ -143,6 +169,24 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
       })
       .toList();
 
+    let propertyTypesDataTable :React$Node = (
+      <AbstractTypeDataTable
+          abstractTypes={propertyTypes}
+          maxHeight={500}
+          workingAbstractTypeType={AbstractTypes.PropertyType} />
+    );
+
+    if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
+      propertyTypesDataTable = (
+        <AbstractTypeDataTable
+            abstractTypes={propertyTypes}
+            highlightOnHover
+            maxHeight={500}
+            showRemoveColumn
+            onAbstractTypeRemove={this.handleRemovePropertyTypeFromAssociationType}
+            workingAbstractTypeType={AbstractTypes.PropertyType} />
+      );
+    }
 
     return (
       <section>
@@ -193,14 +237,40 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
             : (
               <div>
                 <h2>PropertyTypes</h2>
-                <AbstractTypeDataTable
-                    abstractTypes={propertyTypes}
-                    maxHeight={500}
-                    workingAbstractTypeType={AbstractTypes.PropertyType} />
+                { propertyTypesDataTable }
               </div>
             )
         }
+        { this.renderAddPropertyTypesSection() }
       </section>
+    );
+  }
+
+  renderAddPropertyTypesSection = () => {
+
+    if (!AuthUtils.isAuthenticated() || !AuthUtils.isAdmin()) {
+      return null;
+    }
+
+    const associationEntityType :Map<*, *> = this.props.associationType.get('entityType', Immutable.Map());
+    const availablePropertyTypes :List<Map<*, *>> = this.props.propertyTypes
+      .filterNot((propertyType :Map<*, *>) => {
+        const propertyTypeIds :List<string> = associationEntityType.get('properties', Immutable.List());
+        return propertyTypeIds.includes(propertyType.get('id', ''));
+      });
+
+    return (
+      <div>
+        <h2>Add PropertyTypes</h2>
+        <AbstractTypeSearchableSelectWrapper>
+          <AbstractTypeSearchableSelect
+              abstractTypes={availablePropertyTypes}
+              maxHeight={400}
+              searchPlaceholder="Available PropertyTypes..."
+              workingAbstractTypeType={AbstractTypes.PropertyType}
+              onAbstractTypeSelect={this.handleAddPropertyTypeToAssociationType} />
+        </AbstractTypeSearchableSelectWrapper>
+      </div>
     );
   }
 
@@ -396,9 +466,11 @@ function mapDispatchToProps(dispatch :Function) :Object {
 
   const actions = {
     addDestinationEntityTypeToAssociationType,
+    addPropertyTypeToEntityType,
     addSourceEntityTypeToAssociationType,
     deleteAssociationType,
     removeDestinationEntityTypeFromAssociationType,
+    removePropertyTypeFromEntityType,
     removeSourceEntityTypeFromAssociationType
   };
 
