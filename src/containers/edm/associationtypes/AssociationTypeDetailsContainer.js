@@ -24,6 +24,7 @@ const {
   addSourceEntityTypeToAssociationType,
   deleteAssociationType,
   removeDestinationEntityTypeFromAssociationType,
+  removePropertyTypeFromEntityType,
   removeSourceEntityTypeFromAssociationType
 } = EntityDataModelApiActionFactory;
 
@@ -49,6 +50,7 @@ type Props = {
     addSourceEntityTypeToAssociationType :RequestSequence;
     deleteAssociationType :RequestSequence;
     removeDestinationEntityTypeFromAssociationType :RequestSequence;
+    removePropertyTypeFromEntityType :RequestSequence;
     removeSourceEntityTypeFromAssociationType :RequestSequence;
   };
   associationType :Map<*, *>;
@@ -89,6 +91,17 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
       this.props.actions.removeDestinationEntityTypeFromAssociationType({
         associationTypeId: associationEntityType.get('id'),
         entityTypeId: entityTypeIdToRemove
+      });
+    }
+  }
+
+  handleRemovePropertyTypeFromAssociationType = (propertyTypeIdToRemove :string) => {
+
+    if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
+      const associationEntityType :Map<*, *> = this.props.associationType.get('entityType', Immutable.Map());
+      this.props.actions.removePropertyTypeFromEntityType({
+        entityTypeId: associationEntityType.get('id'),
+        propertyTypeId: propertyTypeIdToRemove
       });
     }
   }
@@ -143,6 +156,24 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
       })
       .toList();
 
+    let propertyTypesDataTable :React$Node = (
+      <AbstractTypeDataTable
+          abstractTypes={propertyTypes}
+          maxHeight={500}
+          workingAbstractTypeType={AbstractTypes.PropertyType} />
+    );
+
+    if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
+      propertyTypesDataTable = (
+        <AbstractTypeDataTable
+            abstractTypes={propertyTypes}
+            highlightOnHover
+            maxHeight={500}
+            showRemoveColumn
+            onAbstractTypeRemove={this.handleRemovePropertyTypeFromAssociationType}
+            workingAbstractTypeType={AbstractTypes.PropertyType} />
+      );
+    }
 
     return (
       <section>
@@ -193,10 +224,7 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
             : (
               <div>
                 <h2>PropertyTypes</h2>
-                <AbstractTypeDataTable
-                    abstractTypes={propertyTypes}
-                    maxHeight={500}
-                    workingAbstractTypeType={AbstractTypes.PropertyType} />
+                { propertyTypesDataTable }
               </div>
             )
         }
@@ -399,6 +427,7 @@ function mapDispatchToProps(dispatch :Function) :Object {
     addSourceEntityTypeToAssociationType,
     deleteAssociationType,
     removeDestinationEntityTypeFromAssociationType,
+    removePropertyTypeFromEntityType,
     removeSourceEntityTypeFromAssociationType
   };
 

@@ -41,6 +41,7 @@ describe('AssociationTypesReducer', () => {
       createAssociationType: {},
       deleteAssociationType: {},
       removeDestinationEntityTypeFromAssociationType: {},
+      removePropertyTypeFromEntityType: {},
       removeSourceEntityTypeFromAssociationType: {},
       updateAssociationTypeMetaData: {}
     });
