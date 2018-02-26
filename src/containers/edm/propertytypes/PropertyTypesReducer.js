@@ -56,7 +56,7 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
             return state;
           }
 
-          const newPropertyTypeId :string = seqAction.value;
+          const newPropertyTypeId :string = (seqAction.value :any);
           const tempPropertyType :PropertyType = storedSeqAction.get('value');
 
           const newPropertyType :PropertyType = new PropertyTypeBuilder()
@@ -107,29 +107,28 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
 
           const seqAction :SequenceAction = (action :any);
           const storedSeqAction :Map<*, *> = state.getIn(['actions', 'deletePropertyType', seqAction.id], Map());
-
           if (storedSeqAction.isEmpty()) {
             return state;
           }
 
-          const propertyTypeId :string = storedSeqAction.get('value');
-          const propertyTypeIndex :number = state.getIn(['propertyTypesById', propertyTypeId], -1);
-
-          if (propertyTypeIndex === -1) {
+          const targetId :string = storedSeqAction.get('value');
+          const targetIndex :number = state.getIn(['propertyTypesById', targetId], -1);
+          if (targetIndex === -1) {
             return state;
           }
 
-          const current :List<Map<*, *>> = state.get('propertyTypes', List());
-          const updated :List<Map<*, *>> = current.delete(propertyTypeIndex);
-
-          // !!! BUG !!! - need to update id -> index mapping
-          // TODO: fix bug
-          const currentById :Map<string, number> = state.get('propertyTypesById', Map());
-          const updatedById :Map<string, number> = currentById.delete(propertyTypeId);
+          const currentPropertyTypes :List<Map<*, *>> = state.get('propertyTypes', List());
+          const updatedPropertyTypes :List<Map<*, *>> = currentPropertyTypes.delete(targetIndex);
+          const updatedPropertyTypesById :Map<string, number> = Map()
+            .withMutations((byIdMap :Map<string, number>) => {
+              updatedPropertyTypes.forEach((propertyType :Map<*, *>, propertyTypeIndex :number) => {
+                byIdMap.set(propertyType.get('id'), propertyTypeIndex);
+              });
+            });
 
           return state
-            .set('propertyTypes', updated)
-            .set('propertyTypesById', updatedById);
+            .set('propertyTypes', updatedPropertyTypes)
+            .set('propertyTypesById', updatedPropertyTypesById);
         },
         FAILURE: () => {
           // TODO: need to properly handle the failure case

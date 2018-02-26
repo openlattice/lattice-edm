@@ -70,7 +70,7 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
             return state;
           }
 
-          const newAssociationEntityTypeId :string = seqAction.value;
+          const newAssociationEntityTypeId :string = (seqAction.value :any);
           const tempAssociationType :AssociationType = storedSeqAction.get('value');
 
           const newAssociationEntityType :EntityType = new EntityTypeBuilder()
@@ -129,29 +129,29 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
 
           const seqAction :SequenceAction = (action :any);
           const storedSeqAction :Map<*, *> = state.getIn(['actions', 'deleteAssociationType', seqAction.id], Map());
-
           if (storedSeqAction.isEmpty()) {
             return state;
           }
 
-          const associationTypeId :string = storedSeqAction.get('value');
-          const associationTypeIndex :number = state.getIn(['associationTypesById', associationTypeId], -1);
-
-          if (associationTypeIndex === -1) {
+          const targetId :string = storedSeqAction.get('value');
+          const targetIndex :number = state.getIn(['associationTypesById', targetId], -1);
+          if (targetIndex === -1) {
             return state;
           }
 
-          const current :List<Map<*, *>> = state.get('associationTypes', List());
-          const updated :List<Map<*, *>> = current.delete(associationTypeIndex);
-
-          // !!! BUG !!! - need to update id -> index mapping
-          // TODO: fix bug
-          const currentById :Map<string, number> = state.get('associationTypesById', Map());
-          const updatedById :Map<string, number> = currentById.delete(associationTypeId);
+          const currentAssociationTypes :List<Map<*, *>> = state.get('associationTypes', List());
+          const updatedAssociationTypes :List<Map<*, *>> = currentAssociationTypes.delete(targetIndex);
+          const updatedAssociationTypesById :Map<string, number> = Map()
+            .withMutations((byIdMap :Map<string, number>) => {
+              updatedAssociationTypes.forEach((associationType :Map<*, *>, associationTypeIndex :number) => {
+                const entityType :Map<*, *> = associationType.get('entityType', Map());
+                byIdMap.set(entityType.get('id'), associationTypeIndex);
+              });
+            });
 
           return state
-            .set('associationTypes', updated)
-            .set('associationTypesById', updatedById);
+            .set('associationTypes', updatedAssociationTypes)
+            .set('associationTypesById', updatedAssociationTypesById);
         },
         FAILURE: () => {
           // TODO: need to properly handle the failure case

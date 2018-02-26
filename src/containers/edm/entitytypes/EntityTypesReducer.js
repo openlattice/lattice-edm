@@ -60,7 +60,7 @@ export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, act
             return state;
           }
 
-          const newEntityTypeId :string = seqAction.value;
+          const newEntityTypeId :string = (seqAction.value :any);
           const tempEntityType :EntityType = storedSeqAction.get('value');
 
           const newEntityType :EntityType = new EntityTypeBuilder()
@@ -112,29 +112,28 @@ export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, act
 
           const seqAction :SequenceAction = (action :any);
           const storedSeqAction :Map<*, *> = state.getIn(['actions', 'deleteEntityType', seqAction.id], Map());
-
           if (storedSeqAction.isEmpty()) {
             return state;
           }
 
-          const entityTypeId :string = storedSeqAction.get('value');
-          const entityTypeIndex :number = state.getIn(['entityTypesById', entityTypeId], -1);
-
-          if (entityTypeIndex === -1) {
+          const targetId :string = storedSeqAction.get('value');
+          const targetIndex :number = state.getIn(['entityTypesById', targetId], -1);
+          if (targetIndex === -1) {
             return state;
           }
 
-          const current :List<Map<*, *>> = state.get('entityTypes', List());
-          const updated :List<Map<*, *>> = current.delete(entityTypeIndex);
-
-          // !!! BUG !!! - need to update id -> index mapping
-          // TODO: fix bug
-          const currentById :Map<string, number> = state.get('entityTypesById', Map());
-          const updatedById :Map<string, number> = currentById.delete(entityTypeId);
+          const currentEntityTypes :List<Map<*, *>> = state.get('entityTypes', List());
+          const updatedEntityTypes :List<Map<*, *>> = currentEntityTypes.delete(targetIndex);
+          const updatedEntityTypesById :Map<string, number> = Map()
+            .withMutations((byIdMap :Map<string, number>) => {
+              updatedEntityTypes.forEach((entityType :Map<*, *>, entityTypeIndex :number) => {
+                byIdMap.set(entityType.get('id'), entityTypeIndex);
+              });
+            });
 
           return state
-            .set('entityTypes', updated)
-            .set('entityTypesById', updatedById);
+            .set('entityTypes', updatedEntityTypes)
+            .set('entityTypesById', updatedEntityTypesById);
         },
         FAILURE: () => {
           // TODO: need to properly handle the failure case
