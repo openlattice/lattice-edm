@@ -4,8 +4,9 @@
 
 import React from 'react';
 
-import Immutable from 'immutable';
+import isEmpty from 'lodash/isEmpty';
 import styled from 'styled-components';
+import { List, Map } from 'immutable';
 import { AuthUtils } from 'lattice-auth';
 import { connect } from 'react-redux';
 
@@ -21,6 +22,11 @@ import AssociationTypeDetailsContainer from './associationtypes/AssociationTypeD
 import EntityTypeDetailsContainer from './entitytypes/EntityTypeDetailsContainer';
 import PropertyTypeDetailsContainer from './propertytypes/PropertyTypeDetailsContainer';
 import { getWorkingAbstractTypes, filterAbstractTypes } from '../../utils/AbstractTypeUtils';
+
+import {
+  maybeGetAbstractTypeIdForNewlyCreatedAbstractType,
+  maybeGetAbstractTypeMatchingSelectedAbstractTypeId
+} from './Helpers';
 
 import type { AbstractType } from '../../utils/AbstractTypes';
 
@@ -124,7 +130,7 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
     };
 
     const filteredTypes :List<Map<*, *>> = getWorkingAbstractTypes(params);
-    const selectedAbstractType :Map<*, *> = filteredTypes.get(0, Immutable.Map());
+    const selectedAbstractType :Map<*, *> = filteredTypes.get(0, Map());
     const selectedAbstractTypeId :string = selectedAbstractType.get('id', '');
 
     this.state = {
@@ -140,14 +146,8 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
 
     const {
       associationTypes,
-      associationTypesById,
       entityTypes,
-      entityTypesById,
-      newlyCreatedAssociationTypeId,
-      newlyCreatedEntityTypeId,
-      newlyCreatedPropertyTypeId,
       propertyTypes,
-      propertyTypesById,
       workingAbstractTypeType
     } = nextProps;
 
@@ -159,69 +159,43 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
     };
 
     const workingAbstractTypes :List<Map<*, *>> = getWorkingAbstractTypes(params);
+    const filteredTypes :List<Map<*, *>> = filterAbstractTypes({
+      workingAbstractTypeType,
+      abstractTypes: workingAbstractTypes,
+      filterQuery: this.state.filterQuery
+    });
 
-    // by default, use first element as the selected abstract type
-    let selectedAbstractType :Map<*, *> = workingAbstractTypes.get(0, Immutable.Map());
+    // 0. by default, use first element of all possible options as the selected abstract type
+    let selectedAbstractType :Map<*, *> = workingAbstractTypes.get(0, Map());
     let selectedAbstractTypeId :string = this.state.selectedAbstractTypeId;
     if (!selectedAbstractTypeId) {
       selectedAbstractTypeId = selectedAbstractType.get('id', '');
     }
 
-    // check if a new abstract type was created, and if so, use its id for selection
-    if (newlyCreatedPropertyTypeId
-        && newlyCreatedPropertyTypeId !== this.props.newlyCreatedPropertyTypeId) {
-      selectedAbstractTypeId = newlyCreatedPropertyTypeId;
-    }
-    else if (newlyCreatedEntityTypeId
-        && newlyCreatedEntityTypeId !== this.props.newlyCreatedEntityTypeId) {
-      selectedAbstractTypeId = newlyCreatedEntityTypeId;
-    }
-    else if (newlyCreatedAssociationTypeId
-        && newlyCreatedAssociationTypeId !== this.props.newlyCreatedAssociationTypeId) {
-      selectedAbstractTypeId = newlyCreatedAssociationTypeId;
+    // 1. try to match an abstract type if there's a filter query
+    if (!isEmpty(this.state.filterQuery)) {
+      selectedAbstractType = filteredTypes.get(0, Map());
+      selectedAbstractTypeId = selectedAbstractType.get('id', '');
     }
 
-    // try to select the abstract type corresponding to selectedAbstractTypeId
-    let selectedAbstractTypeIndex :number;
-    switch (workingAbstractTypeType) {
-      case AbstractTypes.AssociationType:
-        if (selectedAbstractTypeId) {
-          selectedAbstractTypeIndex = associationTypesById.get(selectedAbstractTypeId, -1);
-          if (selectedAbstractTypeIndex !== -1) {
-            selectedAbstractType = associationTypes.get(selectedAbstractTypeIndex, Immutable.Map());
-          }
-        }
-        break;
-      case AbstractTypes.EntityType:
-        if (selectedAbstractTypeId) {
-          selectedAbstractTypeIndex = entityTypesById.get(selectedAbstractTypeId, -1);
-          if (selectedAbstractTypeIndex !== -1) {
-            selectedAbstractType = entityTypes.get(selectedAbstractTypeIndex, Immutable.Map());
-          }
-        }
-        break;
-      case AbstractTypes.PropertyType:
-        if (selectedAbstractTypeId) {
-          selectedAbstractTypeIndex = propertyTypesById.get(selectedAbstractTypeId, -1);
-          if (selectedAbstractTypeIndex !== -1) {
-            selectedAbstractType = propertyTypes.get(selectedAbstractTypeIndex, Immutable.Map());
-          }
-        }
-        break;
-      default:
-        break;
-    }
+    // 2. check if a new abstract type was created, and if so, use its id for selection. newly created trumps all.
+    selectedAbstractTypeId = maybeGetAbstractTypeIdForNewlyCreatedAbstractType(
+      selectedAbstractTypeId,
+      this.props,
+      nextProps
+    );
 
-    const filterParams :Object = {
-      workingAbstractTypeType,
-      abstractTypes: workingAbstractTypes,
-      filterQuery: this.state.filterQuery
-    };
-
-    this.setState({
+    // 3. try to select the abstract type corresponding to selectedAbstractTypeId
+    selectedAbstractType = maybeGetAbstractTypeMatchingSelectedAbstractTypeId(
       selectedAbstractType,
       selectedAbstractTypeId,
-      filteredTypes: filterAbstractTypes(filterParams),
+      nextProps
+    );
+
+    this.setState({
+      filteredTypes,
+      selectedAbstractType,
+      selectedAbstractTypeId,
       showCreateNewAbstractTypeCard: false
     });
   }
@@ -239,7 +213,7 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
     } = this.props;
 
     // by default, use first element as the selected abstract type
-    let selectedAbstractType :Map<*, *> = this.state.filteredTypes.get(0, Immutable.Map());
+    let selectedAbstractType :Map<*, *> = this.state.filteredTypes.get(0, Map());
 
     let selectedAbstractTypeIndex :number;
     switch (workingAbstractTypeType) {
@@ -247,7 +221,7 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
         if (selectedAbstractTypeId) {
           selectedAbstractTypeIndex = associationTypesById.get(selectedAbstractTypeId, -1);
           if (selectedAbstractTypeIndex !== -1) {
-            selectedAbstractType = associationTypes.get(selectedAbstractTypeIndex, Immutable.Map());
+            selectedAbstractType = associationTypes.get(selectedAbstractTypeIndex, Map());
           }
         }
         break;
@@ -255,7 +229,7 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
         if (selectedAbstractTypeId) {
           selectedAbstractTypeIndex = entityTypesById.get(selectedAbstractTypeId, -1);
           if (selectedAbstractTypeIndex !== -1) {
-            selectedAbstractType = entityTypes.get(selectedAbstractTypeIndex, Immutable.Map());
+            selectedAbstractType = entityTypes.get(selectedAbstractTypeIndex, Map());
           }
         }
         break;
@@ -263,7 +237,7 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
         if (selectedAbstractTypeId) {
           selectedAbstractTypeIndex = propertyTypesById.get(selectedAbstractTypeId, -1);
           if (selectedAbstractTypeIndex !== -1) {
-            selectedAbstractType = propertyTypes.get(selectedAbstractTypeIndex, Immutable.Map());
+            selectedAbstractType = propertyTypes.get(selectedAbstractTypeIndex, Map());
           }
         }
         break;
@@ -293,7 +267,7 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
     };
 
     const filteredTypes :List<Map<*, *>> = filterAbstractTypes(filterParams);
-    const selectedAbstractType :Map<*, *> = filteredTypes.get(0, Immutable.Map());
+    const selectedAbstractType :Map<*, *> = filteredTypes.get(0, Map());
     const selectedAbstractTypeId :string = selectedAbstractType.get('id', '');
 
     this.setState({
@@ -476,3 +450,5 @@ function mapStateToProps(state :Map<*, *>) :Object {
 }
 
 export default connect(mapStateToProps)(AbstractTypeOverviewContainer);
+
+export type { Props };
