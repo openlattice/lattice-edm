@@ -1,8 +1,5 @@
-/*
- *
- */
-
 import Immutable from 'immutable';
+import randomUUID from 'uuid/v4';
 import { EntityDataModelApiActionFactory } from 'lattice-sagas';
 
 import reducer from './PropertyTypesReducer';
@@ -135,27 +132,79 @@ describe('PropertyTypesReducer', () => {
         });
     });
 
-    test(deletePropertyType.SUCCESS, () => {
+    describe(deletePropertyType.SUCCESS, () => {
 
-      const { id } = deletePropertyType();
-      const propertyTypeId = MOCK_PROPERTY_TYPE.id;
+      test('should delete PropertyType', () => {
 
-      let state = INITIAL_STATE
-        .set('propertyTypes', Immutable.fromJS([MOCK_PROPERTY_TYPE.asImmutable()]))
-        .set('propertyTypesById', Immutable.fromJS({ [propertyTypeId]: 0 }));
+        // yes, this is not a valid PropertyType, but the reducer only cares about the id
+        const mockPropertyType = { id: randomUUID() };
 
-      state = reducer(state, deletePropertyType.request(id, propertyTypeId));
-      state = reducer(state, deletePropertyType.success(id));
+        let state = INITIAL_STATE
+          .set('propertyTypes', Immutable.fromJS([mockPropertyType]))
+          .set('propertyTypesById', Immutable.fromJS({ [mockPropertyType.id]: 0 }));
 
-      expect(state.get('propertyTypes').toJS()).toEqual([]);
-      expect(state.get('propertyTypesById').toJS()).toEqual({});
+        const { id } = deletePropertyType();
+        state = reducer(state, deletePropertyType.request(id, mockPropertyType.id));
+        state = reducer(state, deletePropertyType.success(id));
 
-      expect(state.getIn(['actions', 'deletePropertyType', id]).toJS())
-        .toEqual({
-          id,
-          type: deletePropertyType.REQUEST,
-          value: propertyTypeId
+        expect(state.get('propertyTypes').toJS()).toEqual([]);
+        expect(state.get('propertyTypesById').toJS()).toEqual({});
+        expect(state.getIn(['actions', 'deletePropertyType', id]).toJS())
+          .toEqual({
+            id,
+            type: deletePropertyType.REQUEST,
+            value: mockPropertyType.id
+          });
+      });
+
+      test('should correctly update "propertyTypes" and "propertyTypesById"', () => {
+
+        // yes, this is not a valid PropertyType, but the reducer only cares about the id
+        const mockPropertyType1 = { id: randomUUID() };
+        const mockPropertyType2 = { id: randomUUID() };
+        const mockPropertyType3 = { id: randomUUID() };
+
+        let state = INITIAL_STATE
+          .set('propertyTypes', Immutable.fromJS([
+            mockPropertyType1,
+            mockPropertyType2,
+            mockPropertyType3
+          ]))
+          .set('propertyTypesById', Immutable.fromJS({
+            [mockPropertyType1.id]: 0,
+            [mockPropertyType2.id]: 1,
+            [mockPropertyType3.id]: 2
+          }));
+
+        const { id } = deletePropertyType();
+        state = reducer(state, deletePropertyType.request(id, mockPropertyType2.id));
+        state = reducer(state, deletePropertyType.success(id));
+
+        expect(state.get('propertyTypes').toJS()).toEqual([
+          mockPropertyType1,
+          mockPropertyType3
+        ]);
+        expect(state.get('propertyTypesById').toJS()).toEqual({
+          [mockPropertyType1.id]: 0,
+          [mockPropertyType3.id]: 1
         });
+      });
+
+      test('should not mutate state if attempting to delete a non-existent PropertyType', () => {
+
+        // yes, this is not a valid PropertyType, but the reducer only cares about the id
+        const mockPropertyType = { id: randomUUID() };
+
+        const initialState = INITIAL_STATE
+          .set('propertyTypes', Immutable.fromJS([mockPropertyType]))
+          .set('propertyTypesById', Immutable.fromJS({ [mockPropertyType.id]: 0 }));
+
+        const { id } = deletePropertyType();
+        const stateAfterRequest = reducer(initialState, deletePropertyType.request(id, randomUUID()));
+        const stateAfterSuccess = reducer(stateAfterRequest, deletePropertyType.success(id));
+        expect(stateAfterSuccess.toJS()).toEqual(stateAfterRequest.toJS());
+      });
+
     });
 
     test(deletePropertyType.FAILURE, () => {
