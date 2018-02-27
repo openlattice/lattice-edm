@@ -1,8 +1,5 @@
-/*
- *
- */
-
 import Immutable from 'immutable';
+import randomUUID from 'uuid/v4';
 import { EntityDataModelApiActionFactory } from 'lattice-sagas';
 
 import reducer from './EntityTypesReducer';
@@ -131,26 +128,78 @@ describe('EntityTypesReducer', () => {
         });
     });
 
-    test(deleteEntityType.SUCCESS, () => {
+    describe(deleteEntityType.SUCCESS, () => {
 
-      const { id } = deleteEntityType();
-      const entityTypeId = MOCK_ENTITY_TYPE.id;
+      test('should delete EntityType', () => {
 
-      let state = INITIAL_STATE
-        .set('entityTypes', Immutable.fromJS([MOCK_ENTITY_TYPE.asImmutable()]))
-        .set('entityTypesById', Immutable.fromJS({ [entityTypeId]: 0 }));
+        // yes, this is not a valid EntityType, but the reducer only cares about the id
+        const mockEntityType = { id: randomUUID() };
 
-      state = reducer(state, deleteEntityType.request(id, entityTypeId));
-      state = reducer(state, deleteEntityType.success(id));
+        let state = INITIAL_STATE
+          .set('entityTypes', Immutable.fromJS([mockEntityType]))
+          .set('entityTypesById', Immutable.fromJS({ [mockEntityType.id]: 0 }));
 
-      expect(state.get('entityTypes').toJS()).toEqual([]);
-      expect(state.get('entityTypesById').toJS()).toEqual({});
-      expect(state.getIn(['actions', 'deleteEntityType', id]).toJS())
-        .toEqual({
-          id,
-          type: deleteEntityType.REQUEST,
-          value: entityTypeId
+        const { id } = deleteEntityType();
+        state = reducer(state, deleteEntityType.request(id, mockEntityType.id));
+        state = reducer(state, deleteEntityType.success(id));
+
+        expect(state.get('entityTypes').toJS()).toEqual([]);
+        expect(state.get('entityTypesById').toJS()).toEqual({});
+        expect(state.getIn(['actions', 'deleteEntityType', id]).toJS())
+          .toEqual({
+            id,
+            type: deleteEntityType.REQUEST,
+            value: mockEntityType.id
+          });
+      });
+
+      test('should correctly update "entityTypes" and "entityTypesById"', () => {
+
+        // yes, this is not a valid PropertyType, but the reducer only cares about the id
+        const mockEntityType1 = { id: randomUUID() };
+        const mockEntityType2 = { id: randomUUID() };
+        const mockEntityType3 = { id: randomUUID() };
+
+        let state = INITIAL_STATE
+          .set('entityTypes', Immutable.fromJS([
+            mockEntityType1,
+            mockEntityType2,
+            mockEntityType3
+          ]))
+          .set('entityTypesById', Immutable.fromJS({
+            [mockEntityType1.id]: 0,
+            [mockEntityType2.id]: 1,
+            [mockEntityType3.id]: 2
+          }));
+
+        const { id } = deleteEntityType();
+        state = reducer(state, deleteEntityType.request(id, mockEntityType2.id));
+        state = reducer(state, deleteEntityType.success(id));
+
+        expect(state.get('entityTypes').toJS()).toEqual([
+          mockEntityType1,
+          mockEntityType3
+        ]);
+        expect(state.get('entityTypesById').toJS()).toEqual({
+          [mockEntityType1.id]: 0,
+          [mockEntityType3.id]: 1
         });
+      });
+
+      test('should not mutate state if attempting to delete a non-existent EntityType', () => {
+
+        // yes, this is not a valid PropertyType, but the reducer only cares about the id
+        const mockEntityType = { id: randomUUID() };
+
+        const initialState = INITIAL_STATE
+          .set('entityTypes', Immutable.fromJS([mockEntityType]))
+          .set('entityTypesById', Immutable.fromJS({ [mockEntityType.id]: 0 }));
+
+        const { id } = deleteEntityType();
+        const stateAfterRequest = reducer(initialState, deleteEntityType.request(id, randomUUID()));
+        const stateAfterSuccess = reducer(stateAfterRequest, deleteEntityType.success(id));
+        expect(stateAfterSuccess.toJS()).toEqual(stateAfterRequest.toJS());
+      });
     });
 
     test(deleteEntityType.FAILURE, () => {

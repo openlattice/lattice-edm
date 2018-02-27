@@ -1,8 +1,5 @@
-/*
- *
- */
-
 import Immutable from 'immutable';
+import randomUUID from 'uuid/v4';
 import { EntityDataModelApiActionFactory } from 'lattice-sagas';
 
 import reducer from './AssociationTypesReducer';
@@ -140,27 +137,78 @@ describe('AssociationTypesReducer', () => {
         });
     });
 
-    test(deleteAssociationType.SUCCESS, () => {
+    describe(deleteAssociationType.SUCCESS, () => {
 
-      const { id } = deleteAssociationType();
-      const associationTypeId = MOCK_ASSOCIATION_TYPE.entityType.id;
+      test('should delete AssociationType', () => {
 
-      let state = INITIAL_STATE
-        .set('associationTypes', Immutable.fromJS([MOCK_ASSOCIATION_TYPE.asImmutable()]))
-        .set('associationTypesById', Immutable.fromJS({ [associationTypeId]: 0 }));
+        // yes, this is not a valid AssociationType, but the reducer only cares about the id
+        const mockAssociationType = { entityType: { id: randomUUID() } };
 
-      state = reducer(state, deleteAssociationType.request(id, associationTypeId));
-      state = reducer(state, deleteAssociationType.success(id));
+        let state = INITIAL_STATE
+          .set('associationTypes', Immutable.fromJS([mockAssociationType]))
+          .set('associationTypesById', Immutable.fromJS({ [mockAssociationType.entityType.id]: 0 }));
 
-      expect(state.get('associationTypes').toJS()).toEqual([]);
-      expect(state.get('associationTypesById').toJS()).toEqual({});
+        const { id } = deleteAssociationType();
+        state = reducer(state, deleteAssociationType.request(id, mockAssociationType.entityType.id));
+        state = reducer(state, deleteAssociationType.success(id));
 
-      expect(state.getIn(['actions', 'deleteAssociationType', id]).toJS())
-        .toEqual({
-          id,
-          type: deleteAssociationType.REQUEST,
-          value: associationTypeId
+        expect(state.get('associationTypes').toJS()).toEqual([]);
+        expect(state.get('associationTypesById').toJS()).toEqual({});
+        expect(state.getIn(['actions', 'deleteAssociationType', id]).toJS())
+          .toEqual({
+            id,
+            type: deleteAssociationType.REQUEST,
+            value: mockAssociationType.entityType.id
+          });
+      });
+
+      test('should correctly update "associationTypes" and "associationTypesById"', () => {
+
+        // yes, this is not a valid AssociationType, but the reducer only cares about the id
+        const mockAssociationType1 = { entityType: { id: randomUUID() } };
+        const mockAssociationType2 = { entityType: { id: randomUUID() } };
+        const mockAssociationType3 = { entityType: { id: randomUUID() } };
+
+        let state = INITIAL_STATE
+          .set('associationTypes', Immutable.fromJS([
+            mockAssociationType1,
+            mockAssociationType2,
+            mockAssociationType3
+          ]))
+          .set('associationTypesById', Immutable.fromJS({
+            [mockAssociationType1.entityType.id]: 0,
+            [mockAssociationType2.entityType.id]: 1,
+            [mockAssociationType3.entityType.id]: 2
+          }));
+
+        const { id } = deleteAssociationType();
+        state = reducer(state, deleteAssociationType.request(id, mockAssociationType2.entityType.id));
+        state = reducer(state, deleteAssociationType.success(id));
+
+        expect(state.get('associationTypes').toJS()).toEqual([
+          mockAssociationType1,
+          mockAssociationType3
+        ]);
+        expect(state.get('associationTypesById').toJS()).toEqual({
+          [mockAssociationType1.entityType.id]: 0,
+          [mockAssociationType3.entityType.id]: 1
         });
+      });
+
+      test('should not mutate state if attempting to delete a non-existent AssociationType', () => {
+
+        // yes, this is not a valid AssociationType, but the reducer only cares about the id
+        const mockAssociationType = { entityType: { id: randomUUID() } };
+
+        const initialState = INITIAL_STATE
+          .set('associationTypes', Immutable.fromJS([mockAssociationType]))
+          .set('associationTypesById', Immutable.fromJS({ [mockAssociationType.entityType.id]: 0 }));
+
+        const { id } = deleteAssociationType();
+        const stateAfterRequest = reducer(initialState, deleteAssociationType.request(id, randomUUID()));
+        const stateAfterSuccess = reducer(stateAfterRequest, deleteAssociationType.success(id));
+        expect(stateAfterSuccess.toJS()).toEqual(stateAfterRequest.toJS());
+      });
     });
 
     test(deleteAssociationType.FAILURE, () => {
