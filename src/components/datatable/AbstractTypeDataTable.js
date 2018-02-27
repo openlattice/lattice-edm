@@ -5,9 +5,9 @@
 import React from 'react';
 
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
-import Immutable from 'immutable';
 import styled from 'styled-components';
 import { faTimes } from '@fortawesome/fontawesome-pro-regular';
+import { List, Map, OrderedMap, fromJS } from 'immutable';
 import { Models } from 'lattice';
 
 import AbstractCell from './AbstractCell';
@@ -22,21 +22,21 @@ const { FullyQualifiedName } = Models;
  */
 
 const REMOVE_BTN_HEADER_ID :string = 'remove';
-const REMOVE_BTN_HEADER :Map<string, string> = Immutable.fromJS({ id: REMOVE_BTN_HEADER_ID, value: '' });
+const REMOVE_BTN_HEADER :Map<string, string> = fromJS({ id: REMOVE_BTN_HEADER_ID, value: '' });
 
 const TITLE_HEADER_ID :string = 'title';
-const TITLE_HEADER :Map<string, string> = Immutable.fromJS({ id: TITLE_HEADER_ID, value: 'Title' });
+const TITLE_HEADER :Map<string, string> = fromJS({ id: TITLE_HEADER_ID, value: 'Title' });
 
 const TYPE_HEADER_ID :string = 'type';
-const TYPE_HEADER :Map<string, string> = Immutable.fromJS({ id: TYPE_HEADER_ID, value: 'FQN' });
+const TYPE_HEADER :Map<string, string> = fromJS({ id: TYPE_HEADER_ID, value: 'FQN' });
 
-const HEADERS_MAP :Map<string, Map<string, string>> = Immutable.fromJS({
+const HEADERS_MAP :Map<string, Map<string, string>> = fromJS({
   [REMOVE_BTN_HEADER_ID]: REMOVE_BTN_HEADER,
   [TITLE_HEADER_ID]: TITLE_HEADER,
   [TYPE_HEADER_ID]: TYPE_HEADER
 });
 
-const DEFAULT_HEADERS :List<Map<string, string>> = Immutable.fromJS([
+const DEFAULT_HEADERS :List<Map<string, string>> = fromJS([
   TYPE_HEADER,
   TITLE_HEADER
 ]);
@@ -80,8 +80,8 @@ type State = {
 class AbstractTypeDataTable extends React.Component<Props, State> {
 
   static defaultProps = {
-    abstractTypes: Immutable.List(),
-    headerIds: Immutable.List(),
+    abstractTypes: List(),
+    headerIds: List(),
     height: -1,
     highlightOnHover: false,
     highlightOnSelect: false,
@@ -111,7 +111,7 @@ class AbstractTypeDataTable extends React.Component<Props, State> {
 
     let headers :List<Map<string, string>> = DEFAULT_HEADERS;
     if (!props.headerIds.isEmpty()) {
-      headers = props.headerIds.map((headerId :string) => HEADERS_MAP.get(headerId, Immutable.Map()));
+      headers = props.headerIds.map((headerId :string) => HEADERS_MAP.get(headerId, Map()));
     }
 
     if (props.showRemoveColumn) {
@@ -126,14 +126,14 @@ class AbstractTypeDataTable extends React.Component<Props, State> {
     const data :List<Map<string, string>> = props.abstractTypes.map((type :Map<*, *>) => {
 
       const abstractType :Map<*, *> = (props.workingAbstractTypeType === AbstractTypes.AssociationType)
-        ? type.get('entityType', Immutable.Map())
+        ? type.get('entityType', Map())
         : type;
 
-      const abstractTypeType :Map<string, string> = abstractType.get('type', Immutable.Map());
+      const abstractTypeType :Map<string, string> = abstractType.get('type', Map());
       const abstractTypeFqn :string = FullyQualifiedName.toString(abstractTypeType);
       const abstractTypeTitle :string = abstractType.get('title', '');
 
-      return Immutable.OrderedMap().withMutations((map :OrderedMap<string, string>) => {
+      return OrderedMap().withMutations((map :OrderedMap<string, string>) => {
         map.set(TYPE_HEADER_ID, abstractTypeFqn);
         map.set(TITLE_HEADER_ID, abstractTypeTitle);
         if (props.showRemoveColumn) {
@@ -165,11 +165,11 @@ class AbstractTypeDataTable extends React.Component<Props, State> {
 
   handleOnAbstractTypeRemove = (selectedRowIndex :number) => {
 
-    const selectedAbstractType :Map<*, *> = this.props.abstractTypes.get(selectedRowIndex, Immutable.Map());
+    const selectedAbstractType :Map<*, *> = this.props.abstractTypes.get(selectedRowIndex, Map());
     let selectedAbstractTypeId :string = selectedAbstractType.get('id', '');
 
     if (this.props.workingAbstractTypeType === AbstractTypes.AssociationType) {
-      const entityType :Map<*, *> = selectedAbstractType.get('entityType', Immutable.Map());
+      const entityType :Map<*, *> = selectedAbstractType.get('entityType', Map());
       selectedAbstractTypeId = entityType.get('id', '');
     }
 
@@ -196,11 +196,11 @@ class AbstractTypeDataTable extends React.Component<Props, State> {
 
   handleOnAbstractTypeSelect = (selectedRowIndex :number) => {
 
-    const selectedAbstractType :Map<*, *> = this.props.abstractTypes.get(selectedRowIndex, Immutable.Map());
+    const selectedAbstractType :Map<*, *> = this.props.abstractTypes.get(selectedRowIndex, Map());
     let selectedAbstractTypeId :string = selectedAbstractType.get('id', '');
 
     if (this.props.workingAbstractTypeType === AbstractTypes.AssociationType) {
-      const entityType :Map<*, *> = selectedAbstractType.get('entityType', Immutable.Map());
+      const entityType :Map<*, *> = selectedAbstractType.get('entityType', Map());
       selectedAbstractTypeId = entityType.get('id', '');
     }
 
