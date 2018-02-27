@@ -72,7 +72,7 @@
     "eslint": "^4.18.1",
     "eslint-config-airbnb": "^16.1.0",
     "eslint-import-resolver-webpack": "^0.8.3",
-    "eslint-loader": "^1.9.0",
+    "eslint-loader": "^2.0.0",
     "eslint-plugin-flowtype": "^2.41.0",
     "eslint-plugin-import": "^2.7.0",
     "eslint-plugin-jest": "^21.6.0",
@@ -89,8 +89,9 @@
     "stylelint-config-styled-components": "^0.1.1",
     "stylelint-processor-styled-components": "^1.0.0",
     "uglifyjs-webpack-plugin": "^1.1.4",
+    "uuid": "^3.2.1",
     "webpack": "^4.0.0",
-    "webpack-dev-server": "^2.10.0",
+    "webpack-dev-server": "^3.0.0",
     "webpack-hot-middleware": "^2.21.0"
   },
   "scripts": {
