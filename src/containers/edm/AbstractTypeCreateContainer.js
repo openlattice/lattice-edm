@@ -4,8 +4,8 @@
 
 import React from 'react';
 
-import Immutable from 'immutable';
 import styled from 'styled-components';
+import { Set } from 'immutable';
 import { Models, Types } from 'lattice';
 import { EntityDataModelApiActionFactory } from 'lattice-sagas';
 import { bindActionCreators } from 'redux';
@@ -174,10 +174,10 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
       namespaceValue: '',
       phoneticSearchesValue: false,
       piiValue: false,
-      selectedDestinationEntityTypes: Immutable.Set(),
-      selectedPrimaryKeyPropertyTypes: Immutable.Set(),
-      selectedPropertyTypes: Immutable.Set(),
-      selectedSourceEntityTypes: Immutable.Set(),
+      selectedDestinationEntityTypes: Set(),
+      selectedPrimaryKeyPropertyTypes: Set(),
+      selectedPropertyTypes: Set(),
+      selectedSourceEntityTypes: Set(),
       titleValue: ''
     };
   }

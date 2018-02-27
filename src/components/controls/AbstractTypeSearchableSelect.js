@@ -5,9 +5,9 @@
 import React from 'react';
 
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
-import Immutable from 'immutable';
 import styled, { css } from 'styled-components';
 import { faSearch } from '@fortawesome/fontawesome-pro-regular';
+import { List } from 'immutable';
 
 import AbstractTypes from '../../utils/AbstractTypes';
 import AbstractTypeDataTable from '../datatable/AbstractTypeDataTable';
@@ -103,7 +103,7 @@ type State = {
 class AbstractTypeSearchableSelect extends React.Component<Props, State> {
 
   static defaultProps = {
-    abstractTypes: Immutable.List(),
+    abstractTypes: List(),
     className: '',
     maxHeight: -1,
     searchPlaceholder: 'Search...',

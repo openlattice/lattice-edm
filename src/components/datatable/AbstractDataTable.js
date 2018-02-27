@@ -4,8 +4,8 @@
 
 import React from 'react';
 
-import Immutable from 'immutable';
 import styled from 'styled-components';
+import { List, Map, OrderedMap } from 'immutable';
 import { AutoSizer, Grid, ScrollSync } from 'react-virtualized';
 
 import AbstractCell, { AbstractCellTypes } from './AbstractCell';
@@ -98,8 +98,8 @@ class AbstractDataTable extends React.Component<Props, State> {
   bodyGrid :?Grid;
 
   static defaultProps = {
-    data: Immutable.List(),
-    headers: Immutable.List(),
+    data: List(),
+    headers: List(),
     height: -1,
     maxHeight: -1,
     maxWidth: -1,
@@ -114,7 +114,7 @@ class AbstractDataTable extends React.Component<Props, State> {
     this.state = {
       autosizerHeight: 0,
       autosizerWidth: 0,
-      columnWidths: Immutable.Map(),
+      columnWidths: Map(),
       computedBodyGridHeight: 0,
       computedBodyGridWidth: 0,
       computedHeadGridHeight: 0,
@@ -129,7 +129,7 @@ class AbstractDataTable extends React.Component<Props, State> {
 
   static computeColumnWidths(params :Object) :Map<number, number> {
 
-    return Immutable.OrderedMap().withMutations((map :OrderedMap<number, number>) => {
+    return OrderedMap().withMutations((map :OrderedMap<number, number>) => {
 
       // iterate through the headers, column by column, and compute an estimated width for each column
       params.headers.forEach((header :Map<string, string>, columnIndex :number) => {
