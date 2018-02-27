@@ -96,9 +96,9 @@ type Props = {
   isFetchingAllAssociationTypes :boolean;
   isFetchingAllEntityTypes :boolean;
   isFetchingAllPropertyTypes :boolean;
-  newlyCreatedAssociationTypeId :string;
-  newlyCreatedEntityTypeId :string;
-  newlyCreatedPropertyTypeId :string;
+  newlyCreatedAssociationTypeId :string; // eslint-disable-line react/no-unused-prop-types
+  newlyCreatedEntityTypeId :string; // eslint-disable-line react/no-unused-prop-types
+  newlyCreatedPropertyTypeId :string; // eslint-disable-line react/no-unused-prop-types
   propertyTypes :List<Map<*, *>>;
   propertyTypesById :Map<string, number>;
   workingAbstractTypeType :AbstractType;
