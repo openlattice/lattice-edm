@@ -7,7 +7,7 @@ import React from 'react';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 import styled from 'styled-components';
 import { faTimes } from '@fortawesome/fontawesome-pro-regular';
-import { List, Map, fromJS } from 'immutable';
+import { List, Map, OrderedMap, fromJS } from 'immutable';
 import { Models } from 'lattice';
 
 import AbstractCell from './AbstractCell';
@@ -133,7 +133,7 @@ class AbstractTypeDataTable extends React.Component<Props, State> {
       const abstractTypeFqn :string = FullyQualifiedName.toString(abstractTypeType);
       const abstractTypeTitle :string = abstractType.get('title', '');
 
-      return Immutable.OrderedMap().withMutations((map :OrderedMap<string, string>) => {
+      return OrderedMap().withMutations((map :OrderedMap<string, string>) => {
         map.set(TYPE_HEADER_ID, abstractTypeFqn);
         map.set(TITLE_HEADER_ID, abstractTypeTitle);
         if (props.showRemoveColumn) {
