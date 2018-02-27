@@ -4,8 +4,8 @@
 
 import React from 'react';
 
-import Immutable from 'immutable';
 import styled from 'styled-components';
+import { List, Map } from 'immutable';
 import { AuthUtils } from 'lattice-auth';
 import { EntityDataModelApiActionFactory } from 'lattice-sagas';
 import { bindActionCreators } from 'redux';
@@ -67,7 +67,7 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
   handleAddDestinationEntityTypeToAssociationType = (entityTypeIdToAdd :string) => {
 
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
-      const associationEntityType :Map<*, *> = this.props.associationType.get('entityType', Immutable.Map());
+      const associationEntityType :Map<*, *> = this.props.associationType.get('entityType', Map());
       this.props.actions.addDestinationEntityTypeToAssociationType({
         associationTypeId: associationEntityType.get('id'),
         entityTypeId: entityTypeIdToAdd
@@ -78,7 +78,7 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
   handleAddPropertyTypeToAssociationType = (propertyTypeIdToAdd :string) => {
 
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
-      const associationEntityType :Map<*, *> = this.props.associationType.get('entityType', Immutable.Map());
+      const associationEntityType :Map<*, *> = this.props.associationType.get('entityType', Map());
       this.props.actions.addPropertyTypeToEntityType({
         entityTypeId: associationEntityType.get('id'),
         propertyTypeId: propertyTypeIdToAdd
@@ -89,7 +89,7 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
   handleAddSourceEntityTypeToAssociationType = (entityTypeIdToAdd :string) => {
 
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
-      const associationEntityType :Map<*, *> = this.props.associationType.get('entityType', Immutable.Map());
+      const associationEntityType :Map<*, *> = this.props.associationType.get('entityType', Map());
       this.props.actions.addSourceEntityTypeToAssociationType({
         associationTypeId: associationEntityType.get('id'),
         entityTypeId: entityTypeIdToAdd
@@ -100,7 +100,7 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
   handleRemoveDestinationEntityTypeFromAssociationType = (entityTypeIdToRemove :string) => {
 
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
-      const associationEntityType :Map<*, *> = this.props.associationType.get('entityType', Immutable.Map());
+      const associationEntityType :Map<*, *> = this.props.associationType.get('entityType', Map());
       this.props.actions.removeDestinationEntityTypeFromAssociationType({
         associationTypeId: associationEntityType.get('id'),
         entityTypeId: entityTypeIdToRemove
@@ -111,7 +111,7 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
   handleRemovePropertyTypeFromAssociationType = (propertyTypeIdToRemove :string) => {
 
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
-      const associationEntityType :Map<*, *> = this.props.associationType.get('entityType', Immutable.Map());
+      const associationEntityType :Map<*, *> = this.props.associationType.get('entityType', Map());
       this.props.actions.removePropertyTypeFromEntityType({
         entityTypeId: associationEntityType.get('id'),
         propertyTypeId: propertyTypeIdToRemove
@@ -122,7 +122,7 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
   handleRemoveSourceEntityTypeFromAssociationType = (entityTypeIdToRemove :string) => {
 
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
-      const associationEntityType :Map<*, *> = this.props.associationType.get('entityType', Immutable.Map());
+      const associationEntityType :Map<*, *> = this.props.associationType.get('entityType', Map());
       this.props.actions.removeSourceEntityTypeFromAssociationType({
         associationTypeId: associationEntityType.get('id'),
         entityTypeId: entityTypeIdToRemove
@@ -133,7 +133,7 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
   handleOnClickDelete = () => {
 
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
-      const associationEntityType :Map<*, *> = this.props.associationType.get('entityType', Immutable.Map());
+      const associationEntityType :Map<*, *> = this.props.associationType.get('entityType', Map());
       this.props.actions.deleteAssociationType(associationEntityType.get('id'));
     }
   }
@@ -142,20 +142,20 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
 
     // TODO: consider refactoring this since it's basically a copy of EntityTypeDetailsContainer
 
-    const associationEntityType :Map<*, *> = this.props.associationType.get('entityType', Immutable.Map());
+    const associationEntityType :Map<*, *> = this.props.associationType.get('entityType', Map());
 
     const baseType :string = associationEntityType.get('baseType', '');
 
-    const keyPropertyTypeIds :Set<string> = associationEntityType.get('key', Immutable.List()).toSet();
-    const propertyTypeIds :Set<string> = associationEntityType.get('properties', Immutable.List()).toSet();
+    const keyPropertyTypeIds :Set<string> = associationEntityType.get('key', List()).toSet();
+    const propertyTypeIds :Set<string> = associationEntityType.get('properties', List()).toSet();
 
     const keyPropertyTypes :List<Map<*, *>> = keyPropertyTypeIds
       .map((propertyTypeId :string) => {
         const index :number = this.props.propertyTypesById.get(propertyTypeId, -1);
         if (index === -1) {
-          return Immutable.Map();
+          return Map();
         }
-        return this.props.propertyTypes.get(index, Immutable.Map());
+        return this.props.propertyTypes.get(index, Map());
       })
       .toList();
 
@@ -163,9 +163,9 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
       .map((propertyTypeId :string) => {
         const index :number = this.props.propertyTypesById.get(propertyTypeId, -1);
         if (index === -1) {
-          return Immutable.Map();
+          return Map();
         }
-        return this.props.propertyTypes.get(index, Immutable.Map());
+        return this.props.propertyTypes.get(index, Map());
       })
       .toList();
 
@@ -252,10 +252,10 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
       return null;
     }
 
-    const associationEntityType :Map<*, *> = this.props.associationType.get('entityType', Immutable.Map());
+    const associationEntityType :Map<*, *> = this.props.associationType.get('entityType', Map());
     const availablePropertyTypes :List<Map<*, *>> = this.props.propertyTypes
       .filterNot((propertyType :Map<*, *>) => {
-        const propertyTypeIds :List<string> = associationEntityType.get('properties', Immutable.List());
+        const propertyTypeIds :List<string> = associationEntityType.get('properties', List());
         return propertyTypeIds.includes(propertyType.get('id', ''));
       });
 
@@ -315,7 +315,7 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
 
     const availableEntityTypes :List<Map<*, *>> = this.props.entityTypes
       .filterNot((entityType :Map<*, *>) => {
-        const sourceEntityTypeIds :List<string> = this.props.associationType.get('src', Immutable.List());
+        const sourceEntityTypeIds :List<string> = this.props.associationType.get('src', List());
         return sourceEntityTypeIds.includes(entityType.get('id', ''));
       });
 
@@ -374,7 +374,7 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
 
     const availableEntityTypes :List<Map<*, *>> = this.props.entityTypes
       .filterNot((entityType :Map<*, *>) => {
-        const destinationEntityTypeIds :List<string> = this.props.associationType.get('dst', Immutable.List());
+        const destinationEntityTypeIds :List<string> = this.props.associationType.get('dst', List());
         return destinationEntityTypeIds.includes(entityType.get('id', ''));
       });
 
@@ -399,7 +399,7 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
       return null;
     }
 
-    const associationEntityType :Map<*, *> = this.props.associationType.get('entityType', Immutable.Map());
+    const associationEntityType :Map<*, *> = this.props.associationType.get('entityType', Map());
 
     if (!associationEntityType || associationEntityType.isEmpty()) {
       return null;
@@ -408,22 +408,22 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
     const bidirectional :?boolean = this.props.associationType.get('bidirectional', false);
     const bidiAsString :string = `${String(bidirectional)}`;
 
-    const sourceEntityTypes :List<Map<*, *>> = this.props.associationType.get('src', Immutable.List())
+    const sourceEntityTypes :List<Map<*, *>> = this.props.associationType.get('src', List())
       .map((entityTypeId :string) => {
         const index :number = this.props.entityTypesById.get(entityTypeId, -1);
         if (index === -1) {
-          return Immutable.Map();
+          return Map();
         }
-        return this.props.entityTypes.get(index, Immutable.Map());
+        return this.props.entityTypes.get(index, Map());
       });
 
-    const destinationEntityTypes :List<Map<*, *>> = this.props.associationType.get('dst', Immutable.List())
+    const destinationEntityTypes :List<Map<*, *>> = this.props.associationType.get('dst', List())
       .map((entityTypeId :string) => {
         const index :number = this.props.entityTypesById.get(entityTypeId, -1);
         if (index === -1) {
-          return Immutable.Map();
+          return Map();
         }
-        return this.props.entityTypes.get(index, Immutable.Map());
+        return this.props.entityTypes.get(index, Map());
       });
 
     return (
@@ -455,10 +455,10 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
 function mapStateToProps(state :Map<*, *>) :Object {
 
   return {
-    entityTypes: state.getIn(['edm', 'entityTypes', 'entityTypes'], Immutable.List()),
-    entityTypesById: state.getIn(['edm', 'entityTypes', 'entityTypesById'], Immutable.Map()),
-    propertyTypes: state.getIn(['edm', 'propertyTypes', 'propertyTypes'], Immutable.List()),
-    propertyTypesById: state.getIn(['edm', 'propertyTypes', 'propertyTypesById'], Immutable.Map())
+    entityTypes: state.getIn(['edm', 'entityTypes', 'entityTypes'], List()),
+    entityTypesById: state.getIn(['edm', 'entityTypes', 'entityTypesById'], Map()),
+    propertyTypes: state.getIn(['edm', 'propertyTypes', 'propertyTypes'], List()),
+    propertyTypesById: state.getIn(['edm', 'propertyTypes', 'propertyTypesById'], Map())
   };
 }
 

@@ -4,8 +4,8 @@
 
 import React from 'react';
 
-import Immutable from 'immutable';
 import styled from 'styled-components';
+import { List, Map } from 'immutable';
 import { AuthUtils } from 'lattice-auth';
 import { EntityDataModelApiActionFactory } from 'lattice-sagas';
 import { bindActionCreators } from 'redux';
@@ -122,7 +122,7 @@ class EntityTypeDetailsContainer extends React.Component<Props> {
 
     const availablePropertyTypes :List<Map<*, *>> = this.props.propertyTypes
       .filterNot((propertyType :Map<*, *>) => {
-        const propertyTypeIds :List<string> = this.props.entityType.get('properties', Immutable.List());
+        const propertyTypeIds :List<string> = this.props.entityType.get('properties', List());
         return propertyTypeIds.includes(propertyType.get('id', ''));
       });
 
@@ -149,16 +149,16 @@ class EntityTypeDetailsContainer extends React.Component<Props> {
 
     const baseType :string = this.props.entityType.get('baseType', '');
 
-    const keyPropertyTypeIds :Set<string> = this.props.entityType.get('key', Immutable.List()).toSet();
-    const propertyTypeIds :Set<string> = this.props.entityType.get('properties', Immutable.List()).toSet();
+    const keyPropertyTypeIds :Set<string> = this.props.entityType.get('key', List()).toSet();
+    const propertyTypeIds :Set<string> = this.props.entityType.get('properties', List()).toSet();
 
     const keyPropertyTypes :List<Map<*, *>> = keyPropertyTypeIds
       .map((propertyTypeId :string) => {
         const index :number = this.props.propertyTypesById.get(propertyTypeId, -1);
         if (index === -1) {
-          return Immutable.Map();
+          return Map();
         }
-        return this.props.propertyTypes.get(index, Immutable.Map());
+        return this.props.propertyTypes.get(index, Map());
       })
       .toList();
 
@@ -166,9 +166,9 @@ class EntityTypeDetailsContainer extends React.Component<Props> {
       .map((propertyTypeId :string) => {
         const index :number = this.props.propertyTypesById.get(propertyTypeId, -1);
         if (index === -1) {
-          return Immutable.Map();
+          return Map();
         }
-        return this.props.propertyTypes.get(index, Immutable.Map());
+        return this.props.propertyTypes.get(index, Map());
       })
       .toList();
 
@@ -234,8 +234,8 @@ class EntityTypeDetailsContainer extends React.Component<Props> {
 function mapStateToProps(state :Map<*, *>) :Object {
 
   return {
-    propertyTypes: state.getIn(['edm', 'propertyTypes', 'propertyTypes'], Immutable.List()),
-    propertyTypesById: state.getIn(['edm', 'propertyTypes', 'propertyTypesById'], Immutable.Map())
+    propertyTypes: state.getIn(['edm', 'propertyTypes', 'propertyTypes'], List()),
+    propertyTypesById: state.getIn(['edm', 'propertyTypes', 'propertyTypesById'], Map())
   };
 }
 
