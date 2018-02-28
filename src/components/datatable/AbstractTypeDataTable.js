@@ -21,6 +21,12 @@ const { FullyQualifiedName } = Models;
  * constants
  */
 
+const NAME_HEADER_ID :string = 'name';
+const NAME_HEADER :Map<string, string> = fromJS({ id: NAME_HEADER_ID, value: 'Name' });
+
+const NAMESPACE_HEADER_ID :string = 'namespace';
+const NAMESPACE_HEADER :Map<string, string> = fromJS({ id: NAMESPACE_HEADER_ID, value: 'Namespace' });
+
 const REMOVE_BTN_HEADER_ID :string = 'remove';
 const REMOVE_BTN_HEADER :Map<string, string> = fromJS({ id: REMOVE_BTN_HEADER_ID, value: '' });
 
@@ -30,16 +36,8 @@ const TITLE_HEADER :Map<string, string> = fromJS({ id: TITLE_HEADER_ID, value: '
 const TYPE_HEADER_ID :string = 'type';
 const TYPE_HEADER :Map<string, string> = fromJS({ id: TYPE_HEADER_ID, value: 'FQN' });
 
-const HEADERS_MAP :Map<string, Map<string, string>> = fromJS({
-  [REMOVE_BTN_HEADER_ID]: REMOVE_BTN_HEADER,
-  [TITLE_HEADER_ID]: TITLE_HEADER,
-  [TYPE_HEADER_ID]: TYPE_HEADER
-});
-
-const DEFAULT_HEADERS :List<Map<string, string>> = fromJS([
-  TYPE_HEADER,
-  TITLE_HEADER
-]);
+const DEFAULT_HEADERS :List<Map<string, string>> = fromJS([TYPE_HEADER, TITLE_HEADER]);
+const SCHEMA_HEADERS :List<Map<string, string>> = fromJS([NAMESPACE_HEADER, NAME_HEADER]);
 
 /*
  * styled components
@@ -58,7 +56,6 @@ const RemoveButtonWrapper = styled.div`
 
 type Props = {
   abstractTypes :List<Map<*, *>>;
-  headerIds :List<string>;
   height :number;
   highlightOnHover :boolean;
   highlightOnSelect :boolean;
@@ -67,21 +64,20 @@ type Props = {
   workingAbstractTypeType :AbstractType;
   onAbstractTypeRemove :(selectedAbstractTypeId :string) => void;
   onAbstractTypeSelect :(selectedAbstractTypeId :string) => void;
-}
+};
 
 type State = {
   data :List<Map<string, string>>;
   headers :List<Map<string, string>>;
   hoveredRowIndex :number;
   selectedRowIndex :number;
-}
+};
 
 // TODO: is it possible to extend AbstractDataTable? pass props?
 class AbstractTypeDataTable extends React.Component<Props, State> {
 
   static defaultProps = {
     abstractTypes: List(),
-    headerIds: List(),
     height: -1,
     highlightOnHover: false,
     highlightOnSelect: false,
@@ -110,8 +106,8 @@ class AbstractTypeDataTable extends React.Component<Props, State> {
   static getHeaders(props :Props) :List<Map<string, string>> {
 
     let headers :List<Map<string, string>> = DEFAULT_HEADERS;
-    if (!props.headerIds.isEmpty()) {
-      headers = props.headerIds.map((headerId :string) => HEADERS_MAP.get(headerId, Map()));
+    if (props.workingAbstractTypeType === AbstractTypes.Schema) {
+      headers = SCHEMA_HEADERS;
     }
 
     if (props.showRemoveColumn) {
@@ -129,13 +125,19 @@ class AbstractTypeDataTable extends React.Component<Props, State> {
         ? type.get('entityType', Map())
         : type;
 
-      const abstractTypeType :Map<string, string> = abstractType.get('type', Map());
-      const abstractTypeFqn :string = FullyQualifiedName.toString(abstractTypeType);
-      const abstractTypeTitle :string = abstractType.get('title', '');
+      const abstractTypeFqn :FullyQualifiedName = (props.workingAbstractTypeType === AbstractTypes.Schema)
+        ? new FullyQualifiedName(abstractType.get('fqn', Map()))
+        : new FullyQualifiedName(abstractType.get('type', Map()));
 
       return OrderedMap().withMutations((map :OrderedMap<string, string>) => {
-        map.set(TYPE_HEADER_ID, abstractTypeFqn);
-        map.set(TITLE_HEADER_ID, abstractTypeTitle);
+        if (props.workingAbstractTypeType === AbstractTypes.Schema) {
+          map.set(NAMESPACE_HEADER_ID, abstractTypeFqn.getNamespace());
+          map.set(NAME_HEADER_ID, abstractTypeFqn.getName());
+        }
+        else {
+          map.set(TYPE_HEADER_ID, abstractTypeFqn.getFullyQualifiedName());
+          map.set(TITLE_HEADER_ID, abstractType.get('title', ''));
+        }
         if (props.showRemoveColumn) {
           // not necessary, just good practice to match header count
           map.set(REMOVE_BTN_HEADER_ID, 'x');
@@ -148,10 +150,8 @@ class AbstractTypeDataTable extends React.Component<Props, State> {
 
   componentWillReceiveProps(nextProps :Props) {
 
-    const haveHeadersChanged :boolean = !this.props.headerIds.equals(nextProps.headerIds);
     const haveAbstractTypesChanged :boolean = !this.props.abstractTypes.equals(nextProps.abstractTypes);
-
-    if (haveHeadersChanged || haveAbstractTypesChanged) {
+    if (haveAbstractTypesChanged) {
 
       const data :List<Map<string, string>> = AbstractTypeDataTable.getData(nextProps);
       const headers :List<Map<string, string>> = AbstractTypeDataTable.getHeaders(nextProps);
@@ -171,6 +171,9 @@ class AbstractTypeDataTable extends React.Component<Props, State> {
     if (this.props.workingAbstractTypeType === AbstractTypes.AssociationType) {
       const entityType :Map<*, *> = selectedAbstractType.get('entityType', Map());
       selectedAbstractTypeId = entityType.get('id', '');
+    }
+    else if (this.props.workingAbstractTypeType === AbstractTypes.Schema) {
+      selectedAbstractTypeId = FullyQualifiedName.toString(selectedAbstractType.get('fqn', Map()));
     }
 
     this.props.onAbstractTypeRemove(selectedAbstractTypeId);
@@ -202,6 +205,9 @@ class AbstractTypeDataTable extends React.Component<Props, State> {
     if (this.props.workingAbstractTypeType === AbstractTypes.AssociationType) {
       const entityType :Map<*, *> = selectedAbstractType.get('entityType', Map());
       selectedAbstractTypeId = entityType.get('id', '');
+    }
+    else if (this.props.workingAbstractTypeType === AbstractTypes.Schema) {
+      selectedAbstractTypeId = FullyQualifiedName.toString(selectedAbstractType.get('fqn', Map()));
     }
 
     this.props.onAbstractTypeSelect(selectedAbstractTypeId);

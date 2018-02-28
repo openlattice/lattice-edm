@@ -76,7 +76,7 @@ type Props = {
   maxWidth :number;
   width :number;
   bodyCellRenderer :(params :Object, cellValue :mixed) => mixed;
-}
+};
 
 type State = {
   autosizerHeight :number;
@@ -86,7 +86,7 @@ type State = {
   computedBodyGridWidth :number;
   computedHeadGridHeight :number;
   computedHeadGridWidth :number;
-}
+};
 
 /*
  * TODO: implement filtering
@@ -148,10 +148,14 @@ class AbstractDataTable extends React.Component<Props, State> {
 
         // compare the header cell width with the widest cell in the table
         const headerCellWidth :number = AbstractDataTable.measureTextWidth(header.get('value', ''));
-        columnWidth = (headerCellWidth > columnWidth) ? headerCellWidth : columnWidth;
+        let fontMultiplier :number = 1;
+        if (headerCellWidth >= columnWidth) {
+          columnWidth = headerCellWidth;
+          fontMultiplier = 1.2;
+        }
 
         // account for extra width due to style: left padding, right padding
-        let columnWidthInPixels :number = columnWidth + (2 * CELL_PADDING);
+        let columnWidthInPixels :number = (columnWidth * fontMultiplier) + (2 * CELL_PADDING);
 
         // ensure column will have a minimum width
         if (columnWidthInPixels < DEFAULT_COLUMN_MIN_WIDTH) {
@@ -163,7 +167,7 @@ class AbstractDataTable extends React.Component<Props, State> {
         }
 
         // store the computed column width. empty columns will not be rendered
-        map.set(columnIndex, columnWidthInPixels);
+        map.set(columnIndex, Math.floor(columnWidthInPixels));
       });
     });
   }
