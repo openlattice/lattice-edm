@@ -47,7 +47,7 @@ const INITIAL_STATE :Map<*, *> = fromJS({
   newlyCreatedAssociationTypeId: ''
 });
 
-export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE, action :Object) {
+export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE, action :Object) :Map<*, *> {
 
   switch (action.type) {
 

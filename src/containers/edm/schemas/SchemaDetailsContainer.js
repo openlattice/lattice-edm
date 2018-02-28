@@ -5,37 +5,63 @@
 import React from 'react';
 
 import { List, Map } from 'immutable';
+import { Types } from 'lattice';
 import { AuthUtils } from 'lattice-auth';
+import { EntityDataModelApiActionFactory } from 'lattice-sagas';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 
 import AbstractTypes from '../../../utils/AbstractTypes';
 import AbstractTypeDataTable from '../../../components/datatable/AbstractTypeDataTable';
-import AbstractTypeFieldDescription from '../AbstractTypeFieldDescription';
-import AbstractTypeFieldTitle from '../AbstractTypeFieldTitle';
-import AbstractTypeFieldType from '../AbstractTypeFieldType';
-import AbstractTypeSearchableSelect from '../../../components/controls/AbstractTypeSearchableSelect';
+
+const { ActionTypes } = Types;
+const { updateSchema } = EntityDataModelApiActionFactory;
 
 /*
  * types
  */
 
 type Props = {
+  actions :{
+    updateSchema :RequestSequence;
+  };
   schema :Map<*, *>;
 };
 
 class SchemaDetailsContainer extends React.Component<Props> {
 
+  handleRemovePropertyType = (propertyTypeId :string) => {
+    if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
+      this.props.actions.updateSchema({
+        action: ActionTypes.REMOVE,
+        propertyTypeIds: [propertyTypeId],
+        schemaFqn: this.props.schema.get('fqn').toJS()
+      });
+    }
+  }
+
   renderPropertyTypesSection = () => {
 
     const propertyTypes :List<Map<*, *>> = this.props.schema.get('propertyTypes', List());
 
-    const propertyTypesDataTable :React$Node = (
+    let propertyTypesDataTable :React$Node = (
       <AbstractTypeDataTable
           abstractTypes={propertyTypes}
           maxHeight={500}
           workingAbstractTypeType={AbstractTypes.PropertyType} />
     );
+
+    if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
+      propertyTypesDataTable = (
+        <AbstractTypeDataTable
+            abstractTypes={propertyTypes}
+            highlightOnHover
+            maxHeight={500}
+            showRemoveColumn
+            onAbstractTypeRemove={this.handleRemovePropertyType}
+            workingAbstractTypeType={AbstractTypes.PropertyType} />
+      );
+    }
 
     return (
       <section>
@@ -116,7 +142,9 @@ class SchemaDetailsContainer extends React.Component<Props> {
 
 function mapDispatchToProps(dispatch :Function) :Object {
 
-  const actions = {};
+  const actions = {
+    updateSchema
+  };
 
   return {
     actions: bindActionCreators(actions, dispatch)

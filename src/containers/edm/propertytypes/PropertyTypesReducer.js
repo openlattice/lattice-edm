@@ -33,7 +33,7 @@ const INITIAL_STATE :Map<*, *> = fromJS({
   propertyTypesById: Map()
 });
 
-export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, action :Object) {
+export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, action :Object) :Map<*, *> {
 
   switch (action.type) {
 
