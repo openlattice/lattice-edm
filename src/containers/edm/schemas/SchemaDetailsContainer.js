@@ -4,6 +4,7 @@
 
 import React from 'react';
 
+import styled from 'styled-components';
 import { List, Map } from 'immutable';
 import { Types } from 'lattice';
 import { AuthUtils } from 'lattice-auth';
@@ -13,9 +14,18 @@ import { connect } from 'react-redux';
 
 import AbstractTypes from '../../../utils/AbstractTypes';
 import AbstractTypeDataTable from '../../../components/datatable/AbstractTypeDataTable';
+import AbstractTypeSearchableSelect from '../../../components/controls/AbstractTypeSearchableSelect';
 
 const { ActionTypes } = Types;
 const { updateSchema } = EntityDataModelApiActionFactory;
+
+/*
+ * styled components
+ */
+
+const AbstractTypeSearchableSelectWrapper = styled.div`
+  margin: 20px 0;
+`;
 
 /*
  * types
@@ -25,12 +35,38 @@ type Props = {
   actions :{
     updateSchema :RequestSequence;
   };
+  propertyTypes :List<Map<*, *>>;
+  propertyTypesById :Map<string, number>;
   schema :Map<*, *>;
 };
 
 class SchemaDetailsContainer extends React.Component<Props> {
 
+  handleAddPropertyType = (propertyTypeId :string) => {
+
+    if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
+      // NOTE: this is slightly hacky. updateSchema() will ignore the "propertyType" field, but our reducer will still
+      // have access to it
+      let propertyTypes :Map<*, *> = Map();
+      if (this.props.propertyTypesById.has(propertyTypeId)) {
+        const targetPropertyTypeIndex :number = this.props.propertyTypesById.get(propertyTypeId);
+        const targetPropertyType :Map<*, *> = this.props.propertyTypes.get(targetPropertyTypeIndex, Map());
+        // confirm retrieved PropertyType id matches "propertyTypeId"
+        if (propertyTypeId === targetPropertyType.get('id')) {
+          propertyTypes = propertyTypes.set(propertyTypeId, targetPropertyType);
+        }
+      }
+      this.props.actions.updateSchema({
+        propertyTypes,
+        action: ActionTypes.ADD,
+        propertyTypeIds: [propertyTypeId],
+        schemaFqn: this.props.schema.get('fqn').toJS()
+      });
+    }
+  }
+
   handleRemoveEntityType = (entityTypeId :string) => {
+
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
       this.props.actions.updateSchema({
         action: ActionTypes.REMOVE,
@@ -81,6 +117,33 @@ class SchemaDetailsContainer extends React.Component<Props> {
             ? <p>No PropertyTypes defined.</p>
             : propertyTypesDataTable
         }
+      </section>
+    );
+  }
+
+  renderAddPropertyTypesSection = () => {
+
+    if (!AuthUtils.isAuthenticated() || !AuthUtils.isAdmin()) {
+      return null;
+    }
+
+    const schemaPropertyTypeIds :List<string> = this.props.schema.get('propertyTypes', List())
+      .map((propertyType :Map<*, *>) => propertyType.get('id'));
+
+    const availablePropertyTypes :List<Map<*, *>> = this.props.propertyTypes
+      .filterNot((propertyType :Map<*, *>) => schemaPropertyTypeIds.includes(propertyType.get('id', '')));
+
+    return (
+      <section>
+        <h2>Add PropertyTypes</h2>
+        <AbstractTypeSearchableSelectWrapper>
+          <AbstractTypeSearchableSelect
+              abstractTypes={availablePropertyTypes}
+              maxHeight={400}
+              searchPlaceholder="Available PropertyTypes..."
+              workingAbstractTypeType={AbstractTypes.PropertyType}
+              onAbstractTypeSelect={this.handleAddPropertyType} />
+        </AbstractTypeSearchableSelectWrapper>
       </section>
     );
   }
@@ -167,11 +230,20 @@ class SchemaDetailsContainer extends React.Component<Props> {
       <div>
         <h1>Schema Details</h1>
         { this.renderPropertyTypesSection() }
+        { this.renderAddPropertyTypesSection() }
         { this.renderEntityTypesSection() }
         { this.renderAssociationTypesSection() }
       </div>
     );
   }
+}
+
+function mapStateToProps(state :Map<*, *>) :Object {
+
+  return {
+    propertyTypes: state.getIn(['edm', 'propertyTypes', 'propertyTypes']),
+    propertyTypesById: state.getIn(['edm', 'propertyTypes', 'propertyTypesById']),
+  };
 }
 
 function mapDispatchToProps(dispatch :Function) :Object {
@@ -185,4 +257,4 @@ function mapDispatchToProps(dispatch :Function) :Object {
   };
 }
 
-export default connect(null, mapDispatchToProps)(SchemaDetailsContainer);
+export default connect(mapStateToProps, mapDispatchToProps)(SchemaDetailsContainer);

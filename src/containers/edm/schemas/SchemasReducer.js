@@ -82,10 +82,38 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
           let workingEntityTypes :List<Map<*, *>> = currentEntityTypes;
           let workingPropertyTypes :List<Map<*, *>> = currentPropertyTypes;
 
+          const actionEntityTypes :Map<*, *> = storedSeqAction.getIn(['value', 'entityTypes'], Map());
           const actionEntityTypeIds :List<string> = storedSeqAction.getIn(['value', 'entityTypeIds'], List());
+          const actionPropertyTypes :Map<*, *> = storedSeqAction.getIn(['value', 'propertyTypes'], Map());
           const actionPropertyTypeIds :List<string> = storedSeqAction.getIn(['value', 'propertyTypeIds'], List());
 
-          if (storedSeqAction.getIn(['value', 'action']) === ActionTypes.REMOVE) {
+          if (storedSeqAction.getIn(['value', 'action']) === ActionTypes.ADD) {
+
+            // EntityTypes
+            if (!actionEntityTypeIds.isEmpty() && !actionEntityTypes.isEmpty()) {
+              actionEntityTypes.forEach((actionEntityType :Map<*, *>) => {
+                const matchingIndex :number = workingEntityTypes.findIndex(
+                  (workingEntityType :Map<*, *>) => workingEntityType.get('id') === actionEntityType.get('id')
+                );
+                if (matchingIndex === -1) {
+                  workingEntityTypes = workingEntityTypes.push(actionEntityType);
+                }
+              });
+            }
+
+            // PropertyTypes
+            if (!actionPropertyTypeIds.isEmpty() && !actionPropertyTypes.isEmpty()) {
+              actionPropertyTypes.forEach((actionPropertyType :Map<*, *>) => {
+                const matchingIndex :number = workingPropertyTypes.findIndex(
+                  (workingPropertyType :Map<*, *>) => workingPropertyType.get('id') === actionPropertyType.get('id')
+                );
+                if (matchingIndex === -1) {
+                  workingPropertyTypes = workingPropertyTypes.push(actionPropertyType);
+                }
+              });
+            }
+          }
+          else if (storedSeqAction.getIn(['value', 'action']) === ActionTypes.REMOVE) {
 
             // EntityTypes
             if (!actionEntityTypeIds.isEmpty() && !workingEntityTypes.isEmpty()) {
@@ -108,6 +136,9 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
                 }
               });
             }
+          }
+          else {
+            return state;
           }
 
           const updatedSchema :Map<*, *> = currentSchema
