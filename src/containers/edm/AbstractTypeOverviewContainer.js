@@ -341,7 +341,9 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
         <AbstractTypeDirectoryCardTitle>
           <h1>{ cardTitle }</h1>
           {
+            // disable "Create" button for schemas as creating new schemas is not yet supported
             AuthUtils.isAuthenticated() && AuthUtils.isAdmin()
+              && this.props.workingAbstractTypeType !== AbstractTypes.Schema
               ? (
                 <StyledButton onClick={this.showCreateNewAbstractTypeCard}>Create New</StyledButton>
               )

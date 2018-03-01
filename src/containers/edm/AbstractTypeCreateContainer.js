@@ -743,6 +743,9 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
       case AbstractTypes.PropertyType:
         title = 'Create new PropertyType';
         break;
+      case AbstractTypes.Schema:
+        title = 'Create new Schema';
+        break;
       default:
         title = 'Create new...';
         break;
