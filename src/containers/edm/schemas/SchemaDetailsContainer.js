@@ -30,6 +30,16 @@ type Props = {
 
 class SchemaDetailsContainer extends React.Component<Props> {
 
+  handleRemoveEntityType = (entityTypeId :string) => {
+    if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
+      this.props.actions.updateSchema({
+        action: ActionTypes.REMOVE,
+        entityTypeIds: [entityTypeId],
+        schemaFqn: this.props.schema.get('fqn').toJS()
+      });
+    }
+  }
+
   handleRemovePropertyType = (propertyTypeId :string) => {
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
       this.props.actions.updateSchema({
@@ -80,12 +90,24 @@ class SchemaDetailsContainer extends React.Component<Props> {
     const entityTypes :List<Map<*, *>> = this.props.schema.get('entityTypes', List())
       .filterNot((entityType :Map<*, *>) => entityType.get('category', '') === AbstractTypes.AssociationType);
 
-    const entityTypesDataTable :React$Node = (
+    let entityTypesDataTable :React$Node = (
       <AbstractTypeDataTable
           abstractTypes={entityTypes}
           maxHeight={500}
           workingAbstractTypeType={AbstractTypes.EntityType} />
     );
+
+    if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
+      entityTypesDataTable = (
+        <AbstractTypeDataTable
+            abstractTypes={entityTypes}
+            highlightOnHover
+            maxHeight={500}
+            showRemoveColumn
+            onAbstractTypeRemove={this.handleRemoveEntityType}
+            workingAbstractTypeType={AbstractTypes.EntityType} />
+      );
+    }
 
     return (
       <section>
@@ -104,12 +126,24 @@ class SchemaDetailsContainer extends React.Component<Props> {
     const associationEntityTypes :List<Map<*, *>> = this.props.schema.get('entityTypes', List())
       .filter((entityType :Map<*, *>) => entityType.get('category', '') === AbstractTypes.AssociationType);
 
-    const associationEntityTypesDataTable :React$Node = (
+    let associationEntityTypesDataTable :React$Node = (
       <AbstractTypeDataTable
           abstractTypes={associationEntityTypes}
           maxHeight={500}
           workingAbstractTypeType={AbstractTypes.EntityType} />
     );
+
+    if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
+      associationEntityTypesDataTable = (
+        <AbstractTypeDataTable
+            abstractTypes={associationEntityTypes}
+            highlightOnHover
+            maxHeight={500}
+            showRemoveColumn
+            onAbstractTypeRemove={this.handleRemoveEntityType}
+            workingAbstractTypeType={AbstractTypes.EntityType} />
+      );
+    }
 
     return (
       <section>
