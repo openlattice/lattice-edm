@@ -6,7 +6,7 @@ import React from 'react';
 
 import styled from 'styled-components';
 import { List, Map } from 'immutable';
-import { Types } from 'lattice';
+import { Models, Types } from 'lattice';
 import { AuthUtils } from 'lattice-auth';
 import { EntityDataModelApiActionFactory } from 'lattice-sagas';
 import { bindActionCreators } from 'redux';
@@ -16,6 +16,7 @@ import AbstractTypes from '../../../utils/AbstractTypes';
 import AbstractTypeDataTable from '../../../components/datatable/AbstractTypeDataTable';
 import AbstractTypeSearchableSelect from '../../../components/controls/AbstractTypeSearchableSelect';
 
+const { FullyQualifiedName } = Models;
 const { ActionTypes } = Types;
 const { updateSchema } = EntityDataModelApiActionFactory;
 
@@ -35,6 +36,10 @@ type Props = {
   actions :{
     updateSchema :RequestSequence;
   };
+  associationTypes :List<Map<*, *>>;
+  associationTypesById :Map<string, number>;
+  entityTypes :List<Map<*, *>>;
+  entityTypesById :Map<string, number>;
   propertyTypes :List<Map<*, *>>;
   propertyTypesById :Map<string, number>;
   schema :Map<*, *>;
@@ -42,15 +47,61 @@ type Props = {
 
 class SchemaDetailsContainer extends React.Component<Props> {
 
+  handleAddAssociationType = (entityTypeId :string) => {
+
+    if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
+      // NOTE: this is slightly hacky. updateSchema() will ignore the "entityTypes" field, but our reducer will still
+      // have access to it
+      let entityTypes :Map<*, *> = Map();
+      if (this.props.associationTypesById.has(entityTypeId)) {
+        const targetIndex :number = this.props.associationTypesById.get(entityTypeId);
+        const targetEntityType :Map<*, *> = this.props.associationTypes.getIn([targetIndex, 'entityType'], Map());
+        // confirm retrieved EntityType id matches "entityTypeId"
+        if (entityTypeId === targetEntityType.get('id')) {
+          entityTypes = entityTypes.set(entityTypeId, targetEntityType);
+        }
+      }
+      this.props.actions.updateSchema({
+        entityTypes,
+        action: ActionTypes.ADD,
+        entityTypeIds: [entityTypeId],
+        schemaFqn: this.props.schema.get('fqn').toJS()
+      });
+    }
+  }
+
+  handleAddEntityType = (entityTypeId :string) => {
+
+    if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
+      // NOTE: this is slightly hacky. updateSchema() will ignore the "entityTypes" field, but our reducer will still
+      // have access to it
+      let entityTypes :Map<*, *> = Map();
+      if (this.props.entityTypesById.has(entityTypeId)) {
+        const targetIndex :number = this.props.entityTypesById.get(entityTypeId);
+        const targetEntityType :Map<*, *> = this.props.entityTypes.get(targetIndex, Map());
+        // confirm retrieved EntityType id matches "entityTypeId"
+        if (entityTypeId === targetEntityType.get('id')) {
+          entityTypes = entityTypes.set(entityTypeId, targetEntityType);
+        }
+      }
+      this.props.actions.updateSchema({
+        entityTypes,
+        action: ActionTypes.ADD,
+        entityTypeIds: [entityTypeId],
+        schemaFqn: this.props.schema.get('fqn').toJS()
+      });
+    }
+  }
+
   handleAddPropertyType = (propertyTypeId :string) => {
 
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
-      // NOTE: this is slightly hacky. updateSchema() will ignore the "propertyType" field, but our reducer will still
+      // NOTE: this is slightly hacky. updateSchema() will ignore the "propertyTypes" field, but our reducer will still
       // have access to it
       let propertyTypes :Map<*, *> = Map();
       if (this.props.propertyTypesById.has(propertyTypeId)) {
-        const targetPropertyTypeIndex :number = this.props.propertyTypesById.get(propertyTypeId);
-        const targetPropertyType :Map<*, *> = this.props.propertyTypes.get(targetPropertyTypeIndex, Map());
+        const targetIndex :number = this.props.propertyTypesById.get(propertyTypeId);
+        const targetPropertyType :Map<*, *> = this.props.propertyTypes.get(targetIndex, Map());
         // confirm retrieved PropertyType id matches "propertyTypeId"
         if (propertyTypeId === targetPropertyType.get('id')) {
           propertyTypes = propertyTypes.set(propertyTypeId, targetPropertyType);
@@ -184,6 +235,33 @@ class SchemaDetailsContainer extends React.Component<Props> {
     );
   }
 
+  renderAddEntityTypesSection = () => {
+
+    if (!AuthUtils.isAuthenticated() || !AuthUtils.isAdmin()) {
+      return null;
+    }
+
+    const schemaEntityTypeIds :List<string> = this.props.schema.get('entityTypes', List())
+      .map((entityType :Map<*, *>) => entityType.get('id'));
+
+    const availableEntityTypes :List<Map<*, *>> = this.props.entityTypes
+      .filterNot((entityType :Map<*, *>) => schemaEntityTypeIds.includes(entityType.get('id', '')));
+
+    return (
+      <section>
+        <h2>Add EntityTypes</h2>
+        <AbstractTypeSearchableSelectWrapper>
+          <AbstractTypeSearchableSelect
+              abstractTypes={availableEntityTypes}
+              maxHeight={400}
+              searchPlaceholder="Available EntityTypes..."
+              workingAbstractTypeType={AbstractTypes.EntityType}
+              onAbstractTypeSelect={this.handleAddEntityType} />
+        </AbstractTypeSearchableSelectWrapper>
+      </section>
+    );
+  }
+
   renderAssociationTypesSection = () => {
 
     const associationEntityTypes :List<Map<*, *>> = this.props.schema.get('entityTypes', List())
@@ -220,6 +298,34 @@ class SchemaDetailsContainer extends React.Component<Props> {
     );
   }
 
+  renderAddAssociationTypesSection = () => {
+
+    if (!AuthUtils.isAuthenticated() || !AuthUtils.isAdmin()) {
+      return null;
+    }
+
+    const schemaEntityTypeIds :List<string> = this.props.schema.get('entityTypes', List())
+      .map((entityType :Map<*, *>) => entityType.get('id'));
+
+    const availableEntityTypes :List<Map<*, *>> = this.props.associationTypes
+      .map((associationType :Map<*, *>) => associationType.get('entityType', Map()))
+      .filterNot((entityType :Map<*, *>) => schemaEntityTypeIds.includes(entityType.get('id', '')));
+
+    return (
+      <section>
+        <h2>Add AssociationTypes</h2>
+        <AbstractTypeSearchableSelectWrapper>
+          <AbstractTypeSearchableSelect
+              abstractTypes={availableEntityTypes}
+              maxHeight={400}
+              searchPlaceholder="Available AssociationTypes..."
+              workingAbstractTypeType={AbstractTypes.EntityType} // yes, EntityType, not AssociationType
+              onAbstractTypeSelect={this.handleAddAssociationType} />
+        </AbstractTypeSearchableSelectWrapper>
+      </section>
+    );
+  }
+
   render() {
 
     if (!this.props.schema || this.props.schema.isEmpty()) {
@@ -229,10 +335,16 @@ class SchemaDetailsContainer extends React.Component<Props> {
     return (
       <div>
         <h1>Schema Details</h1>
+        <section>
+          <h2>FQN</h2>
+          <p>{ FullyQualifiedName.toString(this.props.schema.get('fqn')) }</p>
+        </section>
         { this.renderPropertyTypesSection() }
         { this.renderAddPropertyTypesSection() }
         { this.renderEntityTypesSection() }
+        { this.renderAddEntityTypesSection() }
         { this.renderAssociationTypesSection() }
+        { this.renderAddAssociationTypesSection() }
       </div>
     );
   }
@@ -241,8 +353,12 @@ class SchemaDetailsContainer extends React.Component<Props> {
 function mapStateToProps(state :Map<*, *>) :Object {
 
   return {
+    associationTypes: state.getIn(['edm', 'associationTypes', 'associationTypes']),
+    associationTypesById: state.getIn(['edm', 'associationTypes', 'associationTypesById']),
+    entityTypes: state.getIn(['edm', 'entityTypes', 'entityTypes']),
+    entityTypesById: state.getIn(['edm', 'entityTypes', 'entityTypesById']),
     propertyTypes: state.getIn(['edm', 'propertyTypes', 'propertyTypes']),
-    propertyTypesById: state.getIn(['edm', 'propertyTypes', 'propertyTypesById']),
+    propertyTypesById: state.getIn(['edm', 'propertyTypes', 'propertyTypesById'])
   };
 }
 
