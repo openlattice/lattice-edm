@@ -30,6 +30,7 @@ describe('SchemasReducer', () => {
       expect(INITIAL_STATE.get('schemas').toJS()).toEqual([]);
       expect(INITIAL_STATE.get('schemasByFqn').toJS()).toEqual({});
       expect(INITIAL_STATE.get('actions').toJS()).toEqual({
+        createSchema: {},
         updateSchema: {}
       });
     });
