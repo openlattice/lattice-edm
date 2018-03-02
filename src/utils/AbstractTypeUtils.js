@@ -10,11 +10,12 @@ import type { AbstractType } from './AbstractTypes';
 const { FullyQualifiedName } = Models;
 
 type Params = {
-  workingAbstractTypeType :AbstractType,
-  associationTypes :?List<Map<*, *>>,
-  entityTypes :?List<Map<*, *>>,
-  propertyTypes :?List<Map<*, *>>
-}
+  associationTypes :?List<Map<*, *>>;
+  entityTypes :?List<Map<*, *>>;
+  propertyTypes :?List<Map<*, *>>;
+  schemas :?List<Map<*, *>>;
+  workingAbstractTypeType :AbstractType;
+};
 
 export function getWorkingAbstractTypes(params :Params) :List<Map<*, *>> {
 
@@ -25,6 +26,8 @@ export function getWorkingAbstractTypes(params :Params) :List<Map<*, *>> {
       return params.entityTypes || List();
     case AbstractTypes.PropertyType:
       return params.propertyTypes || List();
+    case AbstractTypes.Schema:
+      return params.schemas || List();
     default:
       return List();
   }
@@ -52,7 +55,9 @@ export function filterAbstractTypes(params :AbstractTypeFilterParams) :List<Map<
 
     const abstractTypeId :string = abstractType.get('id', '');
     const abstractTypeType :Map<string, string> = abstractType.get('type', Map());
-    const abstractTypeFqn :string = FullyQualifiedName.toString(abstractTypeType).toLowerCase();
+    const abstractTypeFqn :string = (workingAbstractTypeType === AbstractTypes.Schema)
+      ? FullyQualifiedName.toString(abstractType.get('fqn', Map())).toLowerCase()
+      : FullyQualifiedName.toString(abstractTypeType).toLowerCase();
     const abstractTypeTitle :string = abstractType.get('title', '').toLowerCase();
 
     let includeAbstractType :boolean = true;

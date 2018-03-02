@@ -5,7 +5,7 @@
 import React from 'react';
 
 import styled from 'styled-components';
-import { Set } from 'immutable';
+import { List, Map, Set } from 'immutable';
 import { Models, Types } from 'lattice';
 import { EntityDataModelApiActionFactory } from 'lattice-sagas';
 import { bindActionCreators } from 'redux';
@@ -25,7 +25,8 @@ import type { AbstractType } from '../../utils/AbstractTypes';
 const {
   createAssociationType,
   createEntityType,
-  createPropertyType
+  createPropertyType,
+  createSchema
 } = EntityDataModelApiActionFactory;
 
 const {
@@ -35,7 +36,9 @@ const {
   EntityType,
   EntityTypeBuilder,
   PropertyType,
-  PropertyTypeBuilder
+  PropertyTypeBuilder,
+  Schema,
+  SchemaBuilder
 } = Models;
 
 const {
@@ -124,14 +127,15 @@ const PropertyTypesSection = styled.section`
 
 type Props = {
   actions :{
-    createAssociationType :Function;
-    createEntityType :Function;
-    createPropertyType :Function;
+    createAssociationType :RequestSequence;
+    createEntityType :RequestSequence;
+    createPropertyType :RequestSequence;
+    createSchema :RequestSequence;
   };
   entityTypes :List<Map<*, *>>;
   propertyTypes :List<Map<*, *>>;
   workingAbstractTypeType :AbstractType;
-  onCancel :Function;
+  onCancel :() => void;
 };
 
 type State = {
@@ -185,12 +189,18 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
   isReadyToSubmit = () :boolean => {
 
     let isReadyToSubmit :boolean =
-        !this.state.isInEditModeNamespace
-        && !this.state.isInEditModeName
-        && !this.state.isInEditModeTitle
-        && !!this.state.nameValue
-        && !!this.state.namespaceValue
-        && !!this.state.titleValue;
+      !this.state.isInEditModeName
+      && !this.state.isInEditModeNamespace
+      && !!this.state.nameValue
+      && !!this.state.namespaceValue;
+
+    if (this.props.workingAbstractTypeType === AbstractTypes.Schema) {
+      return isReadyToSubmit;
+    }
+
+    isReadyToSubmit = isReadyToSubmit
+      && !this.state.isInEditModeTitle
+      && !!this.state.titleValue;
 
     if (this.props.workingAbstractTypeType === AbstractTypes.PropertyType) {
       isReadyToSubmit = isReadyToSubmit && !!this.state.datatypeValue;
@@ -205,7 +215,15 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
 
   submitCreateAbstractTypeRequest = () => {
 
-    if (this.props.workingAbstractTypeType === AbstractTypes.PropertyType) {
+    if (this.props.workingAbstractTypeType === AbstractTypes.Schema) {
+
+      const newSchema :Schema = (new SchemaBuilder())
+        .setFullyQualifiedName(new FullyQualifiedName(this.state.namespaceValue, this.state.nameValue))
+        .build();
+
+      this.props.actions.createSchema(newSchema);
+    }
+    else if (this.props.workingAbstractTypeType === AbstractTypes.PropertyType) {
 
       const analyzer :string = (this.state.datatypeValue === 'String' && this.state.phoneticSearchesValue)
         ? AnalyzerTypes.METAPHONE
@@ -466,6 +484,48 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
     );
   }
 
+  renderTitleSection = () => {
+
+    // don't render if we're creating a new Schema
+    if (this.props.workingAbstractTypeType === AbstractTypes.Schema) {
+      return null;
+    }
+
+    return (
+      <section>
+        {
+          this.renderAbstractTypeInputField(
+            'text',
+            'Title',
+            this.handleOnChangeTitle,
+            this.handleOnEditToggleTitle
+          )
+        }
+      </section>
+    );
+  }
+
+  renderDescriptionSection = () => {
+
+    // don't render if we're creating a new Schema
+    if (this.props.workingAbstractTypeType === AbstractTypes.Schema) {
+      return null;
+    }
+
+    return (
+      <section>
+        {
+          this.renderAbstractTypeInputField(
+            'textarea',
+            'Description',
+            this.handleOnChangeDescription,
+            () => {}
+          )
+        }
+      </section>
+    );
+  }
+
   renderPropertyTypeDataTypeSelectSection = () => {
 
     if (this.props.workingAbstractTypeType !== AbstractTypes.PropertyType) {
@@ -583,8 +643,9 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
 
   renderEntityTypePrimaryKeyPropertyTypesSelectSection = () => {
 
-    // don't render if we're creating a new PropertyType
-    if (this.props.workingAbstractTypeType === AbstractTypes.PropertyType) {
+    // don't render if we're creating a new PropertyType or Schema
+    if (this.props.workingAbstractTypeType === AbstractTypes.PropertyType
+        || this.props.workingAbstractTypeType === AbstractTypes.Schema) {
       return null;
     }
 
@@ -621,8 +682,9 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
 
   renderEntityTypePropertyTypesSelectSection = () => {
 
-    // don't render if we're creating a new PropertyType
-    if (this.props.workingAbstractTypeType === AbstractTypes.PropertyType) {
+    // don't render if we're creating a new PropertyType or Schema
+    if (this.props.workingAbstractTypeType === AbstractTypes.PropertyType
+        || this.props.workingAbstractTypeType === AbstractTypes.Schema) {
       return null;
     }
 
@@ -743,6 +805,9 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
       case AbstractTypes.PropertyType:
         title = 'Create new PropertyType';
         break;
+      case AbstractTypes.Schema:
+        title = 'Create new Schema';
+        break;
       default:
         title = 'Create new...';
         break;
@@ -771,26 +836,8 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
             )
           }
         </section>
-        <section>
-          {
-            this.renderAbstractTypeInputField(
-              'text',
-              'Title',
-              this.handleOnChangeTitle,
-              this.handleOnEditToggleTitle
-            )
-          }
-        </section>
-        <section>
-          {
-            this.renderAbstractTypeInputField(
-              'textarea',
-              'Description',
-              this.handleOnChangeDescription,
-              () => {}
-            )
-          }
-        </section>
+        { this.renderTitleSection() }
+        { this.renderDescriptionSection() }
         { this.renderPropertyTypeDataTypeSelectSection() }
         { this.renderPropertyTypePiiSection() }
         { this.renderAssociationTypeBidirectionalSection() }
@@ -827,7 +874,8 @@ function mapDispatchToProps(dispatch :Function) :Object {
   const actions = {
     createAssociationType,
     createEntityType,
-    createPropertyType
+    createPropertyType,
+    createSchema
   };
 
   return {

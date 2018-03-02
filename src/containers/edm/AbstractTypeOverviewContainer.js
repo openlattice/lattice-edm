@@ -21,6 +21,7 @@ import AbstractTypeCreateContainer from './AbstractTypeCreateContainer';
 import AssociationTypeDetailsContainer from './associationtypes/AssociationTypeDetailsContainer';
 import EntityTypeDetailsContainer from './entitytypes/EntityTypeDetailsContainer';
 import PropertyTypeDetailsContainer from './propertytypes/PropertyTypeDetailsContainer';
+import SchemaDetailsContainer from './schemas/SchemaDetailsContainer';
 import { getWorkingAbstractTypes, filterAbstractTypes } from '../../utils/AbstractTypeUtils';
 
 import {
@@ -96,11 +97,14 @@ type Props = {
   isFetchingAllAssociationTypes :boolean;
   isFetchingAllEntityTypes :boolean;
   isFetchingAllPropertyTypes :boolean;
+  isFetchingAllSchemas :boolean;
   newlyCreatedAssociationTypeId :string; // eslint-disable-line react/no-unused-prop-types
   newlyCreatedEntityTypeId :string; // eslint-disable-line react/no-unused-prop-types
   newlyCreatedPropertyTypeId :string; // eslint-disable-line react/no-unused-prop-types
   propertyTypes :List<Map<*, *>>;
   propertyTypesById :Map<string, number>;
+  schemas :List<Map<*, *>>;
+  schemasByFqn :Map<string, number>;
   workingAbstractTypeType :AbstractType;
 };
 
@@ -126,6 +130,7 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
       associationTypes: props.associationTypes,
       entityTypes: props.entityTypes,
       propertyTypes: props.propertyTypes,
+      schemas: props.schemas,
       workingAbstractTypeType: props.workingAbstractTypeType
     };
 
@@ -148,6 +153,7 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
       associationTypes,
       entityTypes,
       propertyTypes,
+      schemas,
       workingAbstractTypeType
     } = nextProps;
 
@@ -155,6 +161,7 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
       associationTypes,
       entityTypes,
       propertyTypes,
+      schemas,
       workingAbstractTypeType
     };
 
@@ -209,6 +216,8 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
       entityTypesById,
       propertyTypes,
       propertyTypesById,
+      schemas,
+      schemasByFqn,
       workingAbstractTypeType
     } = this.props;
 
@@ -217,7 +226,7 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
 
     let selectedAbstractTypeIndex :number;
     switch (workingAbstractTypeType) {
-      case AbstractTypes.AssociationType:
+      case AbstractTypes.AssociationType: {
         if (selectedAbstractTypeId) {
           selectedAbstractTypeIndex = associationTypesById.get(selectedAbstractTypeId, -1);
           if (selectedAbstractTypeIndex !== -1) {
@@ -225,7 +234,8 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
           }
         }
         break;
-      case AbstractTypes.EntityType:
+      }
+      case AbstractTypes.EntityType: {
         if (selectedAbstractTypeId) {
           selectedAbstractTypeIndex = entityTypesById.get(selectedAbstractTypeId, -1);
           if (selectedAbstractTypeIndex !== -1) {
@@ -233,7 +243,8 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
           }
         }
         break;
-      case AbstractTypes.PropertyType:
+      }
+      case AbstractTypes.PropertyType: {
         if (selectedAbstractTypeId) {
           selectedAbstractTypeIndex = propertyTypesById.get(selectedAbstractTypeId, -1);
           if (selectedAbstractTypeIndex !== -1) {
@@ -241,6 +252,16 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
           }
         }
         break;
+      }
+      case AbstractTypes.Schema: {
+        if (selectedAbstractTypeId) {
+          selectedAbstractTypeIndex = schemasByFqn.get(selectedAbstractTypeId, -1);
+          if (selectedAbstractTypeIndex !== -1) {
+            selectedAbstractType = schemas.get(selectedAbstractTypeIndex, Map());
+          }
+        }
+        break;
+      }
       default:
         break;
     }
@@ -257,6 +278,7 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
       associationTypes: this.props.associationTypes,
       entityTypes: this.props.entityTypes,
       propertyTypes: this.props.propertyTypes,
+      schemas: this.props.schemas,
       workingAbstractTypeType: this.props.workingAbstractTypeType
     };
 
@@ -306,6 +328,9 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
         break;
       case AbstractTypes.PropertyType:
         cardTitle = `${cardTitle} - PropertyTypes`;
+        break;
+      case AbstractTypes.Schema:
+        cardTitle = `${cardTitle} - Schemas`;
         break;
       default:
         break;
@@ -362,6 +387,11 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
           <PropertyTypeDetailsContainer propertyType={this.state.selectedAbstractType} />
         );
         break;
+      case AbstractTypes.Schema:
+        abstractTypeDetailsContainer = (
+          <SchemaDetailsContainer schema={this.state.selectedAbstractType} />
+        );
+        break;
       default:
         abstractTypeDetailsContainer = null;
         break;
@@ -393,6 +423,7 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
       associationTypes,
       entityTypes,
       propertyTypes,
+      schemas,
       workingAbstractTypeType
     } = this.props;
 
@@ -400,6 +431,7 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
       (workingAbstractTypeType === AbstractTypes.AssociationType && this.props.isFetchingAllAssociationTypes)
       || (workingAbstractTypeType === AbstractTypes.EntityType && this.props.isFetchingAllEntityTypes)
       || (workingAbstractTypeType === AbstractTypes.PropertyType && this.props.isFetchingAllPropertyTypes)
+      || (workingAbstractTypeType === AbstractTypes.Schema && this.props.isFetchingAllSchemas)
     ) {
       return (
         <Spinner />
@@ -410,6 +442,7 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
       (workingAbstractTypeType === AbstractTypes.AssociationType && associationTypes.isEmpty())
       || (workingAbstractTypeType === AbstractTypes.EntityType && entityTypes.isEmpty())
       || (workingAbstractTypeType === AbstractTypes.PropertyType && propertyTypes.isEmpty())
+      || (workingAbstractTypeType === AbstractTypes.Schema && schemas.isEmpty())
     ) {
       return (
         <Empty>Sorry, something went wrong. Please try refreshing the page, or contact support.</Empty>
@@ -441,11 +474,14 @@ function mapStateToProps(state :Map<*, *>) :Object {
     isFetchingAllAssociationTypes: state.getIn(['edm', 'associationTypes', 'isFetchingAllAssociationTypes']),
     isFetchingAllEntityTypes: state.getIn(['edm', 'entityTypes', 'isFetchingAllEntityTypes']),
     isFetchingAllPropertyTypes: state.getIn(['edm', 'propertyTypes', 'isFetchingAllPropertyTypes']),
+    isFetchingAllSchemas: state.getIn(['edm', 'schemas', 'isFetchingAllSchemas']),
     newlyCreatedAssociationTypeId: state.getIn(['edm', 'associationTypes', 'newlyCreatedAssociationTypeId']),
     newlyCreatedEntityTypeId: state.getIn(['edm', 'entityTypes', 'newlyCreatedEntityTypeId']),
     newlyCreatedPropertyTypeId: state.getIn(['edm', 'propertyTypes', 'newlyCreatedPropertyTypeId']),
     propertyTypes: state.getIn(['edm', 'propertyTypes', 'propertyTypes']),
-    propertyTypesById: state.getIn(['edm', 'propertyTypes', 'propertyTypesById'])
+    propertyTypesById: state.getIn(['edm', 'propertyTypes', 'propertyTypesById']),
+    schemas: state.getIn(['edm', 'schemas', 'schemas']),
+    schemasByFqn: state.getIn(['edm', 'schemas', 'schemasByFqn'])
   };
 }
 

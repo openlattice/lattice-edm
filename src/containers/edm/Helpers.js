@@ -34,6 +34,10 @@ function maybeGetAbstractTypeIdForNewlyCreatedAbstractType(
       prevId = prevProps.newlyCreatedPropertyTypeId;
       break;
     }
+    case AbstractTypes.Schema: {
+      // TODO: implement me!!!
+      return selectedAbstractTypeId;
+    }
     default:
       // shouldn't be possible
       return selectedAbstractTypeId;
@@ -69,12 +73,14 @@ function maybeGetAbstractTypeMatchingSelectedAbstractTypeId(
     entityTypesById,
     propertyTypes,
     propertyTypesById,
+    schemas,
+    schemasByFqn,
     workingAbstractTypeType
   } = nextProps;
 
   let selectedAbstractTypeIndex :number;
   switch (workingAbstractTypeType) {
-    case AbstractTypes.AssociationType:
+    case AbstractTypes.AssociationType: {
       if (selectedAbstractTypeId) {
         selectedAbstractTypeIndex = associationTypesById.get(selectedAbstractTypeId, -1);
         if (selectedAbstractTypeIndex !== -1) {
@@ -82,7 +88,8 @@ function maybeGetAbstractTypeMatchingSelectedAbstractTypeId(
         }
       }
       break;
-    case AbstractTypes.EntityType:
+    }
+    case AbstractTypes.EntityType: {
       if (selectedAbstractTypeId) {
         selectedAbstractTypeIndex = entityTypesById.get(selectedAbstractTypeId, -1);
         if (selectedAbstractTypeIndex !== -1) {
@@ -90,7 +97,8 @@ function maybeGetAbstractTypeMatchingSelectedAbstractTypeId(
         }
       }
       break;
-    case AbstractTypes.PropertyType:
+    }
+    case AbstractTypes.PropertyType: {
       if (selectedAbstractTypeId) {
         selectedAbstractTypeIndex = propertyTypesById.get(selectedAbstractTypeId, -1);
         if (selectedAbstractTypeIndex !== -1) {
@@ -98,6 +106,16 @@ function maybeGetAbstractTypeMatchingSelectedAbstractTypeId(
         }
       }
       break;
+    }
+    case AbstractTypes.Schema: {
+      if (selectedAbstractTypeId) {
+        selectedAbstractTypeIndex = schemasByFqn.get(selectedAbstractTypeId, -1);
+        if (selectedAbstractTypeIndex !== -1) {
+          return schemas.get(selectedAbstractTypeIndex, Map());
+        }
+      }
+      break;
+    }
     default:
       break;
   }
