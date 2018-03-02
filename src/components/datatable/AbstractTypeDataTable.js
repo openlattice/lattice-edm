@@ -121,6 +121,10 @@ class AbstractTypeDataTable extends React.Component<Props, State> {
 
     const data :List<Map<string, string>> = props.abstractTypes.map((type :Map<*, *>) => {
 
+      if (!type || type.isEmpty()) {
+        return Map();
+      }
+
       const abstractType :Map<*, *> = (props.workingAbstractTypeType === AbstractTypes.AssociationType)
         ? type.get('entityType', Map())
         : type;
@@ -135,7 +139,7 @@ class AbstractTypeDataTable extends React.Component<Props, State> {
           map.set(NAME_HEADER_ID, abstractTypeFqn.getName());
         }
         else {
-          map.set(TYPE_HEADER_ID, abstractTypeFqn.getFullyQualifiedName());
+          map.set(TYPE_HEADER_ID, abstractTypeFqn.toString());
           map.set(TITLE_HEADER_ID, abstractType.get('title', ''));
         }
         if (props.showRemoveColumn) {

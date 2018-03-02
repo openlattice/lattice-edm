@@ -92,8 +92,7 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
           const schemasByFqn :Map<string, number> = Map()
             .withMutations((byIdMap :Map<string, number>) => {
               schemas.forEach((schema :Map<*, *>, schemaIndex :number) => {
-                const fqn :FullyQualifiedName = new FullyQualifiedName(schema.get('fqn', Map()));
-                byIdMap.set(fqn.getFullyQualifiedName(), schemaIndex);
+                byIdMap.set(FullyQualifiedName.toString(schema.get('fqn', Map())), schemaIndex);
               });
             });
           return state
