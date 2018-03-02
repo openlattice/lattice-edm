@@ -5,7 +5,7 @@
 import React from 'react';
 
 import styled from 'styled-components';
-import { List, Map } from 'immutable';
+import { List, Map, OrderedSet } from 'immutable';
 import { AuthUtils } from 'lattice-auth';
 import { EntityDataModelApiActionFactory } from 'lattice-sagas';
 import { bindActionCreators } from 'redux';
@@ -146,8 +146,8 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
 
     const baseType :string = associationEntityType.get('baseType', '');
 
-    const keyPropertyTypeIds :Set<string> = associationEntityType.get('key', List()).toSet();
-    const propertyTypeIds :Set<string> = associationEntityType.get('properties', List()).toSet();
+    const keyPropertyTypeIds :OrderedSet<string> = associationEntityType.get('key').toOrderedSet();
+    const propertyTypeIds :OrderedSet<string> = associationEntityType.get('properties').toOrderedSet();
 
     const keyPropertyTypes :List<Map<*, *>> = keyPropertyTypeIds
       .map((propertyTypeId :string) => {
