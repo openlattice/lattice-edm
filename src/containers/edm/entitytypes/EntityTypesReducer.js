@@ -37,7 +37,7 @@ const INITIAL_STATE :Map<*, *> = fromJS({
   newlyCreatedEntityTypeId: ''
 });
 
-export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, action :Object) {
+export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, action :Object) :Map<*, *> {
 
   switch (action.type) {
 

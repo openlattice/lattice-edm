@@ -4,7 +4,7 @@
 
 import React from 'react';
 
-import Immutable from 'immutable';
+import { Map } from 'immutable';
 import { Models } from 'lattice';
 import { AuthUtils } from 'lattice-auth';
 import { EntityDataModelApiActionFactory } from 'lattice-sagas';
@@ -52,7 +52,7 @@ type State = {};
 class AbstractTypeFieldType extends React.Component<Props, State> {
 
   static defaultProps = {
-    abstractType: Immutable.Map(),
+    abstractType: Map(),
     abstractTypeType: AbstractTypes.PropertyType,
     onChange: () => {},
     onEditToggle: () => {}
@@ -73,7 +73,7 @@ class AbstractTypeFieldType extends React.Component<Props, State> {
 
     let abstractType :Map<*, *> = this.props.abstractType;
     if (this.props.abstractTypeType === AbstractTypes.AssociationType) {
-      abstractType = this.props.abstractType.get('entityType', Immutable.Map());
+      abstractType = this.props.abstractType.get('entityType', Map());
     }
 
     if (isValidUuid(abstractType.get('id', ''))) {
@@ -117,10 +117,10 @@ class AbstractTypeFieldType extends React.Component<Props, State> {
 
     let abstractType :Map<*, *> = this.props.abstractType;
     if (this.props.abstractTypeType === AbstractTypes.AssociationType) {
-      abstractType = this.props.abstractType.get('entityType', Immutable.Map());
+      abstractType = this.props.abstractType.get('entityType', Map());
     }
 
-    const abstractTypeFqn :Map<string, string> = abstractType.get('type', Immutable.Map());
+    const abstractTypeFqn :Map<string, string> = abstractType.get('type', Map());
 
     return (
       <div>

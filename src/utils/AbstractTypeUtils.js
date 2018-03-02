@@ -1,7 +1,7 @@
 /*
  * @flow
  */
-import Immutable from 'immutable';
+import { List, Map } from 'immutable';
 import { Models } from 'lattice';
 
 import AbstractTypes from './AbstractTypes';
@@ -10,23 +10,26 @@ import type { AbstractType } from './AbstractTypes';
 const { FullyQualifiedName } = Models;
 
 type Params = {
-  workingAbstractTypeType :AbstractType,
-  associationTypes :?List<Map<*, *>>,
-  entityTypes :?List<Map<*, *>>,
-  propertyTypes :?List<Map<*, *>>
-}
+  associationTypes :?List<Map<*, *>>;
+  entityTypes :?List<Map<*, *>>;
+  propertyTypes :?List<Map<*, *>>;
+  schemas :?List<Map<*, *>>;
+  workingAbstractTypeType :AbstractType;
+};
 
 export function getWorkingAbstractTypes(params :Params) :List<Map<*, *>> {
 
   switch (params.workingAbstractTypeType) {
     case AbstractTypes.AssociationType:
-      return params.associationTypes || Immutable.List();
+      return params.associationTypes || List();
     case AbstractTypes.EntityType:
-      return params.entityTypes || Immutable.List();
+      return params.entityTypes || List();
     case AbstractTypes.PropertyType:
-      return params.propertyTypes || Immutable.List();
+      return params.propertyTypes || List();
+    case AbstractTypes.Schema:
+      return params.schemas || List();
     default:
-      return Immutable.List();
+      return List();
   }
 }
 
@@ -47,12 +50,14 @@ export function filterAbstractTypes(params :AbstractTypeFilterParams) :List<Map<
   return abstractTypes.filter((workingAbstractType :Map<*, *>) => {
 
     const abstractType :Map<*, *> = (workingAbstractTypeType === AbstractTypes.AssociationType)
-      ? workingAbstractType.get('entityType', Immutable.Map())
+      ? workingAbstractType.get('entityType', Map())
       : workingAbstractType;
 
     const abstractTypeId :string = abstractType.get('id', '');
-    const abstractTypeType :Map<string, string> = abstractType.get('type', Immutable.Map());
-    const abstractTypeFqn :string = FullyQualifiedName.toString(abstractTypeType).toLowerCase();
+    const abstractTypeType :Map<string, string> = abstractType.get('type', Map());
+    const abstractTypeFqn :string = (workingAbstractTypeType === AbstractTypes.Schema)
+      ? FullyQualifiedName.toString(abstractType.get('fqn', Map())).toLowerCase()
+      : FullyQualifiedName.toString(abstractTypeType).toLowerCase();
     const abstractTypeTitle :string = abstractType.get('title', '').toLowerCase();
 
     let includeAbstractType :boolean = true;

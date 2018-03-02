@@ -4,6 +4,7 @@
 
 import React from 'react';
 
+import { Map } from 'immutable';
 import { AuthUtils } from 'lattice-auth';
 import { EntityDataModelApiActionFactory } from 'lattice-sagas';
 import { bindActionCreators } from 'redux';
