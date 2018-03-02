@@ -4,7 +4,7 @@
 
 /* eslint-disable arrow-body-style */
 
-import Immutable from 'immutable';
+import { List, Map, fromJS } from 'immutable';
 import { Models } from 'lattice';
 import { EntityDataModelApiActionFactory } from 'lattice-sagas';
 
@@ -22,22 +22,22 @@ const {
   EntityTypeBuilder
 } = Models;
 
-const INITIAL_STATE :Map<*, *> = Immutable.fromJS({
+const INITIAL_STATE :Map<*, *> = fromJS({
   actions: {
-    addPropertyTypeToEntityType: Immutable.Map(),
-    createEntityType: Immutable.Map(),
-    deleteEntityType: Immutable.Map(),
-    removePropertyTypeFromEntityType: Immutable.Map(),
-    updateEntityTypeMetaData: Immutable.Map()
+    addPropertyTypeToEntityType: Map(),
+    createEntityType: Map(),
+    deleteEntityType: Map(),
+    removePropertyTypeFromEntityType: Map(),
+    updateEntityTypeMetaData: Map()
   },
-  entityTypes: Immutable.List(),
-  entityTypesById: Immutable.Map(),
+  entityTypes: List(),
+  entityTypesById: Map(),
   isCreatingNewEntityType: false,
   isFetchingAllEntityTypes: false,
   newlyCreatedEntityTypeId: ''
 });
 
-export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, action :Object) {
+export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, action :Object) :Map<*, *> {
 
   switch (action.type) {
 
@@ -49,24 +49,18 @@ export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, act
           return state
             .set('isCreatingNewEntityType', true)
             .set('newlyCreatedEntityTypeId', '')
-            .setIn(
-              ['actions', 'createEntityType', seqAction.id],
-              Immutable.fromJS(seqAction)
-            );
+            .setIn(['actions', 'createEntityType', seqAction.id], fromJS(seqAction));
         },
         SUCCESS: () => {
 
           const seqAction :SequenceAction = (action :any);
-          const storedSeqAction :Map<*, *> = state.getIn(
-            ['actions', 'createEntityType', seqAction.id],
-            Immutable.Map()
-          );
+          const storedSeqAction :Map<*, *> = state.getIn(['actions', 'createEntityType', seqAction.id], Map());
 
           if (storedSeqAction.isEmpty()) {
             return state;
           }
 
-          const newEntityTypeId :string = seqAction.value;
+          const newEntityTypeId :string = (seqAction.value :any);
           const tempEntityType :EntityType = storedSeqAction.get('value');
 
           const newEntityType :EntityType = new EntityTypeBuilder()
@@ -82,10 +76,10 @@ export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, act
             .build();
 
           const iEntityType :Map<*, *> = newEntityType.asImmutable();
-          const current :List<Map<*, *>> = state.get('entityTypes', Immutable.List());
+          const current :List<Map<*, *>> = state.get('entityTypes', List());
           const updated :List<Map<*, *>> = current.push(iEntityType);
 
-          const currentById :Map<string, number> = state.get('entityTypesById', Immutable.Map());
+          const currentById :Map<string, number> = state.get('entityTypesById', Map());
           const updatedById :Map<string, number> = currentById.set(newEntityTypeId, updated.size - 1);
 
           return state
@@ -112,41 +106,34 @@ export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, act
         REQUEST: () => {
           // TODO: not ideal. perhaps there's a better way to get access to the trigger action value
           const seqAction :SequenceAction = (action :any);
-          return state.setIn(
-            ['actions', 'deleteEntityType', seqAction.id],
-            Immutable.fromJS(seqAction)
-          );
+          return state.setIn(['actions', 'deleteEntityType', seqAction.id], fromJS(seqAction));
         },
         SUCCESS: () => {
 
           const seqAction :SequenceAction = (action :any);
-          const storedSeqAction :Map<*, *> = state.getIn(
-            ['actions', 'deleteEntityType', seqAction.id],
-            Immutable.Map()
-          );
-
+          const storedSeqAction :Map<*, *> = state.getIn(['actions', 'deleteEntityType', seqAction.id], Map());
           if (storedSeqAction.isEmpty()) {
             return state;
           }
 
-          const entityTypeId :string = storedSeqAction.get('value');
-          const entityTypeIndex :number = state.getIn(['entityTypesById', entityTypeId], -1);
-
-          if (entityTypeIndex === -1) {
+          const targetId :string = storedSeqAction.get('value');
+          const targetIndex :number = state.getIn(['entityTypesById', targetId], -1);
+          if (targetIndex === -1) {
             return state;
           }
 
-          const current :List<Map<*, *>> = state.get('entityTypes', Immutable.List());
-          const updated :List<Map<*, *>> = current.delete(entityTypeIndex);
-
-          // !!! BUG !!! - need to update id -> index mapping
-          // TODO: fix bug
-          const currentById :Map<string, number> = state.get('entityTypesById', Immutable.Map());
-          const updatedById :Map<string, number> = currentById.delete(entityTypeId);
+          const currentEntityTypes :List<Map<*, *>> = state.get('entityTypes', List());
+          const updatedEntityTypes :List<Map<*, *>> = currentEntityTypes.delete(targetIndex);
+          const updatedEntityTypesById :Map<string, number> = Map()
+            .withMutations((byIdMap :Map<string, number>) => {
+              updatedEntityTypes.forEach((entityType :Map<*, *>, entityTypeIndex :number) => {
+                byIdMap.set(entityType.get('id'), entityTypeIndex);
+              });
+            });
 
           return state
-            .set('entityTypes', updated)
-            .set('entityTypesById', updatedById);
+            .set('entityTypes', updatedEntityTypes)
+            .set('entityTypesById', updatedEntityTypesById);
         },
         FAILURE: () => {
           // TODO: need to properly handle the failure case
@@ -169,11 +156,11 @@ export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, act
           const seqAction :SequenceAction = (action :any);
 
           if (seqAction.value) {
-            const allEntityTypes :List<Map<*, *>> = Immutable.fromJS(seqAction.value);
+            const allEntityTypes :List<Map<*, *>> = fromJS(seqAction.value);
             const entityTypesStrict :List<Map<*, *>> = allEntityTypes.filter((entityType :Map<*, *>) => {
               return entityType.get('category') === 'EntityType';
             });
-            const entityTypesById :Map<string, number> = Immutable.Map()
+            const entityTypesById :Map<string, number> = Map()
               .withMutations((byIdMap :Map<string, number>) => {
                 entityTypesStrict.forEach((entityType :Map<*, *>, entityTypeIndex :number) => {
                   byIdMap.set(entityType.get('id'), entityTypeIndex);
@@ -188,8 +175,8 @@ export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, act
         },
         FAILURE: () => {
           return state
-            .set('entityTypes', Immutable.List())
-            .set('entityTypesById', Immutable.Map());
+            .set('entityTypes', List())
+            .set('entityTypesById', Map());
         },
         FINALLY: () => {
           return state.set('isFetchingAllEntityTypes', false);
@@ -202,17 +189,14 @@ export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, act
         REQUEST: () => {
           // TODO: not ideal. perhaps there's a better way to get access to the trigger action value
           const seqAction :SequenceAction = (action :any);
-          return state.setIn(
-            ['actions', 'addPropertyTypeToEntityType', seqAction.id],
-            Immutable.fromJS(seqAction)
-          );
+          return state.setIn(['actions', 'addPropertyTypeToEntityType', seqAction.id], fromJS(seqAction));
         },
         SUCCESS: () => {
 
           const seqAction :SequenceAction = (action :any);
           const storedSeqAction :Map<*, *> = state.getIn(
             ['actions', 'addPropertyTypeToEntityType', seqAction.id],
-            Immutable.Map()
+            Map()
           );
 
           if (storedSeqAction.isEmpty()) {
@@ -228,8 +212,8 @@ export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, act
           }
 
           const propertyTypeIdToAdd :string = storedSeqAction.getIn(['value', 'propertyTypeId']);
-          const currentEntityType :Map<*, *> = state.getIn(['entityTypes', targetIndex], Immutable.Map());
-          const currentPropertyTypeIds :List<string> = currentEntityType.get('properties', Immutable.List());
+          const currentEntityType :Map<*, *> = state.getIn(['entityTypes', targetIndex], Map());
+          const currentPropertyTypeIds :List<string> = currentEntityType.get('properties', List());
           const propertyTypeIndex :number = currentPropertyTypeIds.findIndex((propertyTypeId :string) => {
             return propertyTypeId === propertyTypeIdToAdd;
           });
@@ -259,17 +243,14 @@ export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, act
         REQUEST: () => {
           // TODO: not ideal. perhaps there's a better way to get access to the trigger action value
           const seqAction :SequenceAction = (action :any);
-          return state.setIn(
-            ['actions', 'removePropertyTypeFromEntityType', seqAction.id],
-            Immutable.fromJS(seqAction)
-          );
+          return state.setIn(['actions', 'removePropertyTypeFromEntityType', seqAction.id], fromJS(seqAction));
         },
         SUCCESS: () => {
 
           const seqAction :SequenceAction = (action :any);
           const storedSeqAction :Map<*, *> = state.getIn(
             ['actions', 'removePropertyTypeFromEntityType', seqAction.id],
-            Immutable.Map()
+            Map()
           );
 
           if (storedSeqAction.isEmpty()) {
@@ -284,8 +265,8 @@ export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, act
             return state;
           }
 
-          const currentEntityType :Map<*, *> = state.getIn(['entityTypes', targetIndex], Immutable.Map());
-          const currentPropertyTypeIds :List<string> = currentEntityType.get('properties', Immutable.List());
+          const currentEntityType :Map<*, *> = state.getIn(['entityTypes', targetIndex], Map());
+          const currentPropertyTypeIds :List<string> = currentEntityType.get('properties', List());
           const removalIndex :number = currentPropertyTypeIds.findIndex((propertyTypeId :string) => {
             return propertyTypeId === storedSeqAction.getIn(['value', 'propertyTypeId']);
           });
@@ -315,17 +296,14 @@ export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, act
         REQUEST: () => {
           // TODO: not ideal. perhaps there's a better way to get access to the trigger action value
           const seqAction :SequenceAction = (action :any);
-          return state.setIn(
-            ['actions', 'updateEntityTypeMetaData', seqAction.id],
-            Immutable.fromJS(seqAction)
-          );
+          return state.setIn(['actions', 'updateEntityTypeMetaData', seqAction.id], fromJS(seqAction));
         },
         SUCCESS: () => {
 
           const seqAction :SequenceAction = (action :any);
           const storedSeqAction :Map<*, *> = state.getIn(
             ['actions', 'updateEntityTypeMetaData', seqAction.id],
-            Immutable.Map()
+            Map()
           );
 
           if (storedSeqAction.isEmpty()) {
