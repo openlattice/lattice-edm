@@ -357,6 +357,13 @@ class AbstractDataTable extends React.Component<Props, State> {
       return null;
     }
 
+    // NOTE: this is from below. not sure why I left this commented out, or why it existed. might be important
+    // if (height !== (this.state.computedHeadGridHeight + this.state.computedBodyGridHeight)
+    //     || width !== this.state.computedHeadGridWidth
+    //     || width !== this.state.computedBodyGridWidth) {
+    //   return null;
+    // }
+
     return (
       <DataTableOuterWrapper /* innerRef={this.setOuterWrapperRef} */>
         <ScrollSync>
@@ -366,11 +373,6 @@ class AbstractDataTable extends React.Component<Props, State> {
                 <AutoSizer disableHeight onResize={this.onAutoSizerResize}>
                   {
                     (/* { height, width } */) => (
-                      // if (height !== (this.state.computedHeadGridHeight + this.state.computedBodyGridHeight)
-                      //     || width !== this.state.computedHeadGridWidth
-                      //     || width !== this.state.computedBodyGridWidth) {
-                      //   return null;
-                      // }
                       <div>
                         <div>
                           <HeadGrid

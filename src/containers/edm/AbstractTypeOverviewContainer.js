@@ -428,10 +428,10 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
     } = this.props;
 
     if (
-      (workingAbstractTypeType === AbstractTypes.AssociationType && this.props.isFetchingAllAssociationTypes)
-      || (workingAbstractTypeType === AbstractTypes.EntityType && this.props.isFetchingAllEntityTypes)
-      || (workingAbstractTypeType === AbstractTypes.PropertyType && this.props.isFetchingAllPropertyTypes)
-      || (workingAbstractTypeType === AbstractTypes.Schema && this.props.isFetchingAllSchemas)
+      this.props.isFetchingAllAssociationTypes
+      || this.props.isFetchingAllEntityTypes
+      || this.props.isFetchingAllPropertyTypes
+      || this.props.isFetchingAllSchemas
     ) {
       return (
         <Spinner />
