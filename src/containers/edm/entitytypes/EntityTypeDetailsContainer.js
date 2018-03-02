@@ -5,7 +5,7 @@
 import React from 'react';
 
 import styled from 'styled-components';
-import { List, Map } from 'immutable';
+import { List, Map, OrderedSet } from 'immutable';
 import { AuthUtils } from 'lattice-auth';
 import { EntityDataModelApiActionFactory } from 'lattice-sagas';
 import { bindActionCreators } from 'redux';
@@ -149,8 +149,8 @@ class EntityTypeDetailsContainer extends React.Component<Props> {
 
     const baseType :string = this.props.entityType.get('baseType', '');
 
-    const keyPropertyTypeIds :Set<string> = this.props.entityType.get('key', List()).toSet();
-    const propertyTypeIds :Set<string> = this.props.entityType.get('properties', List()).toSet();
+    const keyPropertyTypeIds :OrderedSet<string> = this.props.entityType.get('key').toOrderedSet();
+    const propertyTypeIds :OrderedSet<string> = this.props.entityType.get('properties').toOrderedSet();
 
     const keyPropertyTypes :List<Map<*, *>> = keyPropertyTypeIds
       .map((propertyTypeId :string) => {
