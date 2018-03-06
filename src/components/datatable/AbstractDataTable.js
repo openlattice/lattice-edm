@@ -399,8 +399,11 @@ class AbstractDataTable extends React.Component<Props, State> {
     //   return null;
     // }
 
-    // NOTE: the only difference between BodyGrid and OrderableBodyGrid is the extra cellRangeRenderer prop that
-    // enables the drag & drop. the rest of the props are identical and must be kept in sync.
+    // NOTE: the difference between BodyGrid and OrderableBodyGrid are the extra props needed for "react-sortable-hoc"
+    //   - cellRangeRenderer
+    //   - lockAxis
+    //   - onSortEnd
+    // the rest of the props are identical and must be kept in sync.
     return (
       <DataTableOuterWrapper>
         <ScrollSync>
