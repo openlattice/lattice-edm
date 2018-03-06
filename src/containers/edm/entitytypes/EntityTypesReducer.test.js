@@ -37,6 +37,7 @@ describe('EntityTypesReducer', () => {
       createEntityType: {},
       deleteEntityType: {},
       removePropertyTypeFromEntityType: {},
+      reorderEntityTypePropertyTypes: {},
       updateEntityTypeMetaData: {}
     });
   });

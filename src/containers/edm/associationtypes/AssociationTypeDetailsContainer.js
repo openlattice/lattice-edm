@@ -190,7 +190,6 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
 
     return (
       <section>
-        <h2>EntityType Details</h2>
         <div>
           <h2>ID</h2>
           <p>{ associationEntityType.get('id') }</p>
