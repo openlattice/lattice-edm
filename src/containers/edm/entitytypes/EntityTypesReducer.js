@@ -14,6 +14,7 @@ const {
   deleteEntityType,
   getAllEntityTypes,
   removePropertyTypeFromEntityType,
+  reorderEntityTypePropertyTypes,
   updateEntityTypeMetaData
 } = EntityDataModelApiActionFactory;
 
@@ -28,6 +29,7 @@ const INITIAL_STATE :Map<*, *> = fromJS({
     createEntityType: Map(),
     deleteEntityType: Map(),
     removePropertyTypeFromEntityType: Map(),
+    reorderEntityTypePropertyTypes: Map(),
     updateEntityTypeMetaData: Map()
   },
   entityTypes: List(),
@@ -287,6 +289,49 @@ export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, act
         FINALLY: () => {
           const seqAction :SequenceAction = (action :any);
           return state.deleteIn(['actions', 'removePropertyTypeFromEntityType', seqAction.id]);
+        }
+      });
+    }
+
+    case reorderEntityTypePropertyTypes.case(action.type): {
+      return reorderEntityTypePropertyTypes.reducer(state, action, {
+        REQUEST: () => {
+          // TODO: not ideal. perhaps there's a better way to get access to the trigger action value
+          const seqAction :SequenceAction = (action :any);
+          return state.setIn(['actions', 'reorderEntityTypePropertyTypes', seqAction.id], fromJS(seqAction));
+        },
+        SUCCESS: () => {
+
+          const seqAction :SequenceAction = (action :any);
+          const storedSeqAction :Map<*, *> = state.getIn(
+            ['actions', 'reorderEntityTypePropertyTypes', seqAction.id],
+            Map()
+          );
+
+          if (storedSeqAction.isEmpty()) {
+            return state;
+          }
+
+          const targetId :string = storedSeqAction.getIn(['value', 'entityTypeId']);
+          const targetIndex :number = state.getIn(['entityTypesById', targetId], -1);
+
+          // don't do anything if the EntityType being modified isn't available
+          if (targetIndex === -1) {
+            return state;
+          }
+
+          const reorderedPropertyTypeIds :List<string> = storedSeqAction.getIn(['value', 'propertyTypeIds'], List());
+          const currentEntityType :Map<*, *> = state.getIn(['entityTypes', targetIndex], Map());
+          const updatedEntityType :Map<*, *> = currentEntityType.set('properties', reorderedPropertyTypeIds);
+          return state.setIn(['entityTypes', targetIndex], updatedEntityType);
+        },
+        FAILURE: () => {
+          // TODO: need to properly handle the failure case
+          return state;
+        },
+        FINALLY: () => {
+          const seqAction :SequenceAction = (action :any);
+          return state.deleteIn(['actions', 'reorderEntityTypePropertyTypes', seqAction.id]);
         }
       });
     }
