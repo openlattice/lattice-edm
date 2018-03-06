@@ -80,19 +80,13 @@ class EntityTypeDetailsContainer extends React.Component<Props> {
 
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
 
-      const keyPropertyTypeIds :OrderedSet<string> = this.props.entityType.get('key').toOrderedSet();
-      const allPropertyTypeIds :OrderedSet<string> = this.props.entityType.get('properties').toOrderedSet();
-      const propertyTypeIds :List<string> = allPropertyTypeIds.subtract(keyPropertyTypeIds).toList();
-
+      const propertyTypeIds :List<string> = this.props.entityType.get('properties');
       const idToMove :string = propertyTypeIds.get(oldIndex);
       const reorderedPropertyTypeIds :List<string> = propertyTypeIds.delete(oldIndex).insert(newIndex, idToMove);
 
-      // primary key PropertyType ids are first
-      const result :List<string> = keyPropertyTypeIds.concat(reorderedPropertyTypeIds);
-
       this.props.actions.reorderEntityTypePropertyTypes({
         entityTypeId: this.props.entityType.get('id'),
-        propertyTypeIds: result.toJS()
+        propertyTypeIds: reorderedPropertyTypeIds.toJS()
       });
     }
   }
@@ -187,7 +181,7 @@ class EntityTypeDetailsContainer extends React.Component<Props> {
       })
       .toList();
 
-    const propertyTypes :List<Map<*, *>> = propertyTypeIds.subtract(keyPropertyTypeIds)
+    const propertyTypes :List<Map<*, *>> = propertyTypeIds
       .map((propertyTypeId :string) => {
         const index :number = this.props.propertyTypesById.get(propertyTypeId, -1);
         if (index === -1) {
