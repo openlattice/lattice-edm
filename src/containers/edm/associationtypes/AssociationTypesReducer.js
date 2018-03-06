@@ -18,6 +18,7 @@ const {
   removeDestinationEntityTypeFromAssociationType,
   removePropertyTypeFromEntityType,
   removeSourceEntityTypeFromAssociationType,
+  reorderEntityTypePropertyTypes,
   updateAssociationTypeMetaData
 } = EntityDataModelApiActionFactory;
 
@@ -38,6 +39,7 @@ const INITIAL_STATE :Map<*, *> = fromJS({
     removeDestinationEntityTypeFromAssociationType: Map(),
     removePropertyTypeFromEntityType: Map(),
     removeSourceEntityTypeFromAssociationType: Map(),
+    reorderEntityTypePropertyTypes: Map(),
     updateAssociationTypeMetaData: Map()
   },
   associationTypes: List(),
@@ -542,6 +544,53 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
         FINALLY: () => {
           const seqAction :SequenceAction = (action :any);
           return state.deleteIn(['actions', 'removeSourceEntityTypeFromAssociationType', seqAction.id]);
+        }
+      });
+    }
+
+    case reorderEntityTypePropertyTypes.case(action.type): {
+      return reorderEntityTypePropertyTypes.reducer(state, action, {
+        REQUEST: () => {
+          // TODO: not ideal. perhaps there's a better way to get access to the trigger action value
+          const seqAction :SequenceAction = (action :any);
+          return state.setIn(['actions', 'reorderEntityTypePropertyTypes', seqAction.id], fromJS(seqAction));
+        },
+        SUCCESS: () => {
+
+          const seqAction :SequenceAction = (action :any);
+          const storedSeqAction :Map<*, *> = state.getIn(
+            ['actions', 'reorderEntityTypePropertyTypes', seqAction.id],
+            Map()
+          );
+
+          if (storedSeqAction.isEmpty()) {
+            return state;
+          }
+
+          const targetId :string = storedSeqAction.getIn(['value', 'entityTypeId']);
+          const targetIndex :number = state.getIn(['associationTypesById', targetId], -1);
+
+          // don't do anything if the AssociationType being modified isn't available
+          if (targetIndex === -1) {
+            return state;
+          }
+
+          const reorderedPropertyTypeIds :List<string> = storedSeqAction.getIn(['value', 'propertyTypeIds'], List());
+          const currentAssociationType :Map<*, *> = state.getIn(['associationTypes', targetIndex], Map());
+          const updatedAssociationType :Map<*, *> = currentAssociationType.setIn(
+            ['entityType', 'properties'],
+            reorderedPropertyTypeIds
+          );
+
+          return state.setIn(['associationTypes', targetIndex], updatedAssociationType);
+        },
+        FAILURE: () => {
+          // TODO: need to properly handle the failure case
+          return state;
+        },
+        FINALLY: () => {
+          const seqAction :SequenceAction = (action :any);
+          return state.deleteIn(['actions', 'reorderEntityTypePropertyTypes', seqAction.id]);
         }
       });
     }
