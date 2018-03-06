@@ -26,7 +26,8 @@ const {
   deleteAssociationType,
   removeDestinationEntityTypeFromAssociationType,
   removePropertyTypeFromEntityType,
-  removeSourceEntityTypeFromAssociationType
+  removeSourceEntityTypeFromAssociationType,
+  reorderEntityTypePropertyTypes
 } = EntityDataModelApiActionFactory;
 
 /*
@@ -54,6 +55,7 @@ type Props = {
     removeDestinationEntityTypeFromAssociationType :RequestSequence;
     removePropertyTypeFromEntityType :RequestSequence;
     removeSourceEntityTypeFromAssociationType :RequestSequence;
+    reorderEntityTypePropertyTypes :RequestSequence;
   };
   associationType :Map<*, *>;
   entityTypes :List<Map<*, *>>;
@@ -130,6 +132,22 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
     }
   }
 
+  handleReorderPropertyTypes = (oldIndex :number, newIndex :number) => {
+
+    if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
+
+      const associationEntityType :Map<*, *> = this.props.associationType.get('entityType', Map());
+      const propertyTypeIds :List<string> = associationEntityType.get('properties');
+      const idToMove :string = propertyTypeIds.get(oldIndex);
+      const reorderedPropertyTypeIds :List<string> = propertyTypeIds.delete(oldIndex).insert(newIndex, idToMove);
+
+      this.props.actions.reorderEntityTypePropertyTypes({
+        entityTypeId: associationEntityType.get('id'),
+        propertyTypeIds: reorderedPropertyTypeIds.toJS()
+      });
+    }
+  }
+
   handleOnClickDelete = () => {
 
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
@@ -159,7 +177,7 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
       })
       .toList();
 
-    const propertyTypes :List<Map<*, *>> = propertyTypeIds.subtract(keyPropertyTypeIds)
+    const propertyTypes :List<Map<*, *>> = propertyTypeIds
       .map((propertyTypeId :string) => {
         const index :number = this.props.propertyTypesById.get(propertyTypeId, -1);
         if (index === -1) {
@@ -182,8 +200,10 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
             abstractTypes={propertyTypes}
             highlightOnHover
             maxHeight={500}
-            showRemoveColumn
             onAbstractTypeRemove={this.handleRemovePropertyTypeFromAssociationType}
+            onReorder={this.handleReorderPropertyTypes}
+            orderable
+            showRemoveColumn
             workingAbstractTypeType={AbstractTypes.PropertyType} />
       );
     }
@@ -470,7 +490,8 @@ function mapDispatchToProps(dispatch :Function) :Object {
     deleteAssociationType,
     removeDestinationEntityTypeFromAssociationType,
     removePropertyTypeFromEntityType,
-    removeSourceEntityTypeFromAssociationType
+    removeSourceEntityTypeFromAssociationType,
+    reorderEntityTypePropertyTypes
   };
 
   return {
