@@ -22,7 +22,8 @@ import StyledButton from '../../../components/buttons/StyledButton';
 const {
   addPropertyTypeToEntityType,
   deleteEntityType,
-  removePropertyTypeFromEntityType
+  removePropertyTypeFromEntityType,
+  reorderEntityTypePropertyTypes
 } = EntityDataModelApiActionFactory;
 
 /*
@@ -46,6 +47,7 @@ type Props = {
     addPropertyTypeToEntityType :RequestSequence;
     deleteEntityType :RequestSequence;
     removePropertyTypeFromEntityType :RequestSequence;
+    reorderEntityTypePropertyTypes :RequestSequence;
   };
   entityType :Map<*, *>;
   propertyTypes :List<Map<*, *>>;
@@ -70,6 +72,27 @@ class EntityTypeDetailsContainer extends React.Component<Props> {
       this.props.actions.removePropertyTypeFromEntityType({
         entityTypeId: this.props.entityType.get('id'),
         propertyTypeId: removedAbstractTypeId
+      });
+    }
+  }
+
+  handleOnPropertyTypeReorder = (oldIndex :number, newIndex :number) => {
+
+    if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
+
+      const keyPropertyTypeIds :OrderedSet<string> = this.props.entityType.get('key').toOrderedSet();
+      const allPropertyTypeIds :OrderedSet<string> = this.props.entityType.get('properties').toOrderedSet();
+      const propertyTypeIds :List<string> = allPropertyTypeIds.subtract(keyPropertyTypeIds).toList();
+
+      const idToMove :string = propertyTypeIds.get(oldIndex);
+      const reorderedPropertyTypeIds :List<string> = propertyTypeIds.delete(oldIndex).insert(newIndex, idToMove);
+
+      // primary key PropertyType ids are first
+      const result :List<string> = keyPropertyTypeIds.concat(reorderedPropertyTypeIds);
+
+      this.props.actions.reorderEntityTypePropertyTypes({
+        entityTypeId: this.props.entityType.get('id'),
+        propertyTypeIds: result.toJS()
       });
     }
   }
@@ -100,8 +123,10 @@ class EntityTypeDetailsContainer extends React.Component<Props> {
             abstractTypes={propertyTypes}
             highlightOnHover
             maxHeight={500}
-            showRemoveColumn
             onAbstractTypeRemove={this.handleOnPropertyTypeRemove}
+            onReorder={this.handleOnPropertyTypeReorder}
+            orderable
+            showRemoveColumn
             workingAbstractTypeType={AbstractTypes.PropertyType} />
       );
     }
@@ -244,7 +269,8 @@ function mapDispatchToProps(dispatch :Function) :Object {
   const actions = {
     addPropertyTypeToEntityType,
     deleteEntityType,
-    removePropertyTypeFromEntityType
+    removePropertyTypeFromEntityType,
+    reorderEntityTypePropertyTypes
   };
 
   return {

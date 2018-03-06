@@ -34,6 +34,7 @@ export default function* sagas() :Generator<*, *, *> {
     fork(EntityDataModelApiSagas.removeDestinationEntityTypeFromAssociationTypeWatcher),
     fork(EntityDataModelApiSagas.removePropertyTypeFromEntityTypeWatcher),
     fork(EntityDataModelApiSagas.removeSourceEntityTypeFromAssociationTypeWatcher),
+    fork(EntityDataModelApiSagas.reorderEntityTypePropertyTypesWatcher),
     fork(EntityDataModelApiSagas.updateAssociationTypeMetaDataWatcher),
     fork(EntityDataModelApiSagas.updateEntityTypeMetaDataWatcher),
     fork(EntityDataModelApiSagas.updatePropertyTypeMetaDataWatcher),

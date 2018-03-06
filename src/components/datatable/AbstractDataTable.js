@@ -4,11 +4,14 @@
 
 import React from 'react';
 
+import isFunction from 'lodash/isFunction';
 import styled from 'styled-components';
 import { List, Map, OrderedMap } from 'immutable';
+import { SortableContainer } from 'react-sortable-hoc';
 import { AutoSizer, Grid, ScrollSync } from 'react-virtualized';
 
 import AbstractCell, { AbstractCellTypes } from './AbstractCell';
+import { orderableRowRangeRenderer } from './AbstractRow';
 
 /*
  * constants
@@ -32,6 +35,12 @@ const CELL_PADDING :number = 10;
 const CANVAS = document.createElement('canvas');
 const CANVAS_CONTEXT = CANVAS.getContext('2d');
 CANVAS_CONTEXT.font = '14px "Open Sans", sans-serif';
+
+/*
+ * helper components
+ */
+
+const OrderableGrid = SortableContainer(Grid, { withRef: true });
 
 /*
  * styled components
@@ -61,6 +70,13 @@ const BodyGrid = styled(Grid)`
   z-index: 99;
 `;
 
+const OrderableBodyGrid = styled(OrderableGrid)`
+  border: none;
+  outline: none;
+  margin-top: -1px;
+  z-index: 99;
+`;
+
 /*
  * types
  */
@@ -74,8 +90,10 @@ type Props = {
   height :number;
   maxHeight :number;
   maxWidth :number;
+  orderable :boolean;
   width :number;
   bodyCellRenderer :(params :Object, cellValue :mixed) => mixed;
+  onReorder :(oldIndex :number, newIndex :number) => void;
 };
 
 type State = {
@@ -103,8 +121,10 @@ class AbstractDataTable extends React.Component<Props, State> {
     height: -1,
     maxHeight: -1,
     maxWidth: -1,
+    orderable: false,
     width: -1,
-    bodyCellRenderer: null
+    bodyCellRenderer: null,
+    onReorder: () => {}
   };
 
   constructor(props :Props) {
@@ -270,9 +290,16 @@ class AbstractDataTable extends React.Component<Props, State> {
     this.headGrid = headGridRef;
   }
 
-  setBodyGridRef = (bodyGridRef :any) :void => {
+  setBodyGridRef = (ref :any) :void => {
 
-    this.bodyGrid = bodyGridRef;
+    if (ref) {
+      if (isFunction(ref.getWrappedInstance)) {
+        this.bodyGrid = ref.getWrappedInstance();
+      }
+      else {
+        this.bodyGrid = ref;
+      }
+    }
   }
 
   isLastColumn = (columnIndex :number) :boolean => {
@@ -315,6 +342,14 @@ class AbstractDataTable extends React.Component<Props, State> {
       autosizerWidth: params.width,
       ...newDimensions
     });
+  }
+
+  // https://github.com/clauderic/react-sortable-hoc
+  onSortEnd = (rsParams :Object) => {
+
+    if (rsParams.oldIndex !== rsParams.newIndex) {
+      this.props.onReorder(rsParams.oldIndex, rsParams.newIndex);
+    }
   }
 
   renderHeadCell = (params :Object) => {
@@ -364,8 +399,13 @@ class AbstractDataTable extends React.Component<Props, State> {
     //   return null;
     // }
 
+    // NOTE: the difference between BodyGrid and OrderableBodyGrid are the extra props needed for "react-sortable-hoc"
+    //   - cellRangeRenderer
+    //   - lockAxis
+    //   - onSortEnd
+    // the rest of the props are identical and must be kept in sync.
     return (
-      <DataTableOuterWrapper /* innerRef={this.setOuterWrapperRef} */>
+      <DataTableOuterWrapper>
         <ScrollSync>
           {
             ({ onScroll, scrollLeft }) => (
@@ -390,19 +430,43 @@ class AbstractDataTable extends React.Component<Props, State> {
                               width={this.state.computedHeadGridWidth} />
                         </div>
                         <div>
-                          <BodyGrid
-                              cellRenderer={this.renderBodyCell}
-                              columnCount={columnCount}
-                              columnWidth={this.getColumnWidth}
-                              estimatedColumnSize={DEFAULT_COLUMN_MIN_WIDTH}
-                              height={this.state.computedBodyGridHeight}
-                              innerRef={this.setBodyGridRef}
-                              onScroll={onScroll}
-                              overscanColumnCount={DEFAULT_OVERSCAN_COLUMN_COUNT}
-                              overscanRowCount={DEFAULT_OVERSCAN_ROW_COUNT}
-                              rowCount={rowCount}
-                              rowHeight={this.getRowHeight}
-                              width={this.state.computedBodyGridWidth} />
+                          {
+                            this.props.orderable
+                              ? (
+                                <OrderableBodyGrid
+                                    cellRangeRenderer={orderableRowRangeRenderer}
+                                    cellRenderer={this.renderBodyCell}
+                                    columnCount={columnCount}
+                                    columnWidth={this.getColumnWidth}
+                                    estimatedColumnSize={DEFAULT_COLUMN_MIN_WIDTH}
+                                    height={this.state.computedBodyGridHeight}
+                                    innerRef={this.setBodyGridRef}
+                                    lockAxis="y"
+                                    onScroll={onScroll}
+                                    onSortEnd={this.onSortEnd}
+                                    overscanColumnCount={DEFAULT_OVERSCAN_COLUMN_COUNT}
+                                    overscanRowCount={DEFAULT_OVERSCAN_ROW_COUNT}
+                                    rowCount={rowCount}
+                                    rowHeight={this.getRowHeight}
+                                    width={this.state.computedBodyGridWidth} />
+                              )
+                              : (
+                                <BodyGrid
+                                    cellRenderer={this.renderBodyCell}
+                                    columnCount={columnCount}
+                                    columnWidth={this.getColumnWidth}
+                                    estimatedColumnSize={DEFAULT_COLUMN_MIN_WIDTH}
+                                    height={this.state.computedBodyGridHeight}
+                                    innerRef={this.setBodyGridRef}
+                                    onScroll={onScroll}
+                                    overscanColumnCount={DEFAULT_OVERSCAN_COLUMN_COUNT}
+                                    overscanRowCount={DEFAULT_OVERSCAN_ROW_COUNT}
+                                    rowCount={rowCount}
+                                    rowHeight={this.getRowHeight}
+                                    width={this.state.computedBodyGridWidth} />
+                              )
+                          }
+
                         </div>
                       </div>
                     )

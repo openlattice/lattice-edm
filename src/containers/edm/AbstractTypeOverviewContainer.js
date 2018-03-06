@@ -180,7 +180,7 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
     }
 
     // 1. try to match an abstract type if there's a filter query
-    if (!isEmpty(this.state.filterQuery)) {
+    if (!selectedAbstractTypeId && !isEmpty(this.state.filterQuery)) {
       selectedAbstractType = filteredTypes.get(0, Map());
       selectedAbstractTypeId = selectedAbstractType.get('id', '');
     }
