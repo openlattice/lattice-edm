@@ -41,6 +41,7 @@ describe('AssociationTypesReducer', () => {
       removeDestinationEntityTypeFromAssociationType: {},
       removePropertyTypeFromEntityType: {},
       removeSourceEntityTypeFromAssociationType: {},
+      reorderEntityTypePropertyTypes: {},
       updateAssociationTypeMetaData: {}
     });
   });
