@@ -89,10 +89,21 @@ class PropertyTypeDetailsContainer extends React.Component<Props> {
     if (!this.props.propertyType || this.props.propertyType.isEmpty()) {
       return null;
     }
-
     const ptPII :boolean = this.props.propertyType.get('piiField', false);
     const piiAsString :string = ptPII === true ? 'true' : 'false';
+    const entityTypeIds :OrderedSet<string> = this.props.entityTypes.toOrderedSet();
 
+    const propertyTypeId = this.props.propertyType.get('id');
+    const matchedEntityTypeIds = []
+    for (let entityType of entityTypeIds) {
+      for (let propertyId of entityType.get('properties')) {
+        if (propertyTypeId == propertyId) {
+          console.log('its a match');
+          matchedEntityTypeIds.push(propertyId);
+        }
+      }
+    }
+    console.log(matchedEntityTypeIds);
     // const entityTypes :List<Map<*, *>> = entityTypeIds
     //   .map((entityTypeId :string) => {
     //     const index :number = this.props.entityTypesById.get(entityTypeId, -1);
