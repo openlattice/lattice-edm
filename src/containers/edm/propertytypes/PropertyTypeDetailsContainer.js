@@ -4,7 +4,7 @@
 
 import React from 'react';
 
-import { Map } from 'immutable';
+import { Map, List } from 'immutable';
 import { AuthUtils } from 'lattice-auth';
 import { EntityDataModelApiActionFactory } from 'lattice-sagas';
 import { bindActionCreators } from 'redux';
@@ -36,6 +36,8 @@ type Props = {
     deletePropertyType :RequestSequence;
   };
   propertyType :Map<*, *>;
+  entityTypes :List<Map<*, *>>;
+  entityTypesById :Map<string, number>;
 };
 
 class PropertyTypeDetailsContainer extends React.Component<Props> {
@@ -91,16 +93,16 @@ class PropertyTypeDetailsContainer extends React.Component<Props> {
     const ptPII :boolean = this.props.propertyType.get('piiField', false);
     const piiAsString :string = ptPII === true ? 'true' : 'false';
 
-    const entityTypes :List<Map<*, *>> = entityTypeIds
-      .map((entityTypeId :string) => {
-        const index :number = this.props.entityTypesById.get(entityTypeId, -1);
-        if (index === -1) {
-          return Map();
-        }
-        return this.props.entityTypes.get(index, Map());
-      })
-      .toList();
-      
+    // const entityTypes :List<Map<*, *>> = entityTypeIds
+    //   .map((entityTypeId :string) => {
+    //     const index :number = this.props.entityTypesById.get(entityTypeId, -1);
+    //     if (index === -1) {
+    //       return Map();
+    //     }
+    //     return this.props.entityTypes.get(index, Map());
+    //   })
+    //   .toList();
+
     return (
       <div>
         <h1>PropertyType Details</h1>
@@ -135,7 +137,7 @@ class PropertyTypeDetailsContainer extends React.Component<Props> {
           <h2>Analyzer</h2>
           <p>{ this.props.propertyType.get('analyzer') }</p>
         </section>
-        { this.renderEntityTypesSection(entityTypes) }
+        {/* this.renderEntityTypesSection(entityTypes) */}
         {
           AuthUtils.isAuthenticated() && AuthUtils.isAdmin()
             ? (
@@ -150,6 +152,14 @@ class PropertyTypeDetailsContainer extends React.Component<Props> {
   }
 }
 
+function mapStateToProps(state :Map<*, *>) :Object {
+
+  return {
+    entityTypes: state.getIn(['edm', 'entityTypes', 'entityTypes'], List()),
+    entityTypesById: state.getIn(['edm', 'entityTypes', 'entityTypesById'], Map())
+  };
+}
+
 function mapDispatchToProps(dispatch :Function) :Object {
 
   const actions = {
@@ -161,4 +171,4 @@ function mapDispatchToProps(dispatch :Function) :Object {
   };
 }
 
-export default connect(null, mapDispatchToProps)(PropertyTypeDetailsContainer);
+export default connect(mapStateToProps, mapDispatchToProps)(PropertyTypeDetailsContainer);
