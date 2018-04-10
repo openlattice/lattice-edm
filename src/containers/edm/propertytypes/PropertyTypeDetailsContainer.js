@@ -11,6 +11,7 @@ import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 
 import AbstractTypes from '../../../utils/AbstractTypes';
+import AbstractTypeDataTable from '../../../components/datatable/AbstractTypeDataTable';
 import AbstractTypeFieldDescription from '../AbstractTypeFieldDescription';
 import AbstractTypeFieldTitle from '../AbstractTypeFieldTitle';
 import AbstractTypeFieldType from '../AbstractTypeFieldType';
@@ -46,6 +47,41 @@ class PropertyTypeDetailsContainer extends React.Component<Props> {
     }
   }
 
+  renderEntityTypesSection = (entityTypes :List<Map<*, *>>) => {
+
+    if (entityTypes.isEmpty()) {
+      return null;
+    }
+
+    let entityTypesDataTable :React$Node = (
+      <AbstractTypeDataTable
+          abstractTypes={entityTypes}
+          maxHeight={500}
+          workingAbstractTypeType={AbstractTypes.EntityTypes} />
+    );
+
+    if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
+      entityTypesDataTable = (
+        <AbstractTypeDataTable
+            abstractTypes={entityTypes}
+            highlightOnHover
+            maxHeight={500}
+            onAbstractTypeRemove={this.handleOnEntityTypeRemove}
+            onReorder={this.handleOnEntityTypeReorder}
+            orderable
+            showRemoveColumn
+            workingAbstractTypeType={AbstractTypes.EntityType} />
+      );
+    }
+
+    return (
+      <section>
+        <h2>EntityTypes</h2>
+        { entityTypesDataTable }
+      </section>
+    );
+  }
+
   render() {
 
     if (!this.props.propertyType || this.props.propertyType.isEmpty()) {
@@ -55,6 +91,16 @@ class PropertyTypeDetailsContainer extends React.Component<Props> {
     const ptPII :boolean = this.props.propertyType.get('piiField', false);
     const piiAsString :string = ptPII === true ? 'true' : 'false';
 
+    const entityTypes :List<Map<*, *>> = entityTypeIds
+      .map((entityTypeId :string) => {
+        const index :number = this.props.entityTypesById.get(entityTypeId, -1);
+        if (index === -1) {
+          return Map();
+        }
+        return this.props.entityTypes.get(index, Map());
+      })
+      .toList();
+      
     return (
       <div>
         <h1>PropertyType Details</h1>
@@ -89,6 +135,7 @@ class PropertyTypeDetailsContainer extends React.Component<Props> {
           <h2>Analyzer</h2>
           <p>{ this.props.propertyType.get('analyzer') }</p>
         </section>
+        { this.renderEntityTypesSection(entityTypes) }
         {
           AuthUtils.isAuthenticated() && AuthUtils.isAdmin()
             ? (
