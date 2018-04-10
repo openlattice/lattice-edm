@@ -5,6 +5,7 @@
 import React from 'react';
 
 import { Map, List } from 'immutable';
+import Immutable from 'immutable'
 import { AuthUtils } from 'lattice-auth';
 import { EntityDataModelApiActionFactory } from 'lattice-sagas';
 import { bindActionCreators } from 'redux';
@@ -91,28 +92,35 @@ class PropertyTypeDetailsContainer extends React.Component<Props> {
     }
     const ptPII :boolean = this.props.propertyType.get('piiField', false);
     const piiAsString :string = ptPII === true ? 'true' : 'false';
+    // This gathers ALL entityTypes from the EDM
     const entityTypeIds :OrderedSet<string> = this.props.entityTypes.toOrderedSet();
 
     const propertyTypeId = this.props.propertyType.get('id');
-    const matchedEntityTypeIds = []
+    let matchedEntityTypeIds :OrderedSet<string> = new Set([]);
+
+    // This loops through all entitySets to check if it utilizes the propertyType
+    // This will likely be way too time intensive, couldn't think of another way with existing API
     for (let entityType of entityTypeIds) {
       for (let propertyId of entityType.get('properties')) {
         if (propertyTypeId == propertyId) {
-          console.log('its a match');
-          matchedEntityTypeIds.push(propertyId);
+          matchedEntityTypeIds.add(entityType.get('id'));
         }
       }
     }
-    console.log(matchedEntityTypeIds);
-    // const entityTypes :List<Map<*, *>> = entityTypeIds
-    //   .map((entityTypeId :string) => {
-    //     const index :number = this.props.entityTypesById.get(entityTypeId, -1);
-    //     if (index === -1) {
-    //       return Map();
-    //     }
-    //     return this.props.entityTypes.get(index, Map());
-    //   })
-    //   .toList();
+    // Following code requires an immutable set, so it is converted
+    matchedEntityTypeIds = Immutable.Set(matchedEntityTypeIds);
+
+    const entityTypes :List<Map<*, *>> = matchedEntityTypeIds
+      .map((matchedEntityTypeId :string) => {
+        const index :number = this.props.entityTypesById.get(matchedEntityTypeId, -1);
+        if (index === -1) {
+          return Map();
+        }
+        return this.props.entityTypes.get(index, Map());
+      })
+      .toList();
+    // console.log(this.props.entityTypesById);
+    // console.log(entityTypes);
 
     return (
       <div>
@@ -148,7 +156,7 @@ class PropertyTypeDetailsContainer extends React.Component<Props> {
           <h2>Analyzer</h2>
           <p>{ this.props.propertyType.get('analyzer') }</p>
         </section>
-        {/* this.renderEntityTypesSection(entityTypes) */}
+        { this.renderEntityTypesSection(entityTypes) }
         {
           AuthUtils.isAuthenticated() && AuthUtils.isAdmin()
             ? (
