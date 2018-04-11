@@ -4,13 +4,14 @@
 
 import React from 'react';
 
-import { Map } from 'immutable';
+import { Map, List } from 'immutable';
 import { AuthUtils } from 'lattice-auth';
 import { EntityDataModelApiActionFactory } from 'lattice-sagas';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 
 import AbstractTypes from '../../../utils/AbstractTypes';
+import AbstractTypeDataTable from '../../../components/datatable/AbstractTypeDataTable';
 import AbstractTypeFieldDescription from '../AbstractTypeFieldDescription';
 import AbstractTypeFieldTitle from '../AbstractTypeFieldTitle';
 import AbstractTypeFieldType from '../AbstractTypeFieldType';
@@ -35,6 +36,7 @@ type Props = {
     deletePropertyType :RequestSequence;
   };
   propertyType :Map<*, *>;
+  entityTypes :List<Map<*, *>>;
 };
 
 class PropertyTypeDetailsContainer extends React.Component<Props> {
@@ -46,12 +48,33 @@ class PropertyTypeDetailsContainer extends React.Component<Props> {
     }
   }
 
+  renderEntityTypesSection = (entityTypes :List<Map<*, *>>) => {
+
+    if (entityTypes.isEmpty()) {
+      return null;
+    }
+
+    const entityTypesDataTable :React$Node = (
+      <AbstractTypeDataTable
+          abstractTypes={entityTypes}
+          highlightOnHover
+          maxHeight={500}
+          workingAbstractTypeType={AbstractTypes.EntityTypes} />
+    );
+
+    return (
+      <section>
+        <h2>EntityTypes Utilizing this PropertyType</h2>
+        { entityTypesDataTable }
+      </section>
+    );
+  }
+
   render() {
 
     if (!this.props.propertyType || this.props.propertyType.isEmpty()) {
       return null;
     }
-
     const ptPII :boolean = this.props.propertyType.get('piiField', false);
     const piiAsString :string = ptPII === true ? 'true' : 'false';
 
@@ -89,6 +112,7 @@ class PropertyTypeDetailsContainer extends React.Component<Props> {
           <h2>Analyzer</h2>
           <p>{ this.props.propertyType.get('analyzer') }</p>
         </section>
+        { this.renderEntityTypesSection(this.props.entityTypes) }
         {
           AuthUtils.isAuthenticated() && AuthUtils.isAdmin()
             ? (
@@ -103,6 +127,17 @@ class PropertyTypeDetailsContainer extends React.Component<Props> {
   }
 }
 
+function mapStateToProps(state :Map<*, *>, ownProps) :Object {
+  const propertyTypeId = ownProps.propertyType.get('id');
+  const entityTypes :List<string> = state.getIn(['edm', 'entityTypes', 'entityTypes'], List())
+    .filter((entityType :Map<*, *>) => {
+      return entityType.get('properties').includes(propertyTypeId);
+    });
+  return {
+    entityTypes
+  };
+}
+
 function mapDispatchToProps(dispatch :Function) :Object {
 
   const actions = {
@@ -114,4 +149,4 @@ function mapDispatchToProps(dispatch :Function) :Object {
   };
 }
 
-export default connect(null, mapDispatchToProps)(PropertyTypeDetailsContainer);
+export default connect(mapStateToProps, mapDispatchToProps)(PropertyTypeDetailsContainer);
