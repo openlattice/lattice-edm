@@ -37,7 +37,6 @@ type Props = {
   };
   propertyType :Map<*, *>;
   entityTypes :List<Map<*, *>>;
-  entityTypesById :Map<string, number>;
 };
 
 class PropertyTypeDetailsContainer extends React.Component<Props> {
@@ -78,34 +77,14 @@ class PropertyTypeDetailsContainer extends React.Component<Props> {
     }
     const ptPII :boolean = this.props.propertyType.get('piiField', false);
     const piiAsString :string = ptPII === true ? 'true' : 'false';
-    // This gathers ALL entityTypes from the EDM
-    const entityTypeIds :OrderedSet<string> = this.props.entityTypes.toOrderedSet();
+
     const propertyTypeId = this.props.propertyType.get('id');
-    let matchedEntityTypeIds :OrderedSet<string> = new Set([]);
-
-    // This does a lookup in all entitySets to check if it utilizes the propertyType
-    // Way too time intensive? Couldn't think of another way with existing API
-    entityTypeIds
-      .forEach((entityType) => {
-        if (entityType.get('properties').includes(propertyTypeId)) {
-          matchedEntityTypeIds.add(entityType.get('id'));
-        }
-      });
-
-    // Following code requires an immutable set, so it is converted
-    matchedEntityTypeIds = Immutable.Set(matchedEntityTypeIds);
-
-    const entityTypes :List<Map<*, *>> = matchedEntityTypeIds
-      .map((matchedEntityTypeId :string) => {
-        const index :number = this.props.entityTypesById.get(matchedEntityTypeId, -1);
-        if (index === -1) {
-          return Map();
-        }
-        return this.props.entityTypes.get(index, Map());
+    const entityTypes :OrderedSet<string> = this.props.entityTypes
+      .toOrderedSet()
+      .filter((entityType :Map<*, *>) => {
+        return entityType.get('properties').includes(propertyTypeId);
       })
       .toList();
-    // console.log(this.props.entityTypesById);
-    // console.log(entityTypes);
 
     return (
       <div>
@@ -157,10 +136,9 @@ class PropertyTypeDetailsContainer extends React.Component<Props> {
 }
 
 function mapStateToProps(state :Map<*, *>) :Object {
-
+  const entityTypes = state.getIn(['edm', 'entityTypes', 'entityTypes'], List());
   return {
-    entityTypes: state.getIn(['edm', 'entityTypes', 'entityTypes'], List()),
-    entityTypesById: state.getIn(['edm', 'entityTypes', 'entityTypesById'], Map())
+    entityTypes
   };
 }
 
