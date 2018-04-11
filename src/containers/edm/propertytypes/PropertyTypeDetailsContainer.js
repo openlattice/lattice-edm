@@ -98,11 +98,13 @@ class PropertyTypeDetailsContainer extends React.Component<Props> {
 
     // This does a lookup in all entitySets to check if it utilizes the propertyType
     // Way too time intensive? Couldn't think of another way with existing API
-    for (let entityType of entityTypeIds) {
-      if(entityType.get('properties').includes(propertyTypeId)) {
-        matchedEntityTypeIds.add(entityType.get('id'));
-      }
-    }
+    entityTypeIds
+      .forEach((entityType) => {
+        if (entityType.get('properties').includes(propertyTypeId)) {
+          matchedEntityTypeIds.add(entityType.get('id'));
+        }
+      });
+
     // Following code requires an immutable set, so it is converted
     matchedEntityTypeIds = Immutable.Set(matchedEntityTypeIds);
 
