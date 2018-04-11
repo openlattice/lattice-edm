@@ -4,7 +4,7 @@
 
 import React from 'react';
 
-import Immutable, { Map, List } from 'immutable';
+import { Map, List } from 'immutable';
 import { AuthUtils } from 'lattice-auth';
 import { EntityDataModelApiActionFactory } from 'lattice-sagas';
 import { bindActionCreators } from 'redux';
@@ -78,14 +78,6 @@ class PropertyTypeDetailsContainer extends React.Component<Props> {
     const ptPII :boolean = this.props.propertyType.get('piiField', false);
     const piiAsString :string = ptPII === true ? 'true' : 'false';
 
-    const propertyTypeId = this.props.propertyType.get('id');
-    const entityTypes :OrderedSet<string> = this.props.entityTypes
-      .toOrderedSet()
-      .filter((entityType :Map<*, *>) => {
-        return entityType.get('properties').includes(propertyTypeId);
-      })
-      .toList();
-
     return (
       <div>
         <h1>PropertyType Details</h1>
@@ -120,7 +112,7 @@ class PropertyTypeDetailsContainer extends React.Component<Props> {
           <h2>Analyzer</h2>
           <p>{ this.props.propertyType.get('analyzer') }</p>
         </section>
-        { this.renderEntityTypesSection(entityTypes) }
+        { this.renderEntityTypesSection(this.props.entityTypes) }
         {
           AuthUtils.isAuthenticated() && AuthUtils.isAdmin()
             ? (
@@ -135,8 +127,14 @@ class PropertyTypeDetailsContainer extends React.Component<Props> {
   }
 }
 
-function mapStateToProps(state :Map<*, *>) :Object {
-  const entityTypes = state.getIn(['edm', 'entityTypes', 'entityTypes'], List());
+function mapStateToProps(state :Map<*, *>, ownProps) :Object {
+  const propertyTypeId = ownProps.propertyType.get('id');
+  const entityTypes :OrderedSet<string> = state.getIn(['edm', 'entityTypes', 'entityTypes'], List())
+    .toOrderedSet()
+    .filter((entityType :Map<*, *>) => {
+      return entityType.get('properties').includes(propertyTypeId);
+    })
+    .toList();
   return {
     entityTypes
   };
