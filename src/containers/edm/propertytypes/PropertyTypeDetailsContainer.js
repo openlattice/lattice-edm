@@ -94,17 +94,14 @@ class PropertyTypeDetailsContainer extends React.Component<Props> {
     const piiAsString :string = ptPII === true ? 'true' : 'false';
     // This gathers ALL entityTypes from the EDM
     const entityTypeIds :OrderedSet<string> = this.props.entityTypes.toOrderedSet();
-
     const propertyTypeId = this.props.propertyType.get('id');
     let matchedEntityTypeIds :OrderedSet<string> = new Set([]);
 
-    // This loops through all entitySets to check if it utilizes the propertyType
-    // This will likely be way too time intensive, couldn't think of another way with existing API
+    // This does a lookup in all entitySets to check if it utilizes the propertyType
+    // Way too time intensive? Couldn't think of another way with existing API
     for (let entityType of entityTypeIds) {
-      for (let propertyId of entityType.get('properties')) {
-        if (propertyTypeId == propertyId) {
-          matchedEntityTypeIds.add(entityType.get('id'));
-        }
+      if(entityType.get('properties').includes(propertyTypeId)) {
+        matchedEntityTypeIds.add(entityType.get('id'));
       }
     }
     // Following code requires an immutable set, so it is converted
