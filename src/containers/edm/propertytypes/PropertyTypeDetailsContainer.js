@@ -129,12 +129,10 @@ class PropertyTypeDetailsContainer extends React.Component<Props> {
 
 function mapStateToProps(state :Map<*, *>, ownProps) :Object {
   const propertyTypeId = ownProps.propertyType.get('id');
-  const entityTypes :OrderedSet<string> = state.getIn(['edm', 'entityTypes', 'entityTypes'], List())
-    .toOrderedSet()
+  const entityTypes :List<string> = state.getIn(['edm', 'entityTypes', 'entityTypes'], List())
     .filter((entityType :Map<*, *>) => {
       return entityType.get('properties').includes(propertyTypeId);
-    })
-    .toList();
+    });
   return {
     entityTypes
   };
