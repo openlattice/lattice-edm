@@ -55,30 +55,17 @@ class PropertyTypeDetailsContainer extends React.Component<Props> {
       return null;
     }
 
-    let entityTypesDataTable :React$Node = (
+    const entityTypesDataTable :React$Node = (
       <AbstractTypeDataTable
           abstractTypes={entityTypes}
+          highlightOnHover
           maxHeight={500}
           workingAbstractTypeType={AbstractTypes.EntityTypes} />
     );
 
-    if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
-      entityTypesDataTable = (
-        <AbstractTypeDataTable
-            abstractTypes={entityTypes}
-            highlightOnHover
-            maxHeight={500}
-            onAbstractTypeRemove={this.handleOnEntityTypeRemove}
-            onReorder={this.handleOnEntityTypeReorder}
-            orderable
-            showRemoveColumn
-            workingAbstractTypeType={AbstractTypes.EntityType} />
-      );
-    }
-
     return (
       <section>
-        <h2>EntityTypes</h2>
+        <h2>EntityTypes Utilizing this PropertyType</h2>
         { entityTypesDataTable }
       </section>
     );
