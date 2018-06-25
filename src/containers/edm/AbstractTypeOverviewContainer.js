@@ -29,7 +29,10 @@ import {
   maybeGetAbstractTypeMatchingSelectedAbstractTypeId
 } from './Helpers';
 
-import type { AbstractType } from '../../utils/AbstractTypes';
+import type {
+  AbstractTypeOverviewContainerProps as Props,
+  AbstractTypeOverviewContainerState as State
+} from './Types';
 
 /*
  * styled components
@@ -85,37 +88,6 @@ const Empty = styled.div`
   text-align:center;
 `;
 
-/*
- * types
- */
-
-type Props = {
-  associationTypes :List<Map<*, *>>;
-  associationTypesById :Map<string, number>;
-  entityTypes :List<Map<*, *>>;
-  entityTypesById :Map<string, number>;
-  isFetchingAllAssociationTypes :boolean;
-  isFetchingAllEntityTypes :boolean;
-  isFetchingAllPropertyTypes :boolean;
-  isFetchingAllSchemas :boolean;
-  newlyCreatedAssociationTypeId :string; // eslint-disable-line react/no-unused-prop-types
-  newlyCreatedEntityTypeId :string; // eslint-disable-line react/no-unused-prop-types
-  newlyCreatedPropertyTypeId :string; // eslint-disable-line react/no-unused-prop-types
-  propertyTypes :List<Map<*, *>>;
-  propertyTypesById :Map<string, number>;
-  schemas :List<Map<*, *>>;
-  schemasByFqn :Map<string, number>;
-  workingAbstractTypeType :AbstractType;
-};
-
-type State = {
-  filterQuery :string;
-  filteredTypes :List<Map<*, *>>;
-  selectedAbstractType :Map<*, *>;
-  selectedAbstractTypeId :string;
-  showCreateNewAbstractTypeCard :boolean;
-};
-
 class AbstractTypeOverviewContainer extends React.Component<Props, State> {
 
   static defaultProps = {
@@ -149,6 +121,9 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
 
   componentWillReceiveProps(nextProps :Props) {
 
+    const { filterQuery } = this.state;
+    let { selectedAbstractTypeId } = this.state;
+
     const {
       associationTypes,
       entityTypes,
@@ -167,20 +142,19 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
 
     const workingAbstractTypes :List<Map<*, *>> = getWorkingAbstractTypes(params);
     const filteredTypes :List<Map<*, *>> = filterAbstractTypes({
+      filterQuery,
       workingAbstractTypeType,
-      abstractTypes: workingAbstractTypes,
-      filterQuery: this.state.filterQuery
+      abstractTypes: workingAbstractTypes
     });
 
     // 0. by default, use first element of all possible options as the selected abstract type
     let selectedAbstractType :Map<*, *> = workingAbstractTypes.get(0, Map());
-    let selectedAbstractTypeId :string = this.state.selectedAbstractTypeId;
     if (!selectedAbstractTypeId) {
       selectedAbstractTypeId = selectedAbstractType.get('id', '');
     }
 
     // 1. try to match an abstract type if there's a filter query
-    if (!selectedAbstractTypeId && !isEmpty(this.state.filterQuery)) {
+    if (!selectedAbstractTypeId && !isEmpty(filterQuery)) {
       selectedAbstractType = filteredTypes.get(0, Map());
       selectedAbstractTypeId = selectedAbstractType.get('id', '');
     }
@@ -220,9 +194,10 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
       schemasByFqn,
       workingAbstractTypeType
     } = this.props;
+    const { filteredTypes } = this.state;
 
     // by default, use first element as the selected abstract type
-    let selectedAbstractType :Map<*, *> = this.state.filteredTypes.get(0, Map());
+    let selectedAbstractType :Map<*, *> = filteredTypes.get(0, Map());
 
     let selectedAbstractTypeIndex :number;
     switch (workingAbstractTypeType) {
@@ -274,18 +249,26 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
 
   handleOnChangeFilter = (filterQuery :string) => {
 
+    const {
+      associationTypes,
+      entityTypes,
+      propertyTypes,
+      schemas,
+      workingAbstractTypeType
+    } = this.props;
+
     const params :Object = {
-      associationTypes: this.props.associationTypes,
-      entityTypes: this.props.entityTypes,
-      propertyTypes: this.props.propertyTypes,
-      schemas: this.props.schemas,
-      workingAbstractTypeType: this.props.workingAbstractTypeType
+      associationTypes,
+      entityTypes,
+      propertyTypes,
+      schemas,
+      workingAbstractTypeType
     };
 
     const filterParams :Object = {
       filterQuery,
-      abstractTypes: getWorkingAbstractTypes(params),
-      workingAbstractTypeType: this.props.workingAbstractTypeType
+      workingAbstractTypeType,
+      abstractTypes: getWorkingAbstractTypes(params)
     };
 
     const filteredTypes :List<Map<*, *>> = filterAbstractTypes(filterParams);
@@ -318,8 +301,11 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
 
   renderAbstractTypeDirectoryCard = () => {
 
+    const { workingAbstractTypeType } = this.props;
+    const { filteredTypes } = this.state;
+
     let cardTitle :string = 'Entity Data Model';
-    switch (this.props.workingAbstractTypeType) {
+    switch (workingAbstractTypeType) {
       case AbstractTypes.AssociationType:
         cardTitle = `${cardTitle} - AssociationTypes`;
         break;
@@ -339,29 +325,35 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
     return (
       <AbstractTypeDirectoryCard>
         <AbstractTypeDirectoryCardTitle>
-          <h1>{ cardTitle }</h1>
+          <h1>
+            { cardTitle }
+          </h1>
           {
             AuthUtils.isAuthenticated() && AuthUtils.isAdmin()
               ? (
-                <StyledButton onClick={this.showCreateNewAbstractTypeCard}>Create New</StyledButton>
+                <StyledButton onClick={this.showCreateNewAbstractTypeCard}>
+                  Create New
+                </StyledButton>
               )
               : null
           }
         </AbstractTypeDirectoryCardTitle>
         <AbstractTypeDirectoryCardSearch placeholder="Filter..." onChange={this.handleOnChangeFilter} />
         {
-          this.state.filteredTypes.isEmpty()
+          filteredTypes.isEmpty()
             ? (
-              <div>No matching results.</div>
+              <div>
+                No matching results.
+              </div>
             )
             : null
         }
         <AbstractTypeDataTable
-            abstractTypes={this.state.filteredTypes}
+            abstractTypes={filteredTypes}
             highlightOnHover
             highlightOnSelect
             maxHeight={600}
-            workingAbstractTypeType={this.props.workingAbstractTypeType}
+            workingAbstractTypeType={workingAbstractTypeType}
             onAbstractTypeSelect={this.handleOnAbstractTypeSelect} />
       </AbstractTypeDirectoryCard>
     );
@@ -369,27 +361,30 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
 
   renderAbstractTypeDetailsCard = () => {
 
+    const { workingAbstractTypeType } = this.props;
+    const { selectedAbstractType } = this.state;
+
     let abstractTypeDetailsContainer;
 
-    switch (this.props.workingAbstractTypeType) {
+    switch (workingAbstractTypeType) {
       case AbstractTypes.AssociationType:
         abstractTypeDetailsContainer = (
-          <AssociationTypeDetailsContainer associationType={this.state.selectedAbstractType} />
+          <AssociationTypeDetailsContainer associationType={selectedAbstractType} />
         );
         break;
       case AbstractTypes.EntityType:
         abstractTypeDetailsContainer = (
-          <EntityTypeDetailsContainer entityType={this.state.selectedAbstractType} />
+          <EntityTypeDetailsContainer entityType={selectedAbstractType} />
         );
         break;
       case AbstractTypes.PropertyType:
         abstractTypeDetailsContainer = (
-          <PropertyTypeDetailsContainer propertyType={this.state.selectedAbstractType} />
+          <PropertyTypeDetailsContainer propertyType={selectedAbstractType} />
         );
         break;
       case AbstractTypes.Schema:
         abstractTypeDetailsContainer = (
-          <SchemaDetailsContainer schema={this.state.selectedAbstractType} />
+          <SchemaDetailsContainer schema={selectedAbstractType} />
         );
         break;
       default:
@@ -410,9 +405,11 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
       return null;
     }
 
+    const { workingAbstractTypeType } = this.props;
+
     return (
       <AbstractTypeCreateContainer
-          workingAbstractTypeType={this.props.workingAbstractTypeType}
+          workingAbstractTypeType={workingAbstractTypeType}
           onCancel={this.hideCreateNewAbstractTypeCard} />
     );
   }
@@ -422,16 +419,21 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
     const {
       associationTypes,
       entityTypes,
+      isFetchingAllAssociationTypes,
+      isFetchingAllEntityTypes,
+      isFetchingAllPropertyTypes,
+      isFetchingAllSchemas,
       propertyTypes,
       schemas,
       workingAbstractTypeType
     } = this.props;
+    const { showCreateNewAbstractTypeCard } = this.state;
 
     if (
-      this.props.isFetchingAllAssociationTypes
-      || this.props.isFetchingAllEntityTypes
-      || this.props.isFetchingAllPropertyTypes
-      || this.props.isFetchingAllSchemas
+      isFetchingAllAssociationTypes
+      || isFetchingAllEntityTypes
+      || isFetchingAllPropertyTypes
+      || isFetchingAllSchemas
     ) {
       return (
         <Spinner />
@@ -445,7 +447,9 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
       || (workingAbstractTypeType === AbstractTypes.Schema && schemas.isEmpty())
     ) {
       return (
-        <Empty>Sorry, something went wrong. Please try refreshing the page, or contact support.</Empty>
+        <Empty>
+          Sorry, something went wrong. Please try refreshing the page, or contact support.
+        </Empty>
       );
     }
 
@@ -454,7 +458,7 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
         <OverviewContainerInnerWrapper>
           { this.renderAbstractTypeDirectoryCard() }
           {
-            this.state.showCreateNewAbstractTypeCard
+            showCreateNewAbstractTypeCard
               ? this.renderAbstractTypeCreateCard()
               : this.renderAbstractTypeDetailsCard()
           }

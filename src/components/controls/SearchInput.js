@@ -76,21 +76,26 @@ class SearchInput extends React.Component<Props, State> {
 
   handleOnChange = (event :SyntheticInputEvent<*>) => {
 
+    const { onChange } = this.props;
+
     this.setState({
       searchQuery: event.target.value
     });
 
-    if (this.props.onChange) {
-      this.props.onChange(event.target.value);
+    if (onChange) {
+      onChange(event.target.value);
     }
   }
 
   handleOnKeyDown = (event :SyntheticKeyboardEvent<*>) => {
 
+    const { onSubmit } = this.props;
+    const { searchQuery } = this.state;
+
     switch (event.keyCode) {
       case 13: // 'Enter' key code
-        if (this.state.searchQuery) {
-          this.props.onSubmit(this.state.searchQuery);
+        if (searchQuery) {
+          onSubmit(searchQuery);
         }
         break;
       default:
@@ -100,14 +105,16 @@ class SearchInput extends React.Component<Props, State> {
 
   render() {
 
+    const { className, placeholder } = this.props;
+
     return (
-      <SearchInputWrapper className={this.props.className}>
+      <SearchInputWrapper className={className}>
         <SearchIcon>
           <FontAwesomeIcon icon={faSearch} transform={{ size: 13 }} />
         </SearchIcon>
         <Input
             type="text"
-            placeholder={this.props.placeholder}
+            placeholder={placeholder}
             onChange={this.handleOnChange}
             onKeyDown={this.handleOnKeyDown} />
       </SearchInputWrapper>

@@ -627,13 +627,13 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
               metadata.get('description')
             );
           }
-          else if (metadata.has('title')) {
+          if (metadata.has('title')) {
             return state.setIn(
               ['associationTypes', associationTypeIndex, 'entityType', 'title'],
               metadata.get('title')
             );
           }
-          else if (metadata.has('type')) {
+          if (metadata.has('type')) {
             // TODO: potential bug with how immutable.js deals with custom objects
             // TODO: consider storing plain object instead of FullyQualifiedName object
             return state.setIn(
