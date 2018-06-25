@@ -49,97 +49,125 @@ class SchemaDetailsContainer extends React.Component<Props> {
 
   handleAddAssociationType = (entityTypeId :string) => {
 
+    const {
+      actions,
+      associationTypes,
+      associationTypesById,
+      schema
+    } = this.props;
+
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
       // NOTE: this is slightly hacky. updateSchema() will ignore the "entityTypes" field, but our reducer will still
       // have access to it
       let entityTypes :Map<*, *> = Map();
-      if (this.props.associationTypesById.has(entityTypeId)) {
-        const targetIndex :number = this.props.associationTypesById.get(entityTypeId);
-        const targetEntityType :Map<*, *> = this.props.associationTypes.getIn([targetIndex, 'entityType'], Map());
+      if (associationTypesById.has(entityTypeId)) {
+        const targetIndex :number = associationTypesById.get(entityTypeId);
+        const targetEntityType :Map<*, *> = associationTypes.getIn([targetIndex, 'entityType'], Map());
         // confirm retrieved EntityType id matches "entityTypeId"
         if (entityTypeId === targetEntityType.get('id')) {
           entityTypes = entityTypes.set(entityTypeId, targetEntityType);
         }
       }
-      this.props.actions.updateSchema({
+      actions.updateSchema({
         entityTypes,
         action: ActionTypes.ADD,
         entityTypeIds: [entityTypeId],
-        schemaFqn: this.props.schema.get('fqn').toJS()
+        schemaFqn: schema.get('fqn').toJS()
       });
     }
   }
 
   handleAddEntityType = (entityTypeId :string) => {
 
+    const {
+      actions,
+      entityTypes,
+      entityTypesById,
+      schema
+    } = this.props;
+
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
       // NOTE: this is slightly hacky. updateSchema() will ignore the "entityTypes" field, but our reducer will still
       // have access to it
-      let entityTypes :Map<*, *> = Map();
-      if (this.props.entityTypesById.has(entityTypeId)) {
-        const targetIndex :number = this.props.entityTypesById.get(entityTypeId);
-        const targetEntityType :Map<*, *> = this.props.entityTypes.get(targetIndex, Map());
+      let theEntityTypes :Map<*, *> = Map();
+      if (entityTypesById.has(entityTypeId)) {
+        const targetIndex :number = entityTypesById.get(entityTypeId);
+        const targetEntityType :Map<*, *> = entityTypes.get(targetIndex, Map());
         // confirm retrieved EntityType id matches "entityTypeId"
         if (entityTypeId === targetEntityType.get('id')) {
-          entityTypes = entityTypes.set(entityTypeId, targetEntityType);
+          theEntityTypes = theEntityTypes.set(entityTypeId, targetEntityType);
         }
       }
-      this.props.actions.updateSchema({
-        entityTypes,
+      actions.updateSchema({
         action: ActionTypes.ADD,
+        entityTypes: theEntityTypes,
         entityTypeIds: [entityTypeId],
-        schemaFqn: this.props.schema.get('fqn').toJS()
+        schemaFqn: schema.get('fqn').toJS()
       });
     }
   }
 
   handleAddPropertyType = (propertyTypeId :string) => {
 
+    const {
+      actions,
+      propertyTypes,
+      propertyTypesById,
+      schema
+    } = this.props;
+
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
       // NOTE: this is slightly hacky. updateSchema() will ignore the "propertyTypes" field, but our reducer will still
       // have access to it
-      let propertyTypes :Map<*, *> = Map();
-      if (this.props.propertyTypesById.has(propertyTypeId)) {
-        const targetIndex :number = this.props.propertyTypesById.get(propertyTypeId);
-        const targetPropertyType :Map<*, *> = this.props.propertyTypes.get(targetIndex, Map());
+      let thePropertyTypes :Map<*, *> = Map();
+      if (propertyTypesById.has(propertyTypeId)) {
+        const targetIndex :number = propertyTypesById.get(propertyTypeId);
+        const targetPropertyType :Map<*, *> = propertyTypes.get(targetIndex, Map());
         // confirm retrieved PropertyType id matches "propertyTypeId"
         if (propertyTypeId === targetPropertyType.get('id')) {
-          propertyTypes = propertyTypes.set(propertyTypeId, targetPropertyType);
+          thePropertyTypes = thePropertyTypes.set(propertyTypeId, targetPropertyType);
         }
       }
-      this.props.actions.updateSchema({
-        propertyTypes,
+      actions.updateSchema({
         action: ActionTypes.ADD,
+        propertyTypes: thePropertyTypes,
         propertyTypeIds: [propertyTypeId],
-        schemaFqn: this.props.schema.get('fqn').toJS()
+        schemaFqn: schema.get('fqn').toJS()
       });
     }
   }
 
   handleRemoveEntityType = (entityTypeId :string) => {
 
+    const { actions, schema } = this.props;
+
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
-      this.props.actions.updateSchema({
+      actions.updateSchema({
         action: ActionTypes.REMOVE,
         entityTypeIds: [entityTypeId],
-        schemaFqn: this.props.schema.get('fqn').toJS()
+        schemaFqn: schema.get('fqn').toJS()
       });
     }
   }
 
   handleRemovePropertyType = (propertyTypeId :string) => {
+
+    const { actions, schema } = this.props;
+
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
-      this.props.actions.updateSchema({
+      actions.updateSchema({
         action: ActionTypes.REMOVE,
         propertyTypeIds: [propertyTypeId],
-        schemaFqn: this.props.schema.get('fqn').toJS()
+        schemaFqn: schema.get('fqn').toJS()
       });
     }
   }
 
   renderPropertyTypesSection = () => {
 
-    const propertyTypes :List<Map<*, *>> = this.props.schema.get('propertyTypes', List());
+    const { schema } = this.props;
+
+    const propertyTypes :List<Map<*, *>> = schema.get('propertyTypes', List());
 
     let propertyTypesDataTable :React$Node = (
       <AbstractTypeDataTable
@@ -162,10 +190,16 @@ class SchemaDetailsContainer extends React.Component<Props> {
 
     return (
       <section>
-        <h2>PropertyTypes</h2>
+        <h2>
+          PropertyTypes
+        </h2>
         {
           propertyTypes.isEmpty()
-            ? <p>No PropertyTypes defined.</p>
+            ? (
+              <p>
+                No PropertyTypes defined.
+              </p>
+            )
             : propertyTypesDataTable
         }
       </section>
@@ -178,15 +212,19 @@ class SchemaDetailsContainer extends React.Component<Props> {
       return null;
     }
 
-    const schemaPropertyTypeIds :List<string> = this.props.schema.get('propertyTypes', List())
+    const { propertyTypes, schema } = this.props;
+
+    const schemaPropertyTypeIds :List<string> = schema.get('propertyTypes', List())
       .map((propertyType :Map<*, *>) => propertyType.get('id'));
 
-    const availablePropertyTypes :List<Map<*, *>> = this.props.propertyTypes
+    const availablePropertyTypes :List<Map<*, *>> = propertyTypes
       .filterNot((propertyType :Map<*, *>) => schemaPropertyTypeIds.includes(propertyType.get('id', '')));
 
     return (
       <section>
-        <h2>Add PropertyTypes</h2>
+        <h2>
+          Add PropertyTypes
+        </h2>
         <AbstractTypeSearchableSelectWrapper>
           <AbstractTypeSearchableSelect
               abstractTypes={availablePropertyTypes}
@@ -201,7 +239,9 @@ class SchemaDetailsContainer extends React.Component<Props> {
 
   renderEntityTypesSection = () => {
 
-    const entityTypes :List<Map<*, *>> = this.props.schema.get('entityTypes', List())
+    const { schema } = this.props;
+
+    const entityTypes :List<Map<*, *>> = schema.get('entityTypes', List())
       .filterNot((entityType :Map<*, *>) => entityType.get('category', '') === AbstractTypes.AssociationType);
 
     let entityTypesDataTable :React$Node = (
@@ -225,10 +265,16 @@ class SchemaDetailsContainer extends React.Component<Props> {
 
     return (
       <section>
-        <h2>EntityTypes</h2>
+        <h2>
+          EntityTypes
+        </h2>
         {
           entityTypes.isEmpty()
-            ? <p>No EntityTypes defined.</p>
+            ? (
+              <p>
+                No EntityTypes defined.
+              </p>
+            )
             : entityTypesDataTable
         }
       </section>
@@ -241,15 +287,19 @@ class SchemaDetailsContainer extends React.Component<Props> {
       return null;
     }
 
-    const schemaEntityTypeIds :List<string> = this.props.schema.get('entityTypes', List())
+    const { entityTypes, schema } = this.props;
+
+    const schemaEntityTypeIds :List<string> = schema.get('entityTypes', List())
       .map((entityType :Map<*, *>) => entityType.get('id'));
 
-    const availableEntityTypes :List<Map<*, *>> = this.props.entityTypes
+    const availableEntityTypes :List<Map<*, *>> = entityTypes
       .filterNot((entityType :Map<*, *>) => schemaEntityTypeIds.includes(entityType.get('id', '')));
 
     return (
       <section>
-        <h2>Add EntityTypes</h2>
+        <h2>
+          Add EntityTypes
+        </h2>
         <AbstractTypeSearchableSelectWrapper>
           <AbstractTypeSearchableSelect
               abstractTypes={availableEntityTypes}
@@ -264,7 +314,9 @@ class SchemaDetailsContainer extends React.Component<Props> {
 
   renderAssociationTypesSection = () => {
 
-    const associationEntityTypes :List<Map<*, *>> = this.props.schema.get('entityTypes', List())
+    const { schema } = this.props;
+
+    const associationEntityTypes :List<Map<*, *>> = schema.get('entityTypes', List())
       .filter((entityType :Map<*, *>) => entityType.get('category', '') === AbstractTypes.AssociationType);
 
     let associationEntityTypesDataTable :React$Node = (
@@ -288,10 +340,16 @@ class SchemaDetailsContainer extends React.Component<Props> {
 
     return (
       <section>
-        <h2>AssociationTypes</h2>
+        <h2>
+          AssociationTypes
+        </h2>
         {
           associationEntityTypes.isEmpty()
-            ? <p>No AssociationTypes defined.</p>
+            ? (
+              <p>
+                No AssociationTypes defined.
+              </p>
+            )
             : associationEntityTypesDataTable
         }
       </section>
@@ -304,16 +362,20 @@ class SchemaDetailsContainer extends React.Component<Props> {
       return null;
     }
 
-    const schemaEntityTypeIds :List<string> = this.props.schema.get('entityTypes', List())
+    const { associationTypes, schema } = this.props;
+
+    const schemaEntityTypeIds :List<string> = schema.get('entityTypes', List())
       .map((entityType :Map<*, *>) => entityType.get('id'));
 
-    const availableEntityTypes :List<Map<*, *>> = this.props.associationTypes
+    const availableEntityTypes :List<Map<*, *>> = associationTypes
       .map((associationType :Map<*, *>) => associationType.get('entityType', Map()))
       .filterNot((entityType :Map<*, *>) => schemaEntityTypeIds.includes(entityType.get('id', '')));
 
     return (
       <section>
-        <h2>Add AssociationTypes</h2>
+        <h2>
+          Add AssociationTypes
+        </h2>
         <AbstractTypeSearchableSelectWrapper>
           <AbstractTypeSearchableSelect
               abstractTypes={availableEntityTypes}
@@ -328,16 +390,24 @@ class SchemaDetailsContainer extends React.Component<Props> {
 
   render() {
 
-    if (!this.props.schema || this.props.schema.isEmpty()) {
+    const { schema } = this.props;
+
+    if (!schema || schema.isEmpty()) {
       return null;
     }
 
     return (
       <div>
-        <h1>Schema Details</h1>
+        <h1>
+          Schema Details
+        </h1>
         <section>
-          <h2>FQN</h2>
-          <p>{ FullyQualifiedName.toString(this.props.schema.get('fqn')) }</p>
+          <h2>
+            FQN
+          </h2>
+          <p>
+            { FullyQualifiedName.toString(schema.get('fqn')) }
+          </p>
         </section>
         { this.renderPropertyTypesSection() }
         { this.renderAddPropertyTypesSection() }

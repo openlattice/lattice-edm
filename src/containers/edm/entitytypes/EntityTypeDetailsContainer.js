@@ -58,9 +58,11 @@ class EntityTypeDetailsContainer extends React.Component<Props> {
 
   handleOnPropertyTypeAdd = (selectedPropertyTypeId :string) => {
 
+    const { actions, entityType } = this.props;
+
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
-      this.props.actions.addPropertyTypeToEntityType({
-        entityTypeId: this.props.entityType.get('id'),
+      actions.addPropertyTypeToEntityType({
+        entityTypeId: entityType.get('id'),
         propertyTypeId: selectedPropertyTypeId
       });
     }
@@ -68,9 +70,11 @@ class EntityTypeDetailsContainer extends React.Component<Props> {
 
   handleOnPropertyTypeRemove = (removedAbstractTypeId :string) => {
 
+    const { actions, entityType } = this.props;
+
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
-      this.props.actions.removePropertyTypeFromEntityType({
-        entityTypeId: this.props.entityType.get('id'),
+      actions.removePropertyTypeFromEntityType({
+        entityTypeId: entityType.get('id'),
         propertyTypeId: removedAbstractTypeId
       });
     }
@@ -78,14 +82,16 @@ class EntityTypeDetailsContainer extends React.Component<Props> {
 
   handleOnPropertyTypeReorder = (oldIndex :number, newIndex :number) => {
 
+    const { actions, entityType } = this.props;
+
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
 
-      const propertyTypeIds :List<string> = this.props.entityType.get('properties');
+      const propertyTypeIds :List<string> = entityType.get('properties');
       const idToMove :string = propertyTypeIds.get(oldIndex);
       const reorderedPropertyTypeIds :List<string> = propertyTypeIds.delete(oldIndex).insert(newIndex, idToMove);
 
-      this.props.actions.reorderEntityTypePropertyTypes({
-        entityTypeId: this.props.entityType.get('id'),
+      actions.reorderEntityTypePropertyTypes({
+        entityTypeId: entityType.get('id'),
         propertyTypeIds: reorderedPropertyTypeIds.toJS()
       });
     }
@@ -93,8 +99,10 @@ class EntityTypeDetailsContainer extends React.Component<Props> {
 
   handleOnClickDelete = () => {
 
+    const { actions, entityType } = this.props;
+
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
-      this.props.actions.deleteEntityType(this.props.entityType.get('id'));
+      actions.deleteEntityType(entityType.get('id'));
     }
   }
 
@@ -127,7 +135,9 @@ class EntityTypeDetailsContainer extends React.Component<Props> {
 
     return (
       <section>
-        <h2>PropertyTypes</h2>
+        <h2>
+          PropertyTypes
+        </h2>
         { propertyTypesDataTable }
       </section>
     );
@@ -139,15 +149,19 @@ class EntityTypeDetailsContainer extends React.Component<Props> {
       return null;
     }
 
-    const availablePropertyTypes :List<Map<*, *>> = this.props.propertyTypes
+    const { entityType, propertyTypes } = this.props;
+
+    const availablePropertyTypes :List<Map<*, *>> = propertyTypes
       .filterNot((propertyType :Map<*, *>) => {
-        const propertyTypeIds :List<string> = this.props.entityType.get('properties', List());
+        const propertyTypeIds :List<string> = entityType.get('properties', List());
         return propertyTypeIds.includes(propertyType.get('id', ''));
       });
 
     return (
       <section>
-        <h2>Add PropertyTypes</h2>
+        <h2>
+          Add PropertyTypes
+        </h2>
         <AbstractTypeSearchableSelectWrapper>
           <AbstractTypeSearchableSelect
               abstractTypes={availablePropertyTypes}
@@ -162,55 +176,63 @@ class EntityTypeDetailsContainer extends React.Component<Props> {
 
   render() {
 
-    if (!this.props.entityType || this.props.entityType.isEmpty()) {
+    const { entityType, propertyTypes, propertyTypesById } = this.props;
+
+    if (!entityType || entityType.isEmpty()) {
       return null;
     }
 
-    const baseType :string = this.props.entityType.get('baseType', '');
+    const baseType :string = entityType.get('baseType', '');
 
-    const keyPropertyTypeIds :OrderedSet<string> = this.props.entityType.get('key').toOrderedSet();
-    const propertyTypeIds :OrderedSet<string> = this.props.entityType.get('properties').toOrderedSet();
+    const keyPropertyTypeIds :OrderedSet<string> = entityType.get('key').toOrderedSet();
+    const propertyTypeIds :OrderedSet<string> = entityType.get('properties').toOrderedSet();
 
     const keyPropertyTypes :List<Map<*, *>> = keyPropertyTypeIds
       .map((propertyTypeId :string) => {
-        const index :number = this.props.propertyTypesById.get(propertyTypeId, -1);
+        const index :number = propertyTypesById.get(propertyTypeId, -1);
         if (index === -1) {
           return Map();
         }
-        return this.props.propertyTypes.get(index, Map());
+        return propertyTypes.get(index, Map());
       })
       .toList();
 
-    const propertyTypes :List<Map<*, *>> = propertyTypeIds
+    const thePropertyTypes :List<Map<*, *>> = propertyTypeIds
       .map((propertyTypeId :string) => {
-        const index :number = this.props.propertyTypesById.get(propertyTypeId, -1);
+        const index :number = propertyTypesById.get(propertyTypeId, -1);
         if (index === -1) {
           return Map();
         }
-        return this.props.propertyTypes.get(index, Map());
+        return propertyTypes.get(index, Map());
       })
       .toList();
 
     return (
       <div>
-        <h1>EntityType Details</h1>
+        <h1>
+          EntityType Details
+        </h1>
         <section>
-          <h2>ID</h2>
-          <p>{ this.props.entityType.get('id') }</p>
+          <h2>
+            ID
+          </h2>
+          <p>
+            { entityType.get('id') }
+          </p>
         </section>
         <section>
           <AbstractTypeFieldType
-              abstractType={this.props.entityType}
+              abstractType={entityType}
               abstractTypeType={AbstractTypes.EntityType} />
         </section>
         <section>
           <AbstractTypeFieldTitle
-              abstractType={this.props.entityType}
+              abstractType={entityType}
               abstractTypeType={AbstractTypes.EntityType} />
         </section>
         <section>
           <AbstractTypeFieldDescription
-              abstractType={this.props.entityType}
+              abstractType={entityType}
               abstractTypeType={AbstractTypes.EntityType} />
         </section>
         {
@@ -218,29 +240,41 @@ class EntityTypeDetailsContainer extends React.Component<Props> {
             ? null
             : (
               <section>
-                <h2>BaseType</h2>
-                <p>{ this.props.entityType.get('baseType') }</p>
+                <h2>
+                  BaseType
+                </h2>
+                <p>
+                  { entityType.get('baseType') }
+                </p>
               </section>
             )
         }
         <section>
-          <h2>Category</h2>
-          <p>{ this.props.entityType.get('category') }</p>
+          <h2>
+            Category
+          </h2>
+          <p>
+            { entityType.get('category') }
+          </p>
         </section>
         <section>
-          <h2>Primary Key PropertyTypes</h2>
+          <h2>
+            Primary Key PropertyTypes
+          </h2>
           <AbstractTypeDataTable
               abstractTypes={keyPropertyTypes}
               maxHeight={500}
               workingAbstractTypeType={AbstractTypes.PropertyType} />
         </section>
-        { this.renderPropertyTypesSection(propertyTypes) }
+        { this.renderPropertyTypesSection(thePropertyTypes) }
         { this.renderAddPropertyTypesSection() }
         {
           AuthUtils.isAuthenticated() && AuthUtils.isAdmin()
             ? (
               <section>
-                <DeleteButton onClick={this.handleOnClickDelete}>Delete EntityType</DeleteButton>
+                <DeleteButton onClick={this.handleOnClickDelete}>
+                  Delete EntityType
+                </DeleteButton>
               </section>
             )
             : null
