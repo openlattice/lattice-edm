@@ -22,8 +22,8 @@ import type { AbstractTypeFilterParams } from '../../utils/AbstractTypeUtils';
 
 const SearchableSelectWrapper = styled.div`
   border: none;
-  ${(props) => {
-    if (props.isVisibleDataTable) {
+  ${({ isVisibleDataTable }) => {
+    if (isVisibleDataTable) {
       return css`
         box-shadow: 0 2px 8px -2px rgba(17, 51, 85, 0.15);
       `;
@@ -78,7 +78,7 @@ const DataTableWrapper = styled.div`
   margin-top: -1px; /* - 1 for the bottom border of SearchInputWrapper */
   position: relative;
   width: 100%;
-  visibility: ${props => (props.isVisible ? 'visible' : 'hidden')}};
+  visibility: ${({ isVisible }) => (isVisible ? 'visible' : 'hidden')}};
 `;
 
 /*
@@ -86,18 +86,18 @@ const DataTableWrapper = styled.div`
  */
 
 type Props = {
-  abstractTypes :List<Map<*, *>>,
-  className :string,
-  maxHeight :number,
-  searchPlaceholder :string,
-  workingAbstractTypeType :AbstractType,
-  onAbstractTypeSelect :Function
+  abstractTypes :List<Map<*, *>>;
+  className :string;
+  maxHeight :number;
+  searchPlaceholder :string;
+  workingAbstractTypeType :AbstractType;
+  onAbstractTypeSelect :Function;
 }
 
 type State = {
-  filteredTypes :List<Map<*, *>>,
-  isVisibleDataTable :boolean,
-  searchQuery :string
+  filteredTypes :List<Map<*, *>>;
+  isVisibleDataTable :boolean;
+  searchQuery :string;
 }
 
 class AbstractTypeSearchableSelect extends React.Component<Props, State> {
@@ -148,7 +148,9 @@ class AbstractTypeSearchableSelect extends React.Component<Props, State> {
 
   handleOnAbstractTypeSelect = (selectedAbstractTypeId :string) => {
 
-    this.props.onAbstractTypeSelect(selectedAbstractTypeId);
+    const { onAbstractTypeSelect } = this.props;
+
+    onAbstractTypeSelect(selectedAbstractTypeId);
     this.setState({
       searchQuery: ''
     });
@@ -156,10 +158,12 @@ class AbstractTypeSearchableSelect extends React.Component<Props, State> {
 
   handleOnChangeSearchQuery = (event :SyntheticInputEvent<*>) => {
 
+    const { abstractTypes, workingAbstractTypeType } = this.props;
+
     const filterParams :AbstractTypeFilterParams = {
-      abstractTypes: this.props.abstractTypes,
-      filterQuery: event.target.value,
-      workingAbstractTypeType: this.props.workingAbstractTypeType
+      abstractTypes,
+      workingAbstractTypeType,
+      filterQuery: event.target.value
     };
 
     this.setState({
@@ -170,30 +174,43 @@ class AbstractTypeSearchableSelect extends React.Component<Props, State> {
 
   render() {
 
+    const {
+      className,
+      maxHeight,
+      searchPlaceholder,
+      workingAbstractTypeType
+    } = this.props;
+
+    const {
+      filteredTypes,
+      isVisibleDataTable,
+      searchQuery
+    } = this.state;
+
     return (
-      <SearchableSelectWrapper isVisibleDataTable={this.state.isVisibleDataTable} className={this.props.className}>
+      <SearchableSelectWrapper isVisibleDataTable={isVisibleDataTable} className={className}>
         <SearchInputWrapper>
           <SearchIcon>
             <FontAwesomeIcon icon={faSearch} transform={{ size: 13 }} />
           </SearchIcon>
           <SearchInput
               type="text"
-              placeholder={this.props.searchPlaceholder}
-              value={this.state.searchQuery}
+              placeholder={searchPlaceholder}
+              value={searchQuery}
               onBlur={this.hideDataTable}
               onChange={this.handleOnChangeSearchQuery}
               onFocus={this.showDataTable} />
         </SearchInputWrapper>
         {
-          !this.state.isVisibleDataTable
+          !isVisibleDataTable
             ? null
             : (
-              <DataTableWrapper isVisible={this.state.isVisibleDataTable}>
+              <DataTableWrapper isVisible={isVisibleDataTable}>
                 <AbstractTypeDataTable
-                    abstractTypes={this.state.filteredTypes}
+                    abstractTypes={filteredTypes}
                     highlightOnHover
-                    maxHeight={this.props.maxHeight}
-                    workingAbstractTypeType={this.props.workingAbstractTypeType}
+                    maxHeight={maxHeight}
+                    workingAbstractTypeType={workingAbstractTypeType}
                     onAbstractTypeSelect={this.handleOnAbstractTypeSelect} />
               </DataTableWrapper>
             )

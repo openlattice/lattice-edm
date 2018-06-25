@@ -21,9 +21,9 @@ const TYPES = {
  * helper functions
  */
 
-const getBackgroundStyles = (props :Object) => {
+const getBackgroundStyles = ({ highlight }) => {
 
-  if (props.highlight === true) {
+  if (highlight === true) {
     return css`
       background-color: #edf6ff;
     `;
@@ -32,14 +32,14 @@ const getBackgroundStyles = (props :Object) => {
   return '';
 };
 
-const getBorderStyles = (props :Object) => {
+const getBorderStyles = ({ type }) => {
 
-  if (props.type === TYPES.BODY) {
+  if (type === TYPES.BODY) {
     return css`
       border-top: 1px solid #c5d5e5;
     `;
   }
-  else if (props.type === TYPES.HEAD) {
+  if (type === TYPES.HEAD) {
     return css`
       border-bottom: 1px solid #516a83;
     `;
@@ -48,9 +48,9 @@ const getBorderStyles = (props :Object) => {
   return '';
 };
 
-const getFontWeight = (props :Object) => {
+const getFontWeight = ({ type }) => {
 
-  if (props.type === TYPES.HEAD) {
+  if (type === TYPES.HEAD) {
     return css`
       font-weight: 600;
     `;
@@ -67,7 +67,7 @@ const CellWrapper = styled.div`
   align-items: center;
   display: flex;
   font-size: 14px;
-  justify-content: ${props => props.justifyContent};
+  justify-content: ${({ justifyContent }) => justifyContent};
   padding: ${CELL_PADDING}px;
   ${getBackgroundStyles}
   ${getBorderStyles}
@@ -113,20 +113,33 @@ class AbstractCell extends React.Component<Props> {
 
   render() {
 
+    const {
+      highlight,
+      justifyContent,
+      style,
+      type,
+      value,
+      onMouseDown,
+      onMouseLeave,
+      onMouseOver
+    } = this.props;
+
     // TODO: hover effects
     // possible red: #f44c44;
 
     /* eslint-disable jsx-a11y/mouse-events-have-key-events */
     return (
       <CellWrapper
-          highlight={this.props.highlight}
-          justifyContent={this.props.justifyContent}
-          type={this.props.type}
-          style={this.props.style}
-          onMouseDown={this.props.onMouseDown}
-          onMouseLeave={this.props.onMouseLeave}
-          onMouseOver={this.props.onMouseOver}>
-        <CellValueWrapper>{ this.props.value }</CellValueWrapper>
+          highlight={highlight}
+          justifyContent={justifyContent}
+          type={type}
+          style={style}
+          onMouseDown={onMouseDown}
+          onMouseLeave={onMouseLeave}
+          onMouseOver={onMouseOver}>
+        <CellValueWrapper>
+          { value }
+        </CellValueWrapper>
       </CellWrapper>
     );
     /* eslint-enable */
