@@ -4,9 +4,9 @@
 
 import React from 'react';
 
-import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 import styled from 'styled-components';
-import { faTimes } from '@fortawesome/fontawesome-pro-regular';
+import { faTimes } from '@fortawesome/pro-regular-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Models } from 'lattice';
 import {
   List,

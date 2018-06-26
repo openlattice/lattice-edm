@@ -4,9 +4,9 @@
 
 import React from 'react';
 
-import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 import styled from 'styled-components';
-import { faCheck, faPencil } from '@fortawesome/fontawesome-pro-solid';
+import { faCheck, faPencil } from '@fortawesome/pro-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { isEmptyString, isNonEmptyString } from '../../utils/LangUtils';
 
