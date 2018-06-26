@@ -4,11 +4,16 @@
 
 import React from 'react';
 
-import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 import styled from 'styled-components';
-import { faTimes } from '@fortawesome/fontawesome-pro-regular';
-import { List, Map, OrderedMap, fromJS } from 'immutable';
+import { faTimes } from '@fortawesome/pro-regular-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Models } from 'lattice';
+import {
+  List,
+  Map,
+  OrderedMap,
+  fromJS
+} from 'immutable';
 
 import AbstractCell from './AbstractCell';
 import AbstractDataTable from './AbstractDataTable';
@@ -158,7 +163,9 @@ class AbstractTypeDataTable extends React.Component<Props, State> {
 
   componentWillReceiveProps(nextProps :Props) {
 
-    const haveAbstractTypesChanged :boolean = !this.props.abstractTypes.equals(nextProps.abstractTypes);
+    const { abstractTypes } = this.props;
+
+    const haveAbstractTypesChanged :boolean = !abstractTypes.equals(nextProps.abstractTypes);
     if (haveAbstractTypesChanged) {
 
       const data :List<Map<string, string>> = AbstractTypeDataTable.getData(nextProps);
@@ -171,31 +178,34 @@ class AbstractTypeDataTable extends React.Component<Props, State> {
     }
   }
 
-  handleOnAbstractTypeRemove = (selectedRowIndex :number) => {
+  handleOnAbstractTypeRemove = (clickedRowIndex :number) => {
 
-    const selectedAbstractType :Map<*, *> = this.props.abstractTypes.get(selectedRowIndex, Map());
+    const { abstractTypes, onAbstractTypeRemove, workingAbstractTypeType } = this.props;
+    const { selectedRowIndex } = this.state;
+
+    const selectedAbstractType :Map<*, *> = abstractTypes.get(clickedRowIndex, Map());
     let selectedAbstractTypeId :string = selectedAbstractType.get('id', '');
 
-    if (this.props.workingAbstractTypeType === AbstractTypes.AssociationType) {
+    if (workingAbstractTypeType === AbstractTypes.AssociationType) {
       const entityType :Map<*, *> = selectedAbstractType.get('entityType', Map());
       selectedAbstractTypeId = entityType.get('id', '');
     }
-    else if (this.props.workingAbstractTypeType === AbstractTypes.Schema) {
+    else if (workingAbstractTypeType === AbstractTypes.Schema) {
       selectedAbstractTypeId = FullyQualifiedName.toString(selectedAbstractType.get('fqn', Map()));
     }
 
-    this.props.onAbstractTypeRemove(selectedAbstractTypeId);
+    onAbstractTypeRemove(selectedAbstractTypeId);
 
-    if (selectedRowIndex === this.state.selectedRowIndex) {
+    if (clickedRowIndex === selectedRowIndex) {
       this.setState({
         hoveredRowIndex: -1,
         selectedRowIndex: 0
       });
     }
-    else if (selectedRowIndex < this.state.selectedRowIndex) {
+    else if (clickedRowIndex < selectedRowIndex) {
       this.setState({
         hoveredRowIndex: -1,
-        selectedRowIndex: this.state.selectedRowIndex - 1
+        selectedRowIndex: selectedRowIndex - 1
       });
     }
     else {
@@ -207,18 +217,20 @@ class AbstractTypeDataTable extends React.Component<Props, State> {
 
   handleOnAbstractTypeSelect = (selectedRowIndex :number) => {
 
-    const selectedAbstractType :Map<*, *> = this.props.abstractTypes.get(selectedRowIndex, Map());
+    const { abstractTypes, onAbstractTypeSelect, workingAbstractTypeType } = this.props;
+
+    const selectedAbstractType :Map<*, *> = abstractTypes.get(selectedRowIndex, Map());
     let selectedAbstractTypeId :string = selectedAbstractType.get('id', '');
 
-    if (this.props.workingAbstractTypeType === AbstractTypes.AssociationType) {
+    if (workingAbstractTypeType === AbstractTypes.AssociationType) {
       const entityType :Map<*, *> = selectedAbstractType.get('entityType', Map());
       selectedAbstractTypeId = entityType.get('id', '');
     }
-    else if (this.props.workingAbstractTypeType === AbstractTypes.Schema) {
+    else if (workingAbstractTypeType === AbstractTypes.Schema) {
       selectedAbstractTypeId = FullyQualifiedName.toString(selectedAbstractType.get('fqn', Map()));
     }
 
-    this.props.onAbstractTypeSelect(selectedAbstractTypeId);
+    onAbstractTypeSelect(selectedAbstractTypeId);
 
     this.setState({
       selectedRowIndex,
@@ -228,21 +240,28 @@ class AbstractTypeDataTable extends React.Component<Props, State> {
 
   handleOnReorder = (oldIndex :number, newIndex :number) => {
 
+    const { onReorder } = this.props;
+    const { data } = this.state;
+
     if (oldIndex !== newIndex) {
-      const itemToMove = this.state.data.get(oldIndex);
-      const reorderedData = this.state.data.delete(oldIndex).insert(newIndex, itemToMove);
+      const itemToMove = data.get(oldIndex);
+      const reorderedData = data.delete(oldIndex).insert(newIndex, itemToMove);
       this.setState({ data: reorderedData });
-      this.props.onReorder(oldIndex, newIndex);
+      onReorder(oldIndex, newIndex);
     }
   }
 
   renderBodyCell = (params :Object, cellValue :mixed) => {
 
-    const shouldHighlightCell :boolean =
-      (this.props.highlightOnHover && params.rowIndex === this.state.hoveredRowIndex)
-      || (this.props.highlightOnSelect && params.rowIndex === this.state.selectedRowIndex);
+    const { highlightOnHover, highlightOnSelect, showRemoveColumn } = this.props;
+    const { headers, hoveredRowIndex, selectedRowIndex } = this.state;
 
-    if (this.props.showRemoveColumn && params.columnIndex === this.state.headers.size - 1) {
+    const shouldHighlightCell :boolean = (
+      (highlightOnHover && params.rowIndex === hoveredRowIndex)
+      || (highlightOnSelect && params.rowIndex === selectedRowIndex)
+    );
+
+    if (showRemoveColumn && params.columnIndex === headers.size - 1) {
 
       // TODO: hover effects
       // possible red: #f44c44;
@@ -308,19 +327,27 @@ class AbstractTypeDataTable extends React.Component<Props, State> {
 
   render() {
 
-    if (this.props.abstractTypes.isEmpty()) {
+    const {
+      abstractTypes,
+      height,
+      maxHeight,
+      orderable
+    } = this.props;
+    const { data, headers } = this.state;
+
+    if (abstractTypes.isEmpty()) {
       return null;
     }
 
     return (
       <AbstractDataTable
           bodyCellRenderer={this.renderBodyCell}
-          data={this.state.data}
-          headers={this.state.headers}
-          height={this.props.height}
-          maxHeight={this.props.maxHeight}
+          data={data}
+          headers={headers}
+          height={height}
+          maxHeight={maxHeight}
           onReorder={this.handleOnReorder}
-          orderable={this.props.orderable} />
+          orderable={orderable} />
     );
   }
 }

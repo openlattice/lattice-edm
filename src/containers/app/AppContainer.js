@@ -87,19 +87,25 @@ function getLoginUrl() :string {
   return `${window.location.origin}${Routes.LOGIN}/${queryString}`;
 }
 
-const AppContainer = (props :Props) => (
+const AppContainer = ({ actions } :Props) => (
   <AppWrapper>
     <AppHeaderOuterWrapper>
       <AppHeaderInnerWrapper>
         <Logo src={OpenLatticeLogo} height="50" />
-        <Title>Entity Data Model</Title>
+        <Title>
+          Entity Data Model
+        </Title>
         {
           AuthUtils.isAuthenticated()
             ? (
-              <StyledActionButton onClick={props.actions.logout}>Logout</StyledActionButton>
+              <StyledActionButton onClick={actions.logout}>
+                Logout
+              </StyledActionButton>
             )
             : (
-              <LoginAnchor href={`${getLoginUrl()}`}>Login</LoginAnchor>
+              <LoginAnchor href={`${getLoginUrl()}`}>
+                Login
+              </LoginAnchor>
             )
         }
       </AppHeaderInnerWrapper>

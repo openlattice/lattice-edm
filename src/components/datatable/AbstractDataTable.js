@@ -198,9 +198,7 @@ class AbstractDataTable extends React.Component<Props, State> {
 
     let columnWidths :Map<number, number> = AbstractDataTable.computeColumnWidths(params);
     const totalWidth :number = columnWidths.reduce(
-      (widthSum :number, columnWidth :number) :number => {
-        return widthSum + columnWidth;
-      },
+      (widthSum :number, columnWidth :number) :number => widthSum + columnWidth,
       0
     );
 
@@ -242,17 +240,20 @@ class AbstractDataTable extends React.Component<Props, State> {
 
   componentWillReceiveProps(nextProps :Props) {
 
+    const { data, headers } = this.props;
+    const { autosizerHeight, autosizerWidth } = this.state;
+
     const nextHeaders :GridHeaders = nextProps.headers;
     const nextData :GridData = nextProps.data;
 
-    const haveHeadersChanged :boolean = !this.props.headers.equals(nextHeaders);
-    const hasDataChanged :boolean = !this.props.data.equals(nextData);
+    const haveHeadersChanged :boolean = !headers.equals(nextHeaders);
+    const hasDataChanged :boolean = !data.equals(nextData);
 
     if (haveHeadersChanged || hasDataChanged) {
 
       const newDimensions :Object = AbstractDataTable.computeDimensions({
-        autosizerHeight: this.state.autosizerHeight,
-        autosizerWidth: this.state.autosizerWidth,
+        autosizerHeight,
+        autosizerWidth,
         data: nextData,
         headers: nextHeaders,
         specifiedMaxHeight: nextProps.maxHeight,
@@ -269,12 +270,17 @@ class AbstractDataTable extends React.Component<Props, State> {
 
   componentWillUpdate(nextProps :Props, nextState :State) {
 
+    const { data, headers } = this.props;
+    const { columnWidths } = this.state;
+
+    /* eslint-disable prefer-destructuring */
     const headGrid :?Grid = this.headGrid;
     const bodyGrid :?Grid = this.bodyGrid;
+    /* eslint-enable */
 
-    const haveHeadersChanged :boolean = !this.props.headers.equals(nextProps.headers);
-    const hasDataChanged :boolean = !this.props.data.equals(nextProps.data);
-    const haveColumnWidthsChanged :boolean = !this.state.columnWidths.equals(nextState.columnWidths);
+    const haveHeadersChanged :boolean = !headers.equals(nextProps.headers);
+    const hasDataChanged :boolean = !data.equals(nextProps.data);
+    const haveColumnWidthsChanged :boolean = !columnWidths.equals(nextState.columnWidths);
 
     const shouldRecomputeGrids :boolean = haveHeadersChanged || hasDataChanged || haveColumnWidthsChanged;
 
@@ -303,12 +309,15 @@ class AbstractDataTable extends React.Component<Props, State> {
   }
 
   isLastColumn = (columnIndex :number) :boolean => {
-    return columnIndex + 1 === this.state.columnWidths.size;
+
+    const { columnWidths } = this.state;
+    return columnIndex + 1 === columnWidths.size;
   }
 
   getColumnWidth = (params :Object) :number => {
 
-    return this.state.columnWidths.get(params.index, DEFAULT_COLUMN_MIN_WIDTH);
+    const { columnWidths } = this.state;
+    return columnWidths.get(params.index, DEFAULT_COLUMN_MIN_WIDTH);
   }
 
   getRowHeight = () :number => {
@@ -318,23 +327,34 @@ class AbstractDataTable extends React.Component<Props, State> {
 
   getCellValue = (rowIndex :number, columnIndex :number) :string => {
 
+    const { data, headers } = this.props;
+
     // keeping it simple
     // TODO: handle various cell value types (string, number, array, object, etc.)
-    const header :string = this.props.headers.getIn([columnIndex, 'id'], '');
-    return this.props.data.getIn([rowIndex, header], '');
+    const header :string = headers.getIn([columnIndex, 'id'], '');
+    return data.getIn([rowIndex, header], '');
   }
 
   onAutoSizerResize = (params :Object) => {
 
+    const {
+      data,
+      headers,
+      height,
+      maxHeight,
+      maxWidth,
+      width
+    } = this.props;
+
     const newDimensions :Object = AbstractDataTable.computeDimensions({
+      data,
+      headers,
       autosizerHeight: params.height,
       autosizerWidth: params.width,
-      data: this.props.data,
-      headers: this.props.headers,
-      specifiedMaxHeight: this.props.maxHeight,
-      specifiedMaxWidth: this.props.maxWidth,
-      specifiedHeight: this.props.height,
-      specifiedWidth: this.props.width
+      specifiedMaxHeight: maxHeight,
+      specifiedMaxWidth: maxWidth,
+      specifiedHeight: height,
+      specifiedWidth: width
     });
 
     this.setState({
@@ -347,14 +367,17 @@ class AbstractDataTable extends React.Component<Props, State> {
   // https://github.com/clauderic/react-sortable-hoc
   onSortEnd = (rsParams :Object) => {
 
+    const { onReorder } = this.props;
+
     if (rsParams.oldIndex !== rsParams.newIndex) {
-      this.props.onReorder(rsParams.oldIndex, rsParams.newIndex);
+      onReorder(rsParams.oldIndex, rsParams.newIndex);
     }
   }
 
   renderHeadCell = (params :Object) => {
 
-    const cellValue :string = this.props.headers.getIn([params.columnIndex, 'value'], '');
+    const { headers } = this.props;
+    const cellValue :string = headers.getIn([params.columnIndex, 'value'], '');
 
     return (
       <AbstractCell
@@ -384,8 +407,16 @@ class AbstractDataTable extends React.Component<Props, State> {
 
   render() {
 
-    const columnCount :number = this.props.headers.size;
-    const rowCount :number = this.props.data.size;
+    const { data, headers, orderable } = this.props;
+    const {
+      computedBodyGridHeight,
+      computedBodyGridWidth,
+      computedHeadGridHeight,
+      computedHeadGridWidth
+    } = this.state;
+
+    const columnCount :number = headers.size;
+    const rowCount :number = data.size;
 
     if (columnCount === 0 || rowCount === 0) {
       // TODO: need a better design for no data
@@ -420,18 +451,18 @@ class AbstractDataTable extends React.Component<Props, State> {
                               columnCount={columnCount}
                               columnWidth={this.getColumnWidth}
                               estimatedColumnSize={DEFAULT_COLUMN_MIN_WIDTH}
-                              height={this.state.computedHeadGridHeight}
+                              height={computedHeadGridHeight}
                               innerRef={this.setHeadGridRef}
                               overscanColumnCount={DEFAULT_OVERSCAN_COLUMN_COUNT}
                               overscanRowCount={DEFAULT_OVERSCAN_ROW_COUNT}
                               rowHeight={DEFAULT_ROW_MIN_HEIGHT}
                               rowCount={1}
                               scrollLeft={scrollLeft}
-                              width={this.state.computedHeadGridWidth} />
+                              width={computedHeadGridWidth} />
                         </div>
                         <div>
                           {
-                            this.props.orderable
+                            orderable
                               ? (
                                 <OrderableBodyGrid
                                     cellRangeRenderer={orderableRowRangeRenderer}
@@ -439,7 +470,7 @@ class AbstractDataTable extends React.Component<Props, State> {
                                     columnCount={columnCount}
                                     columnWidth={this.getColumnWidth}
                                     estimatedColumnSize={DEFAULT_COLUMN_MIN_WIDTH}
-                                    height={this.state.computedBodyGridHeight}
+                                    height={computedBodyGridHeight}
                                     innerRef={this.setBodyGridRef}
                                     lockAxis="y"
                                     onScroll={onScroll}
@@ -448,7 +479,7 @@ class AbstractDataTable extends React.Component<Props, State> {
                                     overscanRowCount={DEFAULT_OVERSCAN_ROW_COUNT}
                                     rowCount={rowCount}
                                     rowHeight={this.getRowHeight}
-                                    width={this.state.computedBodyGridWidth} />
+                                    width={computedBodyGridWidth} />
                               )
                               : (
                                 <BodyGrid
@@ -456,14 +487,14 @@ class AbstractDataTable extends React.Component<Props, State> {
                                     columnCount={columnCount}
                                     columnWidth={this.getColumnWidth}
                                     estimatedColumnSize={DEFAULT_COLUMN_MIN_WIDTH}
-                                    height={this.state.computedBodyGridHeight}
+                                    height={computedBodyGridHeight}
                                     innerRef={this.setBodyGridRef}
                                     onScroll={onScroll}
                                     overscanColumnCount={DEFAULT_OVERSCAN_COLUMN_COUNT}
                                     overscanRowCount={DEFAULT_OVERSCAN_ROW_COUNT}
                                     rowCount={rowCount}
                                     rowHeight={this.getRowHeight}
-                                    width={this.state.computedBodyGridWidth} />
+                                    width={computedBodyGridWidth} />
                               )
                           }
 

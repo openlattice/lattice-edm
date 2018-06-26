@@ -7,7 +7,7 @@ import { Map } from 'immutable';
 
 import AbstractTypes from '../../utils/AbstractTypes';
 
-import type { Props as AbstractTypeOverviewContainerProps } from './AbstractTypeOverviewContainer';
+import type { AbstractTypeOverviewContainerProps } from './Types';
 
 function maybeGetAbstractTypeIdForNewlyCreatedAbstractType(
   selectedAbstractTypeId :string,
@@ -52,7 +52,7 @@ function maybeGetAbstractTypeIdForNewlyCreatedAbstractType(
       return nextId;
     }
     // "FINALLY" action
-    else if (isEmpty(nextId) && !isEmpty(prevId)) {
+    if (isEmpty(nextId) && !isEmpty(prevId)) {
       return prevId;
     }
   }

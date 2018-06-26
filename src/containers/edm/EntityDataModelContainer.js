@@ -7,8 +7,14 @@ import React from 'react';
 import styled from 'styled-components';
 import { EntityDataModelApiActionFactory } from 'lattice-sagas';
 import { connect } from 'react-redux';
-import { NavLink, Redirect, Route, Switch, withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
+import {
+  NavLink,
+  Redirect,
+  Route,
+  Switch,
+  withRouter
+} from 'react-router-dom';
 
 import AbstractTypes from '../../utils/AbstractTypes';
 import * as Routes from '../../core/router/Routes';
@@ -84,49 +90,47 @@ class EntityDataModelContainer extends React.Component<Props> {
 
   componentDidMount() {
 
-    this.props.actions.getAllPropertyTypes();
-    this.props.actions.getAllEntityTypes();
-    this.props.actions.getAllAssociationTypes();
-    this.props.actions.getAllSchemas();
+    const { actions } = this.props;
+
+    actions.getAllPropertyTypes();
+    actions.getAllEntityTypes();
+    actions.getAllAssociationTypes();
+    actions.getAllSchemas();
   }
 
-  renderAssociationTypesContainer = () => {
+  renderAssociationTypesContainer = () => (
+    <AbstractTypeOverviewContainer workingAbstractTypeType={AbstractTypes.AssociationType} />
+  )
 
-    return (
-      <AbstractTypeOverviewContainer workingAbstractTypeType={AbstractTypes.AssociationType} />
-    );
-  }
+  renderEntityTypesContainer = () => (
+    <AbstractTypeOverviewContainer workingAbstractTypeType={AbstractTypes.EntityType} />
+  )
 
-  renderEntityTypesContainer = () => {
+  renderPropertyTypesContainer = () => (
+    <AbstractTypeOverviewContainer workingAbstractTypeType={AbstractTypes.PropertyType} />
+  )
 
-    return (
-      <AbstractTypeOverviewContainer workingAbstractTypeType={AbstractTypes.EntityType} />
-    );
-  }
-
-  renderPropertyTypesContainer = () => {
-
-    return (
-      <AbstractTypeOverviewContainer workingAbstractTypeType={AbstractTypes.PropertyType} />
-    );
-  }
-
-  renderSchemasContainer = () => {
-
-    return (
-      <AbstractTypeOverviewContainer workingAbstractTypeType={AbstractTypes.Schema} />
-    );
-  }
+  renderSchemasContainer = () => (
+    <AbstractTypeOverviewContainer workingAbstractTypeType={AbstractTypes.Schema} />
+  )
 
   render() {
 
     return (
       <EDMContainerWrapper>
         <Nav>
-          <NavTab to={Routes.PROPERTY_TYPES}>PropertyTypes</NavTab>
-          <NavTab to={Routes.ENTITY_TYPES}>EntityTypes</NavTab>
-          <NavTab to={Routes.ASSOCIATION_TYPES}>AssociationTypes</NavTab>
-          <NavTab to={Routes.SCHEMAS}>Schemas</NavTab>
+          <NavTab to={Routes.PROPERTY_TYPES}>
+            PropertyTypes
+          </NavTab>
+          <NavTab to={Routes.ENTITY_TYPES}>
+            EntityTypes
+          </NavTab>
+          <NavTab to={Routes.ASSOCIATION_TYPES}>
+            AssociationTypes
+          </NavTab>
+          <NavTab to={Routes.SCHEMAS}>
+            Schemas
+          </NavTab>
         </Nav>
         <Switch>
           <Route path={Routes.PROPERTY_TYPES} render={this.renderPropertyTypesContainer} />
