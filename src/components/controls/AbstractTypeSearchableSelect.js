@@ -4,9 +4,9 @@
 
 import React from 'react';
 
-import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 import styled, { css } from 'styled-components';
-import { faSearch } from '@fortawesome/fontawesome-pro-regular';
+import { faSearch } from '@fortawesome/pro-regular-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { List } from 'immutable';
 
 import AbstractTypes from '../../utils/AbstractTypes';
