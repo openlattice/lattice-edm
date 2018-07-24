@@ -355,7 +355,7 @@ export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, act
             return state;
           }
 
-          const entityTypeId :string = storedSeqAction.getIn(['value', 'id']);
+          const entityTypeId :string = storedSeqAction.getIn(['value', 'entityTypeId']);
           const entityTypeIndex :number = state.getIn(['entityTypesById', entityTypeId], -1);
           if (entityTypeIndex < 0) {
             return state;
