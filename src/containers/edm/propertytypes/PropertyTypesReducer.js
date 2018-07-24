@@ -190,7 +190,7 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
             return state;
           }
 
-          const propertyTypeId :string = storedSeqAction.getIn(['value', 'id']);
+          const propertyTypeId :string = storedSeqAction.getIn(['value', 'propertyTypeId']);
           const propertyTypeIndex :number = state.getIn(['propertyTypesById', propertyTypeId], -1);
           if (propertyTypeIndex < 0) {
             return state;

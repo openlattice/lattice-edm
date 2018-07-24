@@ -9,15 +9,15 @@ import { Models } from 'lattice';
 import { EntityDataModelApiActionFactory } from 'lattice-sagas';
 
 const {
-  addDestinationEntityTypeToAssociationType,
+  addDstEntityTypeToAssociationType,
   addPropertyTypeToEntityType,
-  addSourceEntityTypeToAssociationType,
+  addSrcEntityTypeToAssociationType,
   createAssociationType,
   deleteAssociationType,
   getAllAssociationTypes,
-  removeDestinationEntityTypeFromAssociationType,
+  removeDstEntityTypeFromAssociationType,
   removePropertyTypeFromEntityType,
-  removeSourceEntityTypeFromAssociationType,
+  removeSrcEntityTypeFromAssociationType,
   reorderEntityTypePropertyTypes,
   updateAssociationTypeMetaData
 } = EntityDataModelApiActionFactory;
@@ -31,14 +31,14 @@ const {
 
 const INITIAL_STATE :Map<*, *> = fromJS({
   actions: {
-    addDestinationEntityTypeToAssociationType: Map(),
+    addDstEntityTypeToAssociationType: Map(),
     addPropertyTypeToEntityType: Map(),
-    addSourceEntityTypeToAssociationType: Map(),
+    addSrcEntityTypeToAssociationType: Map(),
     createAssociationType: Map(),
     deleteAssociationType: Map(),
-    removeDestinationEntityTypeFromAssociationType: Map(),
+    removeDstEntityTypeFromAssociationType: Map(),
     removePropertyTypeFromEntityType: Map(),
-    removeSourceEntityTypeFromAssociationType: Map(),
+    removeSrcEntityTypeFromAssociationType: Map(),
     reorderEntityTypePropertyTypes: Map(),
     updateAssociationTypeMetaData: Map()
   },
@@ -203,13 +203,13 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
       });
     }
 
-    case addDestinationEntityTypeToAssociationType.case(action.type): {
-      return addDestinationEntityTypeToAssociationType.reducer(state, action, {
+    case addDstEntityTypeToAssociationType.case(action.type): {
+      return addDstEntityTypeToAssociationType.reducer(state, action, {
         REQUEST: () => {
           // TODO: not ideal. perhaps there's a better way to get access to the trigger action value
           const seqAction :SequenceAction = (action :any);
           return state.setIn(
-            ['actions', 'addDestinationEntityTypeToAssociationType', seqAction.id],
+            ['actions', 'addDstEntityTypeToAssociationType', seqAction.id],
             fromJS(seqAction)
           );
         },
@@ -217,7 +217,7 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
 
           const seqAction :SequenceAction = (action :any);
           const storedSeqAction :Map<*, *> = state.getIn(
-            ['actions', 'addDestinationEntityTypeToAssociationType', seqAction.id],
+            ['actions', 'addDstEntityTypeToAssociationType', seqAction.id],
             Map()
           );
 
@@ -255,7 +255,7 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
         },
         FINALLY: () => {
           const seqAction :SequenceAction = (action :any);
-          return state.deleteIn(['actions', 'addDestinationEntityTypeToAssociationType', seqAction.id]);
+          return state.deleteIn(['actions', 'addDstEntityTypeToAssociationType', seqAction.id]);
         }
       });
     }
@@ -320,13 +320,13 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
       });
     }
 
-    case addSourceEntityTypeToAssociationType.case(action.type): {
-      return addSourceEntityTypeToAssociationType.reducer(state, action, {
+    case addSrcEntityTypeToAssociationType.case(action.type): {
+      return addSrcEntityTypeToAssociationType.reducer(state, action, {
         REQUEST: () => {
           // TODO: not ideal. perhaps there's a better way to get access to the trigger action value
           const seqAction :SequenceAction = (action :any);
           return state.setIn(
-            ['actions', 'addSourceEntityTypeToAssociationType', seqAction.id],
+            ['actions', 'addSrcEntityTypeToAssociationType', seqAction.id],
             fromJS(seqAction)
           );
         },
@@ -334,7 +334,7 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
 
           const seqAction :SequenceAction = (action :any);
           const storedSeqAction :Map<*, *> = state.getIn(
-            ['actions', 'addSourceEntityTypeToAssociationType', seqAction.id],
+            ['actions', 'addSrcEntityTypeToAssociationType', seqAction.id],
             Map()
           );
 
@@ -372,18 +372,18 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
         },
         FINALLY: () => {
           const seqAction :SequenceAction = (action :any);
-          return state.deleteIn(['actions', 'addSourceEntityTypeToAssociationType', seqAction.id]);
+          return state.deleteIn(['actions', 'addSrcEntityTypeToAssociationType', seqAction.id]);
         }
       });
     }
 
-    case removeDestinationEntityTypeFromAssociationType.case(action.type): {
-      return removeDestinationEntityTypeFromAssociationType.reducer(state, action, {
+    case removeDstEntityTypeFromAssociationType.case(action.type): {
+      return removeDstEntityTypeFromAssociationType.reducer(state, action, {
         REQUEST: () => {
           // TODO: not ideal. perhaps there's a better way to get access to the trigger action value
           const seqAction :SequenceAction = (action :any);
           return state.setIn(
-            ['actions', 'removeDestinationEntityTypeFromAssociationType', seqAction.id],
+            ['actions', 'removeDstEntityTypeFromAssociationType', seqAction.id],
             fromJS(seqAction)
           );
         },
@@ -391,7 +391,7 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
 
           const seqAction :SequenceAction = (action :any);
           const storedSeqAction :Map<*, *> = state.getIn(
-            ['actions', 'removeDestinationEntityTypeFromAssociationType', seqAction.id],
+            ['actions', 'removeDstEntityTypeFromAssociationType', seqAction.id],
             Map()
           );
 
@@ -428,7 +428,7 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
         },
         FINALLY: () => {
           const seqAction :SequenceAction = (action :any);
-          return state.deleteIn(['actions', 'removeDestinationEntityTypeFromAssociationType', seqAction.id]);
+          return state.deleteIn(['actions', 'removeDstEntityTypeFromAssociationType', seqAction.id]);
         }
       });
     }
@@ -492,13 +492,13 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
       });
     }
 
-    case removeSourceEntityTypeFromAssociationType.case(action.type): {
-      return removeSourceEntityTypeFromAssociationType.reducer(state, action, {
+    case removeSrcEntityTypeFromAssociationType.case(action.type): {
+      return removeSrcEntityTypeFromAssociationType.reducer(state, action, {
         REQUEST: () => {
           // TODO: not ideal. perhaps there's a better way to get access to the trigger action value
           const seqAction :SequenceAction = (action :any);
           return state.setIn(
-            ['actions', 'removeSourceEntityTypeFromAssociationType', seqAction.id],
+            ['actions', 'removeSrcEntityTypeFromAssociationType', seqAction.id],
             fromJS(seqAction)
           );
         },
@@ -506,7 +506,7 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
 
           const seqAction :SequenceAction = (action :any);
           const storedSeqAction :Map<*, *> = state.getIn(
-            ['actions', 'removeSourceEntityTypeFromAssociationType', seqAction.id],
+            ['actions', 'removeSrcEntityTypeFromAssociationType', seqAction.id],
             Map()
           );
 
@@ -543,7 +543,7 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
         },
         FINALLY: () => {
           const seqAction :SequenceAction = (action :any);
-          return state.deleteIn(['actions', 'removeSourceEntityTypeFromAssociationType', seqAction.id]);
+          return state.deleteIn(['actions', 'removeSrcEntityTypeFromAssociationType', seqAction.id]);
         }
       });
     }
@@ -614,7 +614,7 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
             return state;
           }
 
-          const associationTypeId :string = storedSeqAction.getIn(['value', 'id']);
+          const associationTypeId :string = storedSeqAction.getIn(['value', 'associationTypeId']);
           const associationTypeIndex :number = state.getIn(['associationTypesById', associationTypeId], -1);
           if (associationTypeIndex < 0) {
             return state;

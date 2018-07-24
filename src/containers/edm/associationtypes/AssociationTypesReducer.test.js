@@ -33,14 +33,14 @@ describe('AssociationTypesReducer', () => {
     expect(INITIAL_STATE.get('isFetchingAllAssociationTypes')).toEqual(false);
     expect(INITIAL_STATE.get('newlyCreatedAssociationTypeId')).toEqual('');
     expect(INITIAL_STATE.get('actions').toJS()).toEqual({
-      addDestinationEntityTypeToAssociationType: {},
+      addDstEntityTypeToAssociationType: {},
       addPropertyTypeToEntityType: {},
-      addSourceEntityTypeToAssociationType: {},
+      addSrcEntityTypeToAssociationType: {},
       createAssociationType: {},
       deleteAssociationType: {},
-      removeDestinationEntityTypeFromAssociationType: {},
+      removeDstEntityTypeFromAssociationType: {},
       removePropertyTypeFromEntityType: {},
-      removeSourceEntityTypeFromAssociationType: {},
+      removeSrcEntityTypeFromAssociationType: {},
       reorderEntityTypePropertyTypes: {},
       updateAssociationTypeMetaData: {}
     });
@@ -306,7 +306,7 @@ describe('AssociationTypesReducer', () => {
 
       const associationTypeId = MOCK_ASSOCIATION_TYPE.entityType.id;
       const mockActionValue = {
-        id: associationTypeId,
+        associationTypeId,
         metadata: {
           title: randomId()
         }

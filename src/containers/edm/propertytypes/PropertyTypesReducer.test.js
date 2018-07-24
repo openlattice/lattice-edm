@@ -302,7 +302,7 @@ describe('PropertyTypesReducer', () => {
 
       const propertyTypeId = MOCK_PROPERTY_TYPE.id;
       const mockActionValue = {
-        id: propertyTypeId,
+        propertyTypeId,
         metadata: {
           title: randomId()
         }

@@ -20,13 +20,13 @@ import AbstractTypeSearchableSelect from '../../../components/controls/AbstractT
 import StyledButton from '../../../components/buttons/StyledButton';
 
 const {
-  addDestinationEntityTypeToAssociationType,
+  addDstEntityTypeToAssociationType,
   addPropertyTypeToEntityType,
-  addSourceEntityTypeToAssociationType,
+  addSrcEntityTypeToAssociationType,
   deleteAssociationType,
-  removeDestinationEntityTypeFromAssociationType,
+  removeDstEntityTypeFromAssociationType,
   removePropertyTypeFromEntityType,
-  removeSourceEntityTypeFromAssociationType,
+  removeSrcEntityTypeFromAssociationType,
   reorderEntityTypePropertyTypes
 } = EntityDataModelApiActionFactory;
 
@@ -48,13 +48,13 @@ const AbstractTypeSearchableSelectWrapper = styled.div`
 
 type Props = {
   actions :{
-    addDestinationEntityTypeToAssociationType :RequestSequence;
+    addDstEntityTypeToAssociationType :RequestSequence;
     addPropertyTypeToEntityType :RequestSequence;
-    addSourceEntityTypeToAssociationType :RequestSequence;
+    addSrcEntityTypeToAssociationType :RequestSequence;
     deleteAssociationType :RequestSequence;
-    removeDestinationEntityTypeFromAssociationType :RequestSequence;
+    removeDstEntityTypeFromAssociationType :RequestSequence;
     removePropertyTypeFromEntityType :RequestSequence;
-    removeSourceEntityTypeFromAssociationType :RequestSequence;
+    removeSrcEntityTypeFromAssociationType :RequestSequence;
     reorderEntityTypePropertyTypes :RequestSequence;
   };
   associationType :Map<*, *>;
@@ -72,7 +72,7 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
 
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
       const associationEntityType :Map<*, *> = associationType.get('entityType', Map());
-      actions.addDestinationEntityTypeToAssociationType({
+      actions.addDstEntityTypeToAssociationType({
         associationTypeId: associationEntityType.get('id'),
         entityTypeId: entityTypeIdToAdd
       });
@@ -98,7 +98,7 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
 
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
       const associationEntityType :Map<*, *> = associationType.get('entityType', Map());
-      actions.addSourceEntityTypeToAssociationType({
+      actions.addSrcEntityTypeToAssociationType({
         associationTypeId: associationEntityType.get('id'),
         entityTypeId: entityTypeIdToAdd
       });
@@ -111,7 +111,7 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
 
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
       const associationEntityType :Map<*, *> = associationType.get('entityType', Map());
-      actions.removeDestinationEntityTypeFromAssociationType({
+      actions.removeDstEntityTypeFromAssociationType({
         associationTypeId: associationEntityType.get('id'),
         entityTypeId: entityTypeIdToRemove
       });
@@ -137,7 +137,7 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
 
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
       const associationEntityType :Map<*, *> = associationType.get('entityType', Map());
-      actions.removeSourceEntityTypeFromAssociationType({
+      actions.removeSrcEntityTypeFromAssociationType({
         associationTypeId: associationEntityType.get('id'),
         entityTypeId: entityTypeIdToRemove
       });
@@ -544,13 +544,13 @@ function mapStateToProps(state :Map<*, *>) :Object {
 function mapDispatchToProps(dispatch :Function) :Object {
 
   const actions = {
-    addDestinationEntityTypeToAssociationType,
+    addDstEntityTypeToAssociationType,
     addPropertyTypeToEntityType,
-    addSourceEntityTypeToAssociationType,
+    addSrcEntityTypeToAssociationType,
     deleteAssociationType,
-    removeDestinationEntityTypeFromAssociationType,
+    removeDstEntityTypeFromAssociationType,
     removePropertyTypeFromEntityType,
-    removeSourceEntityTypeFromAssociationType,
+    removeSrcEntityTypeFromAssociationType,
     reorderEntityTypePropertyTypes
   };
 

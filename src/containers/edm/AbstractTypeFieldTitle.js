@@ -73,19 +73,19 @@ class AbstractTypeFieldTitle extends React.Component<Props, State> {
       switch (abstractTypeType) {
         case AbstractTypes.AssociationType:
           actions.updateAssociationTypeMetaData({
-            id: abstractTypeId,
+            associationTypeId: abstractTypeId,
             metadata: abstractTypeMetaData
           });
           break;
         case AbstractTypes.EntityType:
           actions.updateEntityTypeMetaData({
-            id: abstractTypeId,
+            entityTypeId: abstractTypeId,
             metadata: abstractTypeMetaData
           });
           break;
         case AbstractTypes.PropertyType:
           actions.updatePropertyTypeMetaData({
-            id: abstractTypeId,
+            propertyTypeId: abstractTypeId,
             metadata: abstractTypeMetaData
           });
           break;
