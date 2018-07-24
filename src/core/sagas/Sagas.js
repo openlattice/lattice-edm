@@ -17,9 +17,9 @@ export default function* sagas() :Generator<*, *, *> {
     fork(AuthSagas.watchLogout),
 
     // "lattice-sagas" Sagas
-    fork(EntityDataModelApiSagas.addDestinationEntityTypeToAssociationTypeWatcher),
+    fork(EntityDataModelApiSagas.addDstEntityTypeToAssociationTypeWatcher),
     fork(EntityDataModelApiSagas.addPropertyTypeToEntityTypeWatcher),
-    fork(EntityDataModelApiSagas.addSourceEntityTypeToAssociationTypeWatcher),
+    fork(EntityDataModelApiSagas.addSrcEntityTypeToAssociationTypeWatcher),
     fork(EntityDataModelApiSagas.createAssociationTypeWatcher),
     fork(EntityDataModelApiSagas.createEntityTypeWatcher),
     fork(EntityDataModelApiSagas.createPropertyTypeWatcher),
@@ -31,9 +31,9 @@ export default function* sagas() :Generator<*, *, *> {
     fork(EntityDataModelApiSagas.getAllEntityTypesWatcher),
     fork(EntityDataModelApiSagas.getAllPropertyTypesWatcher),
     fork(EntityDataModelApiSagas.getAllSchemasWatcher),
-    fork(EntityDataModelApiSagas.removeDestinationEntityTypeFromAssociationTypeWatcher),
+    fork(EntityDataModelApiSagas.removeDstEntityTypeFromAssociationTypeWatcher),
     fork(EntityDataModelApiSagas.removePropertyTypeFromEntityTypeWatcher),
-    fork(EntityDataModelApiSagas.removeSourceEntityTypeFromAssociationTypeWatcher),
+    fork(EntityDataModelApiSagas.removeSrcEntityTypeFromAssociationTypeWatcher),
     fork(EntityDataModelApiSagas.reorderEntityTypePropertyTypesWatcher),
     fork(EntityDataModelApiSagas.updateAssociationTypeMetaDataWatcher),
     fork(EntityDataModelApiSagas.updateEntityTypeMetaDataWatcher),

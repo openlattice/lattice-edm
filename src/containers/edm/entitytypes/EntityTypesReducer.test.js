@@ -297,7 +297,7 @@ describe('EntityTypesReducer', () => {
 
       const entityTypeId = MOCK_ENTITY_TYPE.id;
       const mockActionValue = {
-        id: entityTypeId,
+        entityTypeId,
         metadata: {
           title: randomId()
         }

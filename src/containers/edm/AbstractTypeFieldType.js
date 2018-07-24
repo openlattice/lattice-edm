@@ -71,32 +71,39 @@ class AbstractTypeFieldType extends React.Component<Props, State> {
       return;
     }
 
-    let abstractType :Map<*, *> = this.props.abstractType;
-    if (this.props.abstractTypeType === AbstractTypes.AssociationType) {
-      abstractType = this.props.abstractType.get('entityType', Map());
+    const {
+      abstractType,
+      abstractTypeType,
+      actions,
+      onChange
+    } = this.props;
+
+    let theAbstractType :Map<*, *> = abstractType;
+    if (abstractTypeType === AbstractTypes.AssociationType) {
+      theAbstractType = abstractType.get('entityType', Map());
     }
 
-    if (isValidUuid(abstractType.get('id', ''))) {
+    if (isValidUuid(theAbstractType.get('id', ''))) {
 
-      const abstractTypeId :string = abstractType.get('id', '');
+      const abstractTypeId :string = theAbstractType.get('id', '');
       const abstractTypeMetaData :Object = { type: new FullyQualifiedName(typeValue) };
 
-      switch (this.props.abstractTypeType) {
+      switch (abstractTypeType) {
         case AbstractTypes.AssociationType:
-          this.props.actions.updateAssociationTypeMetaData({
-            id: abstractTypeId,
+          actions.updateAssociationTypeMetaData({
+            associationTypeId: abstractTypeId,
             metadata: abstractTypeMetaData
           });
           break;
         case AbstractTypes.EntityType:
-          this.props.actions.updateEntityTypeMetaData({
-            id: abstractTypeId,
+          actions.updateEntityTypeMetaData({
+            entityTypeId: abstractTypeId,
             metadata: abstractTypeMetaData
           });
           break;
         case AbstractTypes.PropertyType:
-          this.props.actions.updatePropertyTypeMetaData({
-            id: abstractTypeId,
+          actions.updatePropertyTypeMetaData({
+            propertyTypeId: abstractTypeId,
             metadata: abstractTypeMetaData
           });
           break;
@@ -105,26 +112,31 @@ class AbstractTypeFieldType extends React.Component<Props, State> {
       }
     }
 
-    this.props.onChange(typeValue);
+    onChange(typeValue);
   }
 
   handleOnEditToggle = (isInEditMode :boolean) => {
 
-    this.props.onEditToggle(isInEditMode);
+    const { onEditToggle } = this.props;
+    onEditToggle(isInEditMode);
   }
 
   render() {
 
-    let abstractType :Map<*, *> = this.props.abstractType;
-    if (this.props.abstractTypeType === AbstractTypes.AssociationType) {
-      abstractType = this.props.abstractType.get('entityType', Map());
+    const { abstractType, abstractTypeType } = this.props;
+
+    let theAbstractType :Map<*, *> = abstractType;
+    if (abstractTypeType === AbstractTypes.AssociationType) {
+      theAbstractType = abstractType.get('entityType', Map());
     }
 
-    const abstractTypeFqn :Map<string, string> = abstractType.get('type', Map());
+    const abstractTypeFqn :Map<string, string> = theAbstractType.get('type', Map());
 
     return (
       <div>
-        <h2>{ FIELD_TITLE }</h2>
+        <h2>
+          { FIELD_TITLE }
+        </h2>
         <InlineEditableControl
             type="text"
             placeholder={`${FIELD_TITLE}...`}

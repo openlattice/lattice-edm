@@ -355,7 +355,7 @@ export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, act
             return state;
           }
 
-          const entityTypeId :string = storedSeqAction.getIn(['value', 'id']);
+          const entityTypeId :string = storedSeqAction.getIn(['value', 'entityTypeId']);
           const entityTypeIndex :number = state.getIn(['entityTypesById', entityTypeId], -1);
           if (entityTypeIndex < 0) {
             return state;
@@ -365,10 +365,10 @@ export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, act
           if (metadata.has('description')) {
             return state.setIn(['entityTypes', entityTypeIndex, 'description'], metadata.get('description'));
           }
-          else if (metadata.has('title')) {
+          if (metadata.has('title')) {
             return state.setIn(['entityTypes', entityTypeIndex, 'title'], metadata.get('title'));
           }
-          else if (metadata.has('type')) {
+          if (metadata.has('type')) {
             // TODO: potential bug with how immutable.js deals with custom objects
             // TODO: consider storing plain object instead of FullyQualifiedName object
             return state.setIn(['entityTypes', entityTypeIndex, 'type'], metadata.get('type'));

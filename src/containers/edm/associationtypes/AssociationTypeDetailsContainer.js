@@ -20,13 +20,13 @@ import AbstractTypeSearchableSelect from '../../../components/controls/AbstractT
 import StyledButton from '../../../components/buttons/StyledButton';
 
 const {
-  addDestinationEntityTypeToAssociationType,
+  addDstEntityTypeToAssociationType,
   addPropertyTypeToEntityType,
-  addSourceEntityTypeToAssociationType,
+  addSrcEntityTypeToAssociationType,
   deleteAssociationType,
-  removeDestinationEntityTypeFromAssociationType,
+  removeDstEntityTypeFromAssociationType,
   removePropertyTypeFromEntityType,
-  removeSourceEntityTypeFromAssociationType,
+  removeSrcEntityTypeFromAssociationType,
   reorderEntityTypePropertyTypes
 } = EntityDataModelApiActionFactory;
 
@@ -48,13 +48,13 @@ const AbstractTypeSearchableSelectWrapper = styled.div`
 
 type Props = {
   actions :{
-    addDestinationEntityTypeToAssociationType :RequestSequence;
+    addDstEntityTypeToAssociationType :RequestSequence;
     addPropertyTypeToEntityType :RequestSequence;
-    addSourceEntityTypeToAssociationType :RequestSequence;
+    addSrcEntityTypeToAssociationType :RequestSequence;
     deleteAssociationType :RequestSequence;
-    removeDestinationEntityTypeFromAssociationType :RequestSequence;
+    removeDstEntityTypeFromAssociationType :RequestSequence;
     removePropertyTypeFromEntityType :RequestSequence;
-    removeSourceEntityTypeFromAssociationType :RequestSequence;
+    removeSrcEntityTypeFromAssociationType :RequestSequence;
     reorderEntityTypePropertyTypes :RequestSequence;
   };
   associationType :Map<*, *>;
@@ -68,9 +68,11 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
 
   handleAddDestinationEntityTypeToAssociationType = (entityTypeIdToAdd :string) => {
 
+    const { actions, associationType } = this.props;
+
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
-      const associationEntityType :Map<*, *> = this.props.associationType.get('entityType', Map());
-      this.props.actions.addDestinationEntityTypeToAssociationType({
+      const associationEntityType :Map<*, *> = associationType.get('entityType', Map());
+      actions.addDstEntityTypeToAssociationType({
         associationTypeId: associationEntityType.get('id'),
         entityTypeId: entityTypeIdToAdd
       });
@@ -79,9 +81,11 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
 
   handleAddPropertyTypeToAssociationType = (propertyTypeIdToAdd :string) => {
 
+    const { actions, associationType } = this.props;
+
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
-      const associationEntityType :Map<*, *> = this.props.associationType.get('entityType', Map());
-      this.props.actions.addPropertyTypeToEntityType({
+      const associationEntityType :Map<*, *> = associationType.get('entityType', Map());
+      actions.addPropertyTypeToEntityType({
         entityTypeId: associationEntityType.get('id'),
         propertyTypeId: propertyTypeIdToAdd
       });
@@ -90,9 +94,11 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
 
   handleAddSourceEntityTypeToAssociationType = (entityTypeIdToAdd :string) => {
 
+    const { actions, associationType } = this.props;
+
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
-      const associationEntityType :Map<*, *> = this.props.associationType.get('entityType', Map());
-      this.props.actions.addSourceEntityTypeToAssociationType({
+      const associationEntityType :Map<*, *> = associationType.get('entityType', Map());
+      actions.addSrcEntityTypeToAssociationType({
         associationTypeId: associationEntityType.get('id'),
         entityTypeId: entityTypeIdToAdd
       });
@@ -101,9 +107,11 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
 
   handleRemoveDestinationEntityTypeFromAssociationType = (entityTypeIdToRemove :string) => {
 
+    const { actions, associationType } = this.props;
+
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
-      const associationEntityType :Map<*, *> = this.props.associationType.get('entityType', Map());
-      this.props.actions.removeDestinationEntityTypeFromAssociationType({
+      const associationEntityType :Map<*, *> = associationType.get('entityType', Map());
+      actions.removeDstEntityTypeFromAssociationType({
         associationTypeId: associationEntityType.get('id'),
         entityTypeId: entityTypeIdToRemove
       });
@@ -112,9 +120,11 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
 
   handleRemovePropertyTypeFromAssociationType = (propertyTypeIdToRemove :string) => {
 
+    const { actions, associationType } = this.props;
+
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
-      const associationEntityType :Map<*, *> = this.props.associationType.get('entityType', Map());
-      this.props.actions.removePropertyTypeFromEntityType({
+      const associationEntityType :Map<*, *> = associationType.get('entityType', Map());
+      actions.removePropertyTypeFromEntityType({
         entityTypeId: associationEntityType.get('id'),
         propertyTypeId: propertyTypeIdToRemove
       });
@@ -123,9 +133,11 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
 
   handleRemoveSourceEntityTypeFromAssociationType = (entityTypeIdToRemove :string) => {
 
+    const { actions, associationType } = this.props;
+
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
-      const associationEntityType :Map<*, *> = this.props.associationType.get('entityType', Map());
-      this.props.actions.removeSourceEntityTypeFromAssociationType({
+      const associationEntityType :Map<*, *> = associationType.get('entityType', Map());
+      actions.removeSrcEntityTypeFromAssociationType({
         associationTypeId: associationEntityType.get('id'),
         entityTypeId: entityTypeIdToRemove
       });
@@ -134,14 +146,16 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
 
   handleReorderPropertyTypes = (oldIndex :number, newIndex :number) => {
 
+    const { actions, associationType } = this.props;
+
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
 
-      const associationEntityType :Map<*, *> = this.props.associationType.get('entityType', Map());
+      const associationEntityType :Map<*, *> = associationType.get('entityType', Map());
       const propertyTypeIds :List<string> = associationEntityType.get('properties');
       const idToMove :string = propertyTypeIds.get(oldIndex);
       const reorderedPropertyTypeIds :List<string> = propertyTypeIds.delete(oldIndex).insert(newIndex, idToMove);
 
-      this.props.actions.reorderEntityTypePropertyTypes({
+      actions.reorderEntityTypePropertyTypes({
         entityTypeId: associationEntityType.get('id'),
         propertyTypeIds: reorderedPropertyTypeIds.toJS()
       });
@@ -150,17 +164,21 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
 
   handleOnClickDelete = () => {
 
+    const { actions, associationType } = this.props;
+
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
-      const associationEntityType :Map<*, *> = this.props.associationType.get('entityType', Map());
-      this.props.actions.deleteAssociationType(associationEntityType.get('id'));
+      const associationEntityType :Map<*, *> = associationType.get('entityType', Map());
+      actions.deleteAssociationType(associationEntityType.get('id'));
     }
   }
 
   renderEntityTypeDetails = () => {
 
+    const { associationType, propertyTypes, propertyTypesById } = this.props;
+
     // TODO: consider refactoring this since it's basically a copy of EntityTypeDetailsContainer
 
-    const associationEntityType :Map<*, *> = this.props.associationType.get('entityType', Map());
+    const associationEntityType :Map<*, *> = associationType.get('entityType', Map());
 
     const baseType :string = associationEntityType.get('baseType', '');
 
@@ -169,27 +187,27 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
 
     const keyPropertyTypes :List<Map<*, *>> = keyPropertyTypeIds
       .map((propertyTypeId :string) => {
-        const index :number = this.props.propertyTypesById.get(propertyTypeId, -1);
+        const index :number = propertyTypesById.get(propertyTypeId, -1);
         if (index === -1) {
           return Map();
         }
-        return this.props.propertyTypes.get(index, Map());
+        return propertyTypes.get(index, Map());
       })
       .toList();
 
-    const propertyTypes :List<Map<*, *>> = propertyTypeIds
+    const thePropertyTypes :List<Map<*, *>> = propertyTypeIds
       .map((propertyTypeId :string) => {
-        const index :number = this.props.propertyTypesById.get(propertyTypeId, -1);
+        const index :number = propertyTypesById.get(propertyTypeId, -1);
         if (index === -1) {
           return Map();
         }
-        return this.props.propertyTypes.get(index, Map());
+        return propertyTypes.get(index, Map());
       })
       .toList();
 
     let propertyTypesDataTable :React$Node = (
       <AbstractTypeDataTable
-          abstractTypes={propertyTypes}
+          abstractTypes={thePropertyTypes}
           maxHeight={500}
           workingAbstractTypeType={AbstractTypes.PropertyType} />
     );
@@ -197,7 +215,7 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
       propertyTypesDataTable = (
         <AbstractTypeDataTable
-            abstractTypes={propertyTypes}
+            abstractTypes={thePropertyTypes}
             highlightOnHover
             maxHeight={500}
             onAbstractTypeRemove={this.handleRemovePropertyTypeFromAssociationType}
@@ -211,22 +229,26 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
     return (
       <section>
         <div>
-          <h2>ID</h2>
-          <p>{ associationEntityType.get('id') }</p>
+          <h2>
+            ID
+          </h2>
+          <p>
+            { associationEntityType.get('id') }
+          </p>
         </div>
         <div>
           <AbstractTypeFieldType
-              abstractType={this.props.associationType}
+              abstractType={associationType}
               abstractTypeType={AbstractTypes.AssociationType} />
         </div>
         <div>
           <AbstractTypeFieldTitle
-              abstractType={this.props.associationType}
+              abstractType={associationType}
               abstractTypeType={AbstractTypes.AssociationType} />
         </div>
         <div>
           <AbstractTypeFieldDescription
-              abstractType={this.props.associationType}
+              abstractType={associationType}
               abstractTypeType={AbstractTypes.AssociationType} />
         </div>
         {
@@ -234,17 +256,27 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
             ? null
             : (
               <div>
-                <h2>BaseType</h2>
-                <p>{ associationEntityType.get('baseType') }</p>
+                <h2>
+                  BaseType
+                </h2>
+                <p>
+                  { associationEntityType.get('baseType') }
+                </p>
               </div>
             )
         }
         <div>
-          <h2>Category</h2>
-          <p>{ associationEntityType.get('category') }</p>
+          <h2>
+            Category
+          </h2>
+          <p>
+            { associationEntityType.get('category') }
+          </p>
         </div>
         <div>
-          <h2>Primary Key PropertyTypes</h2>
+          <h2>
+            Primary Key PropertyTypes
+          </h2>
           <AbstractTypeDataTable
               abstractTypes={keyPropertyTypes}
               maxHeight={500}
@@ -255,7 +287,9 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
             ? null
             : (
               <div>
-                <h2>PropertyTypes</h2>
+                <h2>
+                  PropertyTypes
+                </h2>
                 { propertyTypesDataTable }
               </div>
             )
@@ -271,8 +305,10 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
       return null;
     }
 
-    const associationEntityType :Map<*, *> = this.props.associationType.get('entityType', Map());
-    const availablePropertyTypes :List<Map<*, *>> = this.props.propertyTypes
+    const { associationType, propertyTypes } = this.props;
+
+    const associationEntityType :Map<*, *> = associationType.get('entityType', Map());
+    const availablePropertyTypes :List<Map<*, *>> = propertyTypes
       .filterNot((propertyType :Map<*, *>) => {
         const propertyTypeIds :List<string> = associationEntityType.get('properties', List());
         return propertyTypeIds.includes(propertyType.get('id', ''));
@@ -280,7 +316,9 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
 
     return (
       <div>
-        <h2>Add PropertyTypes</h2>
+        <h2>
+          Add PropertyTypes
+        </h2>
         <AbstractTypeSearchableSelectWrapper>
           <AbstractTypeSearchableSelect
               abstractTypes={availablePropertyTypes}
@@ -320,7 +358,9 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
 
     return (
       <section>
-        <h2>Source EntityTypes</h2>
+        <h2>
+          Source EntityTypes
+        </h2>
         { entityTypesDataTable }
       </section>
     );
@@ -332,15 +372,19 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
       return null;
     }
 
-    const availableEntityTypes :List<Map<*, *>> = this.props.entityTypes
+    const { associationType, entityTypes } = this.props;
+
+    const availableEntityTypes :List<Map<*, *>> = entityTypes
       .filterNot((entityType :Map<*, *>) => {
-        const sourceEntityTypeIds :List<string> = this.props.associationType.get('src', List());
+        const sourceEntityTypeIds :List<string> = associationType.get('src', List());
         return sourceEntityTypeIds.includes(entityType.get('id', ''));
       });
 
     return (
       <section>
-        <h2>Add Source EntityTypes</h2>
+        <h2>
+          Add Source EntityTypes
+        </h2>
         <AbstractTypeSearchableSelectWrapper>
           <AbstractTypeSearchableSelect
               abstractTypes={availableEntityTypes}
@@ -380,7 +424,9 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
 
     return (
       <section>
-        <h2>Destination EntityTypes</h2>
+        <h2>
+          Destination EntityTypes
+        </h2>
         { entityTypesDataTable }
       </section>
     );
@@ -391,15 +437,19 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
       return null;
     }
 
-    const availableEntityTypes :List<Map<*, *>> = this.props.entityTypes
+    const { associationType, entityTypes } = this.props;
+
+    const availableEntityTypes :List<Map<*, *>> = entityTypes
       .filterNot((entityType :Map<*, *>) => {
-        const destinationEntityTypeIds :List<string> = this.props.associationType.get('dst', List());
+        const destinationEntityTypeIds :List<string> = associationType.get('dst', List());
         return destinationEntityTypeIds.includes(entityType.get('id', ''));
       });
 
     return (
       <section>
-        <h2>Add Destination EntityTypes</h2>
+        <h2>
+          Add Destination EntityTypes
+        </h2>
         <AbstractTypeSearchableSelectWrapper>
           <AbstractTypeSearchableSelect
               abstractTypes={availableEntityTypes}
@@ -414,44 +464,52 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
 
   render() {
 
-    if (!this.props.associationType || this.props.associationType.isEmpty()) {
+    const { associationType, entityTypes, entityTypesById } = this.props;
+
+    if (!associationType || associationType.isEmpty()) {
       return null;
     }
 
-    const associationEntityType :Map<*, *> = this.props.associationType.get('entityType', Map());
+    const associationEntityType :Map<*, *> = associationType.get('entityType', Map());
 
     if (!associationEntityType || associationEntityType.isEmpty()) {
       return null;
     }
 
-    const bidirectional :?boolean = this.props.associationType.get('bidirectional', false);
+    const bidirectional :?boolean = associationType.get('bidirectional', false);
     const bidiAsString :string = `${String(bidirectional)}`;
 
-    const sourceEntityTypes :List<Map<*, *>> = this.props.associationType.get('src', List())
+    const sourceEntityTypes :List<Map<*, *>> = associationType.get('src', List())
       .map((entityTypeId :string) => {
-        const index :number = this.props.entityTypesById.get(entityTypeId, -1);
+        const index :number = entityTypesById.get(entityTypeId, -1);
         if (index === -1) {
           return Map();
         }
-        return this.props.entityTypes.get(index, Map());
+        return entityTypes.get(index, Map());
       });
 
-    const destinationEntityTypes :List<Map<*, *>> = this.props.associationType.get('dst', List())
+    const destinationEntityTypes :List<Map<*, *>> = associationType.get('dst', List())
       .map((entityTypeId :string) => {
-        const index :number = this.props.entityTypesById.get(entityTypeId, -1);
+        const index :number = entityTypesById.get(entityTypeId, -1);
         if (index === -1) {
           return Map();
         }
-        return this.props.entityTypes.get(index, Map());
+        return entityTypes.get(index, Map());
       });
 
     return (
       <div>
-        <h1>AssociationType Details</h1>
+        <h1>
+          AssociationType Details
+        </h1>
         { this.renderEntityTypeDetails() }
         <section>
-          <h2>Bi-directional</h2>
-          <p>{ bidiAsString }</p>
+          <h2>
+            Bi-directional
+          </h2>
+          <p>
+            { bidiAsString }
+          </p>
         </section>
         { this.renderSourceEntityTypesSection(sourceEntityTypes) }
         { this.renderAddSourceEntityTypesSection() }
@@ -461,7 +519,9 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
           AuthUtils.isAuthenticated() && AuthUtils.isAdmin()
             ? (
               <section>
-                <DeleteButton onClick={this.handleOnClickDelete}>Delete AssociationType</DeleteButton>
+                <DeleteButton onClick={this.handleOnClickDelete}>
+                  Delete AssociationType
+                </DeleteButton>
               </section>
             )
             : null
@@ -484,13 +544,13 @@ function mapStateToProps(state :Map<*, *>) :Object {
 function mapDispatchToProps(dispatch :Function) :Object {
 
   const actions = {
-    addDestinationEntityTypeToAssociationType,
+    addDstEntityTypeToAssociationType,
     addPropertyTypeToEntityType,
-    addSourceEntityTypeToAssociationType,
+    addSrcEntityTypeToAssociationType,
     deleteAssociationType,
-    removeDestinationEntityTypeFromAssociationType,
+    removeDstEntityTypeFromAssociationType,
     removePropertyTypeFromEntityType,
-    removeSourceEntityTypeFromAssociationType,
+    removeSrcEntityTypeFromAssociationType,
     reorderEntityTypePropertyTypes
   };
 

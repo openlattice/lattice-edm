@@ -56,9 +56,10 @@ function rowRangeRenderer(rowRenderer :GridRowRenderer) {
   } :CellRangeRendererParams) :Node[] => {
 
     const renderedRows :Node[] = [];
-    const areOffsetsAdjusted :boolean =
+    const areOffsetsAdjusted :boolean = (
       columnSizeAndPositionManager.areOffsetsAdjusted()
-      || rowSizeAndPositionManager.areOffsetsAdjusted();
+      || rowSizeAndPositionManager.areOffsetsAdjusted()
+    );
     const canCacheStyle :boolean = !isScrolling && !areOffsetsAdjusted;
 
     for (let rowIndex = rowStartIndex; rowIndex <= rowStopIndex; rowIndex += 1) {
@@ -70,11 +71,12 @@ function rowRangeRenderer(rowRenderer :GridRowRenderer) {
 
         const cellKey :string = `${rowIndex}-${columnIndex}`;
         const columnInfo :Object = columnSizeAndPositionManager.getSizeAndPositionOfCell(columnIndex);
-        const isVisible :boolean =
+        const isVisible :boolean = (
           columnIndex >= visibleColumnIndices.start
           && columnIndex <= visibleColumnIndices.stop
           && rowIndex >= visibleRowIndices.start
-          && rowIndex <= visibleRowIndices.stop;
+          && rowIndex <= visibleRowIndices.stop
+        );
 
         let cellStyle :{[string] :mixed};
         if (canCacheStyle && styleCache[cellKey]) {

@@ -190,7 +190,7 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
             return state;
           }
 
-          const propertyTypeId :string = storedSeqAction.getIn(['value', 'id']);
+          const propertyTypeId :string = storedSeqAction.getIn(['value', 'propertyTypeId']);
           const propertyTypeIndex :number = state.getIn(['propertyTypesById', propertyTypeId], -1);
           if (propertyTypeIndex < 0) {
             return state;
@@ -200,10 +200,10 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
           if (metadata.has('description')) {
             return state.setIn(['propertyTypes', propertyTypeIndex, 'description'], metadata.get('description'));
           }
-          else if (metadata.has('title')) {
+          if (metadata.has('title')) {
             return state.setIn(['propertyTypes', propertyTypeIndex, 'title'], metadata.get('title'));
           }
-          else if (metadata.has('type')) {
+          if (metadata.has('type')) {
             // TODO: potential bug with how immutable.js deals with custom objects
             // TODO: consider storing plain object instead of FullyQualifiedName object
             return state.setIn(['propertyTypes', propertyTypeIndex, 'type'], metadata.get('type'));
