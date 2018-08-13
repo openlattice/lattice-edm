@@ -2,6 +2,8 @@ import React from 'react';
 import Axios from 'axios';
 import styled from 'styled-components';
 
+import { AuthUtils } from 'lattice-auth';
+
 const AUDIT_NAMESPACE = 'OPENLATTICE_AUDIT';
 
 const StyledWrapper = styled.div`
@@ -122,6 +124,11 @@ export default class SyncEdm extends React.Component {
   }
 
   render() {
+
+    if (!AuthUtils.isAuthenticated() || !AuthUtils.isAdmin()) {
+      return null;
+    }
+
     return (
       <StyledWrapper>
         <StyledInstructions>
