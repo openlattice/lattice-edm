@@ -19,7 +19,7 @@ export default class SyncEdm extends React.Component {
     const config = {
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.id_token}`
+        Authorization: `Bearer ${window.localStorage.auth0_id_token}`
       }
     };
     Axios.get('http://localhost:8080/datastore/edm?fileType=json', config)
@@ -51,7 +51,7 @@ export default class SyncEdm extends React.Component {
     const localConfig = {
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.id_token}`
+        Authorization: `Bearer ${window.localStorage.auth0_id_token}`
       }
     };
     Axios.get('https://api.openlattice.com/datastore/edm?fileType=json', prodConfig).then((edmResp) => {
