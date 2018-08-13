@@ -1,8 +1,11 @@
 import React from 'react';
 import Axios from 'axios';
 import styled from 'styled-components';
-
 import { AuthUtils } from 'lattice-auth';
+import { Redirect } from 'react-router';
+
+import * as Routes from '../../core/router/Routes';
+
 
 const AUDIT_NAMESPACE = 'OPENLATTICE_AUDIT';
 
@@ -126,7 +129,7 @@ export default class SyncEdm extends React.Component {
   render() {
 
     if (!AuthUtils.isAuthenticated() || !AuthUtils.isAdmin()) {
-      return null;
+      return <Redirect to={Routes.ROOT} />;
     }
 
     return (
