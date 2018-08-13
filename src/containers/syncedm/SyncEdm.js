@@ -37,29 +37,30 @@ export default class SyncEdm extends React.Component {
       }
     };
     Axios.get('http://localhost:8080/datastore/edm?fileType=json', config)
-    .then((response) => {
-      this.setState({ version: response.data.version });
-    });
+      .then((response) => {
+        this.setState({ version: response.data.version });
+      });
   }
 
   removeAudit = (edm) => {
-    const propertyTypes = edm.propertyTypes.filter((propertyType) => {
-      return propertyType.type.namespace !== AUDIT_NAMESPACE;
-    });
-    const entityTypes = edm.entityTypes.filter((enitityType) => {
-      return enitityType.type.namespace !== AUDIT_NAMESPACE;
-    });
-    const associationTypes = edm.associationTypes.filter((associationType) => {
-      return associationType.entityType.type.namespace !== AUDIT_NAMESPACE;
-    });
+    const propertyTypes = edm.propertyTypes.filter(
+      propertyType => propertyType.type.namespace !== AUDIT_NAMESPACE
+    );
+    const entityTypes = edm.entityTypes.filter(
+      enitityType => enitityType.type.namespace !== AUDIT_NAMESPACE
+    );
+    const associationTypes = edm.associationTypes.filter(
+      associationType => associationType.entityType.type.namespace !== AUDIT_NAMESPACE
+    );
     return Object.assign({}, edm, { propertyTypes, entityTypes, associationTypes });
   }
 
   importFn = () => {
+    const { version, jwt } = this.state;
     const prodConfig = {
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${this.state.jwt}`
+        Authorization: `Bearer ${jwt}`
       }
     };
     const localConfig = {
@@ -69,10 +70,9 @@ export default class SyncEdm extends React.Component {
       }
     };
     Axios.get('https://api.openlattice.com/datastore/edm?fileType=json', prodConfig).then((edmResp) => {
-      const edm = Object.assign({}, edmResp.data, { version: this.state.version });
+      const edm = Object.assign({}, edmResp.data, { version });
       Axios.post('http://localhost:8080/datastore/edm/diff?fileType=json', this.removeAudit(edm), localConfig).then((diffResp) => {
-        const conflicts = diffResp.data.conflicts;
-        const diff = diffResp.data.diff;
+        const { conflicts, diff } = diffResp.data;
         if (conflicts === null) {
           Axios.patch('http://localhost:8080/datastore/edm', diff, localConfig).then(() => {
             this.setState({
@@ -97,16 +97,26 @@ export default class SyncEdm extends React.Component {
   }
 
   showSuccess = () => {
-    if (!this.state.success) return null;
-    return <div style={{ color: 'green' }}>Success</div>;
+    const { success } = this.state;
+    if (!success) return null;
+    return (
+      <div style={{ color: 'green' }}>
+        Success
+      </div>
+    );
   }
 
   showConflicts = () => {
-    if (this.state.conflicts === null) return null;
+    const { conflicts } = this.state;
+    if (conflicts === null) return null;
     return (
       <div style={{ color: 'red' }}>
-        <div>You have conflicts :(</div>
-        <div>{this.state.conflicts}</div>
+        <div>
+          You have conflicts :(
+        </div>
+        <div>
+          { conflicts }
+        </div>
       </div>
     );
   }
@@ -114,11 +124,19 @@ export default class SyncEdm extends React.Component {
   render() {
     return (
       <StyledWrapper>
-        <StyledInstructions>Enter your jwt token here to import data model from prod.</StyledInstructions>
-        <StyledInstructions><i>Only run this when your local databases have been wiped (cassandra, elasticsearch, postgres)</i></StyledInstructions>
+        <StyledInstructions>
+          Enter your jwt token here to import data model from prod.
+        </StyledInstructions>
+        <StyledInstructions>
+          <i>
+            Only run this when your local databases have been wiped (cassandra, elasticsearch, postgres)
+          </i>
+        </StyledInstructions>
         <StyledInputWrapper>
           <input type="text" name="jwt" onChange={this.handleChange} />
-          <button onClick={this.importFn}>Import</button>
+          <button type="button" onClick={this.importFn}>
+            Import
+          </button>
           {this.showSuccess()}
           {this.showConflicts()}
         </StyledInputWrapper>
