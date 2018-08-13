@@ -1,7 +1,21 @@
 import React from 'react';
 import Axios from 'axios';
+import styled from 'styled-components';
 
 const AUDIT_NAMESPACE = 'OPENLATTICE_AUDIT';
+
+const StyledWrapper = styled.div`
+  margin: 40px;
+`;
+
+const StyledInstructions = styled.div`
+  margin-bottom: 4px;
+`;
+
+const StyledInputWrapper = styled.div`
+  margin: 20px 0;
+`;
+
 
 export default class SyncEdm extends React.Component {
 
@@ -99,14 +113,16 @@ export default class SyncEdm extends React.Component {
 
   render() {
     return (
-      <div>
-        <div>Enter your jwt token here to import data model from prod.</div>
-        <div><i>Only run this when your local databases have been wiped (cassandra, elasticsearch, postgres)</i></div>
-        <input type="text" name="jwt" onChange={this.handleChange} />
-        <button onClick={this.importFn}>Import</button>
-        {this.showSuccess()}
-        {this.showConflicts()}
-      </div>
+      <StyledWrapper>
+        <StyledInstructions>Enter your jwt token here to import data model from prod.</StyledInstructions>
+        <StyledInstructions><i>Only run this when your local databases have been wiped (cassandra, elasticsearch, postgres)</i></StyledInstructions>
+        <StyledInputWrapper>
+          <input type="text" name="jwt" onChange={this.handleChange} />
+          <button onClick={this.importFn}>Import</button>
+          {this.showSuccess()}
+          {this.showConflicts()}
+        </StyledInputWrapper>
+      </StyledWrapper>
     );
   }
 }
