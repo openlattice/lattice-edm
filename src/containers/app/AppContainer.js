@@ -16,6 +16,7 @@ import StyledButton from '../../components/buttons/StyledButton';
 import * as Routes from '../../core/router/Routes';
 
 import EntityDataModelContainer from '../edm/EntityDataModelContainer';
+import SyncEdm from '../syncedm/SyncEdm';
 
 const {
   logout
@@ -111,6 +112,7 @@ const AppContainer = ({ actions } :Props) => (
       </AppHeaderInnerWrapper>
     </AppHeaderOuterWrapper>
     <Switch>
+      <Route path={Routes.SYNC_EDM} component={SyncEdm} />
       <Route path={Routes.ROOT} component={EntityDataModelContainer} />
       <Redirect to={Routes.ROOT} />
     </Switch>
