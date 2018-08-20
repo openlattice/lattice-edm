@@ -28,7 +28,7 @@ const {
   getAllSchemas
 } = EntityDataModelApiActionFactory;
 
-const SUB_NAV_LINK_ACTIVE_CLASSNAME :string = 'sub-nav-link-active';
+const NAV_LINK_ACTIVE_CLASSNAME :string = 'nav-link-active';
 
 /*
  * styled components
@@ -54,7 +54,7 @@ const Nav = styled.nav`
 `;
 
 const NavTab = styled(NavLink).attrs({
-  activeClassName: SUB_NAV_LINK_ACTIVE_CLASSNAME
+  activeClassName: NAV_LINK_ACTIVE_CLASSNAME
 })`
   align-items: center;
   border-bottom: 1px solid transparent;
@@ -67,7 +67,7 @@ const NavTab = styled(NavLink).attrs({
   &:hover {
    cursor: pointer;
   }
-  &.${SUB_NAV_LINK_ACTIVE_CLASSNAME} {
+  &.${NAV_LINK_ACTIVE_CLASSNAME} {
     border-bottom: 1px solid #7a52ea;
     color: #7a52ea;
   }
