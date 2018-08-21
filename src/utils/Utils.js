@@ -2,10 +2,14 @@
  * @flow
  */
 
+import Lattice from 'lattice';
+import LatticeAuth from 'lattice-auth';
 import isUUID from 'validator/lib/isUUID';
 
 // injected by Webpack.DefinePlugin
 declare var __ENV_DEV__ :boolean;
+
+const { AuthUtils } = LatticeAuth;
 
 export function isValidUuid(value :any) :boolean {
 
@@ -27,4 +31,13 @@ export function getLatticeConfigBaseUrl() :string {
     baseUrl = window.location.host.startsWith('staging') ? 'staging' : 'production';
   }
   return baseUrl;
+}
+
+
+export function resetLatticeConfig() :void {
+
+  Lattice.configure({
+    authToken: AuthUtils.getAuthToken(),
+    baseUrl: getLatticeConfigBaseUrl(),
+  });
 }

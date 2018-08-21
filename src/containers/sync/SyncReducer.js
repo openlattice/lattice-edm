@@ -10,9 +10,16 @@ import {
   syncProdEntityDataModel,
 } from './SyncActionFactory';
 
+// TODO: stop copying things
+export const SYNC_STATES = {
+  PRE_SYNC: 0,
+  IS_SYNCING: 1,
+  SYNC_SUCCESS: 2,
+  SYNC_FAILURE: 3
+};
+
 const INITIAL_STATE :Map<*, *> = fromJS({
-  isSyncing: false,
-  syncSuccess: false,
+  syncState: SYNC_STATES.PRE_SYNC,
 });
 
 export default function syncEdmReducer(state :Map<*, *> = INITIAL_STATE, action :Object) :Map<*, *> {
@@ -21,10 +28,9 @@ export default function syncEdmReducer(state :Map<*, *> = INITIAL_STATE, action 
 
     case syncProdEntityDataModel.case(action.type): {
       return syncProdEntityDataModel.reducer(state, action, {
-        REQUEST: () => state.set('isSyncing', true),
-        SUCCESS: () => state.set('syncSuccess', true),
-        FAILURE: () => state.set('syncSuccess', false).set('conflicts', action.value),
-        FINALLY: () => state.set('isSyncing', false),
+        REQUEST: () => state.set('syncState', SYNC_STATES.IS_SYNCING),
+        SUCCESS: () => state.set('syncState', SYNC_STATES.SYNC_SUCCESS),
+        FAILURE: () => state.set('syncState', SYNC_STATES.SYNC_FAILURE),
       });
     }
 

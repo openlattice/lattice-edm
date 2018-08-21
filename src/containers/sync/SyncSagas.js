@@ -5,12 +5,10 @@
 /* eslint-disable no-use-before-define */
 
 import Lattice from 'lattice';
-import LatticeAuth from 'lattice-auth';
-import randomUUID from 'uuid/v4';
 import { EntityDataModelApiActionFactory, EntityDataModelApiSagas } from 'lattice-sagas';
 import { call, put, takeEvery } from 'redux-saga/effects';
 
-import { getLatticeConfigBaseUrl } from '../../utils/Utils';
+import { resetLatticeConfig } from '../../utils/Utils';
 import {
   SYNC_PROD_EDM,
   syncProdEntityDataModel,
@@ -18,10 +16,6 @@ import {
 
 // injected by Webpack.DefinePlugin
 declare var __ENV_PROD__ :boolean;
-
-const {
-  AuthUtils
-} = LatticeAuth;
 
 const {
   getEntityDataModel,
@@ -51,60 +45,49 @@ function* syncProdEntityDataModelWorker(action :SequenceAction) :Generator<*, *,
       throw new Error('Sync is not allowed on prod.');
     }
 
-    let response :Object = yield call(
-      getEntityDataModelVersionWorker,
-      getEntityDataModelVersion()
-    );
+    let response :Object = yield call(getEntityDataModelVersionWorker, getEntityDataModelVersion());
     if (response.error) {
       throw new Error(response.error);
     }
-    const version :string = response.data;
+    const localVersion :string = response.data;
 
-    // the authToken doesn't actually matter since the prod EDM endpoint is publicly available
-    // Lattice.configure({
-    //   authToken: AuthUtils.getAuthToken(),
-    //   baseUrl: 'production'
-    // });
-
-    response = yield call(
-      getEntityDataModelWorker,
-      getEntityDataModel()
-    );
+    /*
+     * the authToken doesn't actually matter since the prod EDM endpoint is publicly available. setting authToken to
+     * null will result in requests without an "Authorization" header, which is what we want
+     */
+    Lattice.configure({ authToken: null, baseUrl: 'production' });
+    response = yield call(getEntityDataModelWorker, getEntityDataModel());
     if (response.error) {
       throw new Error(response.error);
     }
     let prodEntityDataModel :Object = response.data;
-    prodEntityDataModel = Object.assign({}, prodEntityDataModel, { version });
+    prodEntityDataModel = Object.assign({}, prodEntityDataModel, { version: localVersion });
 
-    // switch back over to talk to localhost
-    Lattice.configure({
-      authToken: AuthUtils.getAuthToken(),
-      baseUrl: getLatticeConfigBaseUrl(),
-    });
+    // revert back to initial configuration
+    resetLatticeConfig();
+    response = yield call(getEntityDataModelDiffWorker, getEntityDataModelDiff(prodEntityDataModel));
+    if (response.error) {
+      throw new Error(response.error);
+    }
+    const { conflicts, diff } = response.data;
+    if (conflicts !== null) {
+      throw new Error(response.error);
+    }
 
-    response = yield call(
-      getEntityDataModelDiffWorker,
-      getEntityDataModelDiff(prodEntityDataModel)
-    );
+    response = yield call(updateEntityDataModelWorker, updateEntityDataModel(diff));
     if (response.error) {
       throw new Error(response.error);
     }
 
-    const { conflicts, diff } = response.data;
-    if (!conflicts) {
-      yield put(syncProdEntityDataModel.success(action.id, diff));
-    }
-    yield put(syncProdEntityDataModel.failure(action.id, conflicts));
+    // finally, we're done
+    yield put(syncProdEntityDataModel.success(action.id));
   }
   catch (error) {
     yield put(syncProdEntityDataModel.failure(action.id, error));
   }
   finally {
-    // making sure to revert back to initial state
-    Lattice.configure({
-      authToken: AuthUtils.getAuthToken(),
-      baseUrl: getLatticeConfigBaseUrl(),
-    });
+    // making sure to revert back to initial configuration
+    resetLatticeConfig();
     yield put(syncProdEntityDataModel.finally(action.id));
   }
 }

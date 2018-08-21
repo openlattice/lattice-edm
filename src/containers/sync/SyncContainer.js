@@ -4,7 +4,6 @@
 
 import React, { Component } from 'react';
 
-import Axios from 'axios';
 import styled from 'styled-components';
 import { faCheckCircle, faTimesCircle } from '@fortawesome/pro-light-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -17,14 +16,11 @@ import { bindActionCreators } from 'redux';
 import StyledButton from '../../components/buttons/StyledButton';
 import Spinner from '../../components/spinner/Spinner';
 import * as Routes from '../../core/router/Routes';
-import {
-  syncProdEntityDataModel
-} from './SyncActionFactory';
+import { SYNC_STATES } from './SyncReducer';
+import { syncProdEntityDataModel } from './SyncActionFactory';
 
 // injected by Webpack.DefinePlugin
 declare var __ENV_PROD__ :boolean;
-
-const AUDIT_NAMESPACE = 'OPENLATTICE_AUDIT';
 
 const ContainerWrapper = styled.div`
   align-items: center;
@@ -33,18 +29,24 @@ const ContainerWrapper = styled.div`
   flex-direction: column;
   margin: 0;
   padding: 40px;
+  position: relative;
+`;
+
+const SpinnerWrapper = styled.div`
+  position: relative;
+  top: 0;
 `;
 
 const SyncSuccess = styled.div`
   align-items: center;
-  color: #7dd322;
+  color: #00be84;
   display: flex;
   flex-direction: column;
 `;
 
 const SyncFailure = styled.div`
   align-items: center;
-  color: #e91e63;
+  color: #ff3c5d;
   display: flex;
   flex-direction: column;
 `;
@@ -53,19 +55,10 @@ type Props = {
   actions :{
     syncProdEntityDataModel :RequestSequence;
   };
-  isSyncing :boolean;
-  syncSuccess :boolean;
+  syncState :number;
 };
 
-type State = {
-
-}
-
-class SyncContainer extends Component<Props, State> {
-
-  componentWillReceiveProps(nextProps :Props) {
-    // TODO: update state to mark that a sync has been attempted
-  }
+class SyncContainer extends Component<Props> {
 
   startSync = () => {
 
@@ -75,8 +68,8 @@ class SyncContainer extends Component<Props, State> {
 
   renderSyncButton = () => {
 
-    const { isSyncing, syncSuccess } = this.props;
-    if (isSyncing || syncSuccess) {
+    const { syncState } = this.props;
+    if (syncState !== SYNC_STATES.PRE_SYNC) {
       return null;
     }
 
@@ -89,8 +82,8 @@ class SyncContainer extends Component<Props, State> {
 
   renderSyncSuccess = () => {
 
-    const { isSyncing, syncSuccess } = this.props;
-    if (isSyncing || !syncSuccess) {
+    const { syncState } = this.props;
+    if (syncState !== SYNC_STATES.SYNC_SUCCESS) {
       return null;
     }
 
@@ -106,8 +99,8 @@ class SyncContainer extends Component<Props, State> {
 
   renderSyncFailureure = () => {
 
-    const { isSyncing, syncSuccess } = this.props;
-    if (isSyncing || syncSuccess) {
+    const { syncState } = this.props;
+    if (syncState !== SYNC_STATES.SYNC_FAILURE) {
       return null;
     }
 
@@ -127,10 +120,14 @@ class SyncContainer extends Component<Props, State> {
       return <Redirect to={Routes.ROOT} />;
     }
 
-    const { isSyncing } = this.props;
-    if (isSyncing) {
+    const { syncState } = this.props;
+    if (syncState === SYNC_STATES.IS_SYNCING) {
       return (
-        <Spinner />
+        <ContainerWrapper>
+          <SpinnerWrapper>
+            <Spinner />
+          </SpinnerWrapper>
+        </ContainerWrapper>
       );
     }
 
@@ -147,9 +144,7 @@ class SyncContainer extends Component<Props, State> {
 function mapStateToProps(state :Map<*, *>) :Object {
 
   return {
-    isSyncing: state.getIn(['sync', 'isSyncing'], false),
-    syncSuccess: state.getIn(['sync', 'syncSuccess'], false),
-    conflicts: state.getIn(['sync', 'conflicts'], false),
+    syncState: state.getIn(['sync', 'syncState'], SYNC_STATES.PRE_SYNC),
   };
 }
 
