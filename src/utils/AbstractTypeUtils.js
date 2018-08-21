@@ -1,6 +1,7 @@
 /*
  * @flow
  */
+
 import { List, Map } from 'immutable';
 import { Models } from 'lattice';
 
@@ -62,8 +63,8 @@ export function filterAbstractTypes(params :AbstractTypeFilterParams) :List<Map<
 
     let includeAbstractType :boolean = true;
     if (filterQuery && filterQuery.trim()) {
-      const matchesId :boolean = (abstractTypeId === filterQuery);
       const filterTrimLowerCase :string = filterQuery.trim().toLowerCase();
+      const matchesId :boolean = abstractTypeId.includes(filterTrimLowerCase);
       const matchesFqn :boolean = abstractTypeFqn.includes(filterTrimLowerCase);
       const matchesTitle :boolean = abstractTypeTitle.includes(filterTrimLowerCase);
       if (!matchesId && !matchesFqn && !matchesTitle) {

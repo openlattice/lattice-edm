@@ -7,8 +7,14 @@ import PACKAGE from '../../package.json';
 import APP_CONFIG from '../app/app.config.js';
 import APP_PATHS from '../app/paths.config.js';
 
-import { ifDev, ifProd, isDev, isProd, isTest } from '../app/env.config.js';
 import { AUTH0_CLIENT_ID, AUTH0_DOMAIN } from '../auth/auth0.config.js';
+import {
+  ifDev,
+  ifProd,
+  isDev,
+  isProd,
+  isTest
+} from '../app/env.config.js';
 
 export default function baseWebpackConfig(env) {
 
@@ -53,13 +59,13 @@ export default function baseWebpackConfig(env) {
   });
 
   const DEFINE_PLUGIN = new Webpack.DefinePlugin({
+    __AUTH0_CLIENT_ID__: JSON.stringify(AUTH0_CLIENT_ID),
+    __AUTH0_DOMAIN__: JSON.stringify(AUTH0_DOMAIN),
+    __BASE_PATH__: JSON.stringify(BASE_PATH),
     __ENV_DEV__: JSON.stringify(isDev),
     __ENV_PROD__: JSON.stringify(isProd),
     __ENV_TEST__: JSON.stringify(isTest),
     __VERSION__: JSON.stringify(`v${PACKAGE.version}`),
-    __AUTH0_CLIENT_ID__: JSON.stringify(AUTH0_CLIENT_ID),
-    __AUTH0_DOMAIN__: JSON.stringify(AUTH0_DOMAIN),
-    __BASE_PATH__: JSON.stringify(BASE_PATH)
   });
 
   /*
@@ -77,6 +83,9 @@ export default function baseWebpackConfig(env) {
         BABEL_LOADER,
         FILE_LOADER_ASSETS_IMAGES
       ]
+    },
+    node: {
+      net: 'empty'
     },
     optimization: {
       minimize: ifProd(true, false)
@@ -99,8 +108,5 @@ export default function baseWebpackConfig(env) {
         APP_PATHS.ABS.NODE
       ]
     },
-    node: {
-      net: 'empty'
-    }
   };
 }

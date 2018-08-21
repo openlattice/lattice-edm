@@ -10,6 +10,8 @@ const spin = keyframes`
 `;
 
 const Spinner = styled.div`
+  height: 50px;
+  width: 50px;
   &:before {
     animation: ${spin} .75s linear infinite;
     border: 1px solid #c5d5e5;

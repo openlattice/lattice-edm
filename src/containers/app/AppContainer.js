@@ -16,7 +16,8 @@ import StyledButton from '../../components/buttons/StyledButton';
 import * as Routes from '../../core/router/Routes';
 
 import EntityDataModelContainer from '../edm/EntityDataModelContainer';
-import SyncEdm from '../syncedm/SyncEdm';
+import NavContainer from './NavContainer';
+import SyncContainer from '../sync/SyncContainer';
 
 const {
   logout
@@ -48,6 +49,7 @@ const AppHeaderInnerWrapper = styled.div`
   flex-direction: row;
   height: 100px;
   justify-content: center;
+  position: relative;
 `;
 
 const Title = styled.h1`
@@ -111,8 +113,9 @@ const AppContainer = ({ actions } :Props) => (
         }
       </AppHeaderInnerWrapper>
     </AppHeaderOuterWrapper>
+    <NavContainer />
     <Switch>
-      <Route path={Routes.SYNC_EDM} component={SyncEdm} />
+      <Route path={Routes.SYNC} component={SyncContainer} />
       <Route path={Routes.ROOT} component={EntityDataModelContainer} />
       <Redirect to={Routes.ROOT} />
     </Switch>

@@ -24,11 +24,10 @@
   "license": "GPLv3",
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.0",
-    "@fortawesome/pro-light-svg-icons": "^5.1.0",
-    "@fortawesome/pro-regular-svg-icons": "^5.1.0",
-    "@fortawesome/pro-solid-svg-icons": "^5.1.0",
+    "@fortawesome/pro-light-svg-icons": "^5.2.0",
+    "@fortawesome/pro-regular-svg-icons": "^5.2.0",
+    "@fortawesome/pro-solid-svg-icons": "^5.2.0",
     "@fortawesome/react-fontawesome": "^0.1.0",
-    "axios": "^0.18.0",
     "babel-polyfill": "^6.26.0",
     "history": "^4.7.2",
     "immutable": "4.0.0-rc.9",
@@ -36,9 +35,9 @@
     "lattice": "^0.37.0",
     "lattice-auth": "^0.7.0",
     "lattice-sagas": "^0.4.0",
-    "lodash": "^4.17.4",
+    "lodash": "^4.17.10",
     "loglevel": "^1.6.0",
-    "moment": "^2.20.0",
+    "moment": "^2.22.0",
     "polished": "^1.9.0",
     "qs": "^6.5.1",
     "react": "^16.4.0",
@@ -48,12 +47,12 @@
     "react-router-dom": "^4.2.2",
     "react-router-redux": "^5.0.0-alpha.9",
     "react-sortable-hoc": "^0.8.0",
-    "react-virtualized": "^9.17.3",
+    "react-virtualized": "^9.20.0",
     "redux": "^4.0.0",
     "redux-immutable": "^4.0.0",
     "redux-reqseq": "0.1.1",
     "redux-saga": "^0.16.0",
-    "styled-components": "^3.0.0",
+    "styled-components": "^3.4.0",
     "validator": "^10.0.0"
   },
   "devDependencies": {
@@ -70,6 +69,7 @@
     "better-npm-run": "0.1.1",
     "enzyme": "^3.4.4",
     "enzyme-adapter-react-16": "^1.2.0",
+    "enzyme-to-json": "^3.3.4",
     "eslint": "^5.3.0",
     "eslint-config-airbnb": "^17.1.0",
     "eslint-import-resolver-webpack": "^0.10.0",
@@ -82,7 +82,8 @@
     "file-loader": "^1.1.5",
     "flow-bin": "^0.79.0",
     "html-webpack-plugin": "^3.0.6",
-    "jest": "^23.4.0",
+    "jest": "^23.5.0",
+    "jest-styled-components": "^6.1.0",
     "npm-run-all": "^4.1.2",
     "rimraf": "^2.6.0",
     "stylelint": "^9.1.1",
@@ -104,7 +105,7 @@
     "lint:css": "stylelint './src/**/*.js'",
     "lint:js": "eslint --config .eslintrc src",
     "test": "jest --config config/jest/jest.config.js",
-    "test:watch": "jest --config config/jest/jest.config.js --watch"
+    "test:watch": "jest --config config/jest/jest.config.js --watch --coverage=false"
   },
   "betterScripts": {
     "build:prod": {

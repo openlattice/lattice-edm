@@ -1,0 +1,206 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`NavContainer snapshots dev should match snapshot, admin and authenticated 1`] = `
+<NavContainer__Nav>
+  <NavContainer__NavTab
+    to="/propertyTypes"
+  >
+    PropertyTypes
+  </NavContainer__NavTab>
+  <NavContainer__NavTab
+    to="/entityTypes"
+  >
+    EntityTypes
+  </NavContainer__NavTab>
+  <NavContainer__NavTab
+    to="/associationTypes"
+  >
+    AssociationTypes
+  </NavContainer__NavTab>
+  <NavContainer__NavTab
+    to="/schemas"
+  >
+    Schemas
+  </NavContainer__NavTab>
+  <NavContainer__NavTab
+    to="/sync"
+  >
+    Sync
+  </NavContainer__NavTab>
+</NavContainer__Nav>
+`;
+
+exports[`NavContainer snapshots dev should match snapshot, admin but not authenticated 1`] = `
+<NavContainer__Nav>
+  <NavContainer__NavTab
+    to="/propertyTypes"
+  >
+    PropertyTypes
+  </NavContainer__NavTab>
+  <NavContainer__NavTab
+    to="/entityTypes"
+  >
+    EntityTypes
+  </NavContainer__NavTab>
+  <NavContainer__NavTab
+    to="/associationTypes"
+  >
+    AssociationTypes
+  </NavContainer__NavTab>
+  <NavContainer__NavTab
+    to="/schemas"
+  >
+    Schemas
+  </NavContainer__NavTab>
+</NavContainer__Nav>
+`;
+
+exports[`NavContainer snapshots dev should match snapshot, not admin and not authenticated 1`] = `
+<NavContainer__Nav>
+  <NavContainer__NavTab
+    to="/propertyTypes"
+  >
+    PropertyTypes
+  </NavContainer__NavTab>
+  <NavContainer__NavTab
+    to="/entityTypes"
+  >
+    EntityTypes
+  </NavContainer__NavTab>
+  <NavContainer__NavTab
+    to="/associationTypes"
+  >
+    AssociationTypes
+  </NavContainer__NavTab>
+  <NavContainer__NavTab
+    to="/schemas"
+  >
+    Schemas
+  </NavContainer__NavTab>
+</NavContainer__Nav>
+`;
+
+exports[`NavContainer snapshots dev should match snapshot, not admin but authenticated 1`] = `
+<NavContainer__Nav>
+  <NavContainer__NavTab
+    to="/propertyTypes"
+  >
+    PropertyTypes
+  </NavContainer__NavTab>
+  <NavContainer__NavTab
+    to="/entityTypes"
+  >
+    EntityTypes
+  </NavContainer__NavTab>
+  <NavContainer__NavTab
+    to="/associationTypes"
+  >
+    AssociationTypes
+  </NavContainer__NavTab>
+  <NavContainer__NavTab
+    to="/schemas"
+  >
+    Schemas
+  </NavContainer__NavTab>
+</NavContainer__Nav>
+`;
+
+exports[`NavContainer snapshots prod should match snapshot, admin and authenticated 1`] = `
+<NavContainer__Nav>
+  <NavContainer__NavTab
+    to="/propertyTypes"
+  >
+    PropertyTypes
+  </NavContainer__NavTab>
+  <NavContainer__NavTab
+    to="/entityTypes"
+  >
+    EntityTypes
+  </NavContainer__NavTab>
+  <NavContainer__NavTab
+    to="/associationTypes"
+  >
+    AssociationTypes
+  </NavContainer__NavTab>
+  <NavContainer__NavTab
+    to="/schemas"
+  >
+    Schemas
+  </NavContainer__NavTab>
+</NavContainer__Nav>
+`;
+
+exports[`NavContainer snapshots prod should match snapshot, admin but not authenticated 1`] = `
+<NavContainer__Nav>
+  <NavContainer__NavTab
+    to="/propertyTypes"
+  >
+    PropertyTypes
+  </NavContainer__NavTab>
+  <NavContainer__NavTab
+    to="/entityTypes"
+  >
+    EntityTypes
+  </NavContainer__NavTab>
+  <NavContainer__NavTab
+    to="/associationTypes"
+  >
+    AssociationTypes
+  </NavContainer__NavTab>
+  <NavContainer__NavTab
+    to="/schemas"
+  >
+    Schemas
+  </NavContainer__NavTab>
+</NavContainer__Nav>
+`;
+
+exports[`NavContainer snapshots prod should match snapshot, not admin and not authenticated 1`] = `
+<NavContainer__Nav>
+  <NavContainer__NavTab
+    to="/propertyTypes"
+  >
+    PropertyTypes
+  </NavContainer__NavTab>
+  <NavContainer__NavTab
+    to="/entityTypes"
+  >
+    EntityTypes
+  </NavContainer__NavTab>
+  <NavContainer__NavTab
+    to="/associationTypes"
+  >
+    AssociationTypes
+  </NavContainer__NavTab>
+  <NavContainer__NavTab
+    to="/schemas"
+  >
+    Schemas
+  </NavContainer__NavTab>
+</NavContainer__Nav>
+`;
+
+exports[`NavContainer snapshots prod should match snapshot, not admin but authenticated 1`] = `
+<NavContainer__Nav>
+  <NavContainer__NavTab
+    to="/propertyTypes"
+  >
+    PropertyTypes
+  </NavContainer__NavTab>
+  <NavContainer__NavTab
+    to="/entityTypes"
+  >
+    EntityTypes
+  </NavContainer__NavTab>
+  <NavContainer__NavTab
+    to="/associationTypes"
+  >
+    AssociationTypes
+  </NavContainer__NavTab>
+  <NavContainer__NavTab
+    to="/schemas"
+  >
+    Schemas
+  </NavContainer__NavTab>
+</NavContainer__Nav>
+`;
