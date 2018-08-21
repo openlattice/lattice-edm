@@ -5,9 +5,13 @@
 import React from 'react';
 
 import styled from 'styled-components';
+import { AuthUtils } from 'lattice-auth';
 import { NavLink } from 'react-router-dom';
 
 import * as Routes from '../../core/router/Routes';
+
+// injected by Webpack.DefinePlugin
+declare var __ENV_DEV__ :boolean;
 
 const NAV_LINK_ACTIVE_CLASSNAME :string = 'nav-link-active';
 
@@ -41,24 +45,32 @@ const NavTab = styled(NavLink).attrs({
   }
 `;
 
-const NavContainer = () => (
-  <Nav>
-    <NavTab to={Routes.PROPERTY_TYPES}>
-      PropertyTypes
-    </NavTab>
-    <NavTab to={Routes.ENTITY_TYPES}>
-      EntityTypes
-    </NavTab>
-    <NavTab to={Routes.ASSOCIATION_TYPES}>
-      AssociationTypes
-    </NavTab>
-    <NavTab to={Routes.SCHEMAS}>
-      Schemas
-    </NavTab>
-    <NavTab to={Routes.SYNC}>
-      Sync
-    </NavTab>
-  </Nav>
-);
+const NavContainer = () => {
+
+  const showSync :boolean = AuthUtils.isAuthenticated() && AuthUtils.isAdmin() && __ENV_DEV__;
+  return (
+    <Nav>
+      <NavTab to={Routes.PROPERTY_TYPES}>
+        PropertyTypes
+      </NavTab>
+      <NavTab to={Routes.ENTITY_TYPES}>
+        EntityTypes
+      </NavTab>
+      <NavTab to={Routes.ASSOCIATION_TYPES}>
+        AssociationTypes
+      </NavTab>
+      <NavTab to={Routes.SCHEMAS}>
+        Schemas
+      </NavTab>
+      {
+        showSync && (
+          <NavTab to={Routes.SYNC}>
+            Sync
+          </NavTab>
+        )
+      }
+    </Nav>
+  );
+};
 
 export default NavContainer;

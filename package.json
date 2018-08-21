@@ -69,6 +69,7 @@
     "better-npm-run": "0.1.1",
     "enzyme": "^3.4.2",
     "enzyme-adapter-react-16": "^1.2.0",
+    "enzyme-to-json": "^3.3.4",
     "eslint": "^5.3.0",
     "eslint-config-airbnb": "^17.1.0",
     "eslint-import-resolver-webpack": "^0.10.0",
@@ -81,7 +82,8 @@
     "file-loader": "^1.1.5",
     "flow-bin": "^0.79.0",
     "html-webpack-plugin": "^3.0.6",
-    "jest": "^23.4.0",
+    "jest": "^23.5.0",
+    "jest-styled-components": "^6.1.0",
     "npm-run-all": "^4.1.2",
     "rimraf": "^2.6.0",
     "stylelint": "^9.1.1",
@@ -103,7 +105,7 @@
     "lint:css": "stylelint './src/**/*.js'",
     "lint:js": "eslint --config .eslintrc src",
     "test": "jest --config config/jest/jest.config.js",
-    "test:watch": "jest --config config/jest/jest.config.js --watch"
+    "test:watch": "jest --config config/jest/jest.config.js --watch --coverage=false"
   },
   "betterScripts": {
     "build:prod": {
