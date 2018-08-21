@@ -42,6 +42,9 @@ const SyncSuccess = styled.div`
   color: #00be84;
   display: flex;
   flex-direction: column;
+  svg {
+    font-size: 36px;
+  }
 `;
 
 const SyncFailure = styled.div`
@@ -49,6 +52,9 @@ const SyncFailure = styled.div`
   color: #ff3c5d;
   display: flex;
   flex-direction: column;
+  svg {
+    font-size: 36px;
+  }
 `;
 
 type Props = {

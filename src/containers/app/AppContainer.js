@@ -16,6 +16,7 @@ import StyledButton from '../../components/buttons/StyledButton';
 import * as Routes from '../../core/router/Routes';
 
 import EntityDataModelContainer from '../edm/EntityDataModelContainer';
+import NavContainer from './NavContainer';
 import SyncContainer from '../sync/SyncContainer';
 
 const {
@@ -112,6 +113,7 @@ const AppContainer = ({ actions } :Props) => (
         }
       </AppHeaderInnerWrapper>
     </AppHeaderOuterWrapper>
+    <NavContainer />
     <Switch>
       <Route path={Routes.SYNC} component={SyncContainer} />
       <Route path={Routes.ROOT} component={EntityDataModelContainer} />
