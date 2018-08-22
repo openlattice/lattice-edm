@@ -4,7 +4,7 @@
 
 /* eslint-disable no-use-before-define */
 
-import Lattice from 'lattice';
+import Lattice, { Models } from 'lattice';
 import { EntityDataModelApiActionFactory, EntityDataModelApiSagas } from 'lattice-sagas';
 import { call, put, takeEvery } from 'redux-saga/effects';
 
@@ -30,6 +30,27 @@ const {
   getEntityDataModelVersionWorker,
   updateEntityDataModelWorker,
 } = EntityDataModelApiSagas;
+
+const { FullyQualifiedName } = Models;
+
+const OL_AUDIT_FQN :FullyQualifiedName = new FullyQualifiedName('OPENLATTICE_AUDIT', 'AUDIT');
+
+function removeOpenLatticeAuditType(edm :Object) :Object {
+
+  const propertyTypes = edm.propertyTypes.filter(
+    propertyType => FullyQualifiedName.toString(propertyType.type) !== OL_AUDIT_FQN.toString()
+  );
+
+  const entityTypes = edm.entityTypes.filter(
+    enitityType => FullyQualifiedName.toString(enitityType.type) !== OL_AUDIT_FQN.toString()
+  );
+
+  const associationTypes = edm.associationTypes.filter(
+    associationType => FullyQualifiedName.toString(associationType.entityType.type) !== OL_AUDIT_FQN.toString()
+  );
+
+  return Object.assign({}, edm, { propertyTypes, entityTypes, associationTypes });
+}
 
 function* syncProdEntityDataModelWatcher() :Generator<*, *, *> {
 
@@ -61,6 +82,7 @@ function* syncProdEntityDataModelWorker(action :SequenceAction) :Generator<*, *,
       throw new Error(response.error);
     }
     let prodEntityDataModel :Object = response.data;
+    prodEntityDataModel = removeOpenLatticeAuditType(prodEntityDataModel);
     prodEntityDataModel = Object.assign({}, prodEntityDataModel, { version: localVersion });
 
     // revert back to initial configuration
