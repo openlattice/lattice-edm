@@ -6,6 +6,8 @@ import { AuthSagas } from 'lattice-auth';
 import { EntityDataModelApiSagas } from 'lattice-sagas';
 import { fork } from 'redux-saga/effects';
 
+import * as SyncSagas from '../../containers/sync/SyncSagas';
+
 export default function* sagas() :Generator<*, *, *> {
 
   yield [
@@ -31,13 +33,19 @@ export default function* sagas() :Generator<*, *, *> {
     fork(EntityDataModelApiSagas.getAllEntityTypesWatcher),
     fork(EntityDataModelApiSagas.getAllPropertyTypesWatcher),
     fork(EntityDataModelApiSagas.getAllSchemasWatcher),
+    fork(EntityDataModelApiSagas.getEntityDataModelDiffWatcher),
+    fork(EntityDataModelApiSagas.getEntityDataModelVersionWatcher),
     fork(EntityDataModelApiSagas.removeDstEntityTypeFromAssociationTypeWatcher),
     fork(EntityDataModelApiSagas.removePropertyTypeFromEntityTypeWatcher),
     fork(EntityDataModelApiSagas.removeSrcEntityTypeFromAssociationTypeWatcher),
     fork(EntityDataModelApiSagas.reorderEntityTypePropertyTypesWatcher),
     fork(EntityDataModelApiSagas.updateAssociationTypeMetaDataWatcher),
+    fork(EntityDataModelApiSagas.updateEntityDataModelWatcher),
     fork(EntityDataModelApiSagas.updateEntityTypeMetaDataWatcher),
     fork(EntityDataModelApiSagas.updatePropertyTypeMetaDataWatcher),
-    fork(EntityDataModelApiSagas.updateSchemaWatcher)
+    fork(EntityDataModelApiSagas.updateSchemaWatcher),
+
+    // SyncSagas
+    fork(SyncSagas.syncProdEntityDataModelWatcher),
   ];
 }
