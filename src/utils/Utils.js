@@ -33,7 +33,6 @@ export function getLatticeConfigBaseUrl() :string {
   return baseUrl;
 }
 
-
 export function resetLatticeConfig() :void {
 
   Lattice.configure({
