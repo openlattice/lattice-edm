@@ -6,7 +6,7 @@
 
 import { List, Map, fromJS } from 'immutable';
 import { Models } from 'lattice';
-import { EntityDataModelApiActionFactory } from 'lattice-sagas';
+import { EntityDataModelApiActions } from 'lattice-sagas';
 
 const {
   addDstEntityTypeToAssociationType,
@@ -14,19 +14,19 @@ const {
   addSrcEntityTypeToAssociationType,
   createAssociationType,
   deleteAssociationType,
-  getAllAssociationTypes,
+  getEntityDataModel,
   removeDstEntityTypeFromAssociationType,
   removePropertyTypeFromEntityType,
   removeSrcEntityTypeFromAssociationType,
   reorderEntityTypePropertyTypes,
-  updateAssociationTypeMetaData
-} = EntityDataModelApiActionFactory;
+  updateAssociationTypeMetaData,
+} = EntityDataModelApiActions;
 
 const {
   AssociationType,
   AssociationTypeBuilder,
   EntityType,
-  EntityTypeBuilder
+  EntityTypeBuilder,
 } = Models;
 
 const INITIAL_STATE :Map<*, *> = fromJS({
@@ -166,8 +166,8 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
       });
     }
 
-    case getAllAssociationTypes.case(action.type): {
-      return getAllAssociationTypes.reducer(state, action, {
+    case getEntityDataModel.case(action.type): {
+      return getEntityDataModel.reducer(state, action, {
         REQUEST: () => {
           return state.set('isFetchingAllAssociationTypes', true);
         },
@@ -176,7 +176,7 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
           const seqAction :SequenceAction = (action :any);
 
           if (seqAction.value) {
-            const allAssociationTypes :List<Map<*, *>> = fromJS(seqAction.value);
+            const allAssociationTypes :List<Map<*, *>> = fromJS(seqAction.value.associationTypes);
             const associationTypesById :Map<string, number> = Map()
               .withMutations((byIdMap :Map<string, number>) => {
                 allAssociationTypes.forEach((associationType :Map<*, *>, associationTypeIndex :number) => {

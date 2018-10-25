@@ -6,17 +6,17 @@
 
 import { List, Map, fromJS } from 'immutable';
 import { Models } from 'lattice';
-import { EntityDataModelApiActionFactory } from 'lattice-sagas';
+import { EntityDataModelApiActions } from 'lattice-sagas';
 
 const {
   addPropertyTypeToEntityType,
   createEntityType,
   deleteEntityType,
-  getAllEntityTypes,
+  getEntityDataModel,
   removePropertyTypeFromEntityType,
   reorderEntityTypePropertyTypes,
   updateEntityTypeMetaData
-} = EntityDataModelApiActionFactory;
+} = EntityDataModelApiActions;
 
 const {
   EntityType,
@@ -148,8 +148,8 @@ export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, act
       });
     }
 
-    case getAllEntityTypes.case(action.type): {
-      return getAllEntityTypes.reducer(state, action, {
+    case getEntityDataModel.case(action.type): {
+      return getEntityDataModel.reducer(state, action, {
         REQUEST: () => {
           return state.set('isFetchingAllEntityTypes', true);
         },
@@ -158,7 +158,7 @@ export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, act
           const seqAction :SequenceAction = (action :any);
 
           if (seqAction.value) {
-            const allEntityTypes :List<Map<*, *>> = fromJS(seqAction.value);
+            const allEntityTypes :List<Map<*, *>> = fromJS(seqAction.value.entityTypes);
             const entityTypesStrict :List<Map<*, *>> = allEntityTypes.filter((entityType :Map<*, *>) => {
               return entityType.get('category') === 'EntityType';
             });

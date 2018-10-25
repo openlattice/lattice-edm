@@ -6,14 +6,14 @@
 
 import { List, Map, fromJS } from 'immutable';
 import { Models } from 'lattice';
-import { EntityDataModelApiActionFactory } from 'lattice-sagas';
+import { EntityDataModelApiActions } from 'lattice-sagas';
 
 const {
   createPropertyType,
   deletePropertyType,
-  getAllPropertyTypes,
+  getEntityDataModel,
   updatePropertyTypeMetaData
-} = EntityDataModelApiActionFactory;
+} = EntityDataModelApiActions;
 
 const {
   PropertyType,
@@ -141,15 +141,15 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
       });
     }
 
-    case getAllPropertyTypes.case(action.type): {
-      return getAllPropertyTypes.reducer(state, action, {
+    case getEntityDataModel.case(action.type): {
+      return getEntityDataModel.reducer(state, action, {
         REQUEST: () => {
           return state.set('isFetchingAllPropertyTypes', true);
         },
         SUCCESS: () => {
 
           const seqAction :SequenceAction = (action :any);
-          const propertyTypes :List<Map<*, *>> = fromJS(seqAction.value);
+          const propertyTypes :List<Map<*, *>> = fromJS(seqAction.value.propertyTypes);
           const propertyTypesById :Map<string, number> = Map()
             .withMutations((byIdMap :Map<string, number>) => {
               propertyTypes.forEach((propertyType :Map<*, *>, propertyTypeIndex :number) => {

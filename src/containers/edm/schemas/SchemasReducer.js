@@ -6,11 +6,11 @@
 
 import { List, Map, fromJS } from 'immutable';
 import { Models, Types } from 'lattice';
-import { EntityDataModelApiActionFactory } from 'lattice-sagas';
+import { EntityDataModelApiActions } from 'lattice-sagas';
 
 const { FullyQualifiedName, Schema, SchemaBuilder } = Models;
 const { ActionTypes } = Types;
-const { createSchema, getAllSchemas, updateSchema } = EntityDataModelApiActionFactory;
+const { createSchema, getEntityDataModel, updateSchema } = EntityDataModelApiActions;
 
 const INITIAL_STATE :Map<*, *> = fromJS({
   actions: {
@@ -81,14 +81,14 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
       });
     }
 
-    case getAllSchemas.case(action.type): {
-      return getAllSchemas.reducer(state, action, {
+    case getEntityDataModel.case(action.type): {
+      return getEntityDataModel.reducer(state, action, {
         REQUEST: () => {
           return state.set('isFetchingAllSchemas', true);
         },
         SUCCESS: () => {
           const seqAction :SequenceAction = (action :any);
-          const schemas :List<Map<*, *>> = fromJS(seqAction.value);
+          const schemas :List<Map<*, *>> = fromJS(seqAction.value.schemas);
           const schemasByFqn :Map<string, number> = Map()
             .withMutations((byIdMap :Map<string, number>) => {
               schemas.forEach((schema :Map<*, *>, schemaIndex :number) => {

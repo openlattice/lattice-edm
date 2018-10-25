@@ -419,22 +419,14 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
     const {
       associationTypes,
       entityTypes,
-      isFetchingAllAssociationTypes,
-      isFetchingAllEntityTypes,
-      isFetchingAllPropertyTypes,
-      isFetchingAllSchemas,
+      isFetchingEntityDataModel,
       propertyTypes,
       schemas,
       workingAbstractTypeType
     } = this.props;
     const { showCreateNewAbstractTypeCard } = this.state;
 
-    if (
-      isFetchingAllAssociationTypes
-      || isFetchingAllEntityTypes
-      || isFetchingAllPropertyTypes
-      || isFetchingAllSchemas
-    ) {
+    if (isFetchingEntityDataModel) {
       return (
         <Spinner />
       );
@@ -475,10 +467,7 @@ function mapStateToProps(state :Map<*, *>) :Object {
     associationTypesById: state.getIn(['edm', 'associationTypes', 'associationTypesById']),
     entityTypes: state.getIn(['edm', 'entityTypes', 'entityTypes']),
     entityTypesById: state.getIn(['edm', 'entityTypes', 'entityTypesById']),
-    isFetchingAllAssociationTypes: state.getIn(['edm', 'associationTypes', 'isFetchingAllAssociationTypes']),
-    isFetchingAllEntityTypes: state.getIn(['edm', 'entityTypes', 'isFetchingAllEntityTypes']),
-    isFetchingAllPropertyTypes: state.getIn(['edm', 'propertyTypes', 'isFetchingAllPropertyTypes']),
-    isFetchingAllSchemas: state.getIn(['edm', 'schemas', 'isFetchingAllSchemas']),
+    isFetchingEntityDataModel: state.getIn(['edm', 'isFetchingEntityDataModel']),
     newlyCreatedAssociationTypeId: state.getIn(['edm', 'associationTypes', 'newlyCreatedAssociationTypeId']),
     newlyCreatedEntityTypeId: state.getIn(['edm', 'entityTypes', 'newlyCreatedEntityTypeId']),
     newlyCreatedPropertyTypeId: state.getIn(['edm', 'propertyTypes', 'newlyCreatedPropertyTypeId']),

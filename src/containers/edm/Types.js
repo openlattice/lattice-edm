@@ -11,10 +11,7 @@ export type AbstractTypeOverviewContainerProps = {
   associationTypesById :Map<string, number>;
   entityTypes :List<Map<*, *>>;
   entityTypesById :Map<string, number>;
-  isFetchingAllAssociationTypes :boolean;
-  isFetchingAllEntityTypes :boolean;
-  isFetchingAllPropertyTypes :boolean;
-  isFetchingAllSchemas :boolean;
+  isFetchingEntityDataModel :boolean;
   newlyCreatedAssociationTypeId :string; // eslint-disable-line react/no-unused-prop-types
   newlyCreatedEntityTypeId :string; // eslint-disable-line react/no-unused-prop-types
   newlyCreatedPropertyTypeId :string; // eslint-disable-line react/no-unused-prop-types
