@@ -4,13 +4,13 @@
 
 import { AuthSagas } from 'lattice-auth';
 import { EntityDataModelApiSagas } from 'lattice-sagas';
-import { fork } from 'redux-saga/effects';
+import { all, fork } from 'redux-saga/effects';
 
 import * as SyncSagas from '../../containers/sync/SyncSagas';
 
 export default function* sagas() :Generator<*, *, *> {
 
-  yield [
+  yield all([
     // "lattice-auth" Sagas
     fork(AuthSagas.watchAuthAttempt),
     fork(AuthSagas.watchAuthSuccess),
@@ -47,5 +47,5 @@ export default function* sagas() :Generator<*, *, *> {
 
     // SyncSagas
     fork(SyncSagas.syncProdEntityDataModelWatcher),
-  ];
+  ]);
 }
