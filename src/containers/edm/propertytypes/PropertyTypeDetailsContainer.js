@@ -4,6 +4,7 @@
 
 import React from 'react';
 
+import styled from 'styled-components';
 import { Map, List } from 'immutable';
 import { AuthUtils } from 'lattice-auth';
 import { EntityDataModelApiActionFactory } from 'lattice-sagas';
@@ -23,7 +24,7 @@ const { deletePropertyType } = EntityDataModelApiActionFactory;
  * styled components
  */
 
-const DeleteButton = StyledButton.extend`
+const DeleteButton = styled(StyledButton)`
   align-self: center;
 `;
 

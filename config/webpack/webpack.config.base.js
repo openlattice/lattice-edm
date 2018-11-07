@@ -36,6 +36,7 @@ module.exports = (env) => {
     use: {
       loader: 'babel-loader',
       options: {
+        cacheDirectory: true,
         configFile: BABEL_CONFIG,
       },
     },

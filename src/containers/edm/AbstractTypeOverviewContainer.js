@@ -58,7 +58,7 @@ const OverviewContainerInnerWrapper = styled.div`
   padding: 40px 20px 20px 20px;
 `;
 
-const AbstractTypeDirectoryCard = StyledCard.extend`
+const AbstractTypeDirectoryCard = styled(StyledCard)`
   flex: 50%;
   max-width: 1000px;
   min-width: 500px;
@@ -76,7 +76,7 @@ const AbstractTypeDirectoryCardSearch = styled(SearchInput)`
   width: 100%;
 `;
 
-const AbstractTypeDetailsCard = StyledCard.extend`
+const AbstractTypeDetailsCard = styled(StyledCard)`
   flex: 50%;
   max-width: 1000px;
   min-width: 500px;

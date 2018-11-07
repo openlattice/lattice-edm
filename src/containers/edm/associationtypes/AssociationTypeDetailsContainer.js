@@ -34,7 +34,7 @@ const {
  * styled components
  */
 
-const DeleteButton = StyledButton.extend`
+const DeleteButton = styled(StyledButton)`
   align-self: center;
 `;
 
