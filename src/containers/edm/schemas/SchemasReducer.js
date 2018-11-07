@@ -6,11 +6,11 @@
 
 import { List, Map, fromJS } from 'immutable';
 import { Models, Types } from 'lattice';
-import { EntityDataModelApiActionFactory } from 'lattice-sagas';
+import { EntityDataModelApiActions } from 'lattice-sagas';
 
 const { FullyQualifiedName, Schema, SchemaBuilder } = Models;
 const { ActionTypes } = Types;
-const { createSchema, getAllSchemas, updateSchema } = EntityDataModelApiActionFactory;
+const { createSchema, getAllSchemas, updateSchema } = EntityDataModelApiActions;
 
 const INITIAL_STATE :Map<*, *> = fromJS({
   actions: {
