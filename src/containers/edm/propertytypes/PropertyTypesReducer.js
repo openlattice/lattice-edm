@@ -252,8 +252,10 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
           actionPropertyTypeIds.forEach((propertyTypeId :string) => {
             const propertyTypeIndex :number = state.getIn(['propertyTypesById', propertyTypeId], -1);
             if (propertyTypeIndex >= 0) {
-              const existingSchemas :List<FullyQualifiedName> =
-                updatedState.getIn(['propertyTypes', propertyTypeIndex, 'schemas'], List());
+              const existingSchemas :List<FullyQualifiedName> = updatedState.getIn(
+                ['propertyTypes', propertyTypeIndex, 'schemas'],
+                List(),
+              );
               if (actionType === ActionTypes.ADD) {
                 const updatedSchemas :List<FullyQualifiedName> = existingSchemas.push(schemaFqn);
                 updatedState = updatedState.setIn(['propertyTypes', propertyTypeIndex, 'schemas'], updatedSchemas);

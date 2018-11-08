@@ -417,8 +417,10 @@ export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, act
           actionEntityTypeIds.forEach((entityTypeId :string) => {
             const entityTypeIndex :number = state.getIn(['entityTypesById', entityTypeId], -1);
             if (entityTypeIndex >= 0) {
-              const existingSchemas :List<FullyQualifiedName> =
-                updatedState.getIn(['entityTypes', entityTypeIndex, 'schemas'], List());
+              const existingSchemas :List<FullyQualifiedName> = updatedState.getIn(
+                ['entityTypes', entityTypeIndex, 'schemas'],
+                List(),
+              );
               if (actionType === ActionTypes.ADD) {
                 const updatedSchemas :List<FullyQualifiedName> = existingSchemas.push(schemaFqn);
                 updatedState = updatedState.setIn(['entityTypes', entityTypeIndex, 'schemas'], updatedSchemas);
