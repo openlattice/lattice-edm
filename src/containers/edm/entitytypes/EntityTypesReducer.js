@@ -5,7 +5,7 @@
 /* eslint-disable arrow-body-style */
 
 import { List, Map, fromJS } from 'immutable';
-import { Models } from 'lattice';
+import { Models, Types } from 'lattice';
 import { EntityDataModelApiActions } from 'lattice-sagas';
 
 const {
@@ -15,13 +15,19 @@ const {
   getEntityDataModel,
   removePropertyTypeFromEntityType,
   reorderEntityTypePropertyTypes,
-  updateEntityTypeMetaData
+  updateEntityTypeMetaData,
+  updateSchema,
 } = EntityDataModelApiActions;
 
 const {
   EntityType,
-  EntityTypeBuilder
+  EntityTypeBuilder,
+  FullyQualifiedName,
 } = Models;
+
+const {
+  ActionTypes,
+} = Types;
 
 const INITIAL_STATE :Map<*, *> = fromJS({
   actions: {
@@ -30,13 +36,14 @@ const INITIAL_STATE :Map<*, *> = fromJS({
     deleteEntityType: Map(),
     removePropertyTypeFromEntityType: Map(),
     reorderEntityTypePropertyTypes: Map(),
-    updateEntityTypeMetaData: Map()
+    updateEntityTypeMetaData: Map(),
+    updateSchema: Map(),
   },
   entityTypes: List(),
   entityTypesById: Map(),
   isCreatingNewEntityType: false,
   isFetchingAllEntityTypes: false,
-  newlyCreatedEntityTypeId: ''
+  newlyCreatedEntityTypeId: '',
 });
 
 export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, action :Object) :Map<*, *> {
@@ -384,6 +391,61 @@ export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, act
           const seqAction :SequenceAction = (action :any);
           return state.deleteIn(['actions', 'updateEntityTypeMetaData', seqAction.id]);
         }
+      });
+    }
+
+    case updateSchema.case(action.type): {
+      return updateSchema.reducer(state, action, {
+        REQUEST: () => {
+          const seqAction :SequenceAction = action;
+          return state.setIn(['actions', 'updateSchema', seqAction.id], fromJS(seqAction));
+        },
+        SUCCESS: () => {
+
+          const seqAction :SequenceAction = action;
+          const storedSeqAction :Map<*, *> = state.getIn(['actions', 'updateSchema', seqAction.id], Map());
+          if (storedSeqAction.isEmpty()) {
+            return state;
+          }
+
+          const schemaFqn :FullyQualifiedName = new FullyQualifiedName(storedSeqAction.getIn(['value', 'schemaFqn']));
+          const actionEntityTypeIds :List<string> = storedSeqAction.getIn(['value', 'entityTypeIds'], List());
+          // TODO: ":string" should be ":ActionType"
+          const actionType :string = storedSeqAction.getIn(['value', 'action']);
+
+          let updatedState :Map<*, *> = state;
+          actionEntityTypeIds.forEach((entityTypeId :string) => {
+            const entityTypeIndex :number = state.getIn(['entityTypesById', entityTypeId], -1);
+            if (entityTypeIndex >= 0) {
+              const existingSchemas :List<FullyQualifiedName> = updatedState.getIn(
+                ['entityTypes', entityTypeIndex, 'schemas'],
+                List(),
+              );
+              if (actionType === ActionTypes.ADD) {
+                const updatedSchemas :List<FullyQualifiedName> = existingSchemas.push(schemaFqn);
+                updatedState = updatedState.setIn(['entityTypes', entityTypeIndex, 'schemas'], updatedSchemas);
+              }
+              else if (actionType === ActionTypes.REMOVE) {
+                const targetIndex :number = existingSchemas.findIndex((fqn :FullyQualifiedName) => (
+                  FullyQualifiedName.toString(fqn) === schemaFqn.toString()
+                ));
+                if (targetIndex >= 0) {
+                  const updatedSchemas :List<FullyQualifiedName> = existingSchemas.delete(targetIndex);
+                  updatedState = updatedState.setIn(['entityTypes', entityTypeIndex, 'schemas'], updatedSchemas);
+                }
+              }
+            }
+          });
+
+          return updatedState;
+        },
+        FAILURE: () => {
+          return state;
+        },
+        FINALLY: () => {
+          const seqAction :SequenceAction = action;
+          return state.deleteIn(['actions', 'updateSchema', seqAction.id]);
+        },
       });
     }
 

@@ -72,7 +72,7 @@ class SchemaDetailsContainer extends React.Component<Props> {
         entityTypes,
         action: ActionTypes.ADD,
         entityTypeIds: [entityTypeId],
-        schemaFqn: schema.get('fqn').toJS()
+        schemaFqn: new FullyQualifiedName(schema.get('fqn')),
       });
     }
   }
@@ -102,7 +102,7 @@ class SchemaDetailsContainer extends React.Component<Props> {
         action: ActionTypes.ADD,
         entityTypes: theEntityTypes,
         entityTypeIds: [entityTypeId],
-        schemaFqn: schema.get('fqn').toJS()
+        schemaFqn: new FullyQualifiedName(schema.get('fqn')),
       });
     }
   }
@@ -132,7 +132,7 @@ class SchemaDetailsContainer extends React.Component<Props> {
         action: ActionTypes.ADD,
         propertyTypes: thePropertyTypes,
         propertyTypeIds: [propertyTypeId],
-        schemaFqn: schema.get('fqn').toJS()
+        schemaFqn: new FullyQualifiedName(schema.get('fqn')),
       });
     }
   }
@@ -145,7 +145,7 @@ class SchemaDetailsContainer extends React.Component<Props> {
       actions.updateSchema({
         action: ActionTypes.REMOVE,
         entityTypeIds: [entityTypeId],
-        schemaFqn: schema.get('fqn').toJS()
+        schemaFqn: new FullyQualifiedName(schema.get('fqn')),
       });
     }
   }
@@ -158,7 +158,7 @@ class SchemaDetailsContainer extends React.Component<Props> {
       actions.updateSchema({
         action: ActionTypes.REMOVE,
         propertyTypeIds: [propertyTypeId],
-        schemaFqn: schema.get('fqn').toJS()
+        schemaFqn: new FullyQualifiedName(schema.get('fqn')),
       });
     }
   }
