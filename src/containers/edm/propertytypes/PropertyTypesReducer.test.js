@@ -1,32 +1,40 @@
-import Immutable from 'immutable';
 import randomUUID from 'uuid/v4';
-import { EntityDataModelApiActionFactory } from 'lattice-sagas';
+import { List, Map, fromJS } from 'immutable';
+import { Types } from 'lattice';
+import { EntityDataModelApiActions } from 'lattice-sagas';
 
 import reducer from './PropertyTypesReducer';
 import { randomId } from '../../../utils/Utils';
 
 import {
   MOCK_PROPERTY_TYPE,
-  MOCK_PROPERTY_TYPE_JSON
+  MOCK_PROPERTY_TYPE_JSON,
+  MOCK_SCHEMA_FQN,
 } from '../../../utils/MockDataModels';
+
+const {
+  ActionTypes,
+} = Types;
 
 const {
   CREATE_PROPERTY_TYPE,
   DELETE_PROPERTY_TYPE,
   GET_ALL_PROPERTY_TYPES,
   UPDATE_PROPERTY_TYPE_METADATA,
+  UPDATE_SCHEMA,
   createPropertyType,
   deletePropertyType,
   getAllPropertyTypes,
-  updatePropertyTypeMetaData
-} = EntityDataModelApiActionFactory;
+  updatePropertyTypeMetaData,
+  updateSchema,
+} = EntityDataModelApiActions;
 
 describe('PropertyTypesReducer', () => {
 
   const INITIAL_STATE = reducer(undefined, { type: '__TEST__' });
 
   test('INITIAL_STATE', () => {
-    expect(INITIAL_STATE).toBeInstanceOf(Immutable.Map);
+    expect(INITIAL_STATE).toBeInstanceOf(Map);
     expect(INITIAL_STATE.get('isCreatingNewPropertyType')).toEqual(false);
     expect(INITIAL_STATE.get('isFetchingAllPropertyTypes')).toEqual(false);
     expect(INITIAL_STATE.get('newlyCreatedPropertyTypeId')).toEqual('');
@@ -35,7 +43,8 @@ describe('PropertyTypesReducer', () => {
     expect(INITIAL_STATE.get('actions').toJS()).toEqual({
       createPropertyType: {},
       deletePropertyType: {},
-      updatePropertyTypeMetaData: {}
+      updatePropertyTypeMetaData: {},
+      updateSchema: {},
     });
   });
 
@@ -140,8 +149,8 @@ describe('PropertyTypesReducer', () => {
         const mockPropertyType = { id: randomUUID() };
 
         let state = INITIAL_STATE
-          .set('propertyTypes', Immutable.fromJS([mockPropertyType]))
-          .set('propertyTypesById', Immutable.fromJS({ [mockPropertyType.id]: 0 }));
+          .set('propertyTypes', fromJS([mockPropertyType]))
+          .set('propertyTypesById', fromJS({ [mockPropertyType.id]: 0 }));
 
         const { id } = deletePropertyType();
         state = reducer(state, deletePropertyType.request(id, mockPropertyType.id));
@@ -165,12 +174,12 @@ describe('PropertyTypesReducer', () => {
         const mockPropertyType3 = { id: randomUUID() };
 
         let state = INITIAL_STATE
-          .set('propertyTypes', Immutable.fromJS([
+          .set('propertyTypes', fromJS([
             mockPropertyType1,
             mockPropertyType2,
             mockPropertyType3
           ]))
-          .set('propertyTypesById', Immutable.fromJS({
+          .set('propertyTypesById', fromJS({
             [mockPropertyType1.id]: 0,
             [mockPropertyType2.id]: 1,
             [mockPropertyType3.id]: 2
@@ -196,8 +205,8 @@ describe('PropertyTypesReducer', () => {
         const mockPropertyType = { id: randomUUID() };
 
         const initialState = INITIAL_STATE
-          .set('propertyTypes', Immutable.fromJS([mockPropertyType]))
-          .set('propertyTypesById', Immutable.fromJS({ [mockPropertyType.id]: 0 }));
+          .set('propertyTypes', fromJS([mockPropertyType]))
+          .set('propertyTypesById', fromJS({ [mockPropertyType.id]: 0 }));
 
         const { id } = deletePropertyType();
         const stateAfterRequest = reducer(initialState, deletePropertyType.request(id, randomUUID()));
@@ -325,8 +334,8 @@ describe('PropertyTypesReducer', () => {
       test(updatePropertyTypeMetaData.SUCCESS, () => {
 
         let state = INITIAL_STATE
-          .set('propertyTypes', Immutable.fromJS([MOCK_PROPERTY_TYPE.asImmutable()]))
-          .set('propertyTypesById', Immutable.fromJS({ [propertyTypeId]: 0 }));
+          .set('propertyTypes', fromJS([MOCK_PROPERTY_TYPE.asImmutable()]))
+          .set('propertyTypesById', fromJS({ [propertyTypeId]: 0 }));
 
         const { id } = updatePropertyTypeMetaData();
         state = reducer(state, updatePropertyTypeMetaData.request(id, mockActionValue));
@@ -380,6 +389,207 @@ describe('PropertyTypesReducer', () => {
         state = reducer(state, updatePropertyTypeMetaData.finally(id));
         expect(state.hasIn(['actions', 'updatePropertyTypeMetaData', id])).toEqual(false);
       });
+
+    });
+
+  });
+
+  describe(UPDATE_SCHEMA, () => {
+
+    describe(`${ActionTypes.ADD}`, () => {
+
+      const mockPropertyTypeId = MOCK_PROPERTY_TYPE.id;
+      const mockActionValue = {
+        action: ActionTypes.ADD,
+        propertyTypeIds: [mockPropertyTypeId],
+        schemaFqn: MOCK_SCHEMA_FQN,
+      };
+
+      test(updateSchema.REQUEST, () => {
+
+        const { id } = updateSchema();
+        const seqAction = updateSchema.request(id, mockActionValue);
+        const state = reducer(INITIAL_STATE, seqAction);
+
+        expect(state.getIn(['actions', 'updateSchema', id]).toJS())
+          .toEqual({
+            id,
+            type: updateSchema.REQUEST,
+            value: mockActionValue,
+          });
+      });
+
+      test(updateSchema.SUCCESS, () => {
+
+        const mockPropertyType = MOCK_PROPERTY_TYPE
+          .asImmutable()
+          .set('schemas', List());
+
+        let state = INITIAL_STATE
+          .set('propertyTypes', fromJS([mockPropertyType]))
+          .set('propertyTypesById', fromJS({ [mockPropertyTypeId]: 0 }));
+
+        const { id } = updateSchema();
+        state = reducer(state, updateSchema.request(id, mockActionValue));
+        state = reducer(state, updateSchema.success(id));
+
+        const expectedPropertyType = MOCK_PROPERTY_TYPE
+          .asImmutable()
+          .set('schemas', List([MOCK_SCHEMA_FQN]));
+
+        expect(state.get('propertyTypes').toJS()).toEqual(
+          [expectedPropertyType.toJS()]
+        );
+
+        expect(state.get('propertyTypesById').toJS()).toEqual(
+          { [mockPropertyTypeId]: 0 }
+        );
+
+        expect(state.getIn(['actions', 'updateSchema', id]).toJS())
+          .toEqual({
+            id,
+            type: updateSchema.REQUEST,
+            value: mockActionValue,
+          });
+      });
+
+      test(updateSchema.FAILURE, () => {
+
+        let state = INITIAL_STATE
+          .set('propertyTypes', fromJS([MOCK_PROPERTY_TYPE.asImmutable()]))
+          .set('propertyTypesById', fromJS({ [mockPropertyTypeId]: 0 }));
+
+        const { id } = updateSchema();
+        state = reducer(state, updateSchema.request(id, mockActionValue));
+        state = reducer(state, updateSchema.failure(id));
+
+        expect(state.get('propertyTypes').toJS()).toEqual(
+          [MOCK_PROPERTY_TYPE]
+        );
+
+        expect(state.get('propertyTypesById').toJS()).toEqual(
+          { [mockPropertyTypeId]: 0 }
+        );
+
+        expect(state.getIn(['actions', 'updateSchema', id]).toJS())
+          .toEqual({
+            id,
+            type: updateSchema.REQUEST,
+            value: mockActionValue,
+          });
+      });
+
+      test(updateSchema.FINALLY, () => {
+
+        const { id } = updateSchema();
+        let state = reducer(INITIAL_STATE, updateSchema.request(id, mockActionValue));
+        expect(state.getIn(['actions', 'updateSchema', id]).toJS())
+          .toEqual({
+            id,
+            type: updateSchema.REQUEST,
+            value: mockActionValue,
+          });
+
+        state = reducer(state, updateSchema.finally(id));
+        expect(state.hasIn(['actions', 'updateSchema', id])).toEqual(false);
+      });
+
+    });
+
+    describe(`${ActionTypes.REMOVE}`, () => {
+
+      const mockPropertyTypeId = MOCK_PROPERTY_TYPE.id;
+      const mockActionValue = {
+        action: ActionTypes.REMOVE,
+        propertyTypeIds: [mockPropertyTypeId],
+        schemaFqn: MOCK_SCHEMA_FQN,
+      };
+
+      test(updateSchema.REQUEST, () => {
+
+        const { id } = updateSchema();
+        const seqAction = updateSchema.request(id, mockActionValue);
+        const state = reducer(INITIAL_STATE, seqAction);
+
+        expect(state.getIn(['actions', 'updateSchema', id]).toJS())
+          .toEqual({
+            id,
+            type: updateSchema.REQUEST,
+            value: mockActionValue,
+          });
+      });
+
+      test(updateSchema.SUCCESS, () => {
+
+        let state = INITIAL_STATE
+          .set('propertyTypes', fromJS([MOCK_PROPERTY_TYPE.asImmutable()]))
+          .set('propertyTypesById', fromJS({ [mockPropertyTypeId]: 0 }));
+
+        const { id } = updateSchema();
+        state = reducer(state, updateSchema.request(id, mockActionValue));
+        state = reducer(state, updateSchema.success(id));
+
+        const expectedPropertyType = MOCK_PROPERTY_TYPE
+          .asImmutable()
+          .set('schemas', List());
+
+        expect(state.get('propertyTypes').toJS()).toEqual(
+          [expectedPropertyType.toJS()]
+        );
+
+        expect(state.get('propertyTypesById').toJS()).toEqual(
+          { [mockPropertyTypeId]: 0 }
+        );
+
+        expect(state.getIn(['actions', 'updateSchema', id]).toJS())
+          .toEqual({
+            id,
+            type: updateSchema.REQUEST,
+            value: mockActionValue,
+          });
+      });
+
+      test(updateSchema.FAILURE, () => {
+
+        let state = INITIAL_STATE
+          .set('propertyTypes', fromJS([MOCK_PROPERTY_TYPE.asImmutable()]))
+          .set('propertyTypesById', fromJS({ [mockPropertyTypeId]: 0 }));
+
+        const { id } = updateSchema();
+        state = reducer(state, updateSchema.request(id, mockActionValue));
+        state = reducer(state, updateSchema.failure(id));
+
+        expect(state.get('propertyTypes').toJS()).toEqual(
+          [MOCK_PROPERTY_TYPE]
+        );
+
+        expect(state.get('propertyTypesById').toJS()).toEqual(
+          { [mockPropertyTypeId]: 0 }
+        );
+
+        expect(state.getIn(['actions', 'updateSchema', id]).toJS())
+          .toEqual({
+            id,
+            type: updateSchema.REQUEST,
+            value: mockActionValue,
+          });
+      });
+
+      test(updateSchema.FINALLY, () => {
+
+        const { id } = updateSchema();
+        let state = reducer(INITIAL_STATE, updateSchema.request(id, mockActionValue));
+        expect(state.getIn(['actions', 'updateSchema', id]).toJS())
+          .toEqual({
+            id,
+            type: updateSchema.REQUEST,
+            value: mockActionValue,
+          });
+
+        state = reducer(state, updateSchema.finally(id));
+        expect(state.hasIn(['actions', 'updateSchema', id])).toEqual(false);
+      });
+
 
     });
 

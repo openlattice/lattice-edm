@@ -58,7 +58,7 @@ const Title = styled.h1`
   margin: 0;
 `;
 
-const StyledActionButton = StyledButton.extend`
+const StyledActionButton = styled(StyledButton)`
   position: absolute;
   right: 50px;
 `;

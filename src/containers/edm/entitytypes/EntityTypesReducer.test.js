@@ -1,32 +1,40 @@
-import Immutable from 'immutable';
 import randomUUID from 'uuid/v4';
-import { EntityDataModelApiActionFactory } from 'lattice-sagas';
+import { List, Map, fromJS } from 'immutable';
+import { Types } from 'lattice';
+import { EntityDataModelApiActions } from 'lattice-sagas';
 
 import reducer from './EntityTypesReducer';
 import { randomId } from '../../../utils/Utils';
 
 import {
   MOCK_ENTITY_TYPE,
-  MOCK_ENTITY_TYPE_JSON
+  MOCK_ENTITY_TYPE_JSON,
+  MOCK_SCHEMA_FQN,
 } from '../../../utils/MockDataModels';
+
+const {
+  ActionTypes,
+} = Types;
 
 const {
   CREATE_ENTITY_TYPE,
   DELETE_ENTITY_TYPE,
   GET_ALL_ENTITY_TYPES,
   UPDATE_ENTITY_TYPE_METADATA,
+  UPDATE_SCHEMA,
   createEntityType,
   deleteEntityType,
   getAllEntityTypes,
-  updateEntityTypeMetaData
-} = EntityDataModelApiActionFactory;
+  updateEntityTypeMetaData,
+  updateSchema,
+} = EntityDataModelApiActions;
 
 describe('EntityTypesReducer', () => {
 
   const INITIAL_STATE = reducer(undefined, { type: '__TEST__' });
 
   test('INITIAL_STATE', () => {
-    expect(INITIAL_STATE).toBeInstanceOf(Immutable.Map);
+    expect(INITIAL_STATE).toBeInstanceOf(Map);
     expect(INITIAL_STATE.get('entityTypes').toJS()).toEqual([]);
     expect(INITIAL_STATE.get('entityTypesById').toJS()).toEqual({});
     expect(INITIAL_STATE.get('isCreatingNewEntityType')).toEqual(false);
@@ -38,7 +46,8 @@ describe('EntityTypesReducer', () => {
       deleteEntityType: {},
       removePropertyTypeFromEntityType: {},
       reorderEntityTypePropertyTypes: {},
-      updateEntityTypeMetaData: {}
+      updateEntityTypeMetaData: {},
+      updateSchema: {},
     });
   });
 
@@ -137,8 +146,8 @@ describe('EntityTypesReducer', () => {
         const mockEntityType = { id: randomUUID() };
 
         let state = INITIAL_STATE
-          .set('entityTypes', Immutable.fromJS([mockEntityType]))
-          .set('entityTypesById', Immutable.fromJS({ [mockEntityType.id]: 0 }));
+          .set('entityTypes', fromJS([mockEntityType]))
+          .set('entityTypesById', fromJS({ [mockEntityType.id]: 0 }));
 
         const { id } = deleteEntityType();
         state = reducer(state, deleteEntityType.request(id, mockEntityType.id));
@@ -162,12 +171,12 @@ describe('EntityTypesReducer', () => {
         const mockEntityType3 = { id: randomUUID() };
 
         let state = INITIAL_STATE
-          .set('entityTypes', Immutable.fromJS([
+          .set('entityTypes', fromJS([
             mockEntityType1,
             mockEntityType2,
             mockEntityType3
           ]))
-          .set('entityTypesById', Immutable.fromJS({
+          .set('entityTypesById', fromJS({
             [mockEntityType1.id]: 0,
             [mockEntityType2.id]: 1,
             [mockEntityType3.id]: 2
@@ -193,8 +202,8 @@ describe('EntityTypesReducer', () => {
         const mockEntityType = { id: randomUUID() };
 
         const initialState = INITIAL_STATE
-          .set('entityTypes', Immutable.fromJS([mockEntityType]))
-          .set('entityTypesById', Immutable.fromJS({ [mockEntityType.id]: 0 }));
+          .set('entityTypes', fromJS([mockEntityType]))
+          .set('entityTypesById', fromJS({ [mockEntityType.id]: 0 }));
 
         const { id } = deleteEntityType();
         const stateAfterRequest = reducer(initialState, deleteEntityType.request(id, randomUUID()));
@@ -320,8 +329,8 @@ describe('EntityTypesReducer', () => {
       test(updateEntityTypeMetaData.SUCCESS, () => {
 
         let state = INITIAL_STATE
-          .set('entityTypes', Immutable.fromJS([MOCK_ENTITY_TYPE.asImmutable()]))
-          .set('entityTypesById', Immutable.fromJS({ [entityTypeId]: 0 }));
+          .set('entityTypes', fromJS([MOCK_ENTITY_TYPE.asImmutable()]))
+          .set('entityTypesById', fromJS({ [entityTypeId]: 0 }));
 
         const { id } = updateEntityTypeMetaData();
         state = reducer(state, updateEntityTypeMetaData.request(id, mockActionValue));
@@ -373,6 +382,206 @@ describe('EntityTypesReducer', () => {
 
         state = reducer(state, updateEntityTypeMetaData.finally(id));
         expect(state.hasIn(['actions', 'updateAssociationTypeMetaData', id])).toEqual(false);
+      });
+
+    });
+
+  });
+
+  describe(UPDATE_SCHEMA, () => {
+
+    describe(`${ActionTypes.ADD}`, () => {
+
+      const mockEntityTypeId = MOCK_ENTITY_TYPE.id;
+      const mockActionValue = {
+        action: ActionTypes.ADD,
+        entityTypeIds: [mockEntityTypeId],
+        schemaFqn: MOCK_SCHEMA_FQN,
+      };
+
+      test(updateSchema.REQUEST, () => {
+
+        const { id } = updateSchema();
+        const seqAction = updateSchema.request(id, mockActionValue);
+        const state = reducer(INITIAL_STATE, seqAction);
+
+        expect(state.getIn(['actions', 'updateSchema', id]).toJS())
+          .toEqual({
+            id,
+            type: updateSchema.REQUEST,
+            value: mockActionValue,
+          });
+      });
+
+      test(updateSchema.SUCCESS, () => {
+
+        const mockEntityType = MOCK_ENTITY_TYPE
+          .asImmutable()
+          .set('schemas', List());
+
+        let state = INITIAL_STATE
+          .set('entityTypes', fromJS([mockEntityType]))
+          .set('entityTypesById', fromJS({ [mockEntityTypeId]: 0 }));
+
+        const { id } = updateSchema();
+        state = reducer(state, updateSchema.request(id, mockActionValue));
+        state = reducer(state, updateSchema.success(id));
+
+        const expectedEntityType = MOCK_ENTITY_TYPE
+          .asImmutable()
+          .set('schemas', List([MOCK_SCHEMA_FQN]));
+
+        expect(state.get('entityTypes').toJS()).toEqual(
+          [expectedEntityType.toJS()]
+        );
+
+        expect(state.get('entityTypesById').toJS()).toEqual(
+          { [mockEntityTypeId]: 0 }
+        );
+
+        expect(state.getIn(['actions', 'updateSchema', id]).toJS())
+          .toEqual({
+            id,
+            type: updateSchema.REQUEST,
+            value: mockActionValue,
+          });
+      });
+
+      test(updateSchema.FAILURE, () => {
+
+        let state = INITIAL_STATE
+          .set('entityTypes', fromJS([MOCK_ENTITY_TYPE.asImmutable()]))
+          .set('entityTypesById', fromJS({ [mockEntityTypeId]: 0 }));
+
+        const { id } = updateSchema();
+        state = reducer(state, updateSchema.request(id, mockActionValue));
+        state = reducer(state, updateSchema.failure(id));
+
+        expect(state.get('entityTypes').toJS()).toEqual(
+          [MOCK_ENTITY_TYPE]
+        );
+
+        expect(state.get('entityTypesById').toJS()).toEqual(
+          { [mockEntityTypeId]: 0 }
+        );
+
+        expect(state.getIn(['actions', 'updateSchema', id]).toJS())
+          .toEqual({
+            id,
+            type: updateSchema.REQUEST,
+            value: mockActionValue,
+          });
+      });
+
+      test(updateSchema.FINALLY, () => {
+
+        const { id } = updateSchema();
+        let state = reducer(INITIAL_STATE, updateSchema.request(id, mockActionValue));
+        expect(state.getIn(['actions', 'updateSchema', id]).toJS())
+          .toEqual({
+            id,
+            type: updateSchema.REQUEST,
+            value: mockActionValue,
+          });
+
+        state = reducer(state, updateSchema.finally(id));
+        expect(state.hasIn(['actions', 'updateSchema', id])).toEqual(false);
+      });
+
+    });
+
+    describe(`${ActionTypes.REMOVE}`, () => {
+
+      const mockEntityTypeId = MOCK_ENTITY_TYPE.id;
+      const mockActionValue = {
+        action: ActionTypes.REMOVE,
+        entityTypeIds: [mockEntityTypeId],
+        schemaFqn: MOCK_SCHEMA_FQN,
+      };
+
+      test(updateSchema.REQUEST, () => {
+
+        const { id } = updateSchema();
+        const seqAction = updateSchema.request(id, mockActionValue);
+        const state = reducer(INITIAL_STATE, seqAction);
+
+        expect(state.getIn(['actions', 'updateSchema', id]).toJS())
+          .toEqual({
+            id,
+            type: updateSchema.REQUEST,
+            value: mockActionValue,
+          });
+      });
+
+      test(updateSchema.SUCCESS, () => {
+
+        let state = INITIAL_STATE
+          .set('entityTypes', fromJS([MOCK_ENTITY_TYPE.asImmutable()]))
+          .set('entityTypesById', fromJS({ [mockEntityTypeId]: 0 }));
+
+        const { id } = updateSchema();
+        state = reducer(state, updateSchema.request(id, mockActionValue));
+        state = reducer(state, updateSchema.success(id));
+
+        const expectedEntityType = MOCK_ENTITY_TYPE
+          .asImmutable()
+          .set('schemas', List());
+
+        expect(state.get('entityTypes').toJS()).toEqual(
+          [expectedEntityType.toJS()]
+        );
+
+        expect(state.get('entityTypesById').toJS()).toEqual(
+          { [mockEntityTypeId]: 0 }
+        );
+
+        expect(state.getIn(['actions', 'updateSchema', id]).toJS())
+          .toEqual({
+            id,
+            type: updateSchema.REQUEST,
+            value: mockActionValue,
+          });
+      });
+
+      test(updateSchema.FAILURE, () => {
+
+        let state = INITIAL_STATE
+          .set('entityTypes', fromJS([MOCK_ENTITY_TYPE.asImmutable()]))
+          .set('entityTypesById', fromJS({ [mockEntityTypeId]: 0 }));
+
+        const { id } = updateSchema();
+        state = reducer(state, updateSchema.request(id, mockActionValue));
+        state = reducer(state, updateSchema.failure(id));
+
+        expect(state.get('entityTypes').toJS()).toEqual(
+          [MOCK_ENTITY_TYPE]
+        );
+
+        expect(state.get('entityTypesById').toJS()).toEqual(
+          { [mockEntityTypeId]: 0 }
+        );
+
+        expect(state.getIn(['actions', 'updateSchema', id]).toJS())
+          .toEqual({
+            id,
+            type: updateSchema.REQUEST,
+            value: mockActionValue,
+          });
+      });
+
+      test(updateSchema.FINALLY, () => {
+
+        const { id } = updateSchema();
+        let state = reducer(INITIAL_STATE, updateSchema.request(id, mockActionValue));
+        expect(state.getIn(['actions', 'updateSchema', id]).toJS())
+          .toEqual({
+            id,
+            type: updateSchema.REQUEST,
+            value: mockActionValue,
+          });
+
+        state = reducer(state, updateSchema.finally(id));
+        expect(state.hasIn(['actions', 'updateSchema', id])).toEqual(false);
       });
 
     });

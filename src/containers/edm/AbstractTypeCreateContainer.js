@@ -68,7 +68,7 @@ const DATA_TYPE_OPTIONS = EDM_PRIMITIVE_TYPES.map((primitive :string) => (
  * styled components
  */
 
-const AbstractTypeCreateCard = StyledCard.extend`
+const AbstractTypeCreateCard = styled(StyledCard)`
   flex: 50%;
   max-width: 1000px;
   min-width: 500px;
