@@ -10,15 +10,15 @@ import type { AbstractType } from './AbstractTypes';
 
 const { FullyQualifiedName } = Models;
 
-type Params = {
-  associationTypes :?List<Map<*, *>>;
-  entityTypes :?List<Map<*, *>>;
-  propertyTypes :?List<Map<*, *>>;
-  schemas :?List<Map<*, *>>;
+type GetWorkingAbstractTypesParams = {
+  associationTypes :List<Map<*, *>>;
+  entityTypes :List<Map<*, *>>;
+  propertyTypes :List<Map<*, *>>;
+  schemas :List<Map<*, *>>;
   workingAbstractTypeType :AbstractType;
 };
 
-export function getWorkingAbstractTypes(params :Params) :List<Map<*, *>> {
+function getWorkingAbstractTypes(params :GetWorkingAbstractTypesParams) :List<Map<*, *>> {
 
   switch (params.workingAbstractTypeType) {
     case AbstractTypes.AssociationType:
@@ -34,13 +34,13 @@ export function getWorkingAbstractTypes(params :Params) :List<Map<*, *>> {
   }
 }
 
-export type AbstractTypeFilterParams = {
-  abstractTypes :List<Map<*, *>>,
-  filterQuery :string,
-  workingAbstractTypeType :AbstractType
-}
+type FilterAbstractTypesParams = {
+  abstractTypes :List<Map<*, *>>;
+  filterQuery :string;
+  workingAbstractTypeType :AbstractType;
+};
 
-export function filterAbstractTypes(params :AbstractTypeFilterParams) :List<Map<*, *>> {
+function filterAbstractTypes(params :FilterAbstractTypesParams) :List<Map<*, *>> {
 
   const {
     abstractTypes,
@@ -54,7 +54,7 @@ export function filterAbstractTypes(params :AbstractTypeFilterParams) :List<Map<
       ? workingAbstractType.get('entityType', Map())
       : workingAbstractType;
 
-    const abstractTypeId :string = abstractType.get('id', '');
+    const abstractTypeId :?string = abstractType.get('id', '');
     const abstractTypeType :Map<string, string> = abstractType.get('type', Map());
     const abstractTypeFqn :string = (workingAbstractTypeType === AbstractTypes.Schema)
       ? FullyQualifiedName.toString(abstractType.get('fqn', Map())).toLowerCase()
@@ -64,10 +64,10 @@ export function filterAbstractTypes(params :AbstractTypeFilterParams) :List<Map<
     let includeAbstractType :boolean = true;
     if (filterQuery && filterQuery.trim()) {
       const filterTrimLowerCase :string = filterQuery.trim().toLowerCase();
-      const matchesId :boolean = abstractTypeId.includes(filterTrimLowerCase);
-      const matchesFqn :boolean = abstractTypeFqn.includes(filterTrimLowerCase);
+      const matchesId :boolean = !!abstractTypeId && abstractTypeId.includes(filterTrimLowerCase);
+      const matchesFQN :boolean = abstractTypeFqn.includes(filterTrimLowerCase);
       const matchesTitle :boolean = abstractTypeTitle.includes(filterTrimLowerCase);
-      if (!matchesId && !matchesFqn && !matchesTitle) {
+      if (!matchesId && !matchesFQN && !matchesTitle) {
         includeAbstractType = false;
       }
     }
@@ -75,3 +75,13 @@ export function filterAbstractTypes(params :AbstractTypeFilterParams) :List<Map<
     return includeAbstractType;
   });
 }
+
+export {
+  filterAbstractTypes,
+  getWorkingAbstractTypes,
+};
+
+export type {
+  GetWorkingAbstractTypesParams,
+  FilterAbstractTypesParams,
+};

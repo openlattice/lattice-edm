@@ -7,6 +7,7 @@ import { EntityDataModelApiSagas } from 'lattice-sagas';
 import { all, fork } from 'redux-saga/effects';
 
 import * as GitHubSagas from '../../containers/github/GitHubSagas';
+import * as PropertyTypesSagas from '../../containers/edm/propertytypes/PropertyTypesSagas';
 import * as SyncSagas from '../../containers/sync/SyncSagas';
 
 // injected by Webpack.DefinePlugin
@@ -27,6 +28,9 @@ export default function* sagas() :Generator<*, *, *> {
 
     // SyncSagas
     fork(SyncSagas.syncProdEntityDataModelWatcher),
+
+    // PropertyTypesSagas
+    fork(PropertyTypesSagas.localCreatePropertyTypeWatcher),
   ];
 
   const optional = [

@@ -69,7 +69,7 @@ type Props = {
   showRemoveColumn :boolean;
   workingAbstractTypeType :AbstractType;
   onAbstractTypeRemove :(selectedAbstractTypeId :string) => void;
-  onAbstractTypeSelect :(selectedAbstractTypeId :string) => void;
+  onAbstractTypeSelect :(selectedAbstractTypeId :FQN | UUID) => void;
   onReorder :(oldIndex :number, newIndex :number) => void;
 };
 
@@ -220,14 +220,20 @@ class AbstractTypeDataTable extends React.Component<Props, State> {
     const { abstractTypes, onAbstractTypeSelect, workingAbstractTypeType } = this.props;
 
     const selectedAbstractType :Map<*, *> = abstractTypes.get(selectedRowIndex, Map());
-    let selectedAbstractTypeId :string = selectedAbstractType.get('id', '');
+    let selectedAbstractTypeId = selectedAbstractType.get('id', '');
+    if (!selectedAbstractTypeId) {
+      selectedAbstractTypeId = new FullyQualifiedName(selectedAbstractType.get('type', Map()));
+    }
 
     if (workingAbstractTypeType === AbstractTypes.AssociationType) {
       const entityType :Map<*, *> = selectedAbstractType.get('entityType', Map());
       selectedAbstractTypeId = entityType.get('id', '');
+      if (!selectedAbstractTypeId) {
+        selectedAbstractTypeId = new FullyQualifiedName(entityType.get('type', Map()));
+      }
     }
     else if (workingAbstractTypeType === AbstractTypes.Schema) {
-      selectedAbstractTypeId = FullyQualifiedName.toString(selectedAbstractType.get('fqn', Map()));
+      selectedAbstractTypeId = new FullyQualifiedName(selectedAbstractType.get('fqn', Map()));
     }
 
     onAbstractTypeSelect(selectedAbstractTypeId);

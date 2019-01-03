@@ -8,8 +8,17 @@ import { List, Map, fromJS } from 'immutable';
 import { Models, Types } from 'lattice';
 import { EntityDataModelApiActions } from 'lattice-sagas';
 
+import Logger from '../../../utils/Logger';
+import {
+  LOCAL_CREATE_PROPERTY_TYPE,
+  localCreatePropertyType,
+} from './PropertyTypesActions';
+
+import type { IndexMap } from '../Types';
+
+const LOG :Logger = new Logger('PropertyTypesReducer');
+
 const {
-  createPropertyType,
   deletePropertyType,
   getEntityDataModel,
   updatePropertyTypeMetaData,
@@ -27,6 +36,7 @@ const {
 } = Types;
 
 const INITIAL_STATE :Map<*, *> = fromJS({
+  [LOCAL_CREATE_PROPERTY_TYPE]: { error: Map() },
   actions: {
     createPropertyType: Map(),
     deletePropertyType: Map(),
@@ -37,69 +47,75 @@ const INITIAL_STATE :Map<*, *> = fromJS({
   isFetchingAllPropertyTypes: false,
   newlyCreatedPropertyTypeId: '',
   propertyTypes: List(),
-  propertyTypesById: Map(),
+  propertyTypesIndexMap: Map(),
 });
 
 export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, action :Object) :Map<*, *> {
 
   switch (action.type) {
 
-    case createPropertyType.case(action.type): {
-      return createPropertyType.reducer(state, action, {
+    case localCreatePropertyType.case(action.type): {
+      return localCreatePropertyType.reducer(state, action, {
         REQUEST: () => {
-          // TODO: not ideal. perhaps there's a better way to get access to the trigger action value
-          const seqAction :SequenceAction = (action :any);
+          const seqAction :SequenceAction = action;
           return state
             .set('isCreatingNewPropertyType', true)
-            .set('newlyCreatedPropertyTypeId', '')
-            .setIn(['actions', 'createPropertyType', seqAction.id], fromJS(seqAction));
+            .setIn([LOCAL_CREATE_PROPERTY_TYPE, seqAction.id], seqAction);
         },
         SUCCESS: () => {
 
-          const seqAction :SequenceAction = (action :any);
-          const storedSeqAction :Map<*, *> = state.getIn(['actions', 'createPropertyType', seqAction.id], Map());
+          const seqAction :SequenceAction = action;
+          const storedSeqAction :SequenceAction = state.getIn([LOCAL_CREATE_PROPERTY_TYPE, seqAction.id]);
 
-          if (storedSeqAction.isEmpty()) {
-            return state;
+          if (storedSeqAction) {
+
+            const storedPropertyType :PropertyType = storedSeqAction.value;
+            const propertyTypeFQN :FQN = new FullyQualifiedName(storedPropertyType.type);
+            const propertyTypeId :?UUID = seqAction.value; // id won't be available in "offline" mode
+            const newPropertyTypeAsImmutable :Map<*, *> = new PropertyTypeBuilder()
+              .setId(propertyTypeId)
+              .setType(propertyTypeFQN)
+              .setTitle(storedPropertyType.title)
+              .setDescription(storedPropertyType.description)
+              .setDataType(storedPropertyType.datatype)
+              .setPii(storedPropertyType.piiField)
+              .setAnalyzer(storedPropertyType.analyzer)
+              .setSchemas(storedPropertyType.schemas)
+              .build()
+              .asImmutable();
+
+            const updatedPropertyTypes :List<Map<*, *>> = state
+              .get('propertyTypes')
+              .push(newPropertyTypeAsImmutable);
+
+            const fqnOrId :FQN | UUID = propertyTypeId || propertyTypeFQN;
+            const updatedPropertyTypesIndexMap :IndexMap = state
+              .get('propertyTypesIndexMap')
+              .set(fqnOrId, updatedPropertyTypes.count() - 1);
+
+            return state
+              .set('newlyCreatedPropertyTypeId', fqnOrId)
+              .set('propertyTypes', updatedPropertyTypes)
+              .set('propertyTypesIndexMap', updatedPropertyTypesIndexMap);
           }
-
-          const newPropertyTypeId :string = (seqAction.value :any);
-          const tempPropertyType :PropertyType = storedSeqAction.get('value');
-
-          const newPropertyType :PropertyType = new PropertyTypeBuilder()
-            .setId(newPropertyTypeId)
-            .setType(tempPropertyType.type)
-            .setTitle(tempPropertyType.title)
-            .setDescription(tempPropertyType.description)
-            .setDataType(tempPropertyType.datatype)
-            .setPii(tempPropertyType.piiField)
-            .setAnalyzer(tempPropertyType.analyzer)
-            .setSchemas(tempPropertyType.schemas)
-            .build();
-
-          const iPropertyType :Map<*, *> = newPropertyType.asImmutable();
-          const current :List<Map<*, *>> = state.get('propertyTypes', List());
-          const updated :List<Map<*, *>> = current.push(iPropertyType);
-
-          const currentById :Map<string, number> = state.get('propertyTypesById', Map());
-          const updatedById :Map<string, number> = currentById.set(newPropertyTypeId, updated.size - 1);
-
-          return state
-            .set('newlyCreatedPropertyTypeId', newPropertyTypeId)
-            .set('propertyTypes', updated)
-            .set('propertyTypesById', updatedById);
+          return state;
         },
         FAILURE: () => {
-          // TODO: need to properly handle the failure case
+          const seqAction :SequenceAction = action;
+          const storedSeqAction :SequenceAction = state.getIn([LOCAL_CREATE_PROPERTY_TYPE, seqAction.id]);
+          if (storedSeqAction) {
+            // TODO: we need a better pattern for setting and handling errors
+            return state.setIn([LOCAL_CREATE_PROPERTY_TYPE, 'error'], true);
+          }
           return state;
         },
         FINALLY: () => {
-          const seqAction :SequenceAction = (action :any);
+          const seqAction :SequenceAction = action;
           return state
             .set('isCreatingNewPropertyType', false)
-            .set('newlyCreatedPropertyTypeId', '')
-            .deleteIn(['actions', 'createPropertyType', seqAction.id]);
-        }
+            // .set('newlyCreatedPropertyTypeId', '')
+            .deleteIn([LOCAL_CREATE_PROPERTY_TYPE, seqAction.id]);
+        },
       });
     }
 
@@ -155,22 +171,45 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
         },
         SUCCESS: () => {
 
-          const seqAction :SequenceAction = (action :any);
-          const propertyTypes :List<Map<*, *>> = fromJS(seqAction.value.propertyTypes);
-          const propertyTypesById :Map<string, number> = Map()
-            .withMutations((byIdMap :Map<string, number>) => {
-              propertyTypes.forEach((propertyType :Map<*, *>, propertyTypeIndex :number) => {
-                byIdMap.set(propertyType.get('id'), propertyTypeIndex);
-              });
-            });
+          const seqAction :SequenceAction = action;
+          const responsePropertyTypes :Object[] = seqAction.value.propertyTypes;
+          if (!responsePropertyTypes || responsePropertyTypes.length === 0) {
+            LOG.error('getEntityDataModel() - no PropertyTypes available', responsePropertyTypes);
+            return state;
+          }
+
+          const propertyTypes :List<Map<*, *>> = List().asMutable();
+          const propertyTypesIndexMap :Map<FQN | UUID, number> = Map().asMutable();
+
+          responsePropertyTypes.forEach((pt :Object, index :number) => {
+            try {
+              const propertyTypeAsImmutable :PropertyType = new PropertyTypeBuilder()
+                .setId(pt.id)
+                .setType(new FullyQualifiedName(pt.type))
+                .setTitle(pt.title)
+                .setDescription(pt.description)
+                .setDataType(pt.datatype)
+                .setPii(pt.piiField)
+                .setAnalyzer(pt.analyzer)
+                .setSchemas(pt.schemas)
+                .build()
+                .asImmutable();
+              propertyTypes.push(propertyTypeAsImmutable);
+              propertyTypesIndexMap.set(pt.id, index);
+            }
+            catch (e) {
+              LOG.error('getEntityDataModel()', e);
+            }
+          });
+
           return state
-            .set('propertyTypes', propertyTypes)
-            .set('propertyTypesById', propertyTypesById);
+            .set('propertyTypes', propertyTypes.asImmutable())
+            .set('propertyTypesIndexMap', propertyTypesIndexMap.asImmutable());
         },
         FAILURE: () => {
           return state
             .set('propertyTypes', List())
-            .set('propertyTypesById', Map());
+            .set('propertyTypesIndexMap', Map());
         },
         FINALLY: () => {
           return state.set('isFetchingAllPropertyTypes', false);
@@ -288,3 +327,7 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
       return state;
   }
 }
+
+export type {
+  IndexMap,
+};

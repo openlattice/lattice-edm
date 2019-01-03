@@ -31,8 +31,10 @@ import {
 
 import type {
   AbstractTypeOverviewContainerProps as Props,
-  AbstractTypeOverviewContainerState as State
+  AbstractTypeOverviewContainerState as State,
 } from './Types';
+
+import type { GetWorkingAbstractTypesParams } from '../../utils/AbstractTypeUtils';
 
 /*
  * styled components
@@ -98,7 +100,7 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
 
     super(props);
 
-    const params :Object = {
+    const params :GetWorkingAbstractTypesParams = {
       associationTypes: props.associationTypes,
       entityTypes: props.entityTypes,
       propertyTypes: props.propertyTypes,
@@ -108,7 +110,7 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
 
     const filteredTypes :List<Map<*, *>> = getWorkingAbstractTypes(params);
     const selectedAbstractType :Map<*, *> = filteredTypes.get(0, Map());
-    const selectedAbstractTypeId :string = selectedAbstractType.get('id', '');
+    const selectedAbstractTypeId :UUID = selectedAbstractType.get('id', '');
 
     this.state = {
       filteredTypes,
@@ -121,6 +123,8 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
 
   componentWillReceiveProps(nextProps :Props) {
 
+    console.log('componentWillReceiveProps()')
+
     const { filterQuery } = this.state;
     let { selectedAbstractTypeId } = this.state;
 
@@ -129,10 +133,10 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
       entityTypes,
       propertyTypes,
       schemas,
-      workingAbstractTypeType
+      workingAbstractTypeType,
     } = nextProps;
 
-    const params :Object = {
+    const params :GetWorkingAbstractTypesParams = {
       associationTypes,
       entityTypes,
       propertyTypes,
@@ -181,7 +185,7 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
     });
   }
 
-  handleOnAbstractTypeSelect = (selectedAbstractTypeId :string) => {
+  handleOnAbstractTypeSelect = (selectedAbstractTypeId :FQN | UUID) => {
 
     const {
       associationTypes,
@@ -189,7 +193,7 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
       entityTypes,
       entityTypesById,
       propertyTypes,
-      propertyTypesById,
+      propertyTypesIndexMap,
       schemas,
       schemasByFqn,
       workingAbstractTypeType
@@ -221,7 +225,7 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
       }
       case AbstractTypes.PropertyType: {
         if (selectedAbstractTypeId) {
-          selectedAbstractTypeIndex = propertyTypesById.get(selectedAbstractTypeId, -1);
+          selectedAbstractTypeIndex = propertyTypesIndexMap.get(selectedAbstractTypeId, -1);
           if (selectedAbstractTypeIndex !== -1) {
             selectedAbstractType = propertyTypes.get(selectedAbstractTypeIndex, Map());
           }
@@ -243,7 +247,7 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
 
     this.setState({
       selectedAbstractType,
-      selectedAbstractTypeId
+      selectedAbstractTypeId,
     });
   }
 
@@ -273,13 +277,13 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
 
     const filteredTypes :List<Map<*, *>> = filterAbstractTypes(filterParams);
     const selectedAbstractType :Map<*, *> = filteredTypes.get(0, Map());
-    const selectedAbstractTypeId :string = selectedAbstractType.get('id', '');
+    const selectedAbstractTypeId :UUID = selectedAbstractType.get('id', '');
 
     this.setState({
       filterQuery,
       filteredTypes,
       selectedAbstractType,
-      selectedAbstractTypeId
+      selectedAbstractTypeId,
     });
   }
 
@@ -292,11 +296,11 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
 
   showCreateNewAbstractTypeCard = () => {
 
-    if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
+    // if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
       this.setState({
         showCreateNewAbstractTypeCard: true
       });
-    }
+    // }
   }
 
   renderAbstractTypeDirectoryCard = () => {
@@ -329,7 +333,8 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
             { cardTitle }
           </h1>
           {
-            AuthUtils.isAuthenticated() && AuthUtils.isAdmin()
+            // AuthUtils.isAuthenticated() && AuthUtils.isAdmin()
+            true
               ? (
                 <StyledButton onClick={this.showCreateNewAbstractTypeCard}>
                   Create New
@@ -401,9 +406,9 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
 
   renderAbstractTypeCreateCard = () => {
 
-    if (!AuthUtils.isAuthenticated() || !AuthUtils.isAdmin()) {
-      return null;
-    }
+    // if (!AuthUtils.isAuthenticated() || !AuthUtils.isAdmin()) {
+    //   return null;
+    // }
 
     const { workingAbstractTypeType } = this.props;
 
@@ -460,24 +465,22 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
   }
 }
 
-function mapStateToProps(state :Map<*, *>) :Object {
+const mapStateToProps = (state :Map<*, *>) :{} => ({
+  associationTypes: state.getIn(['edm', 'associationTypes', 'associationTypes']),
+  associationTypesById: state.getIn(['edm', 'associationTypes', 'associationTypesById']),
+  entityTypes: state.getIn(['edm', 'entityTypes', 'entityTypes']),
+  entityTypesById: state.getIn(['edm', 'entityTypes', 'entityTypesById']),
+  isFetchingEntityDataModel: state.getIn(['edm', 'isFetchingEntityDataModel']),
+  newlyCreatedAssociationTypeId: state.getIn(['edm', 'associationTypes', 'newlyCreatedAssociationTypeId']),
+  newlyCreatedEntityTypeId: state.getIn(['edm', 'entityTypes', 'newlyCreatedEntityTypeId']),
+  newlyCreatedPropertyTypeId: state.getIn(['edm', 'propertyTypes', 'newlyCreatedPropertyTypeId']),
+  propertyTypes: state.getIn(['edm', 'propertyTypes', 'propertyTypes']),
+  propertyTypesIndexMap: state.getIn(['edm', 'propertyTypes', 'propertyTypesIndexMap']),
+  schemas: state.getIn(['edm', 'schemas', 'schemas']),
+  schemasByFqn: state.getIn(['edm', 'schemas', 'schemasByFqn']),
+});
 
-  return {
-    associationTypes: state.getIn(['edm', 'associationTypes', 'associationTypes']),
-    associationTypesById: state.getIn(['edm', 'associationTypes', 'associationTypesById']),
-    entityTypes: state.getIn(['edm', 'entityTypes', 'entityTypes']),
-    entityTypesById: state.getIn(['edm', 'entityTypes', 'entityTypesById']),
-    isFetchingEntityDataModel: state.getIn(['edm', 'isFetchingEntityDataModel']),
-    newlyCreatedAssociationTypeId: state.getIn(['edm', 'associationTypes', 'newlyCreatedAssociationTypeId']),
-    newlyCreatedEntityTypeId: state.getIn(['edm', 'entityTypes', 'newlyCreatedEntityTypeId']),
-    newlyCreatedPropertyTypeId: state.getIn(['edm', 'propertyTypes', 'newlyCreatedPropertyTypeId']),
-    propertyTypes: state.getIn(['edm', 'propertyTypes', 'propertyTypes']),
-    propertyTypesById: state.getIn(['edm', 'propertyTypes', 'propertyTypesById']),
-    schemas: state.getIn(['edm', 'schemas', 'schemas']),
-    schemasByFqn: state.getIn(['edm', 'schemas', 'schemasByFqn'])
-  };
-}
-
+// $FlowFixMe
 export default connect(mapStateToProps)(AbstractTypeOverviewContainer);
 
 export type { Props };

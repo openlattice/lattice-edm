@@ -18,6 +18,7 @@ import * as Routes from '../../core/router/Routes';
 import EntityDataModelContainer from '../edm/EntityDataModelContainer';
 import GitHubContainer from '../github/GitHubContainer';
 import NavContainer from './NavContainer';
+import OnlineToggleContainer from './OnlineToggleContainer';
 import SyncContainer from '../sync/SyncContainer';
 
 const { logout } = AuthActionFactory;
@@ -122,6 +123,7 @@ class AppContainer extends Component<Props> {
           </AppHeaderInnerWrapper>
         </AppHeaderOuterWrapper>
         <NavContainer />
+        <OnlineToggleContainer />
         <Switch>
           <Route path={Routes.SYNC} component={SyncContainer} />
           <Route path={Routes.GITHUB} component={GitHubContainer} />

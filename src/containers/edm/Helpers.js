@@ -10,13 +10,13 @@ import AbstractTypes from '../../utils/AbstractTypes';
 import type { AbstractTypeOverviewContainerProps } from './Types';
 
 function maybeGetAbstractTypeIdForNewlyCreatedAbstractType(
-  selectedAbstractTypeId :string,
+  selectedAbstractTypeId :FQN | UUID,
   prevProps :AbstractTypeOverviewContainerProps,
-  nextProps :AbstractTypeOverviewContainerProps
-) :string {
+  nextProps :AbstractTypeOverviewContainerProps,
+) :FQN | UUID {
 
-  let prevId;
-  let nextId;
+  let prevId :FQN | UUID;
+  let nextId :FQN | UUID;
 
   switch (nextProps.workingAbstractTypeType) {
     case AbstractTypes.AssociationType: {
@@ -62,7 +62,7 @@ function maybeGetAbstractTypeIdForNewlyCreatedAbstractType(
 
 function maybeGetAbstractTypeMatchingSelectedAbstractTypeId(
   selectedAbstractType :Map<*, *>,
-  selectedAbstractTypeId :string,
+  selectedAbstractTypeId :FQN | UUID,
   nextProps :AbstractTypeOverviewContainerProps
 ) :Map<*, *> {
 
@@ -72,7 +72,7 @@ function maybeGetAbstractTypeMatchingSelectedAbstractTypeId(
     entityTypes,
     entityTypesById,
     propertyTypes,
-    propertyTypesById,
+    propertyTypesIndexMap,
     schemas,
     schemasByFqn,
     workingAbstractTypeType
@@ -100,7 +100,7 @@ function maybeGetAbstractTypeMatchingSelectedAbstractTypeId(
     }
     case AbstractTypes.PropertyType: {
       if (selectedAbstractTypeId) {
-        selectedAbstractTypeIndex = propertyTypesById.get(selectedAbstractTypeId, -1);
+        selectedAbstractTypeIndex = propertyTypesIndexMap.get(selectedAbstractTypeId, -1);
         if (selectedAbstractTypeIndex !== -1) {
           return propertyTypes.get(selectedAbstractTypeIndex, Map());
         }

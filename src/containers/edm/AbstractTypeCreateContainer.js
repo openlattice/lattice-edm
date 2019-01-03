@@ -17,7 +17,7 @@ import AbstractTypeSearchableSelect from '../../components/controls/AbstractType
 import InlineEditableControl from '../../components/controls/InlineEditableControl';
 import StyledButton from '../../components/buttons/StyledButton';
 import StyledCard from '../../components/cards/StyledCard';
-
+import * as PropertyTypesActions from './propertytypes/PropertyTypesActions';
 import { EDM_PRIMITIVE_TYPES } from '../../utils/EdmPrimitiveTypes';
 
 import type { AbstractType } from '../../utils/AbstractTypes';
@@ -25,7 +25,6 @@ import type { AbstractType } from '../../utils/AbstractTypes';
 const {
   createAssociationType,
   createEntityType,
-  createPropertyType,
   createSchema
 } = EntityDataModelApiActionFactory;
 
@@ -131,8 +130,8 @@ type Props = {
   actions :{
     createAssociationType :RequestSequence;
     createEntityType :RequestSequence;
-    createPropertyType :RequestSequence;
     createSchema :RequestSequence;
+    localCreatePropertyType :RequestSequence;
   };
   entityTypes :List<Map<*, *>>;
   propertyTypes :List<Map<*, *>>;
@@ -270,7 +269,7 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
         .setAnalyzer(analyzer)
         .build();
 
-      actions.createPropertyType(newPropertyType);
+      actions.localCreatePropertyType(newPropertyType);
     }
     else {
 
@@ -964,29 +963,23 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
   }
 }
 
-function mapStateToProps(state :Map<*, *>) :Object {
+const mapStateToProps = (state :Map<*, *>) :{} => ({
+  associationTypes: state.getIn(['edm', 'associationTypes', 'associationTypes']),
+  entityTypes: state.getIn(['edm', 'entityTypes', 'entityTypes']),
+  propertyTypes: state.getIn(['edm', 'propertyTypes', 'propertyTypes']),
+});
 
-  return {
-    associationTypes: state.getIn(['edm', 'associationTypes', 'associationTypes']),
-    entityTypes: state.getIn(['edm', 'entityTypes', 'entityTypes']),
-    entityTypesById: state.getIn(['edm', 'entityTypes', 'entityTypesById']),
-    propertyTypes: state.getIn(['edm', 'propertyTypes', 'propertyTypes']),
-    propertyTypesById: state.getIn(['edm', 'propertyTypes', 'propertyTypesById'])
-  };
-}
+const mapDispatchToProps = (dispatch :Function) :{} => ({
+  actions: bindActionCreators(
+    {
+      createAssociationType,
+      createEntityType,
+      createSchema,
+      localCreatePropertyType: PropertyTypesActions.localCreatePropertyType,
+    },
+    dispatch
+  )
+});
 
-function mapDispatchToProps(dispatch :Function) :Object {
-
-  const actions = {
-    createAssociationType,
-    createEntityType,
-    createPropertyType,
-    createSchema
-  };
-
-  return {
-    actions: bindActionCreators(actions, dispatch)
-  };
-}
-
+// $FlowFixMe
 export default connect(mapStateToProps, mapDispatchToProps)(AbstractTypeCreateContainer);

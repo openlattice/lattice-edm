@@ -6,26 +6,34 @@ import { List, Map } from 'immutable';
 
 import type { AbstractType } from '../../utils/AbstractTypes';
 
-export type AbstractTypeOverviewContainerProps = {
+type IndexMap = Map<FQN | UUID, number>;
+
+type AbstractTypeOverviewContainerProps = {
   associationTypes :List<Map<*, *>>;
   associationTypesById :Map<string, number>;
   entityTypes :List<Map<*, *>>;
   entityTypesById :Map<string, number>;
   isFetchingEntityDataModel :boolean;
-  newlyCreatedAssociationTypeId :string; // eslint-disable-line react/no-unused-prop-types
-  newlyCreatedEntityTypeId :string; // eslint-disable-line react/no-unused-prop-types
-  newlyCreatedPropertyTypeId :string; // eslint-disable-line react/no-unused-prop-types
+  newlyCreatedAssociationTypeId :UUID; // eslint-disable-line react/no-unused-prop-types
+  newlyCreatedEntityTypeId :UUID; // eslint-disable-line react/no-unused-prop-types
+  newlyCreatedPropertyTypeId :FQN | UUID; // eslint-disable-line react/no-unused-prop-types
   propertyTypes :List<Map<*, *>>;
-  propertyTypesById :Map<string, number>;
+  propertyTypesIndexMap :IndexMap;
   schemas :List<Map<*, *>>;
   schemasByFqn :Map<string, number>;
   workingAbstractTypeType :AbstractType;
 };
 
-export type AbstractTypeOverviewContainerState = {
+type AbstractTypeOverviewContainerState = {
   filterQuery :string;
   filteredTypes :List<Map<*, *>>;
   selectedAbstractType :Map<*, *>;
-  selectedAbstractTypeId :string;
+  selectedAbstractTypeId :FQN | UUID;
   showCreateNewAbstractTypeCard :boolean;
+};
+
+export type {
+  AbstractTypeOverviewContainerProps,
+  AbstractTypeOverviewContainerState,
+  IndexMap,
 };

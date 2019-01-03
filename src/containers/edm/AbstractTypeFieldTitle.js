@@ -12,7 +12,7 @@ import { connect } from 'react-redux';
 
 import AbstractTypes from '../../utils/AbstractTypes';
 import InlineEditableControl from '../../components/controls/InlineEditableControl';
-import { isValidUuid } from '../../utils/Utils';
+import { isValidUUID } from '../../utils/ValidationUtils';
 
 import type { AbstractType } from '../../utils/AbstractTypes';
 
@@ -65,7 +65,7 @@ class AbstractTypeFieldTitle extends React.Component<Props, State> {
       theAbstractType = abstractType.get('entityType', Map());
     }
 
-    if (isValidUuid(theAbstractType.get('id'))) {
+    if (isValidUUID(theAbstractType.get('id'))) {
 
       const abstractTypeId :string = theAbstractType.get('id', '');
       const abstractTypeMetaData :Object = { title: titleValue };
