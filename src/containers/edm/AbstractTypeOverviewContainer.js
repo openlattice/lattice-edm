@@ -123,8 +123,6 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
 
   componentWillReceiveProps(nextProps :Props) {
 
-    console.log('componentWillReceiveProps()')
-
     const { filterQuery } = this.state;
     let { selectedAbstractTypeId } = this.state;
 
@@ -296,11 +294,11 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
 
   showCreateNewAbstractTypeCard = () => {
 
-    // if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
+    if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
       this.setState({
         showCreateNewAbstractTypeCard: true
       });
-    // }
+    }
   }
 
   renderAbstractTypeDirectoryCard = () => {
@@ -333,8 +331,7 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
             { cardTitle }
           </h1>
           {
-            // AuthUtils.isAuthenticated() && AuthUtils.isAdmin()
-            true
+            AuthUtils.isAuthenticated() && AuthUtils.isAdmin()
               ? (
                 <StyledButton onClick={this.showCreateNewAbstractTypeCard}>
                   Create New
@@ -406,9 +403,9 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
 
   renderAbstractTypeCreateCard = () => {
 
-    // if (!AuthUtils.isAuthenticated() || !AuthUtils.isAdmin()) {
-    //   return null;
-    // }
+    if (!AuthUtils.isAuthenticated() || !AuthUtils.isAdmin()) {
+      return null;
+    }
 
     const { workingAbstractTypeType } = this.props;
 

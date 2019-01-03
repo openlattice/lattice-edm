@@ -11,7 +11,9 @@ import { EntityDataModelApiActions } from 'lattice-sagas';
 import Logger from '../../../utils/Logger';
 import {
   LOCAL_CREATE_PROPERTY_TYPE,
+  LOCAL_DELETE_PROPERTY_TYPE,
   localCreatePropertyType,
+  localDeletePropertyType,
 } from './PropertyTypesActions';
 
 import type { IndexMap } from '../Types';
@@ -19,7 +21,6 @@ import type { IndexMap } from '../Types';
 const LOG :Logger = new Logger('PropertyTypesReducer');
 
 const {
-  deletePropertyType,
   getEntityDataModel,
   updatePropertyTypeMetaData,
   updateSchema,
@@ -37,6 +38,7 @@ const {
 
 const INITIAL_STATE :Map<*, *> = fromJS({
   [LOCAL_CREATE_PROPERTY_TYPE]: { error: Map() },
+  [LOCAL_DELETE_PROPERTY_TYPE]: { error: Map() },
   actions: {
     createPropertyType: Map(),
     deletePropertyType: Map(),
@@ -44,6 +46,7 @@ const INITIAL_STATE :Map<*, *> = fromJS({
     updateSchema: Map(),
   },
   isCreatingNewPropertyType: false,
+  isDeletingPropertyType: false,
   isFetchingAllPropertyTypes: false,
   newlyCreatedPropertyTypeId: '',
   propertyTypes: List(),
@@ -119,48 +122,60 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
       });
     }
 
-    case deletePropertyType.case(action.type): {
-      return deletePropertyType.reducer(state, action, {
+    case localDeletePropertyType.case(action.type): {
+      return localDeletePropertyType.reducer(state, action, {
         REQUEST: () => {
-          // TODO: not ideal. perhaps there's a better way to get access to the trigger action value
-          const seqAction :SequenceAction = (action :any);
-          return state.setIn(['actions', 'deletePropertyType', seqAction.id], fromJS(seqAction));
+          const seqAction :SequenceAction = action;
+          return state
+            .set('isDeletingPropertyType', true)
+            .setIn([LOCAL_DELETE_PROPERTY_TYPE, seqAction.id], seqAction);
         },
         SUCCESS: () => {
 
-          const seqAction :SequenceAction = (action :any);
-          const storedSeqAction :Map<*, *> = state.getIn(['actions', 'deletePropertyType', seqAction.id], Map());
-          if (storedSeqAction.isEmpty()) {
-            return state;
-          }
+          const seqAction :SequenceAction = action;
+          const storedSeqAction :SequenceAction = state.getIn([LOCAL_DELETE_PROPERTY_TYPE, seqAction.id]);
 
-          const targetId :string = storedSeqAction.get('value');
-          const targetIndex :number = state.getIn(['propertyTypesById', targetId], -1);
-          if (targetIndex === -1) {
-            return state;
-          }
+          if (storedSeqAction) {
 
-          const currentPropertyTypes :List<Map<*, *>> = state.get('propertyTypes', List());
-          const updatedPropertyTypes :List<Map<*, *>> = currentPropertyTypes.delete(targetIndex);
-          const updatedPropertyTypesById :Map<string, number> = Map()
-            .withMutations((byIdMap :Map<string, number>) => {
-              updatedPropertyTypes.forEach((propertyType :Map<*, *>, propertyTypeIndex :number) => {
-                byIdMap.set(propertyType.get('id'), propertyTypeIndex);
-              });
+            const targetId :FQN | UUID = storedSeqAction.value;
+            const targetIndex :number = state.getIn(['propertyTypesIndexMap', targetId], -1);
+            if (targetIndex === -1) {
+              return state;
+            }
+
+            const currentPropertyTypes :List<Map<*, *>> = state.get('propertyTypes', List());
+            const updatedPropertyTypes :List<Map<*, *>> = currentPropertyTypes.delete(targetIndex);
+            const updatedPropertyTypesIndexMap :Map<FQN | UUID, number> = Map().asMutable();
+
+            updatedPropertyTypes.forEach((propertyType :Map<*, *>, index :number) => {
+              const propertyTypeId :?UUID = propertyType.get('id');
+              const propertyTypeFQN :FQN = propertyType.get('type');
+              const fqnOrId :FQN | UUID = propertyTypeId || propertyTypeFQN;
+              updatedPropertyTypesIndexMap.set(fqnOrId, index);
             });
 
-          return state
-            .set('propertyTypes', updatedPropertyTypes)
-            .set('propertyTypesById', updatedPropertyTypesById);
+            return state
+              .set('propertyTypes', updatedPropertyTypes)
+              .set('propertyTypesIndexMap', updatedPropertyTypesIndexMap);
+          }
+
+          return state;
         },
         FAILURE: () => {
-          // TODO: need to properly handle the failure case
+          const seqAction :SequenceAction = action;
+          const storedSeqAction :SequenceAction = state.getIn([LOCAL_DELETE_PROPERTY_TYPE, seqAction.id]);
+          if (storedSeqAction) {
+            // TODO: we need a better pattern for setting and handling errors
+            return state.setIn([LOCAL_DELETE_PROPERTY_TYPE, 'error'], true);
+          }
           return state;
         },
         FINALLY: () => {
-          const seqAction :SequenceAction = (action :any);
-          return state.deleteIn(['actions', 'deletePropertyType', seqAction.id]);
-        }
+          const seqAction :SequenceAction = action;
+          return state
+            .set('isDeletingPropertyType', false)
+            .deleteIn([LOCAL_DELETE_PROPERTY_TYPE, seqAction.id]);
+        },
       });
     }
 
