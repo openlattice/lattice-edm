@@ -17,22 +17,26 @@ import { ERR_ACTION_VALUE_NOT_DEFINED, ERR_WORKER_SAGA } from '../../../utils/Er
 import {
   LOCAL_CREATE_PROPERTY_TYPE,
   LOCAL_DELETE_PROPERTY_TYPE,
+  LOCAL_UPDATE_PROPERTY_TYPE_META,
   localCreatePropertyType,
   localDeletePropertyType,
+  localUpdatePropertyTypeMeta,
 } from './PropertyTypesActions';
 
-import type { IndexMap } from '../Types';
+import type { IndexMap, UpdatePropertyTypeMeta } from '../Types';
 
 const LOG = new Logger('PropertyTypesSagas');
 
 const {
   createPropertyType,
   deletePropertyType,
+  updatePropertyTypeMetaData,
 } = EntityDataModelApiActions;
 
 const {
   createPropertyTypeWorker,
   deletePropertyTypeWorker,
+  updatePropertyTypeMetaDataWorker,
 } = EntityDataModelApiSagas;
 
 const {
@@ -61,7 +65,6 @@ function* localCreatePropertyTypeWorker(seqAction :SequenceAction) :Generator<*,
   try {
     yield put(localCreatePropertyType.request(id, value));
 
-    let response :Object = {};
     const newPropertyType :PropertyType = value;
     const newPropertyTypeFQN :FQN = newPropertyType.type;
     const propertyTypesIndexMap :IndexMap = yield select(
@@ -79,7 +82,7 @@ function* localCreatePropertyTypeWorker(seqAction :SequenceAction) :Generator<*,
 
     let newPropertyTypeId :UUID = '';
     if (isOnline) {
-      response = yield call(createPropertyTypeWorker, createPropertyType(newPropertyType));
+      const response :Object = yield call(createPropertyTypeWorker, createPropertyType(newPropertyType));
       if (response.error) throw response.error;
       newPropertyTypeId = response.data;
     }
@@ -117,13 +120,14 @@ function* localDeletePropertyTypeWorker(seqAction :SequenceAction) :Generator<*,
   try {
     yield put(localDeletePropertyType.request(id, value));
 
-    let response :Object = {};
-    const propertyTypeId :FQN | UUID = value;
+    const propertyTypeFQN :FQN = value.propertyTypeFQN;
+    const propertyTypeId :?UUID = value.propertyTypeId;
+
     const propertyTypesIndexMap :IndexMap = yield select(
       state => state.getIn(['edm', 'propertyTypes', 'propertyTypesIndexMap'])
     );
 
-    if (!propertyTypesIndexMap.has(propertyTypeId)) {
+    if (!propertyTypesIndexMap.has(propertyTypeFQN)) {
       yield put(localDeletePropertyType.failure(id, ERR_PT_DOES_NOT_EXIST));
       return;
     }
@@ -133,11 +137,11 @@ function* localDeletePropertyTypeWorker(seqAction :SequenceAction) :Generator<*,
     );
 
     if (isOnline && isValidUUID(propertyTypeId)) {
-      response = yield call(deletePropertyTypeWorker, deletePropertyType(propertyTypeId));
+      const response :Object = yield call(deletePropertyTypeWorker, deletePropertyType(propertyTypeId));
       if (response.error) throw response.error;
     }
 
-    yield put(localDeletePropertyType.success(id, propertyTypeId));
+    yield put(localDeletePropertyType.success(id));
   }
   catch (error) {
     LOG.error(ERR_WORKER_SAGA, error);
@@ -153,9 +157,61 @@ function* localDeletePropertyTypeWatcher() :Generator<*, *, *> {
   yield takeEvery(LOCAL_DELETE_PROPERTY_TYPE, localDeletePropertyTypeWorker);
 }
 
+/*
+ *
+ * PropertyTypesActions.localUpdatePropertyTypeMeta()
+ *
+ */
+
+function* localUpdatePropertyTypeMetaWorker(seqAction :SequenceAction) :Generator<*, *, *> {
+
+  const { id, value } = seqAction;
+  if (value === null || value === undefined) {
+    yield put(localUpdatePropertyTypeMeta.failure(id, ERR_ACTION_VALUE_NOT_DEFINED));
+    return;
+  }
+
+  try {
+    yield put(localUpdatePropertyTypeMeta.request(id, value));
+
+    const {
+      metadata,
+      propertyTypeId,
+    } :UpdatePropertyTypeMeta = value;
+
+    const isOnline :boolean = yield select(
+      state => state.getIn(['app', 'isOnline'])
+    );
+
+    if (isOnline && isValidUUID(propertyTypeId)) {
+      const response :Object = yield call(
+        updatePropertyTypeMetaDataWorker,
+        updatePropertyTypeMetaData({ metadata, propertyTypeId })
+      );
+      if (response.error) throw response.error;
+    }
+
+    yield put(localUpdatePropertyTypeMeta.success(id));
+  }
+  catch (error) {
+    LOG.error(ERR_WORKER_SAGA, error);
+    yield put(localUpdatePropertyTypeMeta.failure(id));
+  }
+  finally {
+    yield put(localUpdatePropertyTypeMeta.finally(id));
+  }
+}
+
+function* localUpdatePropertyTypeMetaWatcher() :Generator<*, *, *> {
+
+  yield takeEvery(LOCAL_UPDATE_PROPERTY_TYPE_META, localUpdatePropertyTypeMetaWorker);
+}
+
 export {
   localCreatePropertyTypeWatcher,
   localCreatePropertyTypeWorker,
   localDeletePropertyTypeWatcher,
   localDeletePropertyTypeWorker,
+  localUpdatePropertyTypeMetaWatcher,
+  localUpdatePropertyTypeMetaWorker,
 };

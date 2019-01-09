@@ -68,8 +68,8 @@ type Props = {
   orderable :boolean;
   showRemoveColumn :boolean;
   workingAbstractTypeType :AbstractType;
-  onAbstractTypeRemove :(selectedAbstractTypeId :string) => void;
-  onAbstractTypeSelect :(selectedAbstractTypeId :FQN | UUID) => void;
+  onAbstractTypeRemove :(selectedAbstractTypeFQN :FQN) => void;
+  onAbstractTypeSelect :(selectedAbstractTypeFQN :FQN) => void;
   onReorder :(oldIndex :number, newIndex :number) => void;
 };
 
@@ -138,17 +138,17 @@ class AbstractTypeDataTable extends React.Component<Props, State> {
         ? type.get('entityType', Map())
         : type;
 
-      const abstractTypeFqn :FullyQualifiedName = (props.workingAbstractTypeType === AbstractTypes.Schema)
+      const abstractTypeFQN :FullyQualifiedName = (props.workingAbstractTypeType === AbstractTypes.Schema)
         ? new FullyQualifiedName(abstractType.get('fqn', Map()))
         : new FullyQualifiedName(abstractType.get('type', Map()));
 
       return OrderedMap().withMutations((map :OrderedMap<string, string>) => {
         if (props.workingAbstractTypeType === AbstractTypes.Schema) {
-          map.set(NAMESPACE_HEADER_ID, abstractTypeFqn.getNamespace());
-          map.set(NAME_HEADER_ID, abstractTypeFqn.getName());
+          map.set(NAMESPACE_HEADER_ID, abstractTypeFQN.getNamespace());
+          map.set(NAME_HEADER_ID, abstractTypeFQN.getName());
         }
         else {
-          map.set(TYPE_HEADER_ID, abstractTypeFqn.toString());
+          map.set(TYPE_HEADER_ID, abstractTypeFQN.toString());
           map.set(TITLE_HEADER_ID, abstractType.get('title', ''));
         }
         if (props.showRemoveColumn) {
@@ -184,17 +184,18 @@ class AbstractTypeDataTable extends React.Component<Props, State> {
     const { selectedRowIndex } = this.state;
 
     const selectedAbstractType :Map<*, *> = abstractTypes.get(clickedRowIndex, Map());
-    let selectedAbstractTypeId :string = selectedAbstractType.get('id', '');
+    let selectedAbstractTypeFQN :FQN = selectedAbstractType.get('type');
 
     if (workingAbstractTypeType === AbstractTypes.AssociationType) {
       const entityType :Map<*, *> = selectedAbstractType.get('entityType', Map());
-      selectedAbstractTypeId = entityType.get('id', '');
+      selectedAbstractTypeFQN = entityType.get('type');
     }
     else if (workingAbstractTypeType === AbstractTypes.Schema) {
-      selectedAbstractTypeId = FullyQualifiedName.toString(selectedAbstractType.get('fqn', Map()));
+      selectedAbstractTypeFQN = selectedAbstractType.get('fqn');
+      // selectedAbstractTypeId = FullyQualifiedName.toString(selectedAbstractType.get('fqn', Map()));
     }
 
-    onAbstractTypeRemove(selectedAbstractTypeId);
+    onAbstractTypeRemove(selectedAbstractTypeFQN);
 
     if (clickedRowIndex === selectedRowIndex) {
       this.setState({
@@ -220,23 +221,18 @@ class AbstractTypeDataTable extends React.Component<Props, State> {
     const { abstractTypes, onAbstractTypeSelect, workingAbstractTypeType } = this.props;
 
     const selectedAbstractType :Map<*, *> = abstractTypes.get(selectedRowIndex, Map());
-    let selectedAbstractTypeId = selectedAbstractType.get('id', '');
-    if (!selectedAbstractTypeId) {
-      selectedAbstractTypeId = new FullyQualifiedName(selectedAbstractType.get('type', Map()));
-    }
+    let selectedAbstractTypeFQN :FQN = selectedAbstractType.get('type');
 
     if (workingAbstractTypeType === AbstractTypes.AssociationType) {
       const entityType :Map<*, *> = selectedAbstractType.get('entityType', Map());
-      selectedAbstractTypeId = entityType.get('id', '');
-      if (!selectedAbstractTypeId) {
-        selectedAbstractTypeId = new FullyQualifiedName(entityType.get('type', Map()));
-      }
+      selectedAbstractTypeFQN = entityType.get('type');
     }
     else if (workingAbstractTypeType === AbstractTypes.Schema) {
-      selectedAbstractTypeId = new FullyQualifiedName(selectedAbstractType.get('fqn', Map()));
+      selectedAbstractTypeFQN = selectedAbstractType.get('fqn');
+      // selectedAbstractTypeId = new FullyQualifiedName(selectedAbstractType.get('fqn', Map()));
     }
 
-    onAbstractTypeSelect(selectedAbstractTypeId);
+    onAbstractTypeSelect(selectedAbstractTypeFQN);
 
     this.setState({
       selectedRowIndex,

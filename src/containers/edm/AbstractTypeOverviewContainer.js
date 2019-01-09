@@ -25,8 +25,8 @@ import SchemaDetailsContainer from './schemas/SchemaDetailsContainer';
 import { getWorkingAbstractTypes, filterAbstractTypes } from '../../utils/AbstractTypeUtils';
 
 import {
-  maybeGetAbstractTypeIdForNewlyCreatedAbstractType,
-  maybeGetAbstractTypeMatchingSelectedAbstractTypeId
+  maybeGetAbstractTypeFQNForNewlyCreatedAbstractType,
+  maybeGetAbstractTypeMatchingSelectedAbstractTypeFQN,
 } from './Helpers';
 
 import type {
@@ -110,12 +110,12 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
 
     const filteredTypes :List<Map<*, *>> = getWorkingAbstractTypes(params);
     const selectedAbstractType :Map<*, *> = filteredTypes.get(0, Map());
-    const selectedAbstractTypeId :UUID = selectedAbstractType.get('id', '');
+    const selectedAbstractTypeFQN :FQN = selectedAbstractType.get('type');
 
     this.state = {
       filteredTypes,
       selectedAbstractType,
-      selectedAbstractTypeId,
+      selectedAbstractTypeFQN,
       filterQuery: '',
       showCreateNewAbstractTypeCard: false
     };
@@ -124,7 +124,7 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
   componentWillReceiveProps(nextProps :Props) {
 
     const { filterQuery } = this.state;
-    let { selectedAbstractTypeId } = this.state;
+    let { selectedAbstractTypeFQN } = this.state;
 
     const {
       associationTypes,
@@ -139,7 +139,7 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
       entityTypes,
       propertyTypes,
       schemas,
-      workingAbstractTypeType
+      workingAbstractTypeType,
     };
 
     const workingAbstractTypes :List<Map<*, *>> = getWorkingAbstractTypes(params);
@@ -151,39 +151,39 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
 
     // 0. by default, use first element of all possible options as the selected abstract type
     let selectedAbstractType :Map<*, *> = workingAbstractTypes.get(0, Map());
-    if (!selectedAbstractTypeId) {
-      selectedAbstractTypeId = selectedAbstractType.get('id', '');
+    if (!selectedAbstractTypeFQN) {
+      selectedAbstractTypeFQN = selectedAbstractType.get('type');
     }
 
     // 1. try to match an abstract type if there's a filter query
-    if (!selectedAbstractTypeId && !isEmpty(filterQuery)) {
+    if (!selectedAbstractTypeFQN && !isEmpty(filterQuery)) {
       selectedAbstractType = filteredTypes.get(0, Map());
-      selectedAbstractTypeId = selectedAbstractType.get('id', '');
+      selectedAbstractTypeFQN = selectedAbstractType.get('type');
     }
 
     // 2. check if a new abstract type was created, and if so, use its id for selection. newly created trumps all.
-    selectedAbstractTypeId = maybeGetAbstractTypeIdForNewlyCreatedAbstractType(
-      selectedAbstractTypeId,
+    selectedAbstractTypeFQN = maybeGetAbstractTypeFQNForNewlyCreatedAbstractType(
+      selectedAbstractTypeFQN,
       this.props,
-      nextProps
+      nextProps,
     );
 
-    // 3. try to select the abstract type corresponding to selectedAbstractTypeId
-    selectedAbstractType = maybeGetAbstractTypeMatchingSelectedAbstractTypeId(
+    // 3. try to select the abstract type corresponding to selectedAbstractTypeFQN
+    selectedAbstractType = maybeGetAbstractTypeMatchingSelectedAbstractTypeFQN(
       selectedAbstractType,
-      selectedAbstractTypeId,
+      selectedAbstractTypeFQN,
       nextProps
     );
 
     this.setState({
       filteredTypes,
       selectedAbstractType,
-      selectedAbstractTypeId,
+      selectedAbstractTypeFQN,
       showCreateNewAbstractTypeCard: false
     });
   }
 
-  handleOnAbstractTypeSelect = (selectedAbstractTypeId :FQN | UUID) => {
+  handleOnAbstractTypeSelect = (selectedAbstractTypeFQN :FQN) => {
 
     const {
       associationTypes,
@@ -204,8 +204,8 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
     let selectedAbstractTypeIndex :number;
     switch (workingAbstractTypeType) {
       case AbstractTypes.AssociationType: {
-        if (selectedAbstractTypeId) {
-          selectedAbstractTypeIndex = associationTypesById.get(selectedAbstractTypeId, -1);
+        if (selectedAbstractTypeFQN) {
+          selectedAbstractTypeIndex = associationTypesById.get(selectedAbstractTypeFQN, -1);
           if (selectedAbstractTypeIndex !== -1) {
             selectedAbstractType = associationTypes.get(selectedAbstractTypeIndex, Map());
           }
@@ -213,8 +213,8 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
         break;
       }
       case AbstractTypes.EntityType: {
-        if (selectedAbstractTypeId) {
-          selectedAbstractTypeIndex = entityTypesById.get(selectedAbstractTypeId, -1);
+        if (selectedAbstractTypeFQN) {
+          selectedAbstractTypeIndex = entityTypesById.get(selectedAbstractTypeFQN, -1);
           if (selectedAbstractTypeIndex !== -1) {
             selectedAbstractType = entityTypes.get(selectedAbstractTypeIndex, Map());
           }
@@ -222,8 +222,8 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
         break;
       }
       case AbstractTypes.PropertyType: {
-        if (selectedAbstractTypeId) {
-          selectedAbstractTypeIndex = propertyTypesIndexMap.get(selectedAbstractTypeId, -1);
+        if (selectedAbstractTypeFQN) {
+          selectedAbstractTypeIndex = propertyTypesIndexMap.get(selectedAbstractTypeFQN, -1);
           if (selectedAbstractTypeIndex !== -1) {
             selectedAbstractType = propertyTypes.get(selectedAbstractTypeIndex, Map());
           }
@@ -231,8 +231,8 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
         break;
       }
       case AbstractTypes.Schema: {
-        if (selectedAbstractTypeId) {
-          selectedAbstractTypeIndex = schemasByFqn.get(selectedAbstractTypeId, -1);
+        if (selectedAbstractTypeFQN) {
+          selectedAbstractTypeIndex = schemasByFqn.get(selectedAbstractTypeFQN, -1);
           if (selectedAbstractTypeIndex !== -1) {
             selectedAbstractType = schemas.get(selectedAbstractTypeIndex, Map());
           }
@@ -245,7 +245,7 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
 
     this.setState({
       selectedAbstractType,
-      selectedAbstractTypeId,
+      selectedAbstractTypeFQN,
     });
   }
 
@@ -275,13 +275,13 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
 
     const filteredTypes :List<Map<*, *>> = filterAbstractTypes(filterParams);
     const selectedAbstractType :Map<*, *> = filteredTypes.get(0, Map());
-    const selectedAbstractTypeId :UUID = selectedAbstractType.get('id', '');
+    const selectedAbstractTypeFQN :FQN = selectedAbstractType.get('type');
 
     this.setState({
       filterQuery,
       filteredTypes,
       selectedAbstractType,
-      selectedAbstractTypeId,
+      selectedAbstractTypeFQN,
     });
   }
 
@@ -470,7 +470,7 @@ const mapStateToProps = (state :Map<*, *>) :{} => ({
   isFetchingEntityDataModel: state.getIn(['edm', 'isFetchingEntityDataModel']),
   newlyCreatedAssociationTypeId: state.getIn(['edm', 'associationTypes', 'newlyCreatedAssociationTypeId']),
   newlyCreatedEntityTypeId: state.getIn(['edm', 'entityTypes', 'newlyCreatedEntityTypeId']),
-  newlyCreatedPropertyTypeId: state.getIn(['edm', 'propertyTypes', 'newlyCreatedPropertyTypeId']),
+  newlyCreatedPropertyTypeFQN: state.getIn(['edm', 'propertyTypes', 'newlyCreatedPropertyTypeFQN']),
   propertyTypes: state.getIn(['edm', 'propertyTypes', 'propertyTypes']),
   propertyTypesIndexMap: state.getIn(['edm', 'propertyTypes', 'propertyTypesIndexMap']),
   schemas: state.getIn(['edm', 'schemas', 'schemas']),

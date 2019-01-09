@@ -32,6 +32,7 @@ export default function* sagas() :Generator<*, *, *> {
     // PropertyTypesSagas
     fork(PropertyTypesSagas.localCreatePropertyTypeWatcher),
     fork(PropertyTypesSagas.localDeletePropertyTypeWatcher),
+    fork(PropertyTypesSagas.localUpdatePropertyTypeMetaWatcher),
   ];
 
   const optional = [

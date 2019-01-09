@@ -9,60 +9,60 @@ import AbstractTypes from '../../utils/AbstractTypes';
 
 import type { AbstractTypeOverviewContainerProps } from './Types';
 
-function maybeGetAbstractTypeIdForNewlyCreatedAbstractType(
-  selectedAbstractTypeId :FQN | UUID,
+function maybeGetAbstractTypeFQNForNewlyCreatedAbstractType(
+  selectedAbstractTypeFQN :FQN,
   prevProps :AbstractTypeOverviewContainerProps,
   nextProps :AbstractTypeOverviewContainerProps,
-) :FQN | UUID {
+) :FQN {
 
-  let prevId :FQN | UUID;
-  let nextId :FQN | UUID;
+  let nextFQN :FQN;
+  let prevFQN :FQN;
 
   switch (nextProps.workingAbstractTypeType) {
     case AbstractTypes.AssociationType: {
-      nextId = nextProps.newlyCreatedAssociationTypeId;
-      prevId = prevProps.newlyCreatedAssociationTypeId;
+      nextFQN = nextProps.newlyCreatedAssociationTypeFQN;
+      prevFQN = prevProps.newlyCreatedAssociationTypeFQN;
       break;
     }
     case AbstractTypes.EntityType: {
-      nextId = nextProps.newlyCreatedEntityTypeId;
-      prevId = prevProps.newlyCreatedEntityTypeId;
+      nextFQN = nextProps.newlyCreatedEntityTypeFQN;
+      prevFQN = prevProps.newlyCreatedEntityTypeFQN;
       break;
     }
     case AbstractTypes.PropertyType: {
-      nextId = nextProps.newlyCreatedPropertyTypeId;
-      prevId = prevProps.newlyCreatedPropertyTypeId;
+      nextFQN = nextProps.newlyCreatedPropertyTypeFQN;
+      prevFQN = prevProps.newlyCreatedPropertyTypeFQN;
       break;
     }
     case AbstractTypes.Schema: {
       // TODO: implement me!!!
-      return selectedAbstractTypeId;
+      return selectedAbstractTypeFQN;
     }
     default:
       // shouldn't be possible
-      return selectedAbstractTypeId;
+      return selectedAbstractTypeFQN;
   }
 
-  // to decide if the newly created abstract type id should be used, we have to check for two conditions:
-  //   1. "SUCCESS" sets the new id value, previous id value is empty
-  //   2. "FINALLY" clears the new id value, previous id value is not empty since it was set by "SUCCESS"
-  if (nextId !== prevId) {
+  // to decide if the newly created abstract type fqn should be used, we have to check for two conditions:
+  //   1. "SUCCESS" sets the new fqn value, previous fqn value is empty
+  //   2. "FINALLY" clears the new fqn value, previous fqn value is not empty since it was set by "SUCCESS"
+  if (nextFQN !== prevFQN) {
     // "SUCCESS" action
-    if (!isEmpty(nextId) && isEmpty(prevId)) {
-      return nextId;
+    if (!isEmpty(nextFQN) && isEmpty(prevFQN)) {
+      return nextFQN;
     }
     // "FINALLY" action
-    if (isEmpty(nextId) && !isEmpty(prevId)) {
-      return prevId;
+    if (isEmpty(nextFQN) && !isEmpty(prevFQN)) {
+      return prevFQN;
     }
   }
 
-  return selectedAbstractTypeId;
+  return selectedAbstractTypeFQN;
 }
 
-function maybeGetAbstractTypeMatchingSelectedAbstractTypeId(
+function maybeGetAbstractTypeMatchingSelectedAbstractTypeFQN(
   selectedAbstractType :Map<*, *>,
-  selectedAbstractTypeId :FQN | UUID,
+  selectedAbstractTypeFQN :FQN,
   nextProps :AbstractTypeOverviewContainerProps
 ) :Map<*, *> {
 
@@ -81,8 +81,8 @@ function maybeGetAbstractTypeMatchingSelectedAbstractTypeId(
   let selectedAbstractTypeIndex :number;
   switch (workingAbstractTypeType) {
     case AbstractTypes.AssociationType: {
-      if (selectedAbstractTypeId) {
-        selectedAbstractTypeIndex = associationTypesById.get(selectedAbstractTypeId, -1);
+      if (selectedAbstractTypeFQN) {
+        selectedAbstractTypeIndex = associationTypesById.get(selectedAbstractTypeFQN, -1);
         if (selectedAbstractTypeIndex !== -1) {
           return associationTypes.get(selectedAbstractTypeIndex, Map());
         }
@@ -90,8 +90,8 @@ function maybeGetAbstractTypeMatchingSelectedAbstractTypeId(
       break;
     }
     case AbstractTypes.EntityType: {
-      if (selectedAbstractTypeId) {
-        selectedAbstractTypeIndex = entityTypesById.get(selectedAbstractTypeId, -1);
+      if (selectedAbstractTypeFQN) {
+        selectedAbstractTypeIndex = entityTypesById.get(selectedAbstractTypeFQN, -1);
         if (selectedAbstractTypeIndex !== -1) {
           return entityTypes.get(selectedAbstractTypeIndex, Map());
         }
@@ -99,8 +99,8 @@ function maybeGetAbstractTypeMatchingSelectedAbstractTypeId(
       break;
     }
     case AbstractTypes.PropertyType: {
-      if (selectedAbstractTypeId) {
-        selectedAbstractTypeIndex = propertyTypesIndexMap.get(selectedAbstractTypeId, -1);
+      if (selectedAbstractTypeFQN) {
+        selectedAbstractTypeIndex = propertyTypesIndexMap.get(selectedAbstractTypeFQN, -1);
         if (selectedAbstractTypeIndex !== -1) {
           return propertyTypes.get(selectedAbstractTypeIndex, Map());
         }
@@ -108,8 +108,8 @@ function maybeGetAbstractTypeMatchingSelectedAbstractTypeId(
       break;
     }
     case AbstractTypes.Schema: {
-      if (selectedAbstractTypeId) {
-        selectedAbstractTypeIndex = schemasByFqn.get(selectedAbstractTypeId, -1);
+      if (selectedAbstractTypeFQN) {
+        selectedAbstractTypeIndex = schemasByFqn.get(selectedAbstractTypeFQN, -1);
         if (selectedAbstractTypeIndex !== -1) {
           return schemas.get(selectedAbstractTypeIndex, Map());
         }
@@ -124,6 +124,6 @@ function maybeGetAbstractTypeMatchingSelectedAbstractTypeId(
 }
 
 export {
-  maybeGetAbstractTypeIdForNewlyCreatedAbstractType,
-  maybeGetAbstractTypeMatchingSelectedAbstractTypeId
+  maybeGetAbstractTypeFQNForNewlyCreatedAbstractType,
+  maybeGetAbstractTypeMatchingSelectedAbstractTypeFQN,
 };

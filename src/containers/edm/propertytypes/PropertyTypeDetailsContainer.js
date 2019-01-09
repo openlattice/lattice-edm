@@ -17,7 +17,6 @@ import AbstractTypeFieldTitle from '../AbstractTypeFieldTitle';
 import AbstractTypeFieldType from '../AbstractTypeFieldType';
 import StyledButton from '../../../components/buttons/StyledButton';
 import * as PropertyTypesActions from './PropertyTypesActions';
-import { isValidUUID } from '../../../utils/ValidationUtils';
 
 /*
  * styled components
@@ -47,13 +46,8 @@ class PropertyTypeDetailsContainer extends React.Component<Props> {
 
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
       const propertyTypeId :?UUID = propertyType.get('id');
-      if (isValidUUID(propertyTypeId)) {
-        actions.localDeletePropertyType(propertyTypeId);
-      }
-      else {
-        const propertyTypeFQN :FQN = propertyType.get('type');
-        actions.localDeletePropertyType(propertyTypeFQN);
-      }
+      const propertyTypeFQN :FQN = propertyType.get('type');
+      actions.localDeletePropertyType({ propertyTypeFQN, propertyTypeId });
     }
   }
 

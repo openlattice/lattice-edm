@@ -4,7 +4,12 @@
 
 /* eslint-disable arrow-body-style */
 
-import { List, Map, fromJS } from 'immutable';
+import {
+  List,
+  Map,
+  fromJS,
+  has,
+} from 'immutable';
 import { Models, Types } from 'lattice';
 import { EntityDataModelApiActions } from 'lattice-sagas';
 
@@ -12,17 +17,17 @@ import Logger from '../../../utils/Logger';
 import {
   LOCAL_CREATE_PROPERTY_TYPE,
   LOCAL_DELETE_PROPERTY_TYPE,
+  LOCAL_UPDATE_PROPERTY_TYPE_META,
   localCreatePropertyType,
   localDeletePropertyType,
+  localUpdatePropertyTypeMeta,
 } from './PropertyTypesActions';
-
-import type { IndexMap } from '../Types';
+import type { IndexMap, UpdatePropertyTypeMeta } from '../Types';
 
 const LOG :Logger = new Logger('PropertyTypesReducer');
 
 const {
   getEntityDataModel,
-  updatePropertyTypeMetaData,
   updateSchema,
 } = EntityDataModelApiActions;
 
@@ -39,16 +44,15 @@ const {
 const INITIAL_STATE :Map<*, *> = fromJS({
   [LOCAL_CREATE_PROPERTY_TYPE]: { error: Map() },
   [LOCAL_DELETE_PROPERTY_TYPE]: { error: Map() },
+  [LOCAL_UPDATE_PROPERTY_TYPE_META]: { error: Map() },
   actions: {
-    createPropertyType: Map(),
-    deletePropertyType: Map(),
-    updatePropertyTypeMetaData: Map(),
     updateSchema: Map(),
   },
   isCreatingNewPropertyType: false,
   isDeletingPropertyType: false,
   isFetchingAllPropertyTypes: false,
-  newlyCreatedPropertyTypeId: '',
+  isUpdatingPropertyTypeMeta: false,
+  newlyCreatedPropertyTypeFQN: '',
   propertyTypes: List(),
   propertyTypesIndexMap: Map(),
 });
@@ -91,13 +95,12 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
               .get('propertyTypes')
               .push(newPropertyTypeAsImmutable);
 
-            const fqnOrId :FQN | UUID = propertyTypeId || propertyTypeFQN;
             const updatedPropertyTypesIndexMap :IndexMap = state
               .get('propertyTypesIndexMap')
-              .set(fqnOrId, updatedPropertyTypes.count() - 1);
+              .set(propertyTypeFQN, updatedPropertyTypes.count() - 1);
 
             return state
-              .set('newlyCreatedPropertyTypeId', fqnOrId)
+              .set('newlyCreatedPropertyTypeFQN', propertyTypeFQN)
               .set('propertyTypes', updatedPropertyTypes)
               .set('propertyTypesIndexMap', updatedPropertyTypesIndexMap);
           }
@@ -116,7 +119,6 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
           const seqAction :SequenceAction = action;
           return state
             .set('isCreatingNewPropertyType', false)
-            // .set('newlyCreatedPropertyTypeId', '')
             .deleteIn([LOCAL_CREATE_PROPERTY_TYPE, seqAction.id]);
         },
       });
@@ -137,21 +139,19 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
 
           if (storedSeqAction) {
 
-            const targetId :FQN | UUID = storedSeqAction.value;
-            const targetIndex :number = state.getIn(['propertyTypesIndexMap', targetId], -1);
+            const targetFQN :FQN = storedSeqAction.value.propertyTypeFQN;
+            const targetIndex :number = state.getIn(['propertyTypesIndexMap', targetFQN], -1);
             if (targetIndex === -1) {
               return state;
             }
 
             const currentPropertyTypes :List<Map<*, *>> = state.get('propertyTypes', List());
             const updatedPropertyTypes :List<Map<*, *>> = currentPropertyTypes.delete(targetIndex);
-            const updatedPropertyTypesIndexMap :Map<FQN | UUID, number> = Map().asMutable();
+            const updatedPropertyTypesIndexMap :IndexMap = Map().asMutable();
 
             updatedPropertyTypes.forEach((propertyType :Map<*, *>, index :number) => {
-              const propertyTypeId :?UUID = propertyType.get('id');
               const propertyTypeFQN :FQN = propertyType.get('type');
-              const fqnOrId :FQN | UUID = propertyTypeId || propertyTypeFQN;
-              updatedPropertyTypesIndexMap.set(fqnOrId, index);
+              updatedPropertyTypesIndexMap.set(propertyTypeFQN, index);
             });
 
             return state
@@ -179,6 +179,68 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
       });
     }
 
+    case localUpdatePropertyTypeMeta.case(action.type): {
+      return localUpdatePropertyTypeMeta.reducer(state, action, {
+        REQUEST: () => {
+          const seqAction :SequenceAction = action;
+          return state
+            .set('isUpdatingPropertyTypeMeta', true)
+            .setIn([LOCAL_UPDATE_PROPERTY_TYPE_META, seqAction.id], seqAction);
+        },
+        SUCCESS: () => {
+
+          const seqAction :SequenceAction = action;
+          const storedSeqAction :SequenceAction = state.getIn([LOCAL_UPDATE_PROPERTY_TYPE_META, seqAction.id]);
+
+          if (storedSeqAction) {
+
+            const {
+              metadata,
+              propertyTypeFQN,
+            } :UpdatePropertyTypeMeta = storedSeqAction.value;
+
+            const propertyTypeIndex :number = state.getIn(['propertyTypesIndexMap', propertyTypeFQN], -1);
+            if (propertyTypeIndex === -1) {
+              return state;
+            }
+
+            if (has(metadata, 'description')) {
+              return state.setIn(['propertyTypes', propertyTypeIndex, 'description'], metadata.description);
+            }
+
+            if (has(metadata, 'title')) {
+              return state.setIn(['propertyTypes', propertyTypeIndex, 'title'], metadata.title);
+            }
+
+            if (has(metadata, 'type')) {
+              const newPropertyTypeFQN = new FullyQualifiedName(metadata.type);
+              return state
+                .deleteIn(['propertyTypesIndexMap', propertyTypeFQN])
+                .setIn(['propertyTypesIndexMap', newPropertyTypeFQN], propertyTypeIndex)
+                .setIn(['propertyTypes', propertyTypeIndex, 'type'], newPropertyTypeFQN);
+            }
+          }
+
+          return state;
+        },
+        FAILURE: () => {
+          const seqAction :SequenceAction = action;
+          const storedSeqAction :SequenceAction = state.getIn([LOCAL_UPDATE_PROPERTY_TYPE_META, seqAction.id]);
+          if (storedSeqAction) {
+            // TODO: we need a better pattern for setting and handling errors
+            return state.setIn([LOCAL_UPDATE_PROPERTY_TYPE_META, 'error'], true);
+          }
+          return state;
+        },
+        FINALLY: () => {
+          const seqAction :SequenceAction = action;
+          return state
+            .set('isUpdatingPropertyTypeMeta', false)
+            .deleteIn([LOCAL_UPDATE_PROPERTY_TYPE_META, seqAction.id]);
+        },
+      });
+    }
+
     case getEntityDataModel.case(action.type): {
       return getEntityDataModel.reducer(state, action, {
         REQUEST: () => {
@@ -194,13 +256,14 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
           }
 
           const propertyTypes :List<Map<*, *>> = List().asMutable();
-          const propertyTypesIndexMap :Map<FQN | UUID, number> = Map().asMutable();
+          const propertyTypesIndexMap :IndexMap = Map().asMutable();
 
           responsePropertyTypes.forEach((pt :Object, index :number) => {
             try {
+              const propertyTypeFQN :FQN = new FullyQualifiedName(pt.type);
               const propertyTypeAsImmutable :PropertyType = new PropertyTypeBuilder()
                 .setId(pt.id)
-                .setType(new FullyQualifiedName(pt.type))
+                .setType(propertyTypeFQN)
                 .setTitle(pt.title)
                 .setDescription(pt.description)
                 .setDataType(pt.datatype)
@@ -210,7 +273,7 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
                 .build()
                 .asImmutable();
               propertyTypes.push(propertyTypeAsImmutable);
-              propertyTypesIndexMap.set(pt.id, index);
+              propertyTypesIndexMap.set(propertyTypeFQN, index);
             }
             catch (e) {
               LOG.error('getEntityDataModel()', e);
@@ -228,57 +291,6 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
         },
         FINALLY: () => {
           return state.set('isFetchingAllPropertyTypes', false);
-        }
-      });
-    }
-
-    case updatePropertyTypeMetaData.case(action.type): {
-      return updatePropertyTypeMetaData.reducer(state, action, {
-        REQUEST: () => {
-          // TODO: not ideal. perhaps there's a better way to get access to the trigger action value
-          const seqAction :SequenceAction = (action :any);
-          return state.setIn(['actions', 'updatePropertyTypeMetaData', seqAction.id], fromJS(seqAction));
-        },
-        SUCCESS: () => {
-
-          const seqAction :SequenceAction = (action :any);
-          const storedSeqAction :Map<*, *> = state.getIn(
-            ['actions', 'updatePropertyTypeMetaData', seqAction.id],
-            Map()
-          );
-
-          if (storedSeqAction.isEmpty()) {
-            return state;
-          }
-
-          const propertyTypeId :string = storedSeqAction.getIn(['value', 'propertyTypeId']);
-          const propertyTypeIndex :number = state.getIn(['propertyTypesById', propertyTypeId], -1);
-          if (propertyTypeIndex < 0) {
-            return state;
-          }
-
-          const metadata :Map<*, *> = storedSeqAction.getIn(['value', 'metadata']);
-          if (metadata.has('description')) {
-            return state.setIn(['propertyTypes', propertyTypeIndex, 'description'], metadata.get('description'));
-          }
-          if (metadata.has('title')) {
-            return state.setIn(['propertyTypes', propertyTypeIndex, 'title'], metadata.get('title'));
-          }
-          if (metadata.has('type')) {
-            // TODO: potential bug with how immutable.js deals with custom objects
-            // TODO: consider storing plain object instead of FullyQualifiedName object
-            return state.setIn(['propertyTypes', propertyTypeIndex, 'type'], metadata.get('type'));
-          }
-
-          return state;
-        },
-        FAILURE: () => {
-          // TODO: need to properly handle the failure case
-          return state;
-        },
-        FINALLY: () => {
-          const seqAction :SequenceAction = (action :any);
-          return state.deleteIn(['actions', 'updatePropertyTypeMetaData', seqAction.id]);
         }
       });
     }
@@ -342,7 +354,3 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
       return state;
   }
 }
-
-export type {
-  IndexMap,
-};

@@ -6,7 +6,7 @@ import { List, Map } from 'immutable';
 
 import type { AbstractType } from '../../utils/AbstractTypes';
 
-type IndexMap = Map<FQN | UUID, number>;
+type IndexMap = Map<FQN, number>;
 
 type AbstractTypeOverviewContainerProps = {
   associationTypes :List<Map<*, *>>;
@@ -16,7 +16,7 @@ type AbstractTypeOverviewContainerProps = {
   isFetchingEntityDataModel :boolean;
   newlyCreatedAssociationTypeId :UUID; // eslint-disable-line react/no-unused-prop-types
   newlyCreatedEntityTypeId :UUID; // eslint-disable-line react/no-unused-prop-types
-  newlyCreatedPropertyTypeId :FQN | UUID; // eslint-disable-line react/no-unused-prop-types
+  newlyCreatedPropertyTypeFQN :FQN; // eslint-disable-line react/no-unused-prop-types
   propertyTypes :List<Map<*, *>>;
   propertyTypesIndexMap :IndexMap;
   schemas :List<Map<*, *>>;
@@ -28,12 +28,19 @@ type AbstractTypeOverviewContainerState = {
   filterQuery :string;
   filteredTypes :List<Map<*, *>>;
   selectedAbstractType :Map<*, *>;
-  selectedAbstractTypeId :FQN | UUID;
+  selectedAbstractTypeFQN :FQN;
   showCreateNewAbstractTypeCard :boolean;
+};
+
+type UpdatePropertyTypeMeta = {
+  metadata :Object;
+  propertyTypeFQN :FQN;
+  propertyTypeId :?UUID;
 };
 
 export type {
   AbstractTypeOverviewContainerProps,
   AbstractTypeOverviewContainerState,
   IndexMap,
+  UpdatePropertyTypeMeta,
 };

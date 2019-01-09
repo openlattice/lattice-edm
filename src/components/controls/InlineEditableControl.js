@@ -211,6 +211,11 @@ export default class InlineEditableControl extends React.Component<Props, State>
       // else {
       //   this.props.onChange(this.state.currentValue);
       // }
+
+      // BUG: this is incorrectly triggered when switching property types. for example, we're looking at a empty
+      // description field, then switch to a property type with a complete description field. in this case, this
+      // component sees "currentValue" with the new property type description and compares it to the previous
+      // property type description, which was "".
       onChange(currentValue);
     }
   }
