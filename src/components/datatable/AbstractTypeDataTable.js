@@ -184,14 +184,14 @@ class AbstractTypeDataTable extends React.Component<Props, State> {
     const { selectedRowIndex } = this.state;
 
     const selectedAbstractType :Map<*, *> = abstractTypes.get(clickedRowIndex, Map());
-    let selectedAbstractTypeFQN :FQN = selectedAbstractType.get('type');
+    let selectedAbstractTypeFQN :FQN = new FullyQualifiedName(selectedAbstractType.get('type'));
 
     if (workingAbstractTypeType === AbstractTypes.AssociationType) {
       const entityType :Map<*, *> = selectedAbstractType.get('entityType', Map());
-      selectedAbstractTypeFQN = entityType.get('type');
+      selectedAbstractTypeFQN = new FullyQualifiedName(entityType.get('type'));
     }
     else if (workingAbstractTypeType === AbstractTypes.Schema) {
-      selectedAbstractTypeFQN = selectedAbstractType.get('fqn');
+      selectedAbstractTypeFQN = new FullyQualifiedName(selectedAbstractType.get('fqn'));
       // selectedAbstractTypeId = FullyQualifiedName.toString(selectedAbstractType.get('fqn', Map()));
     }
 
@@ -221,14 +221,14 @@ class AbstractTypeDataTable extends React.Component<Props, State> {
     const { abstractTypes, onAbstractTypeSelect, workingAbstractTypeType } = this.props;
 
     const selectedAbstractType :Map<*, *> = abstractTypes.get(selectedRowIndex, Map());
-    let selectedAbstractTypeFQN :FQN = selectedAbstractType.get('type');
+    let selectedAbstractTypeFQN :FQN = new FullyQualifiedName(selectedAbstractType.get('type'));
 
     if (workingAbstractTypeType === AbstractTypes.AssociationType) {
       const entityType :Map<*, *> = selectedAbstractType.get('entityType', Map());
-      selectedAbstractTypeFQN = entityType.get('type');
+      selectedAbstractTypeFQN = new FullyQualifiedName(entityType.get('type'));
     }
     else if (workingAbstractTypeType === AbstractTypes.Schema) {
-      selectedAbstractTypeFQN = selectedAbstractType.get('fqn');
+      selectedAbstractTypeFQN = new FullyQualifiedName(selectedAbstractType.get('fqn'));
       // selectedAbstractTypeId = new FullyQualifiedName(selectedAbstractType.get('fqn', Map()));
     }
 

@@ -15,7 +15,6 @@ const {
   EntityType,
   EntityTypeBuilder,
   FullyQualifiedName,
-  PropertyType,
   PropertyTypeBuilder,
 } = Models;
 
@@ -73,17 +72,6 @@ const MOCK_PROPERTY_TYPE :PropertyType = new PropertyTypeBuilder()
   .setSchemas([MOCK_SCHEMA_FQN])
   .build();
 
-const MOCK_PROPERTY_TYPE_JSON = {
-  id: 'ec6865e6-e60e-424b-a071-6a9c1603d735',
-  type: MOCK_PROPERTY_TYPE_FQN.toObject(),
-  title: 'title',
-  description: 'description',
-  datatype: 'String',
-  piiField: false,
-  analyzer: 'STANDARD',
-  schemas: [MOCK_SCHEMA_FQN.toObject()],
-};
-
 const MOCK_ASSOCIATION_ENTITY_TYPE :EntityType = new EntityTypeBuilder()
   .setId('ec6865e6-e60e-424b-a071-6a9c1603d735')
   .setType(MOCK_ASSOCIATION_TYPE_FQN)
@@ -123,6 +111,5 @@ export {
   MOCK_ENTITY_TYPE,
   MOCK_ENTITY_TYPE_JSON,
   MOCK_PROPERTY_TYPE,
-  MOCK_PROPERTY_TYPE_JSON,
   MOCK_SCHEMA_FQN,
 };

@@ -6,7 +6,7 @@ import { List, Map } from 'immutable';
 
 import type { AbstractType } from '../../utils/AbstractTypes';
 
-type IndexMap = Map<FQN, number>;
+type IndexMap = Map<FQN | UUID, number>;
 
 type AbstractTypeOverviewContainerProps = {
   associationTypes :List<Map<*, *>>;
@@ -26,9 +26,7 @@ type AbstractTypeOverviewContainerProps = {
 
 type AbstractTypeOverviewContainerState = {
   filterQuery :string;
-  filteredTypes :List<Map<*, *>>;
-  selectedAbstractType :Map<*, *>;
-  selectedAbstractTypeFQN :FQN;
+  selectedAbstractTypeFQN :?FQN;
   showCreateNewAbstractTypeCard :boolean;
 };
 

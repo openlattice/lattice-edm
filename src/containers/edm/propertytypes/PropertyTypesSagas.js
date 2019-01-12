@@ -40,9 +40,7 @@ const {
 } = EntityDataModelApiSagas;
 
 const {
-  FullyQualifiedName,
   PropertyType,
-  PropertyTypeBuilder,
 } = Models;
 
 const ERR_FQN_EXISTS :string = 'FQN already exists';

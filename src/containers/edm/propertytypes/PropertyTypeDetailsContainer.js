@@ -6,6 +6,7 @@ import React from 'react';
 
 import styled from 'styled-components';
 import { Map, List } from 'immutable';
+import { Models } from 'lattice';
 import { AuthUtils } from 'lattice-auth';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
@@ -17,6 +18,8 @@ import AbstractTypeFieldTitle from '../AbstractTypeFieldTitle';
 import AbstractTypeFieldType from '../AbstractTypeFieldType';
 import StyledButton from '../../../components/buttons/StyledButton';
 import * as PropertyTypesActions from './PropertyTypesActions';
+
+const { FullyQualifiedName } = Models;
 
 /*
  * styled components
@@ -46,7 +49,7 @@ class PropertyTypeDetailsContainer extends React.Component<Props> {
 
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
       const propertyTypeId :?UUID = propertyType.get('id');
-      const propertyTypeFQN :FQN = propertyType.get('type');
+      const propertyTypeFQN :FQN = new FullyQualifiedName(propertyType.get('type'));
       actions.localDeletePropertyType({ propertyTypeFQN, propertyTypeId });
     }
   }

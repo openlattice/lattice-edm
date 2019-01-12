@@ -12,8 +12,10 @@ import {
 } from 'immutable';
 import { Models, Types } from 'lattice';
 import { EntityDataModelApiActions } from 'lattice-sagas';
+import type { FQN } from 'lattice';
 
 import Logger from '../../../utils/Logger';
+import { isValidUUID } from '../../../utils/ValidationUtils';
 import {
   LOCAL_CREATE_PROPERTY_TYPE,
   LOCAL_DELETE_PROPERTY_TYPE,
@@ -42,17 +44,14 @@ const {
 } = Types;
 
 const INITIAL_STATE :Map<*, *> = fromJS({
-  [LOCAL_CREATE_PROPERTY_TYPE]: { error: Map() },
-  [LOCAL_DELETE_PROPERTY_TYPE]: { error: Map() },
-  [LOCAL_UPDATE_PROPERTY_TYPE_META]: { error: Map() },
-  actions: {
-    updateSchema: Map(),
-  },
+  [LOCAL_CREATE_PROPERTY_TYPE]: { error: false },
+  [LOCAL_DELETE_PROPERTY_TYPE]: { error: false },
+  [LOCAL_UPDATE_PROPERTY_TYPE_META]: { error: false },
   isCreatingNewPropertyType: false,
   isDeletingPropertyType: false,
   isFetchingAllPropertyTypes: false,
   isUpdatingPropertyTypeMeta: false,
-  newlyCreatedPropertyTypeFQN: '',
+  newlyCreatedPropertyTypeFQN: undefined,
   propertyTypes: List(),
   propertyTypesIndexMap: Map(),
 });
@@ -67,6 +66,7 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
           const seqAction :SequenceAction = action;
           return state
             .set('isCreatingNewPropertyType', true)
+            .set('newlyCreatedPropertyTypeFQN', undefined)
             .setIn([LOCAL_CREATE_PROPERTY_TYPE, seqAction.id], seqAction);
         },
         SUCCESS: () => {
@@ -79,7 +79,7 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
             const storedPropertyType :PropertyType = storedSeqAction.value;
             const propertyTypeFQN :FQN = new FullyQualifiedName(storedPropertyType.type);
             const propertyTypeId :?UUID = seqAction.value; // id won't be available in "offline" mode
-            const newPropertyTypeAsImmutable :Map<*, *> = new PropertyTypeBuilder()
+            const newPropertyType :PropertyType = new PropertyTypeBuilder()
               .setId(propertyTypeId)
               .setType(propertyTypeFQN)
               .setTitle(storedPropertyType.title)
@@ -88,16 +88,24 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
               .setPii(storedPropertyType.piiField)
               .setAnalyzer(storedPropertyType.analyzer)
               .setSchemas(storedPropertyType.schemas)
-              .build()
-              .asImmutable();
+              .build();
 
             const updatedPropertyTypes :List<Map<*, *>> = state
               .get('propertyTypes')
-              .push(newPropertyTypeAsImmutable);
+              .push(newPropertyType.toImmutable());
 
-            const updatedPropertyTypesIndexMap :IndexMap = state
+            const newPropertyTypeIndex :number = updatedPropertyTypes.count() - 1;
+
+            /*
+             * IMPORTANT! we must keep the fqn and the id index mapping in sync!
+             */
+            let updatedPropertyTypesIndexMap :IndexMap = state
               .get('propertyTypesIndexMap')
-              .set(propertyTypeFQN, updatedPropertyTypes.count() - 1);
+              .set(propertyTypeFQN, newPropertyTypeIndex);
+            if (isValidUUID(propertyTypeId)) {
+              updatedPropertyTypesIndexMap = updatedPropertyTypesIndexMap
+                .set(propertyTypeId, newPropertyTypeIndex);
+            }
 
             return state
               .set('newlyCreatedPropertyTypeFQN', propertyTypeFQN)
@@ -111,7 +119,9 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
           const storedSeqAction :SequenceAction = state.getIn([LOCAL_CREATE_PROPERTY_TYPE, seqAction.id]);
           if (storedSeqAction) {
             // TODO: we need a better pattern for setting and handling errors
-            return state.setIn([LOCAL_CREATE_PROPERTY_TYPE, 'error'], true);
+            return state
+              .set('newlyCreatedPropertyTypeFQN', undefined)
+              .setIn([LOCAL_CREATE_PROPERTY_TYPE, 'error'], true);
           }
           return state;
         },
@@ -119,6 +129,8 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
           const seqAction :SequenceAction = action;
           return state
             .set('isCreatingNewPropertyType', false)
+            // TODO: how do we clear?
+            // .set('newlyCreatedPropertyTypeFQN', undefined)
             .deleteIn([LOCAL_CREATE_PROPERTY_TYPE, seqAction.id]);
         },
       });
@@ -150,8 +162,15 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
             const updatedPropertyTypesIndexMap :IndexMap = Map().asMutable();
 
             updatedPropertyTypes.forEach((propertyType :Map<*, *>, index :number) => {
-              const propertyTypeFQN :FQN = propertyType.get('type');
+              /*
+               * IMPORTANT! we must keep the fqn and id index mapping in sync!
+               */
+              const propertyTypeFQN :FQN = new FullyQualifiedName(propertyType.get('type'));
               updatedPropertyTypesIndexMap.set(propertyTypeFQN, index);
+              const propertyTypeId :?UUID = propertyType.get('id');
+              if (isValidUUID(propertyTypeId)) {
+                updatedPropertyTypesIndexMap.set(propertyTypeId, index);
+              }
             });
 
             return state
@@ -260,9 +279,10 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
 
           responsePropertyTypes.forEach((pt :Object, index :number) => {
             try {
+              const propertyTypeId :UUID = pt.id;
               const propertyTypeFQN :FQN = new FullyQualifiedName(pt.type);
-              const propertyTypeAsImmutable :PropertyType = new PropertyTypeBuilder()
-                .setId(pt.id)
+              const propertyType = new PropertyTypeBuilder()
+                .setId(propertyTypeId)
                 .setType(propertyTypeFQN)
                 .setTitle(pt.title)
                 .setDescription(pt.description)
@@ -270,9 +290,12 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
                 .setPii(pt.piiField)
                 .setAnalyzer(pt.analyzer)
                 .setSchemas(pt.schemas)
-                .build()
-                .asImmutable();
-              propertyTypes.push(propertyTypeAsImmutable);
+                .build();
+              propertyTypes.push(propertyType.toImmutable());
+              /*
+               * IMPORTANT! we must keep the fqn and id index mapping in sync!
+               */
+              propertyTypesIndexMap.set(propertyTypeId, index);
               propertyTypesIndexMap.set(propertyTypeFQN, index);
             }
             catch (e) {

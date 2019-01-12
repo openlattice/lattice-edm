@@ -18,6 +18,7 @@ import AbstractTypeFieldTitle from '../AbstractTypeFieldTitle';
 import AbstractTypeFieldType from '../AbstractTypeFieldType';
 import AbstractTypeSearchableSelect from '../../../components/controls/AbstractTypeSearchableSelect';
 import StyledButton from '../../../components/buttons/StyledButton';
+import type { IndexMap } from '../Types';
 
 const {
   addPropertyTypeToEntityType,
@@ -51,7 +52,7 @@ type Props = {
   };
   entityType :Map<*, *>;
   propertyTypes :List<Map<*, *>>;
-  propertyTypesById :Map<string, number>;
+  propertyTypesIndexMap :IndexMap;
 }
 
 class EntityTypeDetailsContainer extends React.Component<Props> {
@@ -176,20 +177,22 @@ class EntityTypeDetailsContainer extends React.Component<Props> {
 
   render() {
 
-    const { entityType, propertyTypes, propertyTypesById } = this.props;
+    const { entityType, propertyTypes, propertyTypesIndexMap } = this.props;
 
     if (!entityType || entityType.isEmpty()) {
       return null;
     }
 
+    console.log(entityType);
+
     const baseType :string = entityType.get('baseType', '');
 
-    const keyPropertyTypeIds :OrderedSet<string> = entityType.get('key').toOrderedSet();
-    const propertyTypeIds :OrderedSet<string> = entityType.get('properties').toOrderedSet();
+    const keyPropertyTypeIds :OrderedSet<string> = entityType.get('key', List()).toOrderedSet();
+    const propertyTypeIds :OrderedSet<string> = entityType.get('properties', List()).toOrderedSet();
 
     const keyPropertyTypes :List<Map<*, *>> = keyPropertyTypeIds
       .map((propertyTypeId :string) => {
-        const index :number = propertyTypesById.get(propertyTypeId, -1);
+        const index :number = propertyTypesIndexMap.get(propertyTypeId, -1);
         if (index === -1) {
           return Map();
         }
@@ -199,7 +202,7 @@ class EntityTypeDetailsContainer extends React.Component<Props> {
 
     const thePropertyTypes :List<Map<*, *>> = propertyTypeIds
       .map((propertyTypeId :string) => {
-        const index :number = propertyTypesById.get(propertyTypeId, -1);
+        const index :number = propertyTypesIndexMap.get(propertyTypeId, -1);
         if (index === -1) {
           return Map();
         }
@@ -288,7 +291,7 @@ function mapStateToProps(state :Map<*, *>) :Object {
 
   return {
     propertyTypes: state.getIn(['edm', 'propertyTypes', 'propertyTypes'], List()),
-    propertyTypesById: state.getIn(['edm', 'propertyTypes', 'propertyTypesById'], Map())
+    propertyTypesIndexMap: state.getIn(['edm', 'propertyTypes', 'propertyTypesIndexMap'], Map())
   };
 }
 

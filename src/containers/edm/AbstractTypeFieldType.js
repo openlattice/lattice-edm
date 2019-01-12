@@ -80,8 +80,8 @@ class AbstractTypeFieldType extends React.Component<Props, State> {
       theAbstractType = abstractType.get('entityType', Map());
     }
 
-    const abstractTypeFQN :FQN = theAbstractType.get('type');
     const abstractTypeId :?UUID = theAbstractType.get('id');
+    const abstractTypeFQN :FQN = new FullyQualifiedName(theAbstractType.get('type'));
     const abstractTypeMetaData :Object = { type: new FullyQualifiedName(typeValue) };
 
     switch (abstractTypeType) {
@@ -126,8 +126,6 @@ class AbstractTypeFieldType extends React.Component<Props, State> {
       theAbstractType = abstractType.get('entityType', Map());
     }
 
-    const abstractTypeFQN :FQN = theAbstractType.get('type');
-
     return (
       <div>
         <h2>
@@ -136,7 +134,7 @@ class AbstractTypeFieldType extends React.Component<Props, State> {
         <InlineEditableControl
             type="text"
             placeholder={`${FIELD_TITLE}...`}
-            value={abstractTypeFQN.toString()}
+            value={FullyQualifiedName.toString(theAbstractType.get('type'))}
             onChange={this.handleOnChange}
             onEditToggle={this.handleOnEditToggle}
             validate={FullyQualifiedName.isValid}

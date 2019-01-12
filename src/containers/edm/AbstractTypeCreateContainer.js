@@ -137,6 +137,7 @@ type Props = {
   propertyTypes :List<Map<*, *>>;
   workingAbstractTypeType :AbstractType;
   onCancel :() => void;
+  onSubmit :() => void;
 };
 
 type State = {
@@ -161,7 +162,6 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
 
   static defaultProps = {
     workingAbstractTypeType: AbstractTypes.PropertyType,
-    onCancel: () => {}
   }
 
   constructor(props :Props) {
@@ -183,7 +183,7 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
       selectedPrimaryKeyPropertyTypes: Set(),
       selectedPropertyTypes: Set(),
       selectedSourceEntityTypes: Set(),
-      titleValue: ''
+      titleValue: '',
     };
   }
 
@@ -230,7 +230,7 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
 
   submitCreateAbstractTypeRequest = () => {
 
-    const { actions, workingAbstractTypeType } = this.props;
+    const { actions, onSubmit, workingAbstractTypeType } = this.props;
     const {
       bidiValue,
       datatypeValue,
@@ -320,6 +320,10 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
         // TODO: need a Logger class
         // console.error('invalid AbstractType: ', this.props.workingAbstractTypeType);
       }
+    }
+
+    if (onSubmit) {
+      onSubmit();
     }
   }
 
