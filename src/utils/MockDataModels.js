@@ -3,6 +3,7 @@
  */
 
 import { Models, Types } from 'lattice';
+import type { FQN } from 'lattice';
 
 const {
   AnalyzerTypes,
@@ -15,13 +16,14 @@ const {
   EntityType,
   EntityTypeBuilder,
   FullyQualifiedName,
+  PropertyType,
   PropertyTypeBuilder,
 } = Models;
 
-const MOCK_ASSOCIATION_TYPE_FQN :FullyQualifiedName = new FullyQualifiedName('OpenLattice', 'MockAssociationType');
-const MOCK_ENTITY_TYPE_FQN :FullyQualifiedName = new FullyQualifiedName('OpenLattice', 'MockEntityType');
-const MOCK_PROPERTY_TYPE_FQN :FullyQualifiedName = new FullyQualifiedName('OpenLattice', 'MockPropertyType');
-const MOCK_SCHEMA_FQN :FullyQualifiedName = new FullyQualifiedName('OpenLattice', 'MockSchema');
+const MOCK_ASSOCIATION_TYPE_FQN :FQN = new FullyQualifiedName('OpenLattice', 'MockAssociationType');
+const MOCK_ENTITY_TYPE_FQN :FQN = new FullyQualifiedName('OpenLattice', 'MockEntityType');
+const MOCK_PROPERTY_TYPE_FQN :FQN = new FullyQualifiedName('OpenLattice', 'MockPropertyType');
+const MOCK_SCHEMA_FQN :FQN = new FullyQualifiedName('OpenLattice', 'MockSchema');
 
 const MOCK_ENTITY_TYPE :EntityType = new EntityTypeBuilder()
   .setId('ec6865e6-e60e-424b-a071-6a9c1603d735')

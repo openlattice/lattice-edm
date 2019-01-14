@@ -4,6 +4,7 @@
 
 import { List, Map } from 'immutable';
 import { Models } from 'lattice';
+import type { FQN } from 'lattice';
 
 import AbstractTypes from './AbstractTypes';
 import Logger from './Logger';
