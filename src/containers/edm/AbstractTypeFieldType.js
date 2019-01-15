@@ -10,6 +10,7 @@ import { AuthUtils } from 'lattice-auth';
 import { EntityDataModelApiActions } from 'lattice-sagas';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
+import type { FQN } from 'lattice';
 
 import AbstractTypes from '../../utils/AbstractTypes';
 import InlineEditableControl from '../../components/controls/InlineEditableControl';
@@ -23,15 +24,7 @@ const {
 
 const { FullyQualifiedName } = Models;
 
-/*
- * constants
- */
-
 const FIELD_TITLE :string = 'Type';
-
-/*
- * types
- */
 
 type Props = {
   abstractType :Map<*, *>;
@@ -132,12 +125,12 @@ class AbstractTypeFieldType extends React.Component<Props, State> {
           { FIELD_TITLE }
         </h2>
         <InlineEditableControl
-            type="text"
             placeholder={`${FIELD_TITLE}...`}
-            value={FullyQualifiedName.toString(theAbstractType.get('type'))}
             onChange={this.handleOnChange}
             onEditToggle={this.handleOnEditToggle}
+            type="text"
             validate={FullyQualifiedName.isValid}
+            value={FullyQualifiedName.toString(theAbstractType.get('type'))}
             viewOnly={!AuthUtils.isAuthenticated() || !AuthUtils.isAdmin()} />
       </div>
     );
