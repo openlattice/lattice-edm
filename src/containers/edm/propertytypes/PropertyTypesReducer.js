@@ -12,7 +12,7 @@ import {
 } from 'immutable';
 import { Models, Types } from 'lattice';
 import { EntityDataModelApiActions } from 'lattice-sagas';
-import type { FQN } from 'lattice';
+import type { FQN, PropertyTypeObject } from 'lattice';
 
 import Logger from '../../../utils/Logger';
 import { isValidUUID } from '../../../utils/ValidationUtils';
@@ -223,21 +223,37 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
               return state;
             }
 
+            let newState :Map<*, *> = state;
+            const currentPropertyType :PropertyTypeObject = state.getIn(['propertyTypes', propertyTypeIndex]).toJS();
+            const propertyTypeBuilder :PropertyTypeBuilder = new PropertyTypeBuilder()
+              .setAnalyzer(currentPropertyType.analyzer)
+              .setDataType(currentPropertyType.datatype)
+              .setDescription(currentPropertyType.description)
+              .setId(currentPropertyType.id)
+              .setPii(currentPropertyType.piiField)
+              .setSchemas(currentPropertyType.schemas)
+              .setTitle(currentPropertyType.title)
+              .setType(currentPropertyType.type);
+
             if (has(metadata, 'description')) {
-              return state.setIn(['propertyTypes', propertyTypeIndex, 'description'], metadata.description);
+              propertyTypeBuilder.setDescription(metadata.description);
             }
 
             if (has(metadata, 'title')) {
-              return state.setIn(['propertyTypes', propertyTypeIndex, 'title'], metadata.title);
+              propertyTypeBuilder.setTitle(metadata.title);
             }
 
             if (has(metadata, 'type')) {
               const newPropertyTypeFQN = new FullyQualifiedName(metadata.type);
-              return state
+              propertyTypeBuilder.setType(metadata.type);
+              newState = newState
                 .deleteIn(['propertyTypesIndexMap', propertyTypeFQN])
-                .setIn(['propertyTypesIndexMap', newPropertyTypeFQN], propertyTypeIndex)
-                .setIn(['propertyTypes', propertyTypeIndex, 'type'], newPropertyTypeFQN);
+                .setIn(['propertyTypesIndexMap', newPropertyTypeFQN], propertyTypeIndex);
             }
+
+            const updatedPropertyType :PropertyType = propertyTypeBuilder.build();
+            return newState
+              .setIn(['propertyTypes', propertyTypeIndex], updatedPropertyType.toImmutable());
           }
 
           return state;

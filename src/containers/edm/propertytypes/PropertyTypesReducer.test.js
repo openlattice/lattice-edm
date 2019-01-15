@@ -1,5 +1,5 @@
 import randomUUID from 'uuid/v4';
-import { Map, fromJS } from 'immutable';
+import { List, Map, fromJS } from 'immutable';
 import { Models } from 'lattice';
 import { EntityDataModelApiActions } from 'lattice-sagas';
 
@@ -21,6 +21,7 @@ import {
 
 const {
   FullyQualifiedName,
+  PropertyTypeBuilder,
 } = Models;
 
 // const {
@@ -79,13 +80,21 @@ describe('PropertyTypesReducer', () => {
       expect(state.getIn([LOCAL_CREATE_PROPERTY_TYPE, id])).toEqual(requestAction);
       expect(state.get('isCreatingNewPropertyType')).toEqual(true);
       expect(state.get('newlyCreatedPropertyTypeFQN')).toEqual(MOCK_PROPERTY_TYPE.type);
-      expect(state.get('propertyTypes').toJS()).toEqual(
-        [MOCK_PROPERTY_TYPE.toObject()]
-      );
-      expect(state.get('propertyTypesIndexMap').toJS()).toEqual({
-        [MOCK_PROPERTY_TYPE.id]: 0,
-        [MOCK_PROPERTY_TYPE.type]: 0,
-      });
+      expect(state.get('newlyCreatedPropertyTypeFQN')).toBeInstanceOf(FullyQualifiedName);
+
+      const expectedPropertyTypes = List().push(MOCK_PROPERTY_TYPE.toImmutable());
+      expect(state.get('propertyTypes').hashCode()).toEqual(expectedPropertyTypes.hashCode());
+      expect(state.get('propertyTypes').equals(expectedPropertyTypes)).toEqual(true);
+
+      const expectedPropertyTypesIndexMap = Map()
+        .set(MOCK_PROPERTY_TYPE.id, 0)
+        .set(MOCK_PROPERTY_TYPE.type, 0);
+      expect(state.get('propertyTypesIndexMap').hashCode()).toEqual(expectedPropertyTypesIndexMap.hashCode());
+      expect(state.get('propertyTypesIndexMap').equals(expectedPropertyTypesIndexMap)).toEqual(true);
+      state.get('propertyTypesIndexMap')
+        .filter((v, k) => FullyQualifiedName.isValid(k))
+        .keySeq()
+        .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
     });
 
     test(localCreatePropertyType.FAILURE, () => {
@@ -99,8 +108,14 @@ describe('PropertyTypesReducer', () => {
       expect(state.getIn([LOCAL_CREATE_PROPERTY_TYPE, 'error'])).toEqual(true);
       expect(state.get('isCreatingNewPropertyType')).toEqual(true);
       expect(state.get('newlyCreatedPropertyTypeFQN')).toEqual(undefined);
-      expect(state.get('propertyTypes')).toEqual(INITIAL_STATE.get('propertyTypes'));
-      expect(state.get('propertyTypesIndexMap')).toEqual(INITIAL_STATE.get('propertyTypesIndexMap'));
+
+      const expectedPropertyTypes = List();
+      expect(state.get('propertyTypes').hashCode()).toEqual(expectedPropertyTypes.hashCode());
+      expect(state.get('propertyTypes').equals(expectedPropertyTypes)).toEqual(true);
+
+      const expectedPropertyTypesIndexMap = Map();
+      expect(state.get('propertyTypesIndexMap').hashCode()).toEqual(expectedPropertyTypesIndexMap.hashCode());
+      expect(state.get('propertyTypesIndexMap').equals(expectedPropertyTypesIndexMap)).toEqual(true);
     });
 
     test(localCreatePropertyType.FINALLY, () => {
@@ -112,6 +127,7 @@ describe('PropertyTypesReducer', () => {
       expect(state.hasIn([LOCAL_CREATE_PROPERTY_TYPE, id])).toEqual(false);
       expect(state.get('isCreatingNewPropertyType')).toEqual(false);
       expect(state.get('newlyCreatedPropertyTypeFQN')).toEqual(MOCK_PROPERTY_TYPE.type);
+      expect(state.get('newlyCreatedPropertyTypeFQN')).toBeInstanceOf(FullyQualifiedName);
     });
 
   });
@@ -131,13 +147,14 @@ describe('PropertyTypesReducer', () => {
 
       test('should delete PropertyType', () => {
 
-        let state = INITIAL_STATE
-          .set('propertyTypes', fromJS([MOCK_PROPERTY_TYPE.toImmutable()]))
-          .set('propertyTypesIndexMap', fromJS({ [MOCK_PROPERTY_TYPE.id]: 0, [MOCK_PROPERTY_TYPE.type]: 0 }));
+        const initialState = INITIAL_STATE
+          .setIn(['propertyTypes', 0], MOCK_PROPERTY_TYPE.toImmutable())
+          .setIn(['propertyTypesIndexMap', MOCK_PROPERTY_TYPE.id], 0)
+          .setIn(['propertyTypesIndexMap', MOCK_PROPERTY_TYPE.type], 0);
 
         const { id } = localDeletePropertyType();
         const requestAction = localDeletePropertyType.request(id, { propertyTypeFQN: MOCK_PROPERTY_TYPE.type });
-        state = reducer(state, requestAction);
+        let state = reducer(initialState, requestAction);
         state = reducer(state, localDeletePropertyType.success(id));
 
         expect(state.getIn([LOCAL_DELETE_PROPERTY_TYPE, id])).toEqual(requestAction);
@@ -148,52 +165,62 @@ describe('PropertyTypesReducer', () => {
 
       test('should correctly update "propertyTypes" and "propertyTypesIndexMap"', () => {
 
-        // yes, this is not a valid PropertyType, but the reducer only cares about the fqn
-        const mockPropertyType1 = {
-          id: randomUUID(),
-          type: new FullyQualifiedName(randomStringId(), randomStringId()),
-        };
-        const mockPropertyType2 = {
-          id: randomUUID(),
-          type: new FullyQualifiedName(randomStringId(), randomStringId()),
-        };
-        const mockPropertyType3 = {
-          id: randomUUID(),
-          type: new FullyQualifiedName(randomStringId(), randomStringId()),
-        };
+        const mockPropertyType0 = new PropertyTypeBuilder()
+          .setDataType('String')
+          .setId(randomUUID())
+          .setTitle('title')
+          .setType(new FullyQualifiedName(randomStringId(), randomStringId()))
+          .build();
 
-        let state = INITIAL_STATE
-          .set('propertyTypes', fromJS([
-            mockPropertyType1,
-            mockPropertyType2,
-            mockPropertyType3,
-          ]))
-          .set('propertyTypesIndexMap', fromJS({
-            [mockPropertyType1.id]: 0,
-            [mockPropertyType1.type]: 0,
-            [mockPropertyType2.id]: 1,
-            [mockPropertyType2.type]: 1,
-            [mockPropertyType3.id]: 2,
-            [mockPropertyType3.type]: 2,
-          }));
+        const mockPropertyType1 = new PropertyTypeBuilder()
+          .setDataType('String')
+          .setId(randomUUID())
+          .setTitle('title')
+          .setType(new FullyQualifiedName(randomStringId(), randomStringId()))
+          .build();
+
+        const mockPropertyType2 = new PropertyTypeBuilder()
+          .setDataType('String')
+          .setId(randomUUID())
+          .setTitle('title')
+          .setType(new FullyQualifiedName(randomStringId(), randomStringId()))
+          .build();
+
+        const initialState = INITIAL_STATE
+          .setIn(['propertyTypes', 0], mockPropertyType0.toImmutable())
+          .setIn(['propertyTypes', 1], mockPropertyType1.toImmutable())
+          .setIn(['propertyTypes', 2], mockPropertyType2.toImmutable())
+          .setIn(['propertyTypesIndexMap', mockPropertyType0.id], 0)
+          .setIn(['propertyTypesIndexMap', mockPropertyType0.type], 0)
+          .setIn(['propertyTypesIndexMap', mockPropertyType1.id], 1)
+          .setIn(['propertyTypesIndexMap', mockPropertyType1.type], 1)
+          .setIn(['propertyTypesIndexMap', mockPropertyType2.id], 2)
+          .setIn(['propertyTypesIndexMap', mockPropertyType2.type], 2);
 
         const { id } = localDeletePropertyType();
-        const requestAction = localDeletePropertyType.request(id, { propertyTypeFQN: mockPropertyType2.type });
-        state = reducer(state, requestAction);
+        const requestAction = localDeletePropertyType.request(id, { propertyTypeFQN: mockPropertyType1.type });
+        let state = reducer(initialState, requestAction);
         state = reducer(state, localDeletePropertyType.success(id));
-
         expect(state.getIn([LOCAL_DELETE_PROPERTY_TYPE, id])).toEqual(requestAction);
         expect(state.get('isDeletingPropertyType')).toEqual(true);
-        expect(state.get('propertyTypes').toJS()).toEqual([
-          mockPropertyType1,
-          mockPropertyType3
-        ]);
-        expect(state.get('propertyTypesIndexMap').toJS()).toEqual({
-          [mockPropertyType1.id]: 0,
-          [mockPropertyType1.type]: 0,
-          [mockPropertyType3.id]: 1,
-          [mockPropertyType3.type]: 1,
-        });
+
+        const expectedPropertyTypes = List()
+          .push(mockPropertyType0.toImmutable())
+          .push(mockPropertyType2.toImmutable());
+        expect(state.get('propertyTypes').hashCode()).toEqual(expectedPropertyTypes.hashCode());
+        expect(state.get('propertyTypes').equals(expectedPropertyTypes)).toEqual(true);
+
+        const expectedPropertyTypesIndexMap = Map()
+          .set(mockPropertyType0.id, 0)
+          .set(mockPropertyType0.type, 0)
+          .set(mockPropertyType2.id, 1)
+          .set(mockPropertyType2.type, 1);
+        expect(state.get('propertyTypesIndexMap').hashCode()).toEqual(expectedPropertyTypesIndexMap.hashCode());
+        expect(state.get('propertyTypesIndexMap').equals(expectedPropertyTypesIndexMap)).toEqual(true);
+        state.get('propertyTypesIndexMap')
+          .filter((v, k) => FullyQualifiedName.isValid(k))
+          .keySeq()
+          .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
       });
 
       test('should not mutate state if attempting to delete a non-existent PropertyType', () => {
@@ -244,8 +271,9 @@ describe('PropertyTypesReducer', () => {
   describe(LOCAL_UPDATE_PROPERTY_TYPE_META, () => {
 
     const initialState = INITIAL_STATE
-      .set('propertyTypes', fromJS([MOCK_PROPERTY_TYPE.toImmutable()]))
-      .set('propertyTypesIndexMap', fromJS({ [MOCK_PROPERTY_TYPE.type]: 0 }));
+      .setIn(['propertyTypes', 0], MOCK_PROPERTY_TYPE.toImmutable())
+      .setIn(['propertyTypesIndexMap', MOCK_PROPERTY_TYPE.id], 0)
+      .setIn(['propertyTypesIndexMap', MOCK_PROPERTY_TYPE.type], 0);
 
     describe('description', () => {
 
@@ -254,10 +282,6 @@ describe('PropertyTypesReducer', () => {
         propertyTypeId: MOCK_PROPERTY_TYPE.id,
         propertyTypeFQN: MOCK_PROPERTY_TYPE.type,
       };
-
-      const expectedPropertyType = MOCK_PROPERTY_TYPE.toImmutable()
-        .set('description', mockActionValue.metadata.description)
-        .toJS();
 
       test(localUpdatePropertyTypeMeta.REQUEST, () => {
 
@@ -276,8 +300,22 @@ describe('PropertyTypesReducer', () => {
         state = reducer(state, localUpdatePropertyTypeMeta.success(id));
         expect(state.getIn([LOCAL_UPDATE_PROPERTY_TYPE_META, id])).toEqual(requestAction);
         expect(state.get('isUpdatingPropertyTypeMeta')).toEqual(true);
-        expect(state.get('propertyTypes').toJS()).toEqual([expectedPropertyType]);
-        expect(state.get('propertyTypesIndexMap').toJS()).toEqual({ [MOCK_PROPERTY_TYPE.type]: 0 });
+
+        const expectedPropertyTypes = List().push(
+          MOCK_PROPERTY_TYPE.toImmutable().set('description', mockActionValue.metadata.description)
+        );
+        expect(state.get('propertyTypes').hashCode()).toEqual(expectedPropertyTypes.hashCode());
+        expect(state.get('propertyTypes').equals(expectedPropertyTypes)).toEqual(true);
+
+        const expectedPropertyTypesIndexMap = Map()
+          .set(MOCK_PROPERTY_TYPE.id, 0)
+          .set(MOCK_PROPERTY_TYPE.type, 0);
+        expect(state.get('propertyTypesIndexMap').hashCode()).toEqual(expectedPropertyTypesIndexMap.hashCode());
+        expect(state.get('propertyTypesIndexMap').equals(expectedPropertyTypesIndexMap)).toEqual(true);
+        state.get('propertyTypesIndexMap')
+          .filter((v, k) => FullyQualifiedName.isValid(k))
+          .keySeq()
+          .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
       });
 
       test(localUpdatePropertyTypeMeta.FAILURE, () => {
@@ -288,8 +326,20 @@ describe('PropertyTypesReducer', () => {
         state = reducer(state, localUpdatePropertyTypeMeta.failure(id));
         expect(state.getIn([LOCAL_UPDATE_PROPERTY_TYPE_META, id])).toEqual(requestAction);
         expect(state.get('isUpdatingPropertyTypeMeta')).toEqual(true);
-        expect(state.get('propertyTypes').toJS()).toEqual(initialState.get('propertyTypes').toJS());
-        expect(state.get('propertyTypesIndexMap').toJS()).toEqual(initialState.get('propertyTypesIndexMap').toJS());
+
+        const expectedPropertyTypes = List().push(MOCK_PROPERTY_TYPE.toImmutable());
+        expect(state.get('propertyTypes').hashCode()).toEqual(expectedPropertyTypes.hashCode());
+        expect(state.get('propertyTypes').equals(expectedPropertyTypes)).toEqual(true);
+
+        const expectedPropertyTypesIndexMap = Map()
+          .set(MOCK_PROPERTY_TYPE.id, 0)
+          .set(MOCK_PROPERTY_TYPE.type, 0);
+        expect(state.get('propertyTypesIndexMap').hashCode()).toEqual(expectedPropertyTypesIndexMap.hashCode());
+        expect(state.get('propertyTypesIndexMap').equals(expectedPropertyTypesIndexMap)).toEqual(true);
+        state.get('propertyTypesIndexMap')
+          .filter((v, k) => FullyQualifiedName.isValid(k))
+          .keySeq()
+          .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
       });
 
       test(localUpdatePropertyTypeMeta.FINALLY, () => {
@@ -312,10 +362,6 @@ describe('PropertyTypesReducer', () => {
         propertyTypeFQN: MOCK_PROPERTY_TYPE.type,
       };
 
-      const expectedPropertyType = MOCK_PROPERTY_TYPE.toImmutable()
-        .set('title', mockActionValue.metadata.title)
-        .toJS();
-
       test(localUpdatePropertyTypeMeta.REQUEST, () => {
 
         const { id } = localUpdatePropertyTypeMeta();
@@ -333,8 +379,22 @@ describe('PropertyTypesReducer', () => {
         state = reducer(state, localUpdatePropertyTypeMeta.success(id));
         expect(state.getIn([LOCAL_UPDATE_PROPERTY_TYPE_META, id])).toEqual(requestAction);
         expect(state.get('isUpdatingPropertyTypeMeta')).toEqual(true);
-        expect(state.get('propertyTypes').toJS()).toEqual([expectedPropertyType]);
-        expect(state.get('propertyTypesIndexMap').toJS()).toEqual({ [MOCK_PROPERTY_TYPE.type]: 0 });
+
+        const expectedPropertyTypes = List().push(
+          MOCK_PROPERTY_TYPE.toImmutable().set('title', mockActionValue.metadata.title)
+        );
+        expect(state.get('propertyTypes').hashCode()).toEqual(expectedPropertyTypes.hashCode());
+        expect(state.get('propertyTypes').equals(expectedPropertyTypes)).toEqual(true);
+
+        const expectedPropertyTypesIndexMap = Map()
+          .set(MOCK_PROPERTY_TYPE.id, 0)
+          .set(MOCK_PROPERTY_TYPE.type, 0);
+        expect(state.get('propertyTypesIndexMap').hashCode()).toEqual(expectedPropertyTypesIndexMap.hashCode());
+        expect(state.get('propertyTypesIndexMap').equals(expectedPropertyTypesIndexMap)).toEqual(true);
+        state.get('propertyTypesIndexMap')
+          .filter((v, k) => FullyQualifiedName.isValid(k))
+          .keySeq()
+          .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
       });
 
       test(localUpdatePropertyTypeMeta.FAILURE, () => {
@@ -345,8 +405,20 @@ describe('PropertyTypesReducer', () => {
         state = reducer(state, localUpdatePropertyTypeMeta.failure(id));
         expect(state.getIn([LOCAL_UPDATE_PROPERTY_TYPE_META, id])).toEqual(requestAction);
         expect(state.get('isUpdatingPropertyTypeMeta')).toEqual(true);
-        expect(state.get('propertyTypes').toJS()).toEqual(initialState.get('propertyTypes').toJS());
-        expect(state.get('propertyTypesIndexMap').toJS()).toEqual(initialState.get('propertyTypesIndexMap').toJS());
+
+        const expectedPropertyTypes = List().push(MOCK_PROPERTY_TYPE.toImmutable());
+        expect(state.get('propertyTypes').hashCode()).toEqual(expectedPropertyTypes.hashCode());
+        expect(state.get('propertyTypes').equals(expectedPropertyTypes)).toEqual(true);
+
+        const expectedPropertyTypesIndexMap = Map()
+          .set(MOCK_PROPERTY_TYPE.id, 0)
+          .set(MOCK_PROPERTY_TYPE.type, 0);
+        expect(state.get('propertyTypesIndexMap').hashCode()).toEqual(expectedPropertyTypesIndexMap.hashCode());
+        expect(state.get('propertyTypesIndexMap').equals(expectedPropertyTypesIndexMap)).toEqual(true);
+        state.get('propertyTypesIndexMap')
+          .filter((v, k) => FullyQualifiedName.isValid(k))
+          .keySeq()
+          .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
       });
 
       test(localUpdatePropertyTypeMeta.FINALLY, () => {
@@ -369,10 +441,6 @@ describe('PropertyTypesReducer', () => {
         propertyTypeFQN: MOCK_PROPERTY_TYPE.type,
       };
 
-      const expectedPropertyType = MOCK_PROPERTY_TYPE.toImmutable()
-        .set('type', mockActionValue.metadata.type.toObject())
-        .toJS();
-
       test(localUpdatePropertyTypeMeta.REQUEST, () => {
 
         const { id } = localUpdatePropertyTypeMeta();
@@ -390,11 +458,47 @@ describe('PropertyTypesReducer', () => {
         state = reducer(state, localUpdatePropertyTypeMeta.success(id));
         expect(state.getIn([LOCAL_UPDATE_PROPERTY_TYPE_META, id])).toEqual(requestAction);
         expect(state.get('isUpdatingPropertyTypeMeta')).toEqual(true);
-        expect(state.get('propertyTypes').toJS()).toEqual([expectedPropertyType]);
-        expect(state.get('propertyTypesIndexMap').toJS()).toEqual({ [mockActionValue.metadata.type]: 0 });
+
+        const expectedPropertyTypes = List().push(
+          MOCK_PROPERTY_TYPE.toImmutable().set('type', fromJS(mockActionValue.metadata.type.toObject()))
+        );
+        expect(state.get('propertyTypes').hashCode()).toEqual(expectedPropertyTypes.hashCode());
+        expect(state.get('propertyTypes').equals(expectedPropertyTypes)).toEqual(true);
+
+        const expectedPropertyTypesIndexMap = Map()
+          .set(MOCK_PROPERTY_TYPE.id, 0)
+          .set(mockActionValue.metadata.type, 0);
+        expect(state.get('propertyTypesIndexMap').hashCode()).toEqual(expectedPropertyTypesIndexMap.hashCode());
+        expect(state.get('propertyTypesIndexMap').equals(expectedPropertyTypesIndexMap)).toEqual(true);
+        state.get('propertyTypesIndexMap')
+          .filter((v, k) => FullyQualifiedName.isValid(k))
+          .keySeq()
+          .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
       });
 
-      test(localUpdatePropertyTypeMeta.FAILURE, () => {});
+      test(localUpdatePropertyTypeMeta.FAILURE, () => {
+
+        const { id } = localUpdatePropertyTypeMeta();
+        const requestAction = localUpdatePropertyTypeMeta.request(id, mockActionValue);
+        let state = reducer(initialState, requestAction);
+        state = reducer(state, localUpdatePropertyTypeMeta.failure(id));
+        expect(state.getIn([LOCAL_UPDATE_PROPERTY_TYPE_META, id])).toEqual(requestAction);
+        expect(state.get('isUpdatingPropertyTypeMeta')).toEqual(true);
+
+        const expectedPropertyTypes = List().push(MOCK_PROPERTY_TYPE.toImmutable());
+        expect(state.get('propertyTypes').hashCode()).toEqual(expectedPropertyTypes.hashCode());
+        expect(state.get('propertyTypes').equals(expectedPropertyTypes)).toEqual(true);
+
+        const expectedPropertyTypesIndexMap = Map()
+          .set(MOCK_PROPERTY_TYPE.id, 0)
+          .set(MOCK_PROPERTY_TYPE.type, 0);
+        expect(state.get('propertyTypesIndexMap').hashCode()).toEqual(expectedPropertyTypesIndexMap.hashCode());
+        expect(state.get('propertyTypesIndexMap').equals(expectedPropertyTypesIndexMap)).toEqual(true);
+        state.get('propertyTypesIndexMap')
+          .filter((v, k) => FullyQualifiedName.isValid(k))
+          .keySeq()
+          .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+      });
 
       test(localUpdatePropertyTypeMeta.FINALLY, () => {
 
@@ -426,15 +530,21 @@ describe('PropertyTypesReducer', () => {
       const response = { propertyTypes: [MOCK_PROPERTY_TYPE.toObject()] };
       let state = reducer(INITIAL_STATE, getEntityDataModel.request(id));
       state = reducer(state, getEntityDataModel.success(id, response));
-
       expect(state.get('isFetchingAllPropertyTypes')).toEqual(true);
-      expect(state.get('propertyTypes').toJS()).toEqual(
-        [MOCK_PROPERTY_TYPE.toObject()]
-      );
-      expect(state.get('propertyTypesIndexMap').toJS()).toEqual({
-        [MOCK_PROPERTY_TYPE.id]: 0,
-        [MOCK_PROPERTY_TYPE.type]: 0,
-      });
+
+      const expectedPropertyTypes = List().push(MOCK_PROPERTY_TYPE.toImmutable());
+      expect(state.get('propertyTypes').hashCode()).toEqual(expectedPropertyTypes.hashCode());
+      expect(state.get('propertyTypes').equals(expectedPropertyTypes)).toEqual(true);
+
+      const expectedPropertyTypesIndexMap = Map()
+        .set(MOCK_PROPERTY_TYPE.id, 0)
+        .set(MOCK_PROPERTY_TYPE.type, 0);
+      expect(state.get('propertyTypesIndexMap').hashCode()).toEqual(expectedPropertyTypesIndexMap.hashCode());
+      expect(state.get('propertyTypesIndexMap').equals(expectedPropertyTypesIndexMap)).toEqual(true);
+      state.get('propertyTypesIndexMap')
+        .filter((v, k) => FullyQualifiedName.isValid(k))
+        .keySeq()
+        .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
     });
 
     test(getEntityDataModel.FAILURE, () => {
