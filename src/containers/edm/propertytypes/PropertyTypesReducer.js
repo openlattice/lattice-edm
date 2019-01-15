@@ -30,7 +30,6 @@ const LOG :Logger = new Logger('PropertyTypesReducer');
 
 const {
   getEntityDataModel,
-  updateSchema,
 } = EntityDataModelApiActions;
 
 const {
@@ -334,6 +333,7 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
       });
     }
 
+    /*
     case updateSchema.case(action.type): {
       return updateSchema.reducer(state, action, {
         REQUEST: () => {
@@ -388,6 +388,7 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
         },
       });
     }
+    */
 
     default:
       return state;
