@@ -15,7 +15,6 @@ import type { FQN } from 'lattice';
 import AbstractTypes from '../../utils/AbstractTypes';
 import InlineEditableControl from '../../components/controls/InlineEditableControl';
 import * as PropertyTypesActions from './propertytypes/PropertyTypesActions';
-import { isValidUUID } from '../../utils/ValidationUtils';
 
 import type { AbstractType } from '../../utils/AbstractTypes';
 

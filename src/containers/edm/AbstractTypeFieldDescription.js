@@ -5,31 +5,33 @@
 import React from 'react';
 
 import { Map } from 'immutable';
+import { Models } from 'lattice';
 import { AuthUtils } from 'lattice-auth';
 import { EntityDataModelApiActionFactory } from 'lattice-sagas';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
+import type { FQN } from 'lattice';
 
 import AbstractTypes from '../../utils/AbstractTypes';
 import InlineEditableControl from '../../components/controls/InlineEditableControl';
-import { isValidUUID } from '../../utils/ValidationUtils';
-
+import * as PropertyTypesActions from './propertytypes/PropertyTypesActions';
 import type { AbstractType } from '../../utils/AbstractTypes';
 
 const {
   updateAssociationTypeMetaData,
   updateEntityTypeMetaData,
-  updatePropertyTypeMetaData
 } = EntityDataModelApiActionFactory;
+
+const { FullyQualifiedName } = Models;
 
 const FIELD_TITLE :string = 'Description';
 
 type Props = {
   abstractType :Map<*, *>;
   actions :{
+    localUpdatePropertyTypeMeta :RequestSequence;
     updateAssociationTypeMetaData :RequestSequence;
     updateEntityTypeMetaData :RequestSequence;
-    updatePropertyTypeMetaData :RequestSequence;
   };
   abstractTypeType :AbstractType;
   onChange :Function;
@@ -65,33 +67,32 @@ class AbstractTypeFieldDescription extends React.Component<Props, State> {
       theAbstractType = abstractType.get('entityType', Map());
     }
 
-    if (isValidUUID(theAbstractType.get('id'))) {
+    const abstractTypeId :?UUID = theAbstractType.get('id');
+    const abstractTypeFQN :FQN = new FullyQualifiedName(theAbstractType.get('type'));
+    const abstractTypeMetaData :Object = { description: descriptionValue };
 
-      const abstractTypeId :string = theAbstractType.get('id', '');
-      const abstractTypeMetaData :Object = { description: descriptionValue };
-
-      switch (abstractTypeType) {
-        case AbstractTypes.AssociationType:
-          actions.updateAssociationTypeMetaData({
-            associationTypeId: abstractTypeId,
-            metadata: abstractTypeMetaData
-          });
-          break;
-        case AbstractTypes.EntityType:
-          actions.updateEntityTypeMetaData({
-            entityTypeId: abstractTypeId,
-            metadata: abstractTypeMetaData
-          });
-          break;
-        case AbstractTypes.PropertyType:
-          actions.updatePropertyTypeMetaData({
-            propertyTypeId: abstractTypeId,
-            metadata: abstractTypeMetaData
-          });
-          break;
-        default:
-          break;
-      }
+    switch (abstractTypeType) {
+      case AbstractTypes.AssociationType:
+        actions.updateAssociationTypeMetaData({
+          associationTypeId: abstractTypeId,
+          metadata: abstractTypeMetaData
+        });
+        break;
+      case AbstractTypes.EntityType:
+        actions.updateEntityTypeMetaData({
+          entityTypeId: abstractTypeId,
+          metadata: abstractTypeMetaData
+        });
+        break;
+      case AbstractTypes.PropertyType:
+        actions.localUpdatePropertyTypeMeta({
+          metadata: abstractTypeMetaData,
+          propertyTypeFQN: abstractTypeFQN,
+          propertyTypeId: abstractTypeId,
+        });
+        break;
+      default:
+        break;
     }
 
     onChange(descriptionValue);
@@ -129,17 +130,13 @@ class AbstractTypeFieldDescription extends React.Component<Props, State> {
   }
 }
 
-function mapDispatchToProps(dispatch :Function) :Object {
-
-  const actions = {
+const mapDispatchToProps = (dispatch :Function) :Object => ({
+  actions: bindActionCreators({
     updateAssociationTypeMetaData,
     updateEntityTypeMetaData,
-    updatePropertyTypeMetaData
-  };
+    localUpdatePropertyTypeMeta: PropertyTypesActions.localUpdatePropertyTypeMeta,
+  }, dispatch)
+});
 
-  return {
-    actions: bindActionCreators(actions, dispatch)
-  };
-}
-
+// $FlowFixMe: Missing type annotation for CP
 export default connect(null, mapDispatchToProps)(AbstractTypeFieldDescription);
