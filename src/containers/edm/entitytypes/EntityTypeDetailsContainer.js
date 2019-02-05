@@ -6,10 +6,11 @@ import React from 'react';
 
 import styled from 'styled-components';
 import { List, Map, OrderedSet } from 'immutable';
+import { Models } from 'lattice';
 import { AuthUtils } from 'lattice-auth';
-import { EntityDataModelApiActionFactory } from 'lattice-sagas';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
+import type { FQN } from 'lattice';
 
 import AbstractTypes from '../../../utils/AbstractTypes';
 import AbstractTypeDataTable from '../../../components/datatable/AbstractTypeDataTable';
@@ -21,11 +22,7 @@ import StyledButton from '../../../components/buttons/StyledButton';
 import * as EntityTypesActions from './EntityTypesActions';
 import type { IndexMap } from '../Types';
 
-const {
-  addPropertyTypeToEntityType,
-  removePropertyTypeFromEntityType,
-  reorderEntityTypePropertyTypes
-} = EntityDataModelApiActionFactory;
+const { FullyQualifiedName } = Models;
 
 /*
  * styled components
@@ -100,7 +97,9 @@ class EntityTypeDetailsContainer extends React.Component<Props> {
     const { actions, entityType } = this.props;
 
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
-      actions.deleteEntityType(entityType.get('id'));
+      const entityTypeId :?UUID = entityType.get('id');
+      const entityTypeFQN :FQN = new FullyQualifiedName(entityType.get('type'));
+      actions.localDeleteEntityType({ entityTypeFQN, entityTypeId });
     }
   }
 
