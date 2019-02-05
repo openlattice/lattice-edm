@@ -342,7 +342,7 @@ export default class InlineEditableControl extends React.Component<Props, State>
             onChange={this.handleOnChange}
             onFocus={this.moveCursorToEndOfText}
             onKeyDown={this.handleOnKeyDown}
-            innerRef={(element) => {
+            ref={(element) => {
               this.control = element;
             }} />
       );
@@ -353,7 +353,7 @@ export default class InlineEditableControl extends React.Component<Props, State>
           className="control"
           styleMap={STYLE_MAP[size]}
           onClick={this.toggleEditable}
-          innerRef={(element) => {
+          ref={(element) => {
             this.control = element;
           }}>
         {
@@ -383,7 +383,7 @@ export default class InlineEditableControl extends React.Component<Props, State>
             onBlur={this.handleOnBlur}
             onChange={this.handleOnChange}
             onKeyDown={this.handleOnKeyDown}
-            innerRef={(element) => {
+            ref={(element) => {
               this.control = element;
             }} />
       );
@@ -394,7 +394,7 @@ export default class InlineEditableControl extends React.Component<Props, State>
           className="control"
           styleMap={STYLE_MAP[size]}
           onClick={this.toggleEditable}
-          innerRef={(element) => {
+          ref={(element) => {
             this.control = element;
           }}>
         {

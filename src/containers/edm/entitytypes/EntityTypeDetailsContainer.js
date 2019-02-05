@@ -18,11 +18,11 @@ import AbstractTypeFieldTitle from '../AbstractTypeFieldTitle';
 import AbstractTypeFieldType from '../AbstractTypeFieldType';
 import AbstractTypeSearchableSelect from '../../../components/controls/AbstractTypeSearchableSelect';
 import StyledButton from '../../../components/buttons/StyledButton';
+import * as EntityTypesActions from './EntityTypesActions';
 import type { IndexMap } from '../Types';
 
 const {
   addPropertyTypeToEntityType,
-  deleteEntityType,
   removePropertyTypeFromEntityType,
   reorderEntityTypePropertyTypes
 } = EntityDataModelApiActionFactory;
@@ -45,10 +45,7 @@ const AbstractTypeSearchableSelectWrapper = styled.div`
 
 type Props = {
   actions :{
-    addPropertyTypeToEntityType :RequestSequence;
-    deleteEntityType :RequestSequence;
-    removePropertyTypeFromEntityType :RequestSequence;
-    reorderEntityTypePropertyTypes :RequestSequence;
+    localDeleteEntityType :RequestSequence;
   };
   entityType :Map<*, *>;
   propertyTypes :List<Map<*, *>>;
@@ -183,8 +180,6 @@ class EntityTypeDetailsContainer extends React.Component<Props> {
       return null;
     }
 
-    console.log(entityType);
-
     const baseType :string = entityType.get('baseType', '');
 
     const keyPropertyTypeIds :OrderedSet<string> = entityType.get('key', List()).toOrderedSet();
@@ -287,26 +282,15 @@ class EntityTypeDetailsContainer extends React.Component<Props> {
   }
 }
 
-function mapStateToProps(state :Map<*, *>) :Object {
+const mapStateToProps = (state :Map<*, *>) :Object => ({
+  propertyTypes: state.getIn(['edm', 'propertyTypes', 'propertyTypes'], List()),
+  propertyTypesIndexMap: state.getIn(['edm', 'propertyTypes', 'propertyTypesIndexMap'], Map()),
+});
 
-  return {
-    propertyTypes: state.getIn(['edm', 'propertyTypes', 'propertyTypes'], List()),
-    propertyTypesIndexMap: state.getIn(['edm', 'propertyTypes', 'propertyTypesIndexMap'], Map())
-  };
-}
-
-function mapDispatchToProps(dispatch :Function) :Object {
-
-  const actions = {
-    addPropertyTypeToEntityType,
-    deleteEntityType,
-    removePropertyTypeFromEntityType,
-    reorderEntityTypePropertyTypes
-  };
-
-  return {
-    actions: bindActionCreators(actions, dispatch)
-  };
-}
+const mapDispatchToProps = (dispatch :Function) :Object => ({
+  actions: bindActionCreators({
+    localDeleteEntityType: EntityTypesActions.localDeleteEntityType,
+  }, dispatch)
+});
 
 export default connect(mapStateToProps, mapDispatchToProps)(EntityTypeDetailsContainer);

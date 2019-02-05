@@ -166,13 +166,9 @@ const mapStateToProps = (state :Map<*, *>, props :Object) :Object => {
 };
 
 const mapDispatchToProps = (dispatch :Function) :Object => ({
-  actions: bindActionCreators(
-    {
-      localDeletePropertyType: PropertyTypesActions.localDeletePropertyType,
-    },
-    dispatch
-  )
+  actions: bindActionCreators({
+    localDeletePropertyType: PropertyTypesActions.localDeletePropertyType,
+  }, dispatch)
 });
 
-// $FlowFixMe
 export default connect(mapStateToProps, mapDispatchToProps)(PropertyTypeDetailsContainer);

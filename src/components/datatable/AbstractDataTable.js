@@ -452,7 +452,7 @@ class AbstractDataTable extends React.Component<Props, State> {
                               columnWidth={this.getColumnWidth}
                               estimatedColumnSize={DEFAULT_COLUMN_MIN_WIDTH}
                               height={computedHeadGridHeight}
-                              innerRef={this.setHeadGridRef}
+                              ref={this.setHeadGridRef}
                               overscanColumnCount={DEFAULT_OVERSCAN_COLUMN_COUNT}
                               overscanRowCount={DEFAULT_OVERSCAN_ROW_COUNT}
                               rowHeight={DEFAULT_ROW_MIN_HEIGHT}
@@ -471,7 +471,7 @@ class AbstractDataTable extends React.Component<Props, State> {
                                     columnWidth={this.getColumnWidth}
                                     estimatedColumnSize={DEFAULT_COLUMN_MIN_WIDTH}
                                     height={computedBodyGridHeight}
-                                    innerRef={this.setBodyGridRef}
+                                    ref={this.setBodyGridRef}
                                     lockAxis="y"
                                     onScroll={onScroll}
                                     onSortEnd={this.onSortEnd}
@@ -488,7 +488,7 @@ class AbstractDataTable extends React.Component<Props, State> {
                                     columnWidth={this.getColumnWidth}
                                     estimatedColumnSize={DEFAULT_COLUMN_MIN_WIDTH}
                                     height={computedBodyGridHeight}
-                                    innerRef={this.setBodyGridRef}
+                                    ref={this.setBodyGridRef}
                                     onScroll={onScroll}
                                     overscanColumnCount={DEFAULT_OVERSCAN_COLUMN_COUNT}
                                     overscanRowCount={DEFAULT_OVERSCAN_ROW_COUNT}

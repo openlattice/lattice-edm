@@ -86,6 +86,8 @@ function maybeGetAbstractTypeMatchingFQN(
 ) :?Map<*, *> {
 
   const {
+    entityTypes,
+    entityTypesIndexMap,
     propertyTypes,
     propertyTypesIndexMap,
     workingAbstractTypeType,
@@ -98,7 +100,12 @@ function maybeGetAbstractTypeMatchingFQN(
       break;
     }
     case AbstractTypes.EntityType: {
-      LOG.warn('not implemented');
+      if (FullyQualifiedName.isValid(abstractTypeFQN)) {
+        abstractTypeIndex = entityTypesIndexMap.get(abstractTypeFQN, -1);
+        if (abstractTypeIndex !== -1) {
+          return entityTypes.get(abstractTypeIndex, Map());
+        }
+      }
       break;
     }
     case AbstractTypes.PropertyType: {
@@ -136,7 +143,8 @@ function maybeGetNewlyCreatedAbstractTypeFQN(
       break;
     }
     case AbstractTypes.EntityType: {
-      LOG.warn('not implemented');
+      prevFQN = prevProps.newlyCreatedEntityTypeFQN;
+      nextFQN = nextProps.newlyCreatedEntityTypeFQN;
       break;
     }
     case AbstractTypes.PropertyType: {

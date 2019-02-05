@@ -9,6 +9,7 @@ import { List, Map } from 'immutable';
 import { Models } from 'lattice';
 import { AuthUtils } from 'lattice-auth';
 import { connect } from 'react-redux';
+import type { FQN } from 'lattice';
 
 import AbstractTypes from '../../utils/AbstractTypes';
 import AbstractTypeDataTable from '../../components/datatable/AbstractTypeDataTable';
@@ -350,10 +351,10 @@ const mapStateToProps = (state :Map<*, *>) :{} => ({
   associationTypes: state.getIn(['edm', 'associationTypes', 'associationTypes']),
   associationTypesById: state.getIn(['edm', 'associationTypes', 'associationTypesById']),
   entityTypes: state.getIn(['edm', 'entityTypes', 'entityTypes']),
-  entityTypesById: state.getIn(['edm', 'entityTypes', 'entityTypesById']),
+  entityTypesIndexMap: state.getIn(['edm', 'entityTypes', 'entityTypesIndexMap']),
   isFetchingEntityDataModel: state.getIn(['edm', 'isFetchingEntityDataModel']),
   newlyCreatedAssociationTypeId: state.getIn(['edm', 'associationTypes', 'newlyCreatedAssociationTypeId']),
-  newlyCreatedEntityTypeId: state.getIn(['edm', 'entityTypes', 'newlyCreatedEntityTypeId']),
+  newlyCreatedEntityTypeFQN: state.getIn(['edm', 'entityTypes', 'newlyCreatedEntityTypeFQN']),
   newlyCreatedPropertyTypeFQN: state.getIn(['edm', 'propertyTypes', 'newlyCreatedPropertyTypeFQN']),
   propertyTypes: state.getIn(['edm', 'propertyTypes', 'propertyTypes']),
   propertyTypesIndexMap: state.getIn(['edm', 'propertyTypes', 'propertyTypesIndexMap']),
@@ -361,5 +362,4 @@ const mapStateToProps = (state :Map<*, *>) :{} => ({
   schemasByFqn: state.getIn(['edm', 'schemas', 'schemasByFqn']),
 });
 
-// $FlowFixMe
 export default connect(mapStateToProps)(AbstractTypeOverviewContainer);

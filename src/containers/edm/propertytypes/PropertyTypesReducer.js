@@ -10,7 +10,7 @@ import {
   fromJS,
   has,
 } from 'immutable';
-import { Models, Types } from 'lattice';
+import { Models } from 'lattice';
 import { EntityDataModelApiActions } from 'lattice-sagas';
 import type { FQN, PropertyTypeObject } from 'lattice';
 
@@ -37,10 +37,6 @@ const {
   PropertyType,
   PropertyTypeBuilder,
 } = Models;
-
-const {
-  ActionTypes,
-} = Types;
 
 const INITIAL_STATE :Map<*, *> = fromJS({
   [LOCAL_CREATE_PROPERTY_TYPE]: { error: false },
@@ -283,7 +279,7 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
         SUCCESS: () => {
 
           const seqAction :SequenceAction = action;
-          const responsePropertyTypes :Object[] = seqAction.value.propertyTypes;
+          const responsePropertyTypes :PropertyTypeObject[] = seqAction.value.propertyTypes;
           if (!responsePropertyTypes || responsePropertyTypes.length === 0) {
             LOG.error('getEntityDataModel() - no PropertyTypes available', responsePropertyTypes);
             return state;
@@ -292,9 +288,9 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
           const propertyTypes :List<Map<*, *>> = List().asMutable();
           const propertyTypesIndexMap :IndexMap = Map().asMutable();
 
-          responsePropertyTypes.forEach((pt :Object, index :number) => {
+          responsePropertyTypes.forEach((pt :PropertyTypeObject, index :number) => {
             try {
-              const propertyTypeId :UUID = pt.id;
+              const propertyTypeId :?UUID = pt.id;
               const propertyTypeFQN :FQN = new FullyQualifiedName(pt.type);
               const propertyType = new PropertyTypeBuilder()
                 .setId(propertyTypeId)

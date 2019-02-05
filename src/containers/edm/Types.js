@@ -3,6 +3,7 @@
  */
 
 import { List, Map } from 'immutable';
+import type { FQN } from 'lattice';
 
 import type { AbstractType } from '../../utils/AbstractTypes';
 
@@ -12,10 +13,10 @@ type AbstractTypeOverviewContainerProps = {
   associationTypes :List<Map<*, *>>;
   associationTypesById :Map<string, number>;
   entityTypes :List<Map<*, *>>;
-  entityTypesById :Map<string, number>;
+  entityTypesIndexMap :IndexMap;
   isFetchingEntityDataModel :boolean;
   newlyCreatedAssociationTypeId :UUID; // eslint-disable-line react/no-unused-prop-types
-  newlyCreatedEntityTypeId :UUID; // eslint-disable-line react/no-unused-prop-types
+  newlyCreatedEntityTypeFQN :FQN; // eslint-disable-line react/no-unused-prop-types
   newlyCreatedPropertyTypeFQN :FQN; // eslint-disable-line react/no-unused-prop-types
   propertyTypes :List<Map<*, *>>;
   propertyTypesIndexMap :IndexMap;
@@ -30,6 +31,12 @@ type AbstractTypeOverviewContainerState = {
   showCreateNewAbstractTypeCard :boolean;
 };
 
+type UpdateEntityTypeMeta = {
+  entityTypeFQN :FQN;
+  entityTypeId :?UUID;
+  metadata :Object;
+};
+
 type UpdatePropertyTypeMeta = {
   metadata :Object;
   propertyTypeFQN :FQN;
@@ -40,5 +47,6 @@ export type {
   AbstractTypeOverviewContainerProps,
   AbstractTypeOverviewContainerState,
   IndexMap,
+  UpdateEntityTypeMeta,
   UpdatePropertyTypeMeta,
 };

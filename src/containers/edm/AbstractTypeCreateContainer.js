@@ -10,6 +10,7 @@ import { Models, Types } from 'lattice';
 import { EntityDataModelApiActionFactory } from 'lattice-sagas';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
+import type { AnalyzerType, FQN } from 'lattice';
 
 import AbstractTypes from '../../utils/AbstractTypes';
 import AbstractTypeDataTable from '../../components/datatable/AbstractTypeDataTable';
@@ -17,14 +18,13 @@ import AbstractTypeSearchableSelect from '../../components/controls/AbstractType
 import InlineEditableControl from '../../components/controls/InlineEditableControl';
 import StyledButton from '../../components/buttons/StyledButton';
 import StyledCard from '../../components/cards/StyledCard';
+import * as EntityTypesActions from './entitytypes/EntityTypesActions';
 import * as PropertyTypesActions from './propertytypes/PropertyTypesActions';
 import { EDM_PRIMITIVE_TYPES } from '../../utils/EdmPrimitiveTypes';
-
 import type { AbstractType } from '../../utils/AbstractTypes';
 
 const {
   createAssociationType,
-  createEntityType,
   createSchema
 } = EntityDataModelApiActionFactory;
 
@@ -129,8 +129,8 @@ const PropertyTypesSection = styled.section`
 type Props = {
   actions :{
     createAssociationType :RequestSequence;
-    createEntityType :RequestSequence;
     createSchema :RequestSequence;
+    localCreateEntityType :RequestSequence;
     localCreatePropertyType :RequestSequence;
   };
   entityTypes :List<Map<*, *>>;
@@ -159,10 +159,6 @@ type State = {
 };
 
 class AbstractTypeCreateContainer extends React.Component<Props, State> {
-
-  static defaultProps = {
-    workingAbstractTypeType: AbstractTypes.PropertyType,
-  }
 
   constructor(props :Props) {
 
@@ -256,7 +252,7 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
     }
     else if (workingAbstractTypeType === AbstractTypes.PropertyType) {
 
-      const analyzer :string = (datatypeValue === 'String' && phoneticSearchesValue)
+      const analyzer :AnalyzerType = (datatypeValue === 'String' && phoneticSearchesValue)
         ? AnalyzerTypes.METAPHONE
         : AnalyzerTypes.STANDARD;
 
@@ -293,7 +289,7 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
           .setCategory(SecurableTypes.EntityType)
           .build();
 
-        actions.createEntityType(newEntityType);
+        actions.localCreateEntityType(newEntityType);
       }
       else if (workingAbstractTypeType === AbstractTypes.AssociationType) {
 
@@ -327,42 +323,42 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
     }
   }
 
-  addToSelectedDestinationEntityTypes = (selectedEntityTypeId :string) => {
+  addToSelectedDestinationEntityTypes = (selectedEntityTypeFQN :FQN) => {
 
     const { entityTypes } = this.props;
     const { selectedDestinationEntityTypes } = this.state;
 
     const selectedEntityType :Map<*, *> = entityTypes.find((entityType :Map<*, *>) => (
-      entityType.get('id', '') === selectedEntityTypeId
+      FullyQualifiedName.toString(entityType.get('type', Map())) === selectedEntityTypeFQN.toString()
     ));
 
     this.setState({
-      selectedDestinationEntityTypes: selectedDestinationEntityTypes.add(selectedEntityType)
+      selectedDestinationEntityTypes: selectedDestinationEntityTypes.add(selectedEntityType),
     });
   }
 
-  addToSelectedPrimaryKeyPropertyTypes = (selectedPropertyTypeId :string) => {
+  addToSelectedPrimaryKeyPropertyTypes = (selectedPropertyTypeFQN :FQN) => {
 
     const { propertyTypes } = this.props;
     const { selectedPrimaryKeyPropertyTypes, selectedPropertyTypes } = this.state;
 
     const selectedPropertyType :Map<*, *> = propertyTypes.find((propertyType :Map<*, *>) => (
-      propertyType.get('id', '') === selectedPropertyTypeId
+      FullyQualifiedName.toString(propertyType.get('type', Map())) === selectedPropertyTypeFQN.toString()
     ));
 
     this.setState({
       selectedPrimaryKeyPropertyTypes: selectedPrimaryKeyPropertyTypes.add(selectedPropertyType),
-      selectedPropertyTypes: selectedPropertyTypes.subtract(selectedPrimaryKeyPropertyTypes)
+      selectedPropertyTypes: selectedPropertyTypes.subtract(selectedPrimaryKeyPropertyTypes),
     });
   }
 
-  addToSelectedPropertyTypes = (selectedPropertyTypeId :string) => {
+  addToSelectedPropertyTypes = (selectedPropertyTypeFQN :FQN) => {
 
     const { propertyTypes } = this.props;
     const { selectedPrimaryKeyPropertyTypes, selectedPropertyTypes } = this.state;
 
     const selectedPropertyType :Map<*, *> = propertyTypes.find((propertyType :Map<*, *>) => (
-      propertyType.get('id', '') === selectedPropertyTypeId
+      FullyQualifiedName.toString(propertyType.get('type', Map())) === selectedPropertyTypeFQN.toString()
     ));
 
     if (selectedPrimaryKeyPropertyTypes.contains(selectedPropertyType)) {
@@ -370,90 +366,98 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
     }
 
     this.setState({
-      selectedPropertyTypes: selectedPropertyTypes.add(selectedPropertyType)
+      selectedPropertyTypes: selectedPropertyTypes.add(selectedPropertyType),
     });
   }
 
-  addToSelectedSourceEntityTypes = (selectedEntityTypeId :string) => {
+  addToSelectedSourceEntityTypes = (selectedEntityTypeFQN :FQN) => {
 
     const { entityTypes } = this.props;
     const { selectedSourceEntityTypes } = this.state;
 
     const selectedEntityType :Map<*, *> = entityTypes.find((entityType :Map<*, *>) => (
-      entityType.get('id', '') === selectedEntityTypeId
+      FullyQualifiedName.toString(entityType.get('type', Map())) === selectedEntityTypeFQN.toString()
     ));
 
     this.setState({
-      selectedSourceEntityTypes: selectedSourceEntityTypes.add(selectedEntityType)
+      selectedSourceEntityTypes: selectedSourceEntityTypes.add(selectedEntityType),
     });
   }
 
-  removeFromSelectedDestinationEntityTypes = (selectedEntityTypeId :string) => {
+  removeFromSelectedDestinationEntityTypes = (selectedEntityTypeFQN :FQN) => {
 
     const { selectedDestinationEntityTypes } = this.state;
 
     const updatedSelectedDestinationEntityTypes :Set<Map<*, *>> = selectedDestinationEntityTypes
-      .filterNot((entityType :Map<*, *>) => entityType.get('id', '') === selectedEntityTypeId);
+      .filterNot((entityType :Map<*, *>) => (
+        FullyQualifiedName.toString(entityType.get('type', Map())) === selectedEntityTypeFQN.toString()
+      ));
 
     this.setState({
-      selectedDestinationEntityTypes: updatedSelectedDestinationEntityTypes
+      selectedDestinationEntityTypes: updatedSelectedDestinationEntityTypes,
     });
   }
 
-  removeFromSelectedPrimaryKeyPropertyTypes = (selectedPropertyTypeId :string) => {
+  removeFromSelectedPrimaryKeyPropertyTypes = (selectedPropertyTypeFQN :FQN) => {
 
     const { selectedPrimaryKeyPropertyTypes } = this.state;
 
     const updatedSelectedPrimaryKeyPropertyTypes :Set<Map<*, *>> = selectedPrimaryKeyPropertyTypes
-      .filterNot((propertyType :Map<*, *>) => propertyType.get('id', '') === selectedPropertyTypeId);
+      .filterNot((propertyType :Map<*, *>) => (
+        FullyQualifiedName.toString(propertyType.get('type', Map())) === selectedPropertyTypeFQN.toString()
+      ));
 
     this.setState({
-      selectedPrimaryKeyPropertyTypes: updatedSelectedPrimaryKeyPropertyTypes
+      selectedPrimaryKeyPropertyTypes: updatedSelectedPrimaryKeyPropertyTypes,
     });
   }
 
-  removeFromSelectedPropertyTypes = (selectedPropertyTypeId :string) => {
+  removeFromSelectedPropertyTypes = (selectedPropertyTypeFQN :FQN) => {
 
     const { selectedPropertyTypes } = this.state;
 
     const updatedSelectedPropertyTypes :Set<Map<*, *>> = selectedPropertyTypes
-      .filterNot((propertyType :Map<*, *>) => propertyType.get('id', '') === selectedPropertyTypeId);
+      .filterNot((propertyType :Map<*, *>) => (
+        FullyQualifiedName.toString(propertyType.get('type', Map())) === selectedPropertyTypeFQN.toString()
+      ));
 
     this.setState({
-      selectedPropertyTypes: updatedSelectedPropertyTypes
+      selectedPropertyTypes: updatedSelectedPropertyTypes,
     });
   }
 
-  removeFromSelectedSourceEntityTypes = (selectedEntityTypeId :string) => {
+  removeFromSelectedSourceEntityTypes = (selectedEntityTypeFQN :FQN) => {
 
     const { selectedSourceEntityTypes } = this.state;
 
     const updatedSelectedSourceEntityTypes :Set<Map<*, *>> = selectedSourceEntityTypes
-      .filterNot((entityType :Map<*, *>) => entityType.get('id', '') === selectedEntityTypeId);
+      .filterNot((entityType :Map<*, *>) => (
+        FullyQualifiedName.toString(entityType.get('type', Map())) === selectedEntityTypeFQN.toString()
+      ));
 
     this.setState({
-      selectedSourceEntityTypes: updatedSelectedSourceEntityTypes
+      selectedSourceEntityTypes: updatedSelectedSourceEntityTypes,
     });
   }
 
   handleOnChangeBidi = (event :SyntheticInputEvent<*>) => {
 
     this.setState({
-      bidiValue: event.target.id === BIDI_YES_RADIO_ID
+      bidiValue: event.target.id === BIDI_YES_RADIO_ID,
     });
   }
 
   handleOnChangeDataType = (event :SyntheticInputEvent<*>) => {
 
     this.setState({
-      datatypeValue: event.target.value || ''
+      datatypeValue: event.target.value || '',
     });
   }
 
   handleOnChangeDescription = (description :string) => {
 
     this.setState({
-      descriptionValue: description || ''
+      descriptionValue: description || '',
     });
   }
 
@@ -461,7 +465,7 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
 
     this.setState({
       nameValue: name || '',
-      isInEditModeName: false
+      isInEditModeName: false,
     });
   }
 
@@ -469,21 +473,21 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
 
     this.setState({
       namespaceValue: namespace || '',
-      isInEditModeNamespace: false
+      isInEditModeNamespace: false,
     });
   }
 
   handleOnChangePhoneticSearches = (event :SyntheticInputEvent<*>) => {
 
     this.setState({
-      phoneticSearchesValue: event.target.checked || false
+      phoneticSearchesValue: event.target.checked || false,
     });
   }
 
   handleOnChangePii = (event :SyntheticInputEvent<*>) => {
 
     this.setState({
-      piiValue: event.target.id === PII_YES_RADIO_ID
+      piiValue: event.target.id === PII_YES_RADIO_ID,
     });
   }
 
@@ -491,28 +495,28 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
 
     this.setState({
       titleValue: title || '',
-      isInEditModeTitle: false
+      isInEditModeTitle: false,
     });
   }
 
   handleOnEditToggleName = (editable :boolean) => {
 
     this.setState({
-      isInEditModeName: editable
+      isInEditModeName: editable,
     });
   }
 
   handleOnEditToggleNamespace = (editable :boolean) => {
 
     this.setState({
-      isInEditModeNamespace: editable
+      isInEditModeNamespace: editable,
     });
   }
 
   handleOnEditToggleTitle = (editable :boolean) => {
 
     this.setState({
-      isInEditModeTitle: editable
+      isInEditModeTitle: editable,
     });
   }
 
@@ -548,7 +552,7 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
             'text',
             'Title',
             this.handleOnChangeTitle,
-            this.handleOnEditToggleTitle
+            this.handleOnEditToggleTitle,
           )
         }
       </section>
@@ -571,7 +575,7 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
             'textarea',
             'Description',
             this.handleOnChangeDescription,
-            () => {}
+            () => {},
           )
         }
       </section>
@@ -747,7 +751,7 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
             availablePropertyTypes.toList(),
             AbstractTypes.PropertyType,
             'Available PropertyTypes...',
-            this.addToSelectedPrimaryKeyPropertyTypes
+            this.addToSelectedPrimaryKeyPropertyTypes,
           )
         }
       </PrimaryKeyPropertyTypesSection>
@@ -836,7 +840,7 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
             entityTypes,
             AbstractTypes.EntityType,
             'Available EntityTypes...',
-            this.addToSelectedSourceEntityTypes
+            this.addToSelectedSourceEntityTypes,
           )
         }
       </section>
@@ -878,7 +882,7 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
             entityTypes,
             AbstractTypes.EntityType,
             'Available EntityTypes...',
-            this.addToSelectedDestinationEntityTypes
+            this.addToSelectedDestinationEntityTypes,
           )
         }
       </section>
@@ -921,7 +925,7 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
               'text',
               'Namespace',
               this.handleOnChangeNamespace,
-              this.handleOnEditToggleNamespace
+              this.handleOnEditToggleNamespace,
             )
           }
         </section>
@@ -931,7 +935,7 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
               'text',
               'Name',
               this.handleOnChangeName,
-              this.handleOnEditToggleName
+              this.handleOnEditToggleName,
             )
           }
         </section>
@@ -974,16 +978,12 @@ const mapStateToProps = (state :Map<*, *>) :{} => ({
 });
 
 const mapDispatchToProps = (dispatch :Function) :{} => ({
-  actions: bindActionCreators(
-    {
-      createAssociationType,
-      createEntityType,
-      createSchema,
-      localCreatePropertyType: PropertyTypesActions.localCreatePropertyType,
-    },
-    dispatch
-  )
+  actions: bindActionCreators({
+    createAssociationType,
+    createSchema,
+    localCreateEntityType: EntityTypesActions.localCreateEntityType,
+    localCreatePropertyType: PropertyTypesActions.localCreatePropertyType,
+  }, dispatch)
 });
 
-// $FlowFixMe
 export default connect(mapStateToProps, mapDispatchToProps)(AbstractTypeCreateContainer);

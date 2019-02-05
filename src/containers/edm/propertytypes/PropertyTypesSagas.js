@@ -10,10 +10,16 @@ import {
   select,
   takeEvery,
 } from 'redux-saga/effects';
+import type { FQN } from 'lattice';
 
 import Logger from '../../../utils/Logger';
 import { isValidUUID } from '../../../utils/ValidationUtils';
-import { ERR_ACTION_VALUE_NOT_DEFINED, ERR_WORKER_SAGA } from '../../../utils/Errors';
+import {
+  ERR_ACTION_VALUE_NOT_DEFINED,
+  ERR_FQN_EXISTS,
+  ERR_PT_DOES_NOT_EXIST,
+  ERR_WORKER_SAGA,
+} from '../../../utils/Errors';
 import {
   LOCAL_CREATE_PROPERTY_TYPE,
   LOCAL_DELETE_PROPERTY_TYPE,
@@ -22,7 +28,6 @@ import {
   localDeletePropertyType,
   localUpdatePropertyTypeMeta,
 } from './PropertyTypesActions';
-
 import type { IndexMap, UpdatePropertyTypeMeta } from '../Types';
 
 const LOG = new Logger('PropertyTypesSagas');
@@ -42,9 +47,6 @@ const {
 const {
   PropertyType,
 } = Models;
-
-const ERR_FQN_EXISTS :string = 'FQN already exists';
-const ERR_PT_DOES_NOT_EXIST :string = 'PropertyType does not exist';
 
 /*
  *
@@ -78,7 +80,7 @@ function* localCreatePropertyTypeWorker(seqAction :SequenceAction) :Generator<*,
       state => state.getIn(['app', 'isOnline'])
     );
 
-    let newPropertyTypeId :UUID = '';
+    let newPropertyTypeId :?UUID = '';
     if (isOnline) {
       const response :Object = yield call(createPropertyTypeWorker, createPropertyType(newPropertyType));
       if (response.error) throw response.error;

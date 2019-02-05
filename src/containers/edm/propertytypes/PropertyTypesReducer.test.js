@@ -4,11 +4,8 @@ import { Models } from 'lattice';
 import { EntityDataModelApiActions } from 'lattice-sagas';
 
 import reducer from './PropertyTypesReducer';
+import { MOCK_PROPERTY_TYPE } from '../../../utils/MockDataModels';
 import { randomStringId } from '../../../utils/Utils';
-import {
-  MOCK_PROPERTY_TYPE,
-  // MOCK_SCHEMA_FQN,
-} from '../../../utils/MockDataModels';
 
 import {
   LOCAL_CREATE_PROPERTY_TYPE,
@@ -124,6 +121,7 @@ describe('PropertyTypesReducer', () => {
       let state = reducer(INITIAL_STATE, localCreatePropertyType.request(id, MOCK_PROPERTY_TYPE));
       state = reducer(state, localCreatePropertyType.success(id, MOCK_PROPERTY_TYPE.id));
       state = reducer(state, localCreatePropertyType.finally(id));
+
       expect(state.hasIn([LOCAL_CREATE_PROPERTY_TYPE, id])).toEqual(false);
       expect(state.get('isCreatingNewPropertyType')).toEqual(false);
       expect(state.get('newlyCreatedPropertyTypeFQN')).toEqual(MOCK_PROPERTY_TYPE.type);
@@ -226,14 +224,16 @@ describe('PropertyTypesReducer', () => {
       test('should not mutate state if attempting to delete a non-existent PropertyType', () => {
 
         const initialState = INITIAL_STATE
-          .set('propertyTypes', fromJS([MOCK_PROPERTY_TYPE.toImmutable()]))
-          .set('propertyTypesIndexMap', fromJS({ [MOCK_PROPERTY_TYPE.id]: 0, [MOCK_PROPERTY_TYPE.type]: 0 }));
+          .setIn(['propertyTypes', 0], MOCK_PROPERTY_TYPE.toImmutable())
+          .setIn(['propertyTypesIndexMap', MOCK_PROPERTY_TYPE.id], 0)
+          .setIn(['propertyTypesIndexMap', MOCK_PROPERTY_TYPE.type], 0);
 
         const { id } = localDeletePropertyType();
         const propertyTypeFQN = new FullyQualifiedName(randomStringId(), randomStringId());
         const stateAfterRequest = reducer(initialState, localDeletePropertyType.request(id, { propertyTypeFQN }));
         const stateAfterSuccess = reducer(stateAfterRequest, localDeletePropertyType.success(id));
-        expect(stateAfterSuccess.toJS()).toEqual(stateAfterRequest.toJS());
+        expect(stateAfterSuccess.hashCode()).toEqual(stateAfterRequest.hashCode());
+        expect(stateAfterSuccess.equals(stateAfterRequest)).toEqual(true);
       });
 
     });
@@ -241,8 +241,9 @@ describe('PropertyTypesReducer', () => {
     test(localDeletePropertyType.FAILURE, () => {
 
       const initialState = INITIAL_STATE
-        .set('propertyTypes', fromJS([MOCK_PROPERTY_TYPE.toImmutable()]))
-        .set('propertyTypesIndexMap', fromJS({ [MOCK_PROPERTY_TYPE.id]: 0, [MOCK_PROPERTY_TYPE.type]: 0 }));
+        .setIn(['propertyTypes', 0], MOCK_PROPERTY_TYPE.toImmutable())
+        .setIn(['propertyTypesIndexMap', MOCK_PROPERTY_TYPE.id], 0)
+        .setIn(['propertyTypesIndexMap', MOCK_PROPERTY_TYPE.type], 0);
 
       const { id } = localDeletePropertyType();
       const requestAction = localDeletePropertyType.request(id, { propertyTypeFQN: MOCK_PROPERTY_TYPE.type });
@@ -250,9 +251,17 @@ describe('PropertyTypesReducer', () => {
       state = reducer(state, localDeletePropertyType.failure(id));
 
       expect(state.getIn([LOCAL_DELETE_PROPERTY_TYPE, id])).toEqual(requestAction);
+      expect(state.getIn([LOCAL_DELETE_PROPERTY_TYPE, 'error'])).toEqual(true);
       expect(state.get('isDeletingPropertyType')).toEqual(true);
-      expect(state.get('propertyTypes').toJS()).toEqual(initialState.get('propertyTypes').toJS());
-      expect(state.get('propertyTypesIndexMap').toJS()).toEqual(initialState.get('propertyTypesIndexMap').toJS());
+      expect(state.get('newlyCreatedPropertyTypeFQN')).toEqual(undefined);
+
+      const expectedPropertyTypes = initialState.get('propertyTypes');
+      expect(state.get('propertyTypes').hashCode()).toEqual(expectedPropertyTypes.hashCode());
+      expect(state.get('propertyTypes').equals(expectedPropertyTypes)).toEqual(true);
+
+      const expectedPropertyTypesIndexMap = initialState.get('propertyTypesIndexMap');
+      expect(state.get('propertyTypesIndexMap').hashCode()).toEqual(expectedPropertyTypesIndexMap.hashCode());
+      expect(state.get('propertyTypesIndexMap').equals(expectedPropertyTypesIndexMap)).toEqual(true);
     });
 
     test(localDeletePropertyType.FINALLY, () => {
@@ -331,9 +340,7 @@ describe('PropertyTypesReducer', () => {
         expect(state.get('propertyTypes').hashCode()).toEqual(expectedPropertyTypes.hashCode());
         expect(state.get('propertyTypes').equals(expectedPropertyTypes)).toEqual(true);
 
-        const expectedPropertyTypesIndexMap = Map()
-          .set(MOCK_PROPERTY_TYPE.id, 0)
-          .set(MOCK_PROPERTY_TYPE.type, 0);
+        const expectedPropertyTypesIndexMap = Map().set(MOCK_PROPERTY_TYPE.id, 0).set(MOCK_PROPERTY_TYPE.type, 0);
         expect(state.get('propertyTypesIndexMap').hashCode()).toEqual(expectedPropertyTypesIndexMap.hashCode());
         expect(state.get('propertyTypesIndexMap').equals(expectedPropertyTypesIndexMap)).toEqual(true);
         state.get('propertyTypesIndexMap')
