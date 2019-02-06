@@ -42,10 +42,6 @@ const INITIAL_STATE :Map<*, *> = fromJS({
   [LOCAL_CREATE_PROPERTY_TYPE]: { error: false },
   [LOCAL_DELETE_PROPERTY_TYPE]: { error: false },
   [LOCAL_UPDATE_PROPERTY_TYPE_META]: { error: false },
-  isCreatingNewPropertyType: false,
-  isDeletingPropertyType: false,
-  isGettingPropertyTypes: false,
-  isUpdatingPropertyTypeMeta: false,
   newlyCreatedPropertyTypeFQN: undefined,
   propertyTypes: List(),
   propertyTypesIndexMap: Map(),
@@ -60,7 +56,6 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
         REQUEST: () => {
           const seqAction :SequenceAction = action;
           return state
-            .set('isCreatingNewPropertyType', true)
             .set('newlyCreatedPropertyTypeFQN', undefined)
             .setIn([LOCAL_CREATE_PROPERTY_TYPE, seqAction.id], seqAction);
         },
@@ -122,11 +117,7 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
         },
         FINALLY: () => {
           const seqAction :SequenceAction = action;
-          return state
-            .set('isCreatingNewPropertyType', false)
-            // TODO: how do we clear?
-            // .set('newlyCreatedPropertyTypeFQN', undefined)
-            .deleteIn([LOCAL_CREATE_PROPERTY_TYPE, seqAction.id]);
+          return state.deleteIn([LOCAL_CREATE_PROPERTY_TYPE, seqAction.id]);
         },
       });
     }
@@ -135,9 +126,7 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
       return localDeletePropertyType.reducer(state, action, {
         REQUEST: () => {
           const seqAction :SequenceAction = action;
-          return state
-            .set('isDeletingPropertyType', true)
-            .setIn([LOCAL_DELETE_PROPERTY_TYPE, seqAction.id], seqAction);
+          return state.setIn([LOCAL_DELETE_PROPERTY_TYPE, seqAction.id], seqAction);
         },
         SUCCESS: () => {
 
@@ -186,9 +175,7 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
         },
         FINALLY: () => {
           const seqAction :SequenceAction = action;
-          return state
-            .set('isDeletingPropertyType', false)
-            .deleteIn([LOCAL_DELETE_PROPERTY_TYPE, seqAction.id]);
+          return state.deleteIn([LOCAL_DELETE_PROPERTY_TYPE, seqAction.id]);
         },
       });
     }
@@ -197,9 +184,7 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
       return localUpdatePropertyTypeMeta.reducer(state, action, {
         REQUEST: () => {
           const seqAction :SequenceAction = action;
-          return state
-            .set('isUpdatingPropertyTypeMeta', true)
-            .setIn([LOCAL_UPDATE_PROPERTY_TYPE_META, seqAction.id], seqAction);
+          return state.setIn([LOCAL_UPDATE_PROPERTY_TYPE_META, seqAction.id], seqAction);
         },
         SUCCESS: () => {
 
@@ -264,18 +249,13 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
         },
         FINALLY: () => {
           const seqAction :SequenceAction = action;
-          return state
-            .set('isUpdatingPropertyTypeMeta', false)
-            .deleteIn([LOCAL_UPDATE_PROPERTY_TYPE_META, seqAction.id]);
+          return state.deleteIn([LOCAL_UPDATE_PROPERTY_TYPE_META, seqAction.id]);
         },
       });
     }
 
     case getEntityDataModel.case(action.type): {
       return getEntityDataModel.reducer(state, action, {
-        REQUEST: () => {
-          return state.set('isGettingPropertyTypes', true);
-        },
         SUCCESS: () => {
 
           const seqAction :SequenceAction = action;
@@ -323,9 +303,6 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
             .set('propertyTypes', List())
             .set('propertyTypesIndexMap', Map());
         },
-        FINALLY: () => {
-          return state.set('isGettingPropertyTypes', false);
-        }
       });
     }
 

@@ -38,13 +38,9 @@ describe('EntityTypesReducer', () => {
       [LOCAL_CREATE_ENTITY_TYPE]: { error: false },
       [LOCAL_DELETE_ENTITY_TYPE]: { error: false },
       [LOCAL_UPDATE_ENTITY_TYPE_META]: { error: false },
-      isCreatingNewEntityType: false,
-      isDeletingEntityType: false,
-      isGettingEntityTypes: false,
-      isUpdatingEntityTypeMeta: false,
-      newlyCreatedEntityTypeFQN: undefined,
       entityTypes: [],
       entityTypesIndexMap: {},
+      newlyCreatedEntityTypeFQN: undefined,
     });
   });
 
@@ -164,7 +160,6 @@ describe('EntityTypesReducer', () => {
       const state = reducer(INITIAL_STATE, requestAction);
 
       expect(state.getIn([LOCAL_CREATE_ENTITY_TYPE, id])).toEqual(requestAction);
-      expect(state.get('isCreatingNewEntityType')).toEqual(true);
       expect(state.get('newlyCreatedEntityTypeFQN')).toEqual(undefined);
     });
 
@@ -176,7 +171,6 @@ describe('EntityTypesReducer', () => {
       state = reducer(state, localCreateEntityType.success(id, MOCK_ENTITY_TYPE.id));
 
       expect(state.getIn([LOCAL_CREATE_ENTITY_TYPE, id])).toEqual(requestAction);
-      expect(state.get('isCreatingNewEntityType')).toEqual(true);
       expect(state.get('newlyCreatedEntityTypeFQN')).toEqual(MOCK_ENTITY_TYPE.type);
       expect(state.get('newlyCreatedEntityTypeFQN')).toBeInstanceOf(FullyQualifiedName);
 
@@ -204,7 +198,6 @@ describe('EntityTypesReducer', () => {
 
       expect(state.getIn([LOCAL_CREATE_ENTITY_TYPE, id])).toEqual(requestAction);
       expect(state.getIn([LOCAL_CREATE_ENTITY_TYPE, 'error'])).toEqual(true);
-      expect(state.get('isCreatingNewEntityType')).toEqual(true);
       expect(state.get('newlyCreatedEntityTypeFQN')).toEqual(undefined);
 
       const expectedEntityTypes = List();
@@ -224,7 +217,6 @@ describe('EntityTypesReducer', () => {
       state = reducer(state, localCreateEntityType.finally(id));
 
       expect(state.hasIn([LOCAL_CREATE_ENTITY_TYPE, id])).toEqual(false);
-      expect(state.get('isCreatingNewEntityType')).toEqual(false);
       expect(state.get('newlyCreatedEntityTypeFQN')).toEqual(MOCK_ENTITY_TYPE.type);
       expect(state.get('newlyCreatedEntityTypeFQN')).toBeInstanceOf(FullyQualifiedName);
     });
@@ -239,7 +231,6 @@ describe('EntityTypesReducer', () => {
       const requestAction = localDeleteEntityType.request(id, { entityTypeFQN: MOCK_ENTITY_TYPE.type });
       const state = reducer(INITIAL_STATE, requestAction);
       expect(state.getIn([LOCAL_DELETE_ENTITY_TYPE, id])).toEqual(requestAction);
-      expect(state.get('isDeletingEntityType')).toEqual(true);
     });
 
     describe(localDeleteEntityType.SUCCESS, () => {
@@ -257,7 +248,6 @@ describe('EntityTypesReducer', () => {
         state = reducer(state, localDeleteEntityType.success(id));
 
         expect(state.getIn([LOCAL_DELETE_ENTITY_TYPE, id])).toEqual(requestAction);
-        expect(state.get('isDeletingEntityType')).toEqual(true);
         expect(state.get('entityTypes').toJS()).toEqual([]);
         expect(state.get('entityTypesIndexMap').toJS()).toEqual({});
       });
@@ -307,7 +297,6 @@ describe('EntityTypesReducer', () => {
         let state = reducer(initialState, requestAction);
         state = reducer(state, localDeleteEntityType.success(id));
         expect(state.getIn([LOCAL_DELETE_ENTITY_TYPE, id])).toEqual(requestAction);
-        expect(state.get('isDeletingEntityType')).toEqual(true);
 
         const expectedEntityTypes = List()
           .push(mockEntityType0.toImmutable())
@@ -359,7 +348,6 @@ describe('EntityTypesReducer', () => {
 
       expect(state.getIn([LOCAL_DELETE_ENTITY_TYPE, id])).toEqual(requestAction);
       expect(state.getIn([LOCAL_DELETE_ENTITY_TYPE, 'error'])).toEqual(true);
-      expect(state.get('isDeletingEntityType')).toEqual(true);
       expect(state.get('newlyCreatedEntityTypeFQN')).toEqual(undefined);
 
       const expectedEntityTypes = initialState.get('entityTypes');
@@ -379,7 +367,6 @@ describe('EntityTypesReducer', () => {
       state = reducer(state, localDeleteEntityType.success(id));
       state = reducer(state, localDeleteEntityType.finally(id));
       expect(state.hasIn([LOCAL_DELETE_ENTITY_TYPE, id])).toEqual(false);
-      expect(state.get('isDeletingEntityType')).toEqual(false);
     });
 
   });
@@ -405,7 +392,6 @@ describe('EntityTypesReducer', () => {
         const requestAction = localUpdateEntityTypeMeta.request(id, mockActionValue);
         const state = reducer(initialState, requestAction);
         expect(state.getIn([LOCAL_UPDATE_ENTITY_TYPE_META, id])).toEqual(requestAction);
-        expect(state.get('isUpdatingEntityTypeMeta')).toEqual(true);
       });
 
       test(localUpdateEntityTypeMeta.SUCCESS, () => {
@@ -415,7 +401,6 @@ describe('EntityTypesReducer', () => {
         let state = reducer(initialState, requestAction);
         state = reducer(state, localUpdateEntityTypeMeta.success(id));
         expect(state.getIn([LOCAL_UPDATE_ENTITY_TYPE_META, id])).toEqual(requestAction);
-        expect(state.get('isUpdatingEntityTypeMeta')).toEqual(true);
 
         const expectedEntityTypes = List().push(
           MOCK_ENTITY_TYPE.toImmutable().set('description', mockActionValue.metadata.description)
@@ -439,7 +424,6 @@ describe('EntityTypesReducer', () => {
         let state = reducer(initialState, requestAction);
         state = reducer(state, localUpdateEntityTypeMeta.failure(id));
         expect(state.getIn([LOCAL_UPDATE_ENTITY_TYPE_META, id])).toEqual(requestAction);
-        expect(state.get('isUpdatingEntityTypeMeta')).toEqual(true);
 
         const expectedEntityTypes = List().push(MOCK_ENTITY_TYPE.toImmutable());
         expect(state.get('entityTypes').hashCode()).toEqual(expectedEntityTypes.hashCode());
@@ -461,7 +445,6 @@ describe('EntityTypesReducer', () => {
         state = reducer(state, localUpdateEntityTypeMeta.success(id));
         state = reducer(state, localUpdateEntityTypeMeta.finally(id));
         expect(state.hasIn([LOCAL_UPDATE_ENTITY_TYPE_META, id])).toEqual(false);
-        expect(state.get('isUpdatingEntityTypeMeta')).toEqual(false);
       });
 
     });
@@ -480,7 +463,6 @@ describe('EntityTypesReducer', () => {
         const requestAction = localUpdateEntityTypeMeta.request(id, mockActionValue);
         const state = reducer(initialState, requestAction);
         expect(state.getIn([LOCAL_UPDATE_ENTITY_TYPE_META, id])).toEqual(requestAction);
-        expect(state.get('isUpdatingEntityTypeMeta')).toEqual(true);
       });
 
       test(localUpdateEntityTypeMeta.SUCCESS, () => {
@@ -490,7 +472,6 @@ describe('EntityTypesReducer', () => {
         let state = reducer(initialState, requestAction);
         state = reducer(state, localUpdateEntityTypeMeta.success(id));
         expect(state.getIn([LOCAL_UPDATE_ENTITY_TYPE_META, id])).toEqual(requestAction);
-        expect(state.get('isUpdatingEntityTypeMeta')).toEqual(true);
 
         const expectedEntityTypes = List().push(
           MOCK_ENTITY_TYPE.toImmutable().set('title', mockActionValue.metadata.title)
@@ -514,7 +495,6 @@ describe('EntityTypesReducer', () => {
         let state = reducer(initialState, requestAction);
         state = reducer(state, localUpdateEntityTypeMeta.failure(id));
         expect(state.getIn([LOCAL_UPDATE_ENTITY_TYPE_META, id])).toEqual(requestAction);
-        expect(state.get('isUpdatingEntityTypeMeta')).toEqual(true);
 
         const expectedEntityTypes = List().push(MOCK_ENTITY_TYPE.toImmutable());
         expect(state.get('entityTypes').hashCode()).toEqual(expectedEntityTypes.hashCode());
@@ -536,7 +516,6 @@ describe('EntityTypesReducer', () => {
         state = reducer(state, localUpdateEntityTypeMeta.success(id));
         state = reducer(state, localUpdateEntityTypeMeta.finally(id));
         expect(state.hasIn([LOCAL_UPDATE_ENTITY_TYPE_META, id])).toEqual(false);
-        expect(state.get('isUpdatingEntityTypeMeta')).toEqual(false);
       });
 
     });
@@ -555,7 +534,6 @@ describe('EntityTypesReducer', () => {
         const requestAction = localUpdateEntityTypeMeta.request(id, mockActionValue);
         const state = reducer(initialState, requestAction);
         expect(state.getIn([LOCAL_UPDATE_ENTITY_TYPE_META, id])).toEqual(requestAction);
-        expect(state.get('isUpdatingEntityTypeMeta')).toEqual(true);
       });
 
       test(localUpdateEntityTypeMeta.SUCCESS, () => {
@@ -565,7 +543,6 @@ describe('EntityTypesReducer', () => {
         let state = reducer(initialState, requestAction);
         state = reducer(state, localUpdateEntityTypeMeta.success(id));
         expect(state.getIn([LOCAL_UPDATE_ENTITY_TYPE_META, id])).toEqual(requestAction);
-        expect(state.get('isUpdatingEntityTypeMeta')).toEqual(true);
 
         const expectedEntityTypes = List().push(
           MOCK_ENTITY_TYPE.toImmutable().set('type', fromJS(mockActionValue.metadata.type.toObject()))
@@ -589,7 +566,6 @@ describe('EntityTypesReducer', () => {
         let state = reducer(initialState, requestAction);
         state = reducer(state, localUpdateEntityTypeMeta.failure(id));
         expect(state.getIn([LOCAL_UPDATE_ENTITY_TYPE_META, id])).toEqual(requestAction);
-        expect(state.get('isUpdatingEntityTypeMeta')).toEqual(true);
 
         const expectedEntityTypes = List().push(MOCK_ENTITY_TYPE.toImmutable());
         expect(state.get('entityTypes').hashCode()).toEqual(expectedEntityTypes.hashCode());
@@ -611,7 +587,6 @@ describe('EntityTypesReducer', () => {
         state = reducer(state, localUpdateEntityTypeMeta.success(id));
         state = reducer(state, localUpdateEntityTypeMeta.finally(id));
         expect(state.hasIn([LOCAL_UPDATE_ENTITY_TYPE_META, id])).toEqual(false);
-        expect(state.get('isUpdatingEntityTypeMeta')).toEqual(false);
       });
 
     });
@@ -623,8 +598,9 @@ describe('EntityTypesReducer', () => {
     test(getEntityDataModel.REQUEST, () => {
 
       const { id } = getEntityDataModel();
-      const state = reducer(INITIAL_STATE, getEntityDataModel.request(id));
-      expect(state.get('isGettingEntityTypes')).toEqual(true);
+      const stateAfterRequest = reducer(INITIAL_STATE, getEntityDataModel.request(id));
+      expect(stateAfterRequest.hashCode()).toEqual(INITIAL_STATE.hashCode());
+      expect(stateAfterRequest.equals(INITIAL_STATE)).toEqual(true);
     });
 
     // TODO: test SUCCESS with variable size result
@@ -634,7 +610,6 @@ describe('EntityTypesReducer', () => {
       const response = { entityTypes: [MOCK_ENTITY_TYPE.toObject()] };
       let state = reducer(INITIAL_STATE, getEntityDataModel.request(id));
       state = reducer(state, getEntityDataModel.success(id, response));
-      expect(state.get('isGettingEntityTypes')).toEqual(true);
 
       const expectedPropertyTypes = List().push(MOCK_ENTITY_TYPE.toImmutable());
       expect(state.get('entityTypes').hashCode()).toEqual(expectedPropertyTypes.hashCode());
@@ -654,8 +629,6 @@ describe('EntityTypesReducer', () => {
       const { id } = getEntityDataModel();
       let state = reducer(INITIAL_STATE, getEntityDataModel.request(id));
       state = reducer(state, getEntityDataModel.failure(id));
-
-      expect(state.get('isGettingEntityTypes')).toEqual(true);
       expect(state.get('entityTypes').toJS()).toEqual([]);
       expect(state.get('entityTypesIndexMap').toJS()).toEqual({});
     });
@@ -663,11 +636,10 @@ describe('EntityTypesReducer', () => {
     test(getEntityDataModel.FINALLY, () => {
 
       const { id } = getEntityDataModel();
-      let state = reducer(INITIAL_STATE, getEntityDataModel.request(id));
-      expect(state.get('isGettingEntityTypes')).toEqual(true);
-
-      state = reducer(state, getEntityDataModel.finally(id));
-      expect(state.get('isGettingEntityTypes')).toEqual(false);
+      const stateAfterRequest = reducer(INITIAL_STATE, getEntityDataModel.request(id));
+      const stateAfterFinally = reducer(stateAfterRequest, getEntityDataModel.finally(id));
+      expect(stateAfterFinally.hashCode()).toEqual(stateAfterRequest.hashCode());
+      expect(stateAfterFinally.equals(stateAfterRequest)).toEqual(true);
     });
 
   });

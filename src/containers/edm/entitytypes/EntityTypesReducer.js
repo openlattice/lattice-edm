@@ -56,10 +56,6 @@ const INITIAL_STATE :Map<*, *> = fromJS({
   [LOCAL_UPDATE_ENTITY_TYPE_META]: { error: false },
   entityTypes: List(),
   entityTypesIndexMap: Map(),
-  isCreatingNewEntityType: false,
-  isDeletingEntityType: false,
-  isGettingEntityTypes: false,
-  isUpdatingEntityTypeMeta: false,
   newlyCreatedEntityTypeFQN: undefined,
 });
 
@@ -138,7 +134,6 @@ export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, act
         REQUEST: () => {
           const seqAction :SequenceAction = action;
           return state
-            .set('isCreatingNewEntityType', true)
             .set('newlyCreatedEntityTypeFQN', undefined)
             .setIn([LOCAL_CREATE_ENTITY_TYPE, seqAction.id], seqAction);
         },
@@ -200,11 +195,7 @@ export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, act
         },
         FINALLY: () => {
           const seqAction :SequenceAction = action;
-          return state
-            .set('isCreatingNewEntityType', false)
-            // TODO: how do we clear?
-            // .set('newlyCreatedEntityTypeFQN', undefined)
-            .deleteIn([LOCAL_CREATE_ENTITY_TYPE, seqAction.id]);
+          return state.deleteIn([LOCAL_CREATE_ENTITY_TYPE, seqAction.id]);
         },
       });
     }
@@ -213,9 +204,7 @@ export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, act
       return localDeleteEntityType.reducer(state, action, {
         REQUEST: () => {
           const seqAction :SequenceAction = action;
-          return state
-            .set('isDeletingEntityType', true)
-            .setIn([LOCAL_DELETE_ENTITY_TYPE, seqAction.id], seqAction);
+          return state.setIn([LOCAL_DELETE_ENTITY_TYPE, seqAction.id], seqAction);
         },
         SUCCESS: () => {
 
@@ -262,9 +251,7 @@ export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, act
         },
         FINALLY: () => {
           const seqAction :SequenceAction = action;
-          return state
-            .set('isDeletingEntityType', false)
-            .deleteIn([LOCAL_DELETE_ENTITY_TYPE, seqAction.id]);
+          return state.deleteIn([LOCAL_DELETE_ENTITY_TYPE, seqAction.id]);
         },
       });
     }
@@ -273,9 +260,7 @@ export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, act
       return localUpdateEntityTypeMeta.reducer(state, action, {
         REQUEST: () => {
           const seqAction :SequenceAction = action;
-          return state
-            .set('isUpdatingEntityTypeMeta', true)
-            .setIn([LOCAL_UPDATE_ENTITY_TYPE_META, seqAction.id], seqAction);
+          return state.setIn([LOCAL_UPDATE_ENTITY_TYPE_META, seqAction.id], seqAction);
         },
         SUCCESS: () => {
 
@@ -339,18 +324,13 @@ export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, act
         },
         FINALLY: () => {
           const seqAction :SequenceAction = action;
-          return state
-            .set('isUpdatingEntityTypeMeta', false)
-            .deleteIn([LOCAL_UPDATE_ENTITY_TYPE_META, seqAction.id]);
+          return state.deleteIn([LOCAL_UPDATE_ENTITY_TYPE_META, seqAction.id]);
         },
       });
     }
 
     case getEntityDataModel.case(action.type): {
       return getEntityDataModel.reducer(state, action, {
-        REQUEST: () => {
-          return state.set('isGettingEntityTypes', true);
-        },
         SUCCESS: () => {
 
           const seqAction :SequenceAction = action;
@@ -399,9 +379,6 @@ export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, act
             .set('entityTypes', List())
             .set('entityTypesIndexMap', Map());
         },
-        FINALLY: () => {
-          return state.set('isGettingEntityTypes', false);
-        }
       });
     }
 
