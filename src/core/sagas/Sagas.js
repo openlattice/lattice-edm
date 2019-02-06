@@ -31,6 +31,7 @@ export default function* sagas() :Generator<*, *, *> {
     fork(EntityTypesSagas.localAddPropertyTypeToEntityTypeWatcher),
     fork(EntityTypesSagas.localCreateEntityTypeWatcher),
     fork(EntityTypesSagas.localDeleteEntityTypeWatcher),
+    fork(EntityTypesSagas.localRemovePropertyTypeFromEntityTypeWatcher),
     fork(EntityTypesSagas.localUpdateEntityTypeMetaWatcher),
 
     // PropertyTypesSagas

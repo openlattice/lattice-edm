@@ -51,6 +51,58 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
 
   switch (action.type) {
 
+    case getEntityDataModel.case(action.type): {
+      return getEntityDataModel.reducer(state, action, {
+        SUCCESS: () => {
+
+          const seqAction :SequenceAction = action;
+          const responsePropertyTypes :PropertyTypeObject[] = seqAction.value.propertyTypes;
+          if (!responsePropertyTypes || responsePropertyTypes.length === 0) {
+            LOG.error('getEntityDataModel() - no PropertyTypes available', responsePropertyTypes);
+            return state;
+          }
+
+          const propertyTypes :List<Map<*, *>> = List().asMutable();
+          const propertyTypesIndexMap :IndexMap = Map().asMutable();
+
+          responsePropertyTypes.forEach((pt :PropertyTypeObject, index :number) => {
+            try {
+              const propertyTypeId :?UUID = pt.id;
+              const propertyTypeFQN :FQN = new FullyQualifiedName(pt.type);
+              const propertyType = new PropertyTypeBuilder()
+                .setId(propertyTypeId)
+                .setType(propertyTypeFQN)
+                .setTitle(pt.title)
+                .setDescription(pt.description)
+                .setDataType(pt.datatype)
+                .setPii(pt.piiField)
+                .setAnalyzer(pt.analyzer)
+                .setSchemas(pt.schemas)
+                .build();
+              propertyTypes.push(propertyType.toImmutable());
+              /*
+               * IMPORTANT! we must keep the fqn and id index mapping in sync!
+               */
+              propertyTypesIndexMap.set(propertyTypeId, index);
+              propertyTypesIndexMap.set(propertyTypeFQN, index);
+            }
+            catch (e) {
+              LOG.error('getEntityDataModel()', e);
+            }
+          });
+
+          return state
+            .set('propertyTypes', propertyTypes.asImmutable())
+            .set('propertyTypesIndexMap', propertyTypesIndexMap.asImmutable());
+        },
+        FAILURE: () => {
+          return state
+            .set('propertyTypes', List())
+            .set('propertyTypesIndexMap', Map());
+        },
+      });
+    }
+
     case localCreatePropertyType.case(action.type): {
       return localCreatePropertyType.reducer(state, action, {
         REQUEST: () => {
@@ -250,58 +302,6 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
         FINALLY: () => {
           const seqAction :SequenceAction = action;
           return state.deleteIn([LOCAL_UPDATE_PROPERTY_TYPE_META, seqAction.id]);
-        },
-      });
-    }
-
-    case getEntityDataModel.case(action.type): {
-      return getEntityDataModel.reducer(state, action, {
-        SUCCESS: () => {
-
-          const seqAction :SequenceAction = action;
-          const responsePropertyTypes :PropertyTypeObject[] = seqAction.value.propertyTypes;
-          if (!responsePropertyTypes || responsePropertyTypes.length === 0) {
-            LOG.error('getEntityDataModel() - no PropertyTypes available', responsePropertyTypes);
-            return state;
-          }
-
-          const propertyTypes :List<Map<*, *>> = List().asMutable();
-          const propertyTypesIndexMap :IndexMap = Map().asMutable();
-
-          responsePropertyTypes.forEach((pt :PropertyTypeObject, index :number) => {
-            try {
-              const propertyTypeId :?UUID = pt.id;
-              const propertyTypeFQN :FQN = new FullyQualifiedName(pt.type);
-              const propertyType = new PropertyTypeBuilder()
-                .setId(propertyTypeId)
-                .setType(propertyTypeFQN)
-                .setTitle(pt.title)
-                .setDescription(pt.description)
-                .setDataType(pt.datatype)
-                .setPii(pt.piiField)
-                .setAnalyzer(pt.analyzer)
-                .setSchemas(pt.schemas)
-                .build();
-              propertyTypes.push(propertyType.toImmutable());
-              /*
-               * IMPORTANT! we must keep the fqn and id index mapping in sync!
-               */
-              propertyTypesIndexMap.set(propertyTypeId, index);
-              propertyTypesIndexMap.set(propertyTypeFQN, index);
-            }
-            catch (e) {
-              LOG.error('getEntityDataModel()', e);
-            }
-          });
-
-          return state
-            .set('propertyTypes', propertyTypes.asImmutable())
-            .set('propertyTypesIndexMap', propertyTypesIndexMap.asImmutable());
-        },
-        FAILURE: () => {
-          return state
-            .set('propertyTypes', List())
-            .set('propertyTypesIndexMap', Map());
         },
       });
     }

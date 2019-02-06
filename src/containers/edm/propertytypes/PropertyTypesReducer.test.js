@@ -50,6 +50,60 @@ describe('PropertyTypesReducer', () => {
     });
   });
 
+  describe(GET_ENTITY_DATA_MODEL, () => {
+
+    test(getEntityDataModel.REQUEST, () => {
+
+      const { id } = getEntityDataModel();
+      const stateAfterRequest = reducer(INITIAL_STATE, getEntityDataModel.request(id));
+      expect(stateAfterRequest.hashCode()).toEqual(INITIAL_STATE.hashCode());
+      expect(stateAfterRequest.equals(INITIAL_STATE)).toEqual(true);
+    });
+
+    // TODO: test SUCCESS with variable size result
+    test(getEntityDataModel.SUCCESS, () => {
+
+      const { id } = getEntityDataModel();
+      const response = { propertyTypes: [MOCK_PROPERTY_TYPE.toObject()] };
+      let state = reducer(INITIAL_STATE, getEntityDataModel.request(id));
+      state = reducer(state, getEntityDataModel.success(id, response));
+
+      const expectedPropertyTypes = List().push(MOCK_PROPERTY_TYPE.toImmutable());
+      expect(state.get('propertyTypes').hashCode()).toEqual(expectedPropertyTypes.hashCode());
+      expect(state.get('propertyTypes').equals(expectedPropertyTypes)).toEqual(true);
+
+      const expectedPropertyTypesIndexMap = Map()
+        .set(MOCK_PROPERTY_TYPE.id, 0)
+        .set(MOCK_PROPERTY_TYPE.type, 0);
+      expect(state.get('propertyTypesIndexMap').hashCode()).toEqual(expectedPropertyTypesIndexMap.hashCode());
+      expect(state.get('propertyTypesIndexMap').equals(expectedPropertyTypesIndexMap)).toEqual(true);
+      state.get('propertyTypesIndexMap')
+        .filter((v, k) => FullyQualifiedName.isValid(k))
+        .keySeq()
+        .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+    });
+
+    test(getEntityDataModel.FAILURE, () => {
+
+      const { id } = getEntityDataModel();
+      let state = reducer(INITIAL_STATE, getEntityDataModel.request(id));
+      state = reducer(state, getEntityDataModel.failure(id));
+
+      expect(state.get('propertyTypes').toJS()).toEqual([]);
+      expect(state.get('propertyTypesIndexMap').toJS()).toEqual({});
+    });
+
+    test(getEntityDataModel.FINALLY, () => {
+
+      const { id } = getEntityDataModel();
+      const stateAfterRequest = reducer(INITIAL_STATE, getEntityDataModel.request(id));
+      const stateAfterFinally = reducer(stateAfterRequest, getEntityDataModel.finally(id));
+      expect(stateAfterFinally.hashCode()).toEqual(stateAfterRequest.hashCode());
+      expect(stateAfterFinally.equals(stateAfterRequest)).toEqual(true);
+    });
+
+  });
+
   describe(LOCAL_CREATE_PROPERTY_TYPE, () => {
 
     test(localCreatePropertyType.REQUEST, () => {
@@ -492,60 +546,6 @@ describe('PropertyTypesReducer', () => {
         expect(state.hasIn([LOCAL_UPDATE_PROPERTY_TYPE_META, id])).toEqual(false);
       });
 
-    });
-
-  });
-
-  describe(GET_ENTITY_DATA_MODEL, () => {
-
-    test(getEntityDataModel.REQUEST, () => {
-
-      const { id } = getEntityDataModel();
-      const stateAfterRequest = reducer(INITIAL_STATE, getEntityDataModel.request(id));
-      expect(stateAfterRequest.hashCode()).toEqual(INITIAL_STATE.hashCode());
-      expect(stateAfterRequest.equals(INITIAL_STATE)).toEqual(true);
-    });
-
-    // TODO: test SUCCESS with variable size result
-    test(getEntityDataModel.SUCCESS, () => {
-
-      const { id } = getEntityDataModel();
-      const response = { propertyTypes: [MOCK_PROPERTY_TYPE.toObject()] };
-      let state = reducer(INITIAL_STATE, getEntityDataModel.request(id));
-      state = reducer(state, getEntityDataModel.success(id, response));
-
-      const expectedPropertyTypes = List().push(MOCK_PROPERTY_TYPE.toImmutable());
-      expect(state.get('propertyTypes').hashCode()).toEqual(expectedPropertyTypes.hashCode());
-      expect(state.get('propertyTypes').equals(expectedPropertyTypes)).toEqual(true);
-
-      const expectedPropertyTypesIndexMap = Map()
-        .set(MOCK_PROPERTY_TYPE.id, 0)
-        .set(MOCK_PROPERTY_TYPE.type, 0);
-      expect(state.get('propertyTypesIndexMap').hashCode()).toEqual(expectedPropertyTypesIndexMap.hashCode());
-      expect(state.get('propertyTypesIndexMap').equals(expectedPropertyTypesIndexMap)).toEqual(true);
-      state.get('propertyTypesIndexMap')
-        .filter((v, k) => FullyQualifiedName.isValid(k))
-        .keySeq()
-        .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
-    });
-
-    test(getEntityDataModel.FAILURE, () => {
-
-      const { id } = getEntityDataModel();
-      let state = reducer(INITIAL_STATE, getEntityDataModel.request(id));
-      state = reducer(state, getEntityDataModel.failure(id));
-
-      expect(state.get('propertyTypes').toJS()).toEqual([]);
-      expect(state.get('propertyTypesIndexMap').toJS()).toEqual({});
-    });
-
-    test(getEntityDataModel.FINALLY, () => {
-
-      const { id } = getEntityDataModel();
-      const stateAfterRequest = reducer(INITIAL_STATE, getEntityDataModel.request(id));
-      const stateAfterFinally = reducer(stateAfterRequest, getEntityDataModel.finally(id));
-      expect(stateAfterFinally.hashCode()).toEqual(stateAfterRequest.hashCode());
-      expect(stateAfterFinally.equals(stateAfterRequest)).toEqual(true);
     });
 
   });

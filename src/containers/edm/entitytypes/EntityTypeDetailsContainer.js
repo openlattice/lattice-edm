@@ -48,6 +48,7 @@ type Props = {
   actions :{
     localAddPropertyTypeToEntityType :RequestSequence;
     localDeleteEntityType :RequestSequence;
+    localRemovePropertyTypeFromEntityType :RequestSequence;
   };
   entityType :Map<*, *>;
   propertyTypes :List<Map<*, *>>;
@@ -81,14 +82,22 @@ class EntityTypeDetailsContainer extends React.Component<Props> {
     }
   }
 
-  handleOnPropertyTypeRemove = (removedAbstractTypeId :string) => {
+  handleOnPropertyTypeRemove = (removedPropertyTypeFQN :FQN) => {
 
-    const { actions, entityType } = this.props;
+    const {
+      actions,
+      entityType,
+      propertyTypes,
+      propertyTypesIndexMap,
+    } = this.props;
 
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
-      actions.removePropertyTypeFromEntityType({
+      const propertyTypesIndex :number = propertyTypesIndexMap.get(removedPropertyTypeFQN, -1);
+      const propertyTypeId :?UUID = propertyTypes.getIn([propertyTypesIndex, 'id']);
+      actions.localRemovePropertyTypeFromEntityType({
+        propertyTypeId,
+        entityTypeFQN: new FullyQualifiedName(entityType.get('type')),
         entityTypeId: entityType.get('id'),
-        propertyTypeId: removedAbstractTypeId
       });
     }
   }
@@ -308,6 +317,7 @@ const mapDispatchToProps = (dispatch :Function) :Object => ({
   actions: bindActionCreators({
     localAddPropertyTypeToEntityType: EntityTypesActions.localAddPropertyTypeToEntityType,
     localDeleteEntityType: EntityTypesActions.localDeleteEntityType,
+    localRemovePropertyTypeFromEntityType: EntityTypesActions.localRemovePropertyTypeFromEntityType,
   }, dispatch)
 });
 

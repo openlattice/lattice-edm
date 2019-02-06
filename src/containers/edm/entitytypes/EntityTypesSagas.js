@@ -24,10 +24,12 @@ import {
   LOCAL_ADD_PT_TO_ET,
   LOCAL_CREATE_ENTITY_TYPE,
   LOCAL_DELETE_ENTITY_TYPE,
+  LOCAL_REMOVE_PT_FROM_ET,
   LOCAL_UPDATE_ENTITY_TYPE_META,
   localAddPropertyTypeToEntityType,
   localCreateEntityType,
   localDeleteEntityType,
+  localRemovePropertyTypeFromEntityType,
   localUpdateEntityTypeMeta,
 } from './EntityTypesActions';
 import type { IndexMap, UpdateEntityTypeMeta } from '../Types';
@@ -38,6 +40,7 @@ const {
   addPropertyTypeToEntityType,
   createEntityType,
   deleteEntityType,
+  removePropertyTypeFromEntityType,
   updateEntityTypeMetaData,
 } = EntityDataModelApiActions;
 
@@ -45,6 +48,7 @@ const {
   addPropertyTypeToEntityTypeWorker,
   createEntityTypeWorker,
   deleteEntityTypeWorker,
+  removePropertyTypeFromEntityTypeWorker,
   updateEntityTypeMetaDataWorker,
 } = EntityDataModelApiSagas;
 
@@ -213,6 +217,56 @@ function* localDeleteEntityTypeWatcher() :Generator<*, *, *> {
 
 /*
  *
+ * EntityTypesActions.localRemovePropertyTypeFromEntityType()
+ *
+ */
+
+function* localRemovePropertyTypeFromEntityTypeWorker(seqAction :SequenceAction) :Generator<*, *, *> {
+
+  const { id, value } = seqAction;
+  if (value === null || value === undefined) {
+    yield put(localRemovePropertyTypeFromEntityType.failure(id, ERR_ACTION_VALUE_NOT_DEFINED));
+    return;
+  }
+
+  try {
+    yield put(localRemovePropertyTypeFromEntityType.request(id, value));
+
+    const {
+      entityTypeId,
+      propertyTypeId,
+    } = value;
+
+    const isOnline :boolean = yield select(
+      state => state.getIn(['app', 'isOnline'])
+    );
+
+    if (isOnline && isValidUUID(entityTypeId) && isValidUUID(propertyTypeId)) {
+      const response :Object = yield call(
+        removePropertyTypeFromEntityTypeWorker,
+        removePropertyTypeFromEntityType({ entityTypeId, propertyTypeId })
+      );
+      if (response.error) throw response.error;
+    }
+
+    yield put(localRemovePropertyTypeFromEntityType.success(id));
+  }
+  catch (error) {
+    LOG.error(ERR_WORKER_SAGA, error);
+    yield put(localRemovePropertyTypeFromEntityType.failure(id));
+  }
+  finally {
+    yield put(localRemovePropertyTypeFromEntityType.finally(id));
+  }
+}
+
+function* localRemovePropertyTypeFromEntityTypeWatcher() :Generator<*, *, *> {
+
+  yield takeEvery(LOCAL_REMOVE_PT_FROM_ET, localRemovePropertyTypeFromEntityTypeWorker);
+}
+
+/*
+ *
  * EntityTypesActions.localUpdateEntityTypeMeta()
  *
  */
@@ -268,6 +322,8 @@ export {
   localCreateEntityTypeWorker,
   localDeleteEntityTypeWatcher,
   localDeleteEntityTypeWorker,
+  localRemovePropertyTypeFromEntityTypeWatcher,
+  localRemovePropertyTypeFromEntityTypeWorker,
   localUpdateEntityTypeMetaWatcher,
   localUpdateEntityTypeMetaWorker,
 };
