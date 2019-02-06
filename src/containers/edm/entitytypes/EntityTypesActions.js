@@ -4,6 +4,9 @@
 
 import { newRequestSequence } from 'redux-reqseq';
 
+const LOCAL_ADD_PT_TO_ET :'LOCAL_ADD_PT_TO_ET' = 'LOCAL_ADD_PT_TO_ET';
+const localAddPropertyTypeToEntityType :RequestSequence = newRequestSequence(LOCAL_ADD_PT_TO_ET);
+
 const LOCAL_CREATE_ENTITY_TYPE :'LOCAL_CREATE_ENTITY_TYPE' = 'LOCAL_CREATE_ENTITY_TYPE';
 const localCreateEntityType :RequestSequence = newRequestSequence(LOCAL_CREATE_ENTITY_TYPE);
 
@@ -14,9 +17,11 @@ const LOCAL_UPDATE_ENTITY_TYPE_META :'LOCAL_UPDATE_ENTITY_TYPE_META' = 'LOCAL_UP
 const localUpdateEntityTypeMeta :RequestSequence = newRequestSequence(LOCAL_UPDATE_ENTITY_TYPE_META);
 
 export {
+  LOCAL_ADD_PT_TO_ET,
   LOCAL_CREATE_ENTITY_TYPE,
   LOCAL_DELETE_ENTITY_TYPE,
   LOCAL_UPDATE_ENTITY_TYPE_META,
+  localAddPropertyTypeToEntityType,
   localCreateEntityType,
   localDeleteEntityType,
   localUpdateEntityTypeMeta,

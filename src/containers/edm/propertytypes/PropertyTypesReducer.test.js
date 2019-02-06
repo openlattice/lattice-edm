@@ -46,7 +46,7 @@ describe('PropertyTypesReducer', () => {
       [LOCAL_UPDATE_PROPERTY_TYPE_META]: { error: false },
       isCreatingNewPropertyType: false,
       isDeletingPropertyType: false,
-      isFetchingAllPropertyTypes: false,
+      isGettingPropertyTypes: false,
       isUpdatingPropertyTypeMeta: false,
       newlyCreatedPropertyTypeFQN: undefined,
       propertyTypes: [],
@@ -527,7 +527,7 @@ describe('PropertyTypesReducer', () => {
 
       const { id } = getEntityDataModel();
       const state = reducer(INITIAL_STATE, getEntityDataModel.request(id));
-      expect(state.get('isFetchingAllPropertyTypes')).toEqual(true);
+      expect(state.get('isGettingPropertyTypes')).toEqual(true);
     });
 
     // TODO: test SUCCESS with variable size result
@@ -537,7 +537,7 @@ describe('PropertyTypesReducer', () => {
       const response = { propertyTypes: [MOCK_PROPERTY_TYPE.toObject()] };
       let state = reducer(INITIAL_STATE, getEntityDataModel.request(id));
       state = reducer(state, getEntityDataModel.success(id, response));
-      expect(state.get('isFetchingAllPropertyTypes')).toEqual(true);
+      expect(state.get('isGettingPropertyTypes')).toEqual(true);
 
       const expectedPropertyTypes = List().push(MOCK_PROPERTY_TYPE.toImmutable());
       expect(state.get('propertyTypes').hashCode()).toEqual(expectedPropertyTypes.hashCode());
@@ -560,7 +560,7 @@ describe('PropertyTypesReducer', () => {
       let state = reducer(INITIAL_STATE, getEntityDataModel.request(id));
       state = reducer(state, getEntityDataModel.failure(id));
 
-      expect(state.get('isFetchingAllPropertyTypes')).toEqual(true);
+      expect(state.get('isGettingPropertyTypes')).toEqual(true);
       expect(state.get('propertyTypes').toJS()).toEqual([]);
       expect(state.get('propertyTypesIndexMap').toJS()).toEqual({});
     });
@@ -569,10 +569,10 @@ describe('PropertyTypesReducer', () => {
 
       const { id } = getEntityDataModel();
       let state = reducer(INITIAL_STATE, getEntityDataModel.request(id));
-      expect(state.get('isFetchingAllPropertyTypes')).toEqual(true);
+      expect(state.get('isGettingPropertyTypes')).toEqual(true);
 
       state = reducer(state, getEntityDataModel.finally(id));
-      expect(state.get('isFetchingAllPropertyTypes')).toEqual(false);
+      expect(state.get('isGettingPropertyTypes')).toEqual(false);
     });
 
   });

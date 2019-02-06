@@ -18,9 +18,13 @@ import AbstractTypeFieldDescription from '../AbstractTypeFieldDescription';
 import AbstractTypeFieldTitle from '../AbstractTypeFieldTitle';
 import AbstractTypeFieldType from '../AbstractTypeFieldType';
 import AbstractTypeSearchableSelect from '../../../components/controls/AbstractTypeSearchableSelect';
+import Logger from '../../../utils/Logger';
 import StyledButton from '../../../components/buttons/StyledButton';
 import * as EntityTypesActions from './EntityTypesActions';
+import { isValidUUID } from '../../../utils/ValidationUtils';
 import type { IndexMap } from '../Types';
+
+const LOG :Logger = new Logger('EntityTypeDetailsContainer');
 
 const { FullyQualifiedName } = Models;
 
@@ -42,6 +46,7 @@ const AbstractTypeSearchableSelectWrapper = styled.div`
 
 type Props = {
   actions :{
+    localAddPropertyTypeToEntityType :RequestSequence;
     localDeleteEntityType :RequestSequence;
   };
   entityType :Map<*, *>;
@@ -51,14 +56,27 @@ type Props = {
 
 class EntityTypeDetailsContainer extends React.Component<Props> {
 
-  handleOnPropertyTypeAdd = (selectedPropertyTypeId :string) => {
+  handleOnPropertyTypeAdd = (selectedPropertyTypeFQN :FQN) => {
 
-    const { actions, entityType } = this.props;
+    const {
+      actions,
+      entityType,
+      propertyTypes,
+      propertyTypesIndexMap,
+    } = this.props;
 
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
-      actions.addPropertyTypeToEntityType({
+      const propertyTypesIndex :number = propertyTypesIndexMap.get(selectedPropertyTypeFQN, -1);
+      const propertyTypeId :?UUID = propertyTypes.getIn([propertyTypesIndex, 'id']);
+      if (!isValidUUID(propertyTypeId)) {
+        const errorMsg = 'PropertyType id must be a valid UUID, otherwise it cannot be added to an EntityType';
+        LOG.error(errorMsg, propertyTypeId);
+        return;
+      }
+      actions.localAddPropertyTypeToEntityType({
+        propertyTypeId,
+        entityTypeFQN: new FullyQualifiedName(entityType.get('type')),
         entityTypeId: entityType.get('id'),
-        propertyTypeId: selectedPropertyTypeId
       });
     }
   }
@@ -288,6 +306,7 @@ const mapStateToProps = (state :Map<*, *>) :Object => ({
 
 const mapDispatchToProps = (dispatch :Function) :Object => ({
   actions: bindActionCreators({
+    localAddPropertyTypeToEntityType: EntityTypesActions.localAddPropertyTypeToEntityType,
     localDeleteEntityType: EntityTypesActions.localDeleteEntityType,
   }, dispatch)
 });

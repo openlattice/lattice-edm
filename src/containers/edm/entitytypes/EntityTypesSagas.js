@@ -21,9 +21,11 @@ import {
   ERR_WORKER_SAGA,
 } from '../../../utils/Errors';
 import {
+  LOCAL_ADD_PT_TO_ET,
   LOCAL_CREATE_ENTITY_TYPE,
   LOCAL_DELETE_ENTITY_TYPE,
   LOCAL_UPDATE_ENTITY_TYPE_META,
+  localAddPropertyTypeToEntityType,
   localCreateEntityType,
   localDeleteEntityType,
   localUpdateEntityTypeMeta,
@@ -33,12 +35,14 @@ import type { IndexMap, UpdateEntityTypeMeta } from '../Types';
 const LOG = new Logger('EntityTypesSagas');
 
 const {
+  addPropertyTypeToEntityType,
   createEntityType,
   deleteEntityType,
   updateEntityTypeMetaData,
 } = EntityDataModelApiActions;
 
 const {
+  addPropertyTypeToEntityTypeWorker,
   createEntityTypeWorker,
   deleteEntityTypeWorker,
   updateEntityTypeMetaDataWorker,
@@ -47,6 +51,56 @@ const {
 const {
   EntityType,
 } = Models;
+
+/*
+ *
+ * EntityTypesActions.localAddPropertyTypeToEntityType()
+ *
+ */
+
+function* localAddPropertyTypeToEntityTypeWorker(seqAction :SequenceAction) :Generator<*, *, *> {
+
+  const { id, value } = seqAction;
+  if (value === null || value === undefined) {
+    yield put(localAddPropertyTypeToEntityType.failure(id, ERR_ACTION_VALUE_NOT_DEFINED));
+    return;
+  }
+
+  try {
+    yield put(localAddPropertyTypeToEntityType.request(id, value));
+
+    const {
+      entityTypeId,
+      propertyTypeId,
+    } = value;
+
+    const isOnline :boolean = yield select(
+      state => state.getIn(['app', 'isOnline'])
+    );
+
+    if (isOnline && isValidUUID(entityTypeId) && isValidUUID(propertyTypeId)) {
+      const response :Object = yield call(
+        addPropertyTypeToEntityTypeWorker,
+        addPropertyTypeToEntityType({ entityTypeId, propertyTypeId })
+      );
+      if (response.error) throw response.error;
+    }
+
+    yield put(localAddPropertyTypeToEntityType.success(id));
+  }
+  catch (error) {
+    LOG.error(ERR_WORKER_SAGA, error);
+    yield put(localAddPropertyTypeToEntityType.failure(id));
+  }
+  finally {
+    yield put(localAddPropertyTypeToEntityType.finally(id));
+  }
+}
+
+function* localAddPropertyTypeToEntityTypeWatcher() :Generator<*, *, *> {
+
+  yield takeEvery(LOCAL_ADD_PT_TO_ET, localAddPropertyTypeToEntityTypeWorker);
+}
 
 /*
  *
@@ -208,6 +262,8 @@ function* localUpdateEntityTypeMetaWatcher() :Generator<*, *, *> {
 }
 
 export {
+  localAddPropertyTypeToEntityTypeWatcher,
+  localAddPropertyTypeToEntityTypeWorker,
   localCreateEntityTypeWatcher,
   localCreateEntityTypeWorker,
   localDeleteEntityTypeWatcher,

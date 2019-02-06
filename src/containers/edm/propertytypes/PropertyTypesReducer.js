@@ -44,7 +44,7 @@ const INITIAL_STATE :Map<*, *> = fromJS({
   [LOCAL_UPDATE_PROPERTY_TYPE_META]: { error: false },
   isCreatingNewPropertyType: false,
   isDeletingPropertyType: false,
-  isFetchingAllPropertyTypes: false,
+  isGettingPropertyTypes: false,
   isUpdatingPropertyTypeMeta: false,
   newlyCreatedPropertyTypeFQN: undefined,
   propertyTypes: List(),
@@ -274,7 +274,7 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
     case getEntityDataModel.case(action.type): {
       return getEntityDataModel.reducer(state, action, {
         REQUEST: () => {
-          return state.set('isFetchingAllPropertyTypes', true);
+          return state.set('isGettingPropertyTypes', true);
         },
         SUCCESS: () => {
 
@@ -324,7 +324,7 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
             .set('propertyTypesIndexMap', Map());
         },
         FINALLY: () => {
-          return state.set('isFetchingAllPropertyTypes', false);
+          return state.set('isGettingPropertyTypes', false);
         }
       });
     }

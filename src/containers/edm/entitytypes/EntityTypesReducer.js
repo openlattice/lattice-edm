@@ -17,9 +17,11 @@ import type { FQN, EntityTypeObject } from 'lattice';
 import Logger from '../../../utils/Logger';
 import { isValidUUID } from '../../../utils/ValidationUtils';
 import {
+  LOCAL_ADD_PT_TO_ET,
   LOCAL_CREATE_ENTITY_TYPE,
   LOCAL_DELETE_ENTITY_TYPE,
   LOCAL_UPDATE_ENTITY_TYPE_META,
+  localAddPropertyTypeToEntityType,
   localCreateEntityType,
   localDeleteEntityType,
   localUpdateEntityTypeMeta,
@@ -48,6 +50,7 @@ const {
 } = Types;
 
 const INITIAL_STATE :Map<*, *> = fromJS({
+  [LOCAL_ADD_PT_TO_ET]: { error: false },
   [LOCAL_CREATE_ENTITY_TYPE]: { error: false },
   [LOCAL_DELETE_ENTITY_TYPE]: { error: false },
   [LOCAL_UPDATE_ENTITY_TYPE_META]: { error: false },
@@ -55,7 +58,7 @@ const INITIAL_STATE :Map<*, *> = fromJS({
   entityTypesIndexMap: Map(),
   isCreatingNewEntityType: false,
   isDeletingEntityType: false,
-  isFetchingAllEntityTypes: false,
+  isGettingEntityTypes: false,
   isUpdatingEntityTypeMeta: false,
   newlyCreatedEntityTypeFQN: undefined,
 });
@@ -63,6 +66,72 @@ const INITIAL_STATE :Map<*, *> = fromJS({
 export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, action :Object) :Map<*, *> {
 
   switch (action.type) {
+
+    case localAddPropertyTypeToEntityType.case(action.type): {
+      return localAddPropertyTypeToEntityType.reducer(state, action, {
+        REQUEST: () => {
+          const seqAction :SequenceAction = action;
+          return state.setIn([LOCAL_ADD_PT_TO_ET, seqAction.id], seqAction);
+        },
+        SUCCESS: () => {
+
+          const seqAction :SequenceAction = action;
+          const storedSeqAction :SequenceAction = state.getIn([LOCAL_ADD_PT_TO_ET, seqAction.id]);
+          if (storedSeqAction) {
+
+            const {
+              entityTypeFQN,
+              entityTypeId,
+              propertyTypeId,
+            } = storedSeqAction.value;
+
+            if (!isValidUUID(propertyTypeId)) {
+              LOG.error('PropertyType id must be a valid UUID', propertyTypeId);
+              return state;
+            }
+
+            const targetIndex :number = state.getIn(['entityTypesIndexMap', entityTypeFQN], -1);
+            if (targetIndex === -1) {
+              LOG.error('EntityType does not exist in store', entityTypeFQN);
+              return state;
+            }
+
+            const targetEntityType :Map<*, *> = state.getIn(['entityTypes', targetIndex], Map());
+            if (
+              targetEntityType.get('id') !== entityTypeId
+              || FullyQualifiedName.toString(targetEntityType.get('type', Map())) !== entityTypeFQN.toString()
+            ) {
+              LOG.error('EntityType does not match id or fqn', entityTypeId, entityTypeFQN);
+              return state;
+            }
+
+            const currentPropertyTypeIds :List<UUID> = targetEntityType.get('properties', List());
+
+            // don't do anything if the PropertyType id being added is already a part of the EntityType
+            if (currentPropertyTypeIds.includes(propertyTypeId)) {
+              return state;
+            }
+
+            const updatedPropertyTypeIds :List<UUID> = currentPropertyTypeIds.push(propertyTypeId);
+            return state.setIn(['entityTypes', targetIndex, 'properties'], updatedPropertyTypeIds);
+          }
+          return state;
+        },
+        FAILURE: () => {
+          const seqAction :SequenceAction = action;
+          const storedSeqAction :SequenceAction = state.getIn([LOCAL_ADD_PT_TO_ET, seqAction.id]);
+          if (storedSeqAction) {
+            // TODO: we need a better pattern for setting and handling errors
+            return state.setIn([LOCAL_ADD_PT_TO_ET, 'error'], true);
+          }
+          return state;
+        },
+        FINALLY: () => {
+          const seqAction :SequenceAction = action;
+          return state.deleteIn([LOCAL_ADD_PT_TO_ET, seqAction.id]);
+        },
+      });
+    }
 
     case localCreateEntityType.case(action.type): {
       return localCreateEntityType.reducer(state, action, {
@@ -280,7 +349,7 @@ export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, act
     case getEntityDataModel.case(action.type): {
       return getEntityDataModel.reducer(state, action, {
         REQUEST: () => {
-          return state.set('isFetchingAllEntityTypes', true);
+          return state.set('isGettingEntityTypes', true);
         },
         SUCCESS: () => {
 
@@ -331,7 +400,7 @@ export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, act
             .set('entityTypesIndexMap', Map());
         },
         FINALLY: () => {
-          return state.set('isFetchingAllEntityTypes', false);
+          return state.set('isGettingEntityTypes', false);
         }
       });
     }
