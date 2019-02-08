@@ -200,6 +200,72 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
       });
     }
 
+    case localDeleteAssociationType.case(action.type): {
+      return localDeleteAssociationType.reducer(state, action, {
+        REQUEST: () => {
+          const seqAction :SequenceAction = action;
+          return state.setIn([LOCAL_DELETE_ASSOCIATION_TYPE, seqAction.id], seqAction);
+        },
+        SUCCESS: () => {
+
+          const seqAction :SequenceAction = action;
+          const storedSeqAction :SequenceAction = state.getIn([LOCAL_DELETE_ASSOCIATION_TYPE, seqAction.id]);
+
+          if (storedSeqAction) {
+
+            const targetFQN :FQN = storedSeqAction.value.associationTypeFQN;
+            const targetIndex :number = state.getIn(['associationTypesIndexMap', targetFQN], -1);
+            if (targetIndex === -1) {
+              LOG.error('AssociationType does not exist in store', targetFQN);
+              return state;
+            }
+
+            const target :Map<*, *> = state.getIn(['associationTypes', targetIndex], Map());
+            if (FullyQualifiedName.toString(target.getIn(['entityType', 'type'], Map())) !== targetFQN.toString()) {
+              LOG.error('AssociationType does not match fqn', targetFQN);
+              return state;
+            }
+
+            const currentAssociationTypes :List<Map<*, *>> = state.get('associationTypes', List());
+            const updatedAssociationTypes :List<Map<*, *>> = currentAssociationTypes.delete(targetIndex);
+            const updatedAssociationTypesIndexMap :IndexMap = Map().asMutable();
+
+            updatedAssociationTypes.forEach((associationType :Map<*, *>, index :number) => {
+              /*
+               * IMPORTANT! we must keep the fqn and id index mapping in sync!
+               */
+              const associationEntityType :Map<*, *> = associationType.get('entityType', Map());
+              const associationTypeFQN :FQN = new FullyQualifiedName(associationEntityType.get('type'));
+              updatedAssociationTypesIndexMap.set(associationTypeFQN, index);
+              const associationTypeId :?UUID = associationType.get('id');
+              if (isValidUUID(associationTypeId)) {
+                updatedAssociationTypesIndexMap.set(associationTypeId, index);
+              }
+            });
+
+            return state
+              .set('associationTypes', updatedAssociationTypes)
+              .set('associationTypesIndexMap', updatedAssociationTypesIndexMap.asImmutable());
+          }
+
+          return state;
+        },
+        FAILURE: () => {
+          const seqAction :SequenceAction = action;
+          const storedSeqAction :SequenceAction = state.getIn([LOCAL_DELETE_ASSOCIATION_TYPE, seqAction.id]);
+          if (storedSeqAction) {
+            // TODO: we need a better pattern for setting and handling errors
+            return state.setIn([LOCAL_DELETE_ASSOCIATION_TYPE, 'error'], true);
+          }
+          return state;
+        },
+        FINALLY: () => {
+          const seqAction :SequenceAction = action;
+          return state.deleteIn([LOCAL_DELETE_ASSOCIATION_TYPE, seqAction.id]);
+        },
+      });
+    }
+
     // case deleteAssociationType.case(action.type): {
     //   return deleteAssociationType.reducer(state, action, {
     //     REQUEST: () => {

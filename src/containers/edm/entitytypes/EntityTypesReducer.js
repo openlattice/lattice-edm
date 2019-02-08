@@ -293,7 +293,7 @@ export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, act
 
             return state
               .set('entityTypes', updatedEntityTypes)
-              .set('entityTypesIndexMap', updatedEntityTypesIndexMap);
+              .set('entityTypesIndexMap', updatedEntityTypesIndexMap.asImmutable());
           }
 
           return state;

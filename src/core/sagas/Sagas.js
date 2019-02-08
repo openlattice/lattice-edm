@@ -30,6 +30,7 @@ export default function* sagas() :Generator<*, *, *> {
 
     // AssociationTypesSagas
     fork(AssociationTypesSagas.localCreateAssociationTypeWatcher),
+    fork(AssociationTypesSagas.localDeleteAssociationTypeWatcher),
 
     // EntityTypesSagas
     fork(EntityTypesSagas.localAddPropertyTypeToEntityTypeWatcher),

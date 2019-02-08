@@ -16,7 +16,7 @@ import Logger from '../../../utils/Logger';
 import { isValidUUID } from '../../../utils/ValidationUtils';
 import {
   ERR_ACTION_VALUE_NOT_DEFINED,
-  ERR_ET_DOES_NOT_EXIST,
+  ERR_AT_DOES_NOT_EXIST,
   ERR_FQN_EXISTS,
   ERR_WORKER_SAGA,
 } from '../../../utils/Errors';
@@ -38,10 +38,12 @@ const LOG = new Logger('EntityTypesSagas');
 
 const {
   createAssociationType,
+  deleteAssociationType,
 } = EntityDataModelApiActions;
 
 const {
   createAssociationTypeWorker,
+  deleteAssociationTypeWorker,
 } = EntityDataModelApiSagas;
 
 const {
@@ -50,7 +52,7 @@ const {
 
 /*
  *
- * EntityTypesActions.localCreateAssociationType()
+ * AssociationTypesActions.localCreateAssociationType()
  *
  */
 
@@ -103,7 +105,63 @@ function* localCreateAssociationTypeWatcher() :Generator<*, *, *> {
   yield takeEvery(LOCAL_CREATE_ASSOCIATION_TYPE, localCreateAssociationTypeWorker);
 }
 
+/*
+ *
+ * AssociationTypesActions.localDeleteAssociationType()
+ *
+ */
+
+function* localDeleteAssociationTypeWorker(seqAction :SequenceAction) :Generator<*, *, *> {
+
+  const { id, value } = seqAction;
+  if (value === null || value === undefined) {
+    yield put(localDeleteAssociationType.failure(id, ERR_ACTION_VALUE_NOT_DEFINED));
+    return;
+  }
+
+  try {
+    yield put(localDeleteAssociationType.request(id, value));
+
+    const associationTypeFQN :FQN = value.associationTypeFQN;
+    const associationTypeId :?UUID = value.associationTypeId;
+
+    const associationTypesIndexMap :IndexMap = yield select(
+      state => state.getIn(['edm', 'associationTypes', 'associationTypesIndexMap'])
+    );
+
+    if (!associationTypesIndexMap.has(associationTypeFQN)) {
+      yield put(localDeleteAssociationType.failure(id, ERR_AT_DOES_NOT_EXIST));
+      return;
+    }
+
+    const isOnline :boolean = yield select(
+      state => state.getIn(['app', 'isOnline'])
+    );
+
+    if (isOnline && isValidUUID(associationTypeId)) {
+      const response :Object = yield call(deleteAssociationTypeWorker, deleteAssociationType(associationTypeId));
+      if (response.error) throw response.error;
+    }
+
+    yield put(localDeleteAssociationType.success(id));
+  }
+  catch (error) {
+    LOG.error(ERR_WORKER_SAGA, error);
+    yield put(localDeleteAssociationType.failure(id));
+  }
+  finally {
+    yield put(localDeleteAssociationType.finally(id));
+  }
+}
+
+function* localDeleteAssociationTypeWatcher() :Generator<*, *, *> {
+
+  yield takeEvery(LOCAL_DELETE_ASSOCIATION_TYPE, localDeleteAssociationTypeWorker);
+}
+
 export {
   localCreateAssociationTypeWatcher,
   localCreateAssociationTypeWorker,
+  localDeleteAssociationTypeWatcher,
+  localDeleteAssociationTypeWorker,
 };

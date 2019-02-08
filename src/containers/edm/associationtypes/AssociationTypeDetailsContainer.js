@@ -6,6 +6,7 @@ import React from 'react';
 
 import styled from 'styled-components';
 import { List, Map, OrderedSet } from 'immutable';
+import { Models } from 'lattice';
 import { AuthUtils } from 'lattice-auth';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
@@ -21,6 +22,10 @@ import StyledButton from '../../../components/buttons/StyledButton';
 import * as AssociationTypesActions from './AssociationTypesActions';
 import { isValidUUID } from '../../../utils/ValidationUtils';
 import type { IndexMap } from '../Types';
+
+const {
+  FullyQualifiedName
+} = Models;
 
 /*
  * styled components
@@ -40,6 +45,7 @@ const AbstractTypeSearchableSelectWrapper = styled.div`
 
 type Props = {
   actions :{
+    localDeleteAssociationType :RequestSequence;
   };
   associationType :Map<*, *>;
   entityTypes :List<Map<*, *>>;
@@ -152,7 +158,9 @@ class AssociationTypeDetailsContainer extends React.Component<Props> {
 
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
       const associationEntityType :Map<*, *> = associationType.get('entityType', Map());
-      actions.deleteAssociationType(associationEntityType.get('id'));
+      const associationTypeId :?UUID = associationEntityType.get('id');
+      const associationTypeFQN :FQN = new FullyQualifiedName(associationEntityType.get('type'));
+      actions.localDeleteAssociationType({ associationTypeFQN, associationTypeId });
     }
   }
 
@@ -524,9 +532,7 @@ const mapStateToProps = (state :Map<*, *>) :Object => ({
 
 const mapDispatchToProps = (dispatch :Function) :Object => ({
   actions: bindActionCreators({
-    localAddPropertyTypeToAssociationType: AssociationTypesActions.localAddPropertyTypeToAssociationType,
     localDeleteAssociationType: AssociationTypesActions.localDeleteAssociationType,
-    localRemovePropertyTypeFromAssociationType: AssociationTypesActions.localRemovePropertyTypeFromAssociationType,
   }, dispatch)
 });
 
