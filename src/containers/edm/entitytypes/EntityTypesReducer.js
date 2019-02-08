@@ -46,6 +46,7 @@ const INITIAL_STATE :Map<*, *> = fromJS({
   [LOCAL_ADD_PT_TO_ET]: { error: false },
   [LOCAL_CREATE_ENTITY_TYPE]: { error: false },
   [LOCAL_DELETE_ENTITY_TYPE]: { error: false },
+  [LOCAL_REMOVE_PT_FROM_ET]: { error: false },
   [LOCAL_UPDATE_ENTITY_TYPE_META]: { error: false },
   entityTypes: List(),
   entityTypesIndexMap: Map(),
@@ -63,7 +64,7 @@ export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, act
           const seqAction :SequenceAction = action;
           const responseEntityTypes :EntityTypeObject[] = seqAction.value.entityTypes;
           if (!responseEntityTypes || responseEntityTypes.length === 0) {
-            LOG.error('getEntityDataModel() - no EntityTypes available', responseEntityTypes);
+            LOG.error('getEntityDataModel() - EntityTypes missing', responseEntityTypes);
             return state;
           }
 

@@ -86,6 +86,8 @@ function maybeGetAbstractTypeMatchingFQN(
 ) :?Map<*, *> {
 
   const {
+    associationTypes,
+    associationTypesIndexMap,
     entityTypes,
     entityTypesIndexMap,
     propertyTypes,
@@ -96,7 +98,12 @@ function maybeGetAbstractTypeMatchingFQN(
   let abstractTypeIndex :number;
   switch (workingAbstractTypeType) {
     case AbstractTypes.AssociationType: {
-      LOG.warn('not implemented');
+      if (FullyQualifiedName.isValid(abstractTypeFQN)) {
+        abstractTypeIndex = associationTypesIndexMap.get(abstractTypeFQN, -1);
+        if (abstractTypeIndex !== -1) {
+          return associationTypes.get(abstractTypeIndex, Map());
+        }
+      }
       break;
     }
     case AbstractTypes.EntityType: {
@@ -139,7 +146,8 @@ function maybeGetNewlyCreatedAbstractTypeFQN(
 
   switch (nextProps.workingAbstractTypeType) {
     case AbstractTypes.AssociationType: {
-      LOG.warn('not implemented');
+      prevFQN = prevProps.newlyCreatedAssociationTypeFQN;
+      nextFQN = nextProps.newlyCreatedAssociationTypeFQN;
       break;
     }
     case AbstractTypes.EntityType: {

@@ -1,32 +1,35 @@
 import randomUUID from 'uuid/v4';
 import { List, Map, fromJS } from 'immutable';
-import { Types } from 'lattice';
+import { Models, Types } from 'lattice';
 import { EntityDataModelApiActions } from 'lattice-sagas';
 
 import reducer from './AssociationTypesReducer';
-import { randomId } from '../../../utils/Utils';
-
+import { MOCK_ASSOCIATION_TYPE } from '../../../utils/MockDataModels';
+import { randomStringId } from '../../../utils/Utils';
 import {
-  MOCK_ASSOCIATION_TYPE,
-  MOCK_ASSOCIATION_TYPE_JSON,
-  MOCK_SCHEMA_FQN,
-} from '../../../utils/MockDataModels';
+  LOCAL_ADD_PT_TO_AT,
+  LOCAL_CREATE_ASSOCIATION_TYPE,
+  LOCAL_DELETE_ASSOCIATION_TYPE,
+  LOCAL_REMOVE_PT_FROM_AT,
+  LOCAL_UPDATE_ASSOCIATION_TYPE_META,
+  localAddPropertyTypeToAssociationType,
+  localCreateAssociationType,
+  localDeleteAssociationType,
+  localRemovePropertyTypeFromAssociationType,
+  localUpdateAssociationTypeMeta,
+} from './AssociationTypesActions';
+
+const {
+  FullyQualifiedName,
+} = Models;
 
 const {
   ActionTypes,
 } = Types;
 
 const {
-  CREATE_ASSOCIATION_TYPE,
-  DELETE_ASSOCIATION_TYPE,
-  GET_ALL_ASSOCIATION_TYPES,
-  UPDATE_ASSOCIATION_TYPE_METADATA,
-  UPDATE_SCHEMA,
-  createAssociationType,
-  deleteAssociationType,
-  getAllAssociationTypes,
-  updateAssociationTypeMetaData,
-  updateSchema,
+  GET_ENTITY_DATA_MODEL,
+  getEntityDataModel,
 } = EntityDataModelApiActions;
 
 describe('AssociationTypesReducer', () => {
@@ -35,24 +38,69 @@ describe('AssociationTypesReducer', () => {
 
   test('INITIAL_STATE', () => {
     expect(INITIAL_STATE).toBeInstanceOf(Map);
-    expect(INITIAL_STATE.get('associationTypes').toJS()).toEqual([]);
-    expect(INITIAL_STATE.get('associationTypesById').toJS()).toEqual({});
-    expect(INITIAL_STATE.get('isCreatingNewAssociationType')).toEqual(false);
-    expect(INITIAL_STATE.get('isFetchingAllAssociationTypes')).toEqual(false);
-    expect(INITIAL_STATE.get('newlyCreatedAssociationTypeId')).toEqual('');
-    expect(INITIAL_STATE.get('actions').toJS()).toEqual({
-      addDstEntityTypeToAssociationType: {},
-      addPropertyTypeToEntityType: {},
-      addSrcEntityTypeToAssociationType: {},
-      createAssociationType: {},
-      deleteAssociationType: {},
-      removeDstEntityTypeFromAssociationType: {},
-      removePropertyTypeFromEntityType: {},
-      removeSrcEntityTypeFromAssociationType: {},
-      reorderEntityTypePropertyTypes: {},
-      updateAssociationTypeMetaData: {},
-      updateSchema: {},
+    expect(INITIAL_STATE.toJS()).toEqual({
+      [LOCAL_ADD_PT_TO_AT]: { error: false },
+      [LOCAL_CREATE_ASSOCIATION_TYPE]: { error: false },
+      [LOCAL_DELETE_ASSOCIATION_TYPE]: { error: false },
+      [LOCAL_REMOVE_PT_FROM_AT]: { error: false },
+      [LOCAL_UPDATE_ASSOCIATION_TYPE_META]: { error: false },
+      associationTypes: [],
+      associationTypesIndexMap: {},
+      newlyCreatedAssociationTypeFQN: undefined,
     });
+  });
+
+  describe(GET_ENTITY_DATA_MODEL, () => {
+
+    test(getEntityDataModel.REQUEST, () => {
+
+      const { id } = getEntityDataModel();
+      const stateAfterRequest = reducer(INITIAL_STATE, getEntityDataModel.request(id));
+      expect(stateAfterRequest.hashCode()).toEqual(INITIAL_STATE.hashCode());
+      expect(stateAfterRequest.equals(INITIAL_STATE)).toEqual(true);
+    });
+
+    // TODO: test SUCCESS with variable size result
+    test(getEntityDataModel.SUCCESS, () => {
+
+      const { id } = getEntityDataModel();
+      const response = { associationTypes: [MOCK_ASSOCIATION_TYPE.toObject()] };
+      let state = reducer(INITIAL_STATE, getEntityDataModel.request(id));
+      state = reducer(state, getEntityDataModel.success(id, response));
+
+      const expectedAssociationTypes = List().push(MOCK_ASSOCIATION_TYPE.toImmutable());
+      expect(state.get('associationTypes').hashCode()).toEqual(expectedAssociationTypes.hashCode());
+      expect(state.get('associationTypes').equals(expectedAssociationTypes)).toEqual(true);
+
+      const expectedAssociationTypesIndexMap = Map()
+        .set(MOCK_ASSOCIATION_TYPE.entityType.id, 0)
+        .set(MOCK_ASSOCIATION_TYPE.entityType.type, 0);
+      expect(state.get('associationTypesIndexMap').hashCode()).toEqual(expectedAssociationTypesIndexMap.hashCode());
+      expect(state.get('associationTypesIndexMap').equals(expectedAssociationTypesIndexMap)).toEqual(true);
+      state.get('associationTypesIndexMap')
+        .filter((v, k) => FullyQualifiedName.isValid(k))
+        .keySeq()
+        .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+    });
+
+    test(getEntityDataModel.FAILURE, () => {
+
+      const { id } = getEntityDataModel();
+      let state = reducer(INITIAL_STATE, getEntityDataModel.request(id));
+      state = reducer(state, getEntityDataModel.failure(id));
+      expect(state.get('associationTypes').toJS()).toEqual([]);
+      expect(state.get('associationTypesIndexMap').toJS()).toEqual({});
+    });
+
+    test(getEntityDataModel.FINALLY, () => {
+
+      const { id } = getEntityDataModel();
+      const stateAfterRequest = reducer(INITIAL_STATE, getEntityDataModel.request(id));
+      const stateAfterFinally = reducer(stateAfterRequest, getEntityDataModel.finally(id));
+      expect(stateAfterFinally.hashCode()).toEqual(stateAfterRequest.hashCode());
+      expect(stateAfterFinally.equals(stateAfterRequest)).toEqual(true);
+    });
+
   });
 
   describe(CREATE_ASSOCIATION_TYPE, () => {
@@ -63,7 +111,7 @@ describe('AssociationTypesReducer', () => {
       const state = reducer(INITIAL_STATE, createAssociationType.request(id, MOCK_ASSOCIATION_TYPE));
 
       expect(state.get('isCreatingNewAssociationType')).toEqual(true);
-      expect(state.get('newlyCreatedAssociationTypeId')).toEqual('');
+      expect(state.get('newlyCreatedAssociationTypeFQN')).toEqual('');
       expect(state.getIn(['actions', 'createAssociationType', id]).toJS())
         .toEqual({
           id,
@@ -79,7 +127,7 @@ describe('AssociationTypesReducer', () => {
       state = reducer(state, createAssociationType.success(id, MOCK_ASSOCIATION_TYPE.entityType.id));
 
       expect(state.get('isCreatingNewAssociationType')).toEqual(true);
-      expect(state.get('newlyCreatedAssociationTypeId')).toEqual(MOCK_ASSOCIATION_TYPE.entityType.id);
+      expect(state.get('newlyCreatedAssociationTypeFQN')).toEqual(MOCK_ASSOCIATION_TYPE.entityType.id);
       expect(state.getIn(['actions', 'createAssociationType', id]).toJS())
         .toEqual({
           id,
@@ -103,7 +151,7 @@ describe('AssociationTypesReducer', () => {
       state = reducer(state, createAssociationType.failure(id));
 
       expect(state.get('isCreatingNewAssociationType')).toEqual(true);
-      expect(state.get('newlyCreatedAssociationTypeId')).toEqual('');
+      expect(state.get('newlyCreatedAssociationTypeFQN')).toEqual('');
       expect(state.getIn(['actions', 'createAssociationType', id]).toJS())
         .toEqual({
           id,
@@ -125,7 +173,7 @@ describe('AssociationTypesReducer', () => {
 
       state = reducer(state, createAssociationType.finally(id));
       expect(state.get('isCreatingNewAssociationType')).toEqual(false);
-      expect(state.get('newlyCreatedAssociationTypeId')).toEqual('');
+      expect(state.get('newlyCreatedAssociationTypeFQN')).toEqual('');
       expect(state.hasIn(['actions', 'createAssociationType', id])).toEqual(false);
     });
 
@@ -252,56 +300,6 @@ describe('AssociationTypesReducer', () => {
 
       state = reducer(state, deleteAssociationType.finally(id));
       expect(state.hasIn(['actions', 'createAssociationType', id])).toEqual(false);
-    });
-
-  });
-
-  describe(GET_ALL_ASSOCIATION_TYPES, () => {
-
-    test(getAllAssociationTypes.REQUEST, () => {
-      const { id } = getAllAssociationTypes();
-      const state = reducer(INITIAL_STATE, getAllAssociationTypes.request(id));
-      expect(state.get('isFetchingAllAssociationTypes')).toEqual(true);
-    });
-
-    // TODO: test SUCCESS with variable size result
-    test(getAllAssociationTypes.SUCCESS, () => {
-
-      const { id } = getAllAssociationTypes();
-      const response = [MOCK_ASSOCIATION_TYPE_JSON];
-      let state = reducer(INITIAL_STATE, getAllAssociationTypes.request(id));
-      state = reducer(state, getAllAssociationTypes.success(id, response));
-
-      expect(state.get('isFetchingAllAssociationTypes')).toEqual(true);
-
-      expect(state.get('associationTypes').toJS()).toEqual(
-        [MOCK_ASSOCIATION_TYPE_JSON]
-      );
-
-      expect(state.get('associationTypesById').toJS()).toEqual(
-        { [MOCK_ASSOCIATION_TYPE_JSON.entityType.id]: 0 }
-      );
-    });
-
-    test(getAllAssociationTypes.FAILURE, () => {
-
-      const { id } = getAllAssociationTypes();
-      let state = reducer(INITIAL_STATE, getAllAssociationTypes.request(id));
-      state = reducer(state, getAllAssociationTypes.failure(id));
-
-      expect(state.get('associationTypes').toJS()).toEqual([]);
-      expect(state.get('associationTypesById').toJS()).toEqual({});
-      expect(state.get('isFetchingAllAssociationTypes')).toEqual(true);
-    });
-
-    test(getAllAssociationTypes.FINALLY, () => {
-
-      const { id } = getAllAssociationTypes();
-      let state = reducer(INITIAL_STATE, getAllAssociationTypes.request(id));
-      expect(state.get('isFetchingAllAssociationTypes')).toEqual(true);
-
-      state = reducer(state, getAllAssociationTypes.finally(id));
-      expect(state.get('isFetchingAllAssociationTypes')).toEqual(false);
     });
 
   });

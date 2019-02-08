@@ -349,11 +349,11 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
 
 const mapStateToProps = (state :Map<*, *>) :{} => ({
   associationTypes: state.getIn(['edm', 'associationTypes', 'associationTypes']),
-  associationTypesById: state.getIn(['edm', 'associationTypes', 'associationTypesById']),
+  associationTypesIndexMap: state.getIn(['edm', 'associationTypes', 'associationTypesIndexMap']),
   entityTypes: state.getIn(['edm', 'entityTypes', 'entityTypes']),
   entityTypesIndexMap: state.getIn(['edm', 'entityTypes', 'entityTypesIndexMap']),
   isFetchingEntityDataModel: state.getIn(['edm', 'isFetchingEntityDataModel']),
-  newlyCreatedAssociationTypeId: state.getIn(['edm', 'associationTypes', 'newlyCreatedAssociationTypeId']),
+  newlyCreatedAssociationTypeFQN: state.getIn(['edm', 'associationTypes', 'newlyCreatedAssociationTypeFQN']),
   newlyCreatedEntityTypeFQN: state.getIn(['edm', 'entityTypes', 'newlyCreatedEntityTypeFQN']),
   newlyCreatedPropertyTypeFQN: state.getIn(['edm', 'propertyTypes', 'newlyCreatedPropertyTypeFQN']),
   propertyTypes: state.getIn(['edm', 'propertyTypes', 'propertyTypes']),

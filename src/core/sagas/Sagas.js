@@ -6,6 +6,7 @@ import { AuthSagas } from 'lattice-auth';
 import { EntityDataModelApiSagas } from 'lattice-sagas';
 import { all, fork } from 'redux-saga/effects';
 
+import * as AssociationTypesSagas from '../../containers/edm/associationtypes/AssociationTypesSagas';
 import * as EntityTypesSagas from '../../containers/edm/entitytypes/EntityTypesSagas';
 import * as GitHubSagas from '../../containers/github/GitHubSagas';
 import * as PropertyTypesSagas from '../../containers/edm/propertytypes/PropertyTypesSagas';
@@ -26,6 +27,9 @@ export default function* sagas() :Generator<*, *, *> {
 
     // "lattice-sagas" Sagas
     fork(EntityDataModelApiSagas.getEntityDataModelWatcher),
+
+    // AssociationTypesSagas
+    fork(AssociationTypesSagas.localCreateAssociationTypeWatcher),
 
     // EntityTypesSagas
     fork(EntityTypesSagas.localAddPropertyTypeToEntityTypeWatcher),

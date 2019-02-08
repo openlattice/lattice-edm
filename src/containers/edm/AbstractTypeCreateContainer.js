@@ -16,12 +16,16 @@ import AbstractTypes from '../../utils/AbstractTypes';
 import AbstractTypeDataTable from '../../components/datatable/AbstractTypeDataTable';
 import AbstractTypeSearchableSelect from '../../components/controls/AbstractTypeSearchableSelect';
 import InlineEditableControl from '../../components/controls/InlineEditableControl';
+import Logger from '../../utils/Logger';
 import StyledButton from '../../components/buttons/StyledButton';
 import StyledCard from '../../components/cards/StyledCard';
+import * as AssociationTypesActions from './associationtypes/AssociationTypesActions';
 import * as EntityTypesActions from './entitytypes/EntityTypesActions';
 import * as PropertyTypesActions from './propertytypes/PropertyTypesActions';
 import { EDM_PRIMITIVE_TYPES } from '../../utils/EdmPrimitiveTypes';
 import type { AbstractType } from '../../utils/AbstractTypes';
+
+const LOG :Logger = new Logger('AbstractTypeCreateContainer');
 
 const {
   createAssociationType,
@@ -29,11 +33,11 @@ const {
 } = EntityDataModelApiActionFactory;
 
 const {
-  FullyQualifiedName,
   AssociationType,
   AssociationTypeBuilder,
   EntityType,
   EntityTypeBuilder,
+  FullyQualifiedName,
   PropertyType,
   PropertyTypeBuilder,
   Schema,
@@ -128,8 +132,7 @@ const PropertyTypesSection = styled.section`
 
 type Props = {
   actions :{
-    createAssociationType :RequestSequence;
-    createSchema :RequestSequence;
+    localCreateAssociationType :RequestSequence;
     localCreateEntityType :RequestSequence;
     localCreatePropertyType :RequestSequence;
   };
@@ -310,11 +313,10 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
           .setBidirectional(bidiValue)
           .build();
 
-        actions.createAssociationType(newAssociationType);
+        actions.localCreateAssociationType(newAssociationType);
       }
       else {
-        // TODO: need a Logger class
-        // console.error('invalid AbstractType: ', this.props.workingAbstractTypeType);
+        LOG.error('invalid AbstractType:', workingAbstractTypeType);
       }
     }
 
@@ -979,8 +981,7 @@ const mapStateToProps = (state :Map<*, *>) :{} => ({
 
 const mapDispatchToProps = (dispatch :Function) :{} => ({
   actions: bindActionCreators({
-    createAssociationType,
-    createSchema,
+    localCreateAssociationType: AssociationTypesActions.localCreateAssociationType,
     localCreateEntityType: EntityTypesActions.localCreateEntityType,
     localCreatePropertyType: PropertyTypesActions.localCreatePropertyType,
   }, dispatch)

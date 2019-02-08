@@ -14,6 +14,7 @@ import {
   OrderedMap,
   fromJS
 } from 'immutable';
+import type { FQN } from 'lattice';
 
 import AbstractCell from './AbstractCell';
 import AbstractDataTable from './AbstractDataTable';
@@ -220,16 +221,18 @@ class AbstractTypeDataTable extends React.Component<Props, State> {
 
     const { abstractTypes, onAbstractTypeSelect, workingAbstractTypeType } = this.props;
 
+    let selectedAbstractTypeFQN :FQN;
     const selectedAbstractType :Map<*, *> = abstractTypes.get(selectedRowIndex, Map());
-    let selectedAbstractTypeFQN :FQN = new FullyQualifiedName(selectedAbstractType.get('type'));
 
     if (workingAbstractTypeType === AbstractTypes.AssociationType) {
       const entityType :Map<*, *> = selectedAbstractType.get('entityType', Map());
-      selectedAbstractTypeFQN = new FullyQualifiedName(entityType.get('type'));
+      selectedAbstractTypeFQN = new FullyQualifiedName(entityType.get('type', Map()));
     }
     else if (workingAbstractTypeType === AbstractTypes.Schema) {
-      selectedAbstractTypeFQN = new FullyQualifiedName(selectedAbstractType.get('fqn'));
-      // selectedAbstractTypeId = new FullyQualifiedName(selectedAbstractType.get('fqn', Map()));
+      selectedAbstractTypeFQN = new FullyQualifiedName(selectedAbstractType.get('fqn', Map()));
+    }
+    else {
+      selectedAbstractTypeFQN = new FullyQualifiedName(selectedAbstractType.get('type', Map()));
     }
 
     onAbstractTypeSelect(selectedAbstractTypeFQN);

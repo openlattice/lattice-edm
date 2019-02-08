@@ -11,13 +11,13 @@ type IndexMap = Map<FQN | UUID, number>;
 
 type AbstractTypeOverviewContainerProps = {
   associationTypes :List<Map<*, *>>;
-  associationTypesById :Map<string, number>;
+  associationTypesIndexMap :IndexMap;
   entityTypes :List<Map<*, *>>;
   entityTypesIndexMap :IndexMap;
   isFetchingEntityDataModel :boolean;
-  newlyCreatedAssociationTypeId :UUID; // eslint-disable-line react/no-unused-prop-types
-  newlyCreatedEntityTypeFQN :FQN; // eslint-disable-line react/no-unused-prop-types
-  newlyCreatedPropertyTypeFQN :FQN; // eslint-disable-line react/no-unused-prop-types
+  newlyCreatedAssociationTypeFQN :FQN;
+  newlyCreatedEntityTypeFQN :FQN;
+  newlyCreatedPropertyTypeFQN :FQN;
   propertyTypes :List<Map<*, *>>;
   propertyTypesIndexMap :IndexMap;
   schemas :List<Map<*, *>>;

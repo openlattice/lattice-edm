@@ -58,7 +58,7 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
           const seqAction :SequenceAction = action;
           const responsePropertyTypes :PropertyTypeObject[] = seqAction.value.propertyTypes;
           if (!responsePropertyTypes || responsePropertyTypes.length === 0) {
-            LOG.error('getEntityDataModel() - no PropertyTypes available', responsePropertyTypes);
+            LOG.error('getEntityDataModel() - PropertyTypes missing', responsePropertyTypes);
             return state;
           }
 
@@ -69,7 +69,7 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
             try {
               const propertyTypeId :?UUID = pt.id;
               const propertyTypeFQN :FQN = new FullyQualifiedName(pt.type);
-              const propertyType = new PropertyTypeBuilder()
+              const propertyType :PropertyType = new PropertyTypeBuilder()
                 .setId(propertyTypeId)
                 .setType(propertyTypeFQN)
                 .setTitle(pt.title)
