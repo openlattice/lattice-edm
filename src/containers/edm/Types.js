@@ -31,6 +31,12 @@ type AbstractTypeOverviewContainerState = {
   showCreateNewAbstractTypeCard :boolean;
 };
 
+type UpdateAssociationTypeMeta = {
+  associationTypeFQN :FQN;
+  associationTypeId :?UUID;
+  metadata :Object;
+};
+
 type UpdateEntityTypeMeta = {
   entityTypeFQN :FQN;
   entityTypeId :?UUID;
@@ -47,6 +53,7 @@ export type {
   AbstractTypeOverviewContainerProps,
   AbstractTypeOverviewContainerState,
   IndexMap,
+  UpdateAssociationTypeMeta,
   UpdateEntityTypeMeta,
   UpdatePropertyTypeMeta,
 };

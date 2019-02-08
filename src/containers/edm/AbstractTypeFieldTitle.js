@@ -13,6 +13,7 @@ import type { FQN } from 'lattice';
 
 import AbstractTypes from '../../utils/AbstractTypes';
 import InlineEditableControl from '../../components/controls/InlineEditableControl';
+import * as AssociationTypesActions from './associationtypes/AssociationTypesActions';
 import * as EntityTypesActions from './entitytypes/EntityTypesActions';
 import * as PropertyTypesActions from './propertytypes/PropertyTypesActions';
 import type { AbstractType } from '../../utils/AbstractTypes';
@@ -25,6 +26,7 @@ type Props = {
   abstractType :Map<*, *>;
   abstractTypeType :AbstractType;
   actions :{
+    localUpdateAssociationTypeMeta :RequestSequence;
     localUpdateEntityTypeMeta :RequestSequence;
     localUpdatePropertyTypeMeta :RequestSequence;
   };
@@ -57,10 +59,11 @@ class AbstractTypeFieldTitle extends React.Component<Props, State> {
 
     switch (abstractTypeType) {
       case AbstractTypes.AssociationType:
-        // actions.updateAssociationTypeMetaData({
-        //   associationTypeId: abstractTypeId,
-        //   metadata: abstractTypeMetaData
-        // });
+        actions.localUpdateAssociationTypeMeta({
+          associationTypeFQN: abstractTypeFQN,
+          associationTypeId: abstractTypeId,
+          metadata: abstractTypeMetaData
+        });
         break;
       case AbstractTypes.EntityType:
         actions.localUpdateEntityTypeMeta({
@@ -108,6 +111,7 @@ class AbstractTypeFieldTitle extends React.Component<Props, State> {
 
 const mapDispatchToProps = (dispatch :Function) :Object => ({
   actions: bindActionCreators({
+    localUpdateAssociationTypeMeta: AssociationTypesActions.localUpdateAssociationTypeMeta,
     localUpdateEntityTypeMeta: EntityTypesActions.localUpdateEntityTypeMeta,
     localUpdatePropertyTypeMeta: PropertyTypesActions.localUpdatePropertyTypeMeta,
   }, dispatch)

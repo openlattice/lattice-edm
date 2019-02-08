@@ -32,18 +32,20 @@ import {
   localRemovePropertyTypeFromAssociationType,
   localUpdateAssociationTypeMeta,
 } from './AssociationTypesActions';
-import type { IndexMap } from '../Types';
+import type { IndexMap, UpdateAssociationTypeMeta } from '../Types';
 
 const LOG = new Logger('EntityTypesSagas');
 
 const {
   createAssociationType,
   deleteAssociationType,
+  updateAssociationTypeMetaData,
 } = EntityDataModelApiActions;
 
 const {
   createAssociationTypeWorker,
   deleteAssociationTypeWorker,
+  updateAssociationTypeMetaDataWorker,
 } = EntityDataModelApiSagas;
 
 const {
@@ -159,9 +161,61 @@ function* localDeleteAssociationTypeWatcher() :Generator<*, *, *> {
   yield takeEvery(LOCAL_DELETE_ASSOCIATION_TYPE, localDeleteAssociationTypeWorker);
 }
 
+/*
+ *
+ * AssociationTypesActions.localUpdateAssociationTypeMeta()
+ *
+ */
+
+function* localUpdateAssociationTypeMetaWorker(seqAction :SequenceAction) :Generator<*, *, *> {
+
+  const { id, value } = seqAction;
+  if (value === null || value === undefined) {
+    yield put(localUpdateAssociationTypeMeta.failure(id, ERR_ACTION_VALUE_NOT_DEFINED));
+    return;
+  }
+
+  try {
+    yield put(localUpdateAssociationTypeMeta.request(id, value));
+
+    const {
+      associationTypeId,
+      metadata,
+    } :UpdateAssociationTypeMeta = value;
+
+    const isOnline :boolean = yield select(
+      state => state.getIn(['app', 'isOnline'])
+    );
+
+    if (isOnline && isValidUUID(associationTypeId)) {
+      const response :Object = yield call(
+        updateAssociationTypeMetaDataWorker,
+        updateAssociationTypeMetaData({ associationTypeId, metadata }),
+      );
+      if (response.error) throw response.error;
+    }
+
+    yield put(localUpdateAssociationTypeMeta.success(id));
+  }
+  catch (error) {
+    LOG.error(ERR_WORKER_SAGA, error);
+    yield put(localUpdateAssociationTypeMeta.failure(id));
+  }
+  finally {
+    yield put(localUpdateAssociationTypeMeta.finally(id));
+  }
+}
+
+function* localUpdateAssociationTypeMetaWatcher() :Generator<*, *, *> {
+
+  yield takeEvery(LOCAL_UPDATE_ASSOCIATION_TYPE_META, localUpdateAssociationTypeMetaWorker);
+}
+
 export {
   localCreateAssociationTypeWatcher,
   localCreateAssociationTypeWorker,
   localDeleteAssociationTypeWatcher,
   localDeleteAssociationTypeWorker,
+  localUpdateAssociationTypeMetaWatcher,
+  localUpdateAssociationTypeMetaWorker,
 };

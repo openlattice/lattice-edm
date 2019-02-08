@@ -4,7 +4,12 @@
 
 /* eslint-disable arrow-body-style */
 
-import { List, Map, fromJS } from 'immutable';
+import {
+  List,
+  Map,
+  fromJS,
+  has,
+} from 'immutable';
 import { Models, Types } from 'lattice';
 import { EntityDataModelApiActions } from 'lattice-sagas';
 import type { FQN, AssociationTypeObject } from 'lattice';
@@ -23,7 +28,7 @@ import {
   localRemovePropertyTypeFromAssociationType,
   localUpdateAssociationTypeMeta,
 } from './AssociationTypesActions';
-import type { IndexMap } from '../Types';
+import type { IndexMap, UpdateAssociationTypeMeta } from '../Types';
 
 const LOG :Logger = new Logger('AssociationTypesReducer');
 
@@ -213,16 +218,19 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
 
           if (storedSeqAction) {
 
-            const targetFQN :FQN = storedSeqAction.value.associationTypeFQN;
-            const targetIndex :number = state.getIn(['associationTypesIndexMap', targetFQN], -1);
+            const associationTypeFQN :FQN = storedSeqAction.value.associationTypeFQN;
+            const associationTypeId :FQN = storedSeqAction.value.associationTypeId;
+
+            const targetIndex :number = state.getIn(['associationTypesIndexMap', associationTypeFQN], -1);
             if (targetIndex === -1) {
-              LOG.error('AssociationType does not exist in store', targetFQN);
+              LOG.error('AssociationType does not exist in store', associationTypeFQN);
               return state;
             }
 
             const target :Map<*, *> = state.getIn(['associationTypes', targetIndex], Map());
-            if (FullyQualifiedName.toString(target.getIn(['entityType', 'type'], Map())) !== targetFQN.toString()) {
-              LOG.error('AssociationType does not match fqn', targetFQN);
+            const targetFQN :FQN = new FullyQualifiedName(target.get('type', Map()));
+            if (target.get('id') !== associationTypeId || targetFQN.toString() !== associationTypeFQN.toString()) {
+              LOG.error('AssociationType does not match id or fqn', associationTypeId, associationTypeFQN);
               return state;
             }
 
@@ -235,11 +243,11 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
                * IMPORTANT! we must keep the fqn and id index mapping in sync!
                */
               const associationEntityType :Map<*, *> = associationType.get('entityType', Map());
-              const associationTypeFQN :FQN = new FullyQualifiedName(associationEntityType.get('type'));
-              updatedAssociationTypesIndexMap.set(associationTypeFQN, index);
-              const associationTypeId :?UUID = associationType.get('id');
-              if (isValidUUID(associationTypeId)) {
-                updatedAssociationTypesIndexMap.set(associationTypeId, index);
+              const fqn :FQN = new FullyQualifiedName(associationEntityType.get('type'));
+              updatedAssociationTypesIndexMap.set(fqn, index);
+              const id :?UUID = associationType.get('id');
+              if (isValidUUID(id)) {
+                updatedAssociationTypesIndexMap.set(id, index);
               }
             });
 
@@ -266,51 +274,97 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
       });
     }
 
-    // case deleteAssociationType.case(action.type): {
-    //   return deleteAssociationType.reducer(state, action, {
-    //     REQUEST: () => {
-    //       // TODO: not ideal. perhaps there's a better way to get access to the trigger action value
-    //       const seqAction :SequenceAction = (action :any);
-    //       return state.setIn(['actions', 'deleteAssociationType', seqAction.id], fromJS(seqAction));
-    //     },
-    //     SUCCESS: () => {
-    //
-    //       const seqAction :SequenceAction = (action :any);
-    //       const storedSeqAction :Map<*, *> = state.getIn(['actions', 'deleteAssociationType', seqAction.id], Map());
-    //       if (storedSeqAction.isEmpty()) {
-    //         return state;
-    //       }
-    //
-    //       const targetId :string = storedSeqAction.get('value');
-    //       const targetIndex :number = state.getIn(['associationTypesById', targetId], -1);
-    //       if (targetIndex === -1) {
-    //         return state;
-    //       }
-    //
-    //       const currentAssociationTypes :List<Map<*, *>> = state.get('associationTypes', List());
-    //       const updatedAssociationTypes :List<Map<*, *>> = currentAssociationTypes.delete(targetIndex);
-    //       const updatedAssociationTypesById :Map<string, number> = Map()
-    //         .withMutations((byIdMap :Map<string, number>) => {
-    //           updatedAssociationTypes.forEach((associationType :Map<*, *>, associationTypeIndex :number) => {
-    //             const entityType :Map<*, *> = associationType.get('entityType', Map());
-    //             byIdMap.set(entityType.get('id'), associationTypeIndex);
-    //           });
-    //         });
-    //
-    //       return state
-    //         .set('associationTypes', updatedAssociationTypes)
-    //         .set('associationTypesById', updatedAssociationTypesById);
-    //     },
-    //     FAILURE: () => {
-    //       // TODO: need to properly handle the failure case
-    //       return state;
-    //     },
-    //     FINALLY: () => {
-    //       const seqAction :SequenceAction = (action :any);
-    //       return state.deleteIn(['actions', 'deleteAssociationType', seqAction.id]);
-    //     }
-    //   });
-    // }
+    case localUpdateAssociationTypeMeta.case(action.type): {
+      return localUpdateAssociationTypeMeta.reducer(state, action, {
+        REQUEST: () => {
+          const seqAction :SequenceAction = action;
+          return state.setIn([LOCAL_UPDATE_ASSOCIATION_TYPE_META, seqAction.id], seqAction);
+        },
+        SUCCESS: () => {
+
+          const seqAction :SequenceAction = action;
+          const storedSeqAction :SequenceAction = state.getIn([LOCAL_UPDATE_ASSOCIATION_TYPE_META, seqAction.id]);
+
+          if (storedSeqAction) {
+
+            const {
+              associationTypeFQN,
+              associationTypeId,
+              metadata,
+            } :UpdateAssociationTypeMeta = storedSeqAction.value;
+
+            const targetIndex :number = state.getIn(['associationTypesIndexMap', associationTypeFQN], -1);
+            if (targetIndex === -1) {
+              LOG.error('AssociationType does not exist in store', associationTypeFQN);
+              return state;
+            }
+
+            const target :Map<*, *> = state.getIn(['associationTypes', targetIndex], Map());
+            const targetFQN :FQN = new FullyQualifiedName(target.getIn(['entityType', 'type'], Map()));
+            const targetId :?UUID = target.getIn(['entityType', 'id']);
+            if (targetId !== associationTypeId || targetFQN.toString() !== associationTypeFQN.toString()) {
+              LOG.error('AssociationType does not match id or fqn', associationTypeId, associationTypeFQN);
+              return state;
+            }
+
+            let newState :Map<*, *> = state;
+            const currentAssociationType :AssociationTypeObject = target.toJS();
+            const entityTypeBuilder :EntityTypeBuilder = new EntityTypeBuilder()
+              .setBaseType(currentAssociationType.entityType.baseType)
+              .setCategory(currentAssociationType.entityType.category)
+              .setDescription(currentAssociationType.entityType.description)
+              .setId(currentAssociationType.entityType.id)
+              .setKey(currentAssociationType.entityType.key)
+              .setPropertyTypes(currentAssociationType.entityType.properties)
+              .setSchemas(currentAssociationType.entityType.schemas)
+              .setTitle(currentAssociationType.entityType.title)
+              .setType(currentAssociationType.entityType.type);
+
+            if (has(metadata, 'description')) {
+              entityTypeBuilder.setDescription(metadata.description);
+            }
+
+            if (has(metadata, 'title')) {
+              entityTypeBuilder.setTitle(metadata.title);
+            }
+
+            if (has(metadata, 'type')) {
+              const newAssociationTypeFQN = new FullyQualifiedName(metadata.type);
+              entityTypeBuilder.setType(metadata.type);
+              newState = newState
+                .deleteIn(['associationTypesIndexMap', associationTypeFQN])
+                .setIn(['associationTypesIndexMap', newAssociationTypeFQN], targetIndex);
+            }
+
+            const updatedEntityType :EntityType = entityTypeBuilder.build();
+            const updatedAssociationType :AssociationType = new AssociationTypeBuilder()
+              .setBidirectional(currentAssociationType.bidirectional)
+              .setDestinationEntityTypeIds(currentAssociationType.dst)
+              .setEntityType(updatedEntityType)
+              .setSourceEntityTypeIds(currentAssociationType.src)
+              .build();
+
+            return newState
+              .setIn(['associationTypes', targetIndex], updatedAssociationType.toImmutable());
+          }
+
+          return state;
+        },
+        FAILURE: () => {
+          const seqAction :SequenceAction = action;
+          const storedSeqAction :SequenceAction = state.getIn([LOCAL_UPDATE_ASSOCIATION_TYPE_META, seqAction.id]);
+          if (storedSeqAction) {
+            // TODO: we need a better pattern for setting and handling errors
+            return state.setIn([LOCAL_UPDATE_ASSOCIATION_TYPE_META, 'error'], true);
+          }
+          return state;
+        },
+        FINALLY: () => {
+          const seqAction :SequenceAction = action;
+          return state.deleteIn([LOCAL_UPDATE_ASSOCIATION_TYPE_META, seqAction.id]);
+        },
+      });
+    }
 
     // case addDstEntityTypeToAssociationType.case(action.type): {
     //   return addDstEntityTypeToAssociationType.reducer(state, action, {
@@ -700,66 +754,6 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
     //     FINALLY: () => {
     //       const seqAction :SequenceAction = (action :any);
     //       return state.deleteIn(['actions', 'reorderEntityTypePropertyTypes', seqAction.id]);
-    //     }
-    //   });
-    // }
-
-    // case updateAssociationTypeMetaData.case(action.type): {
-    //   return updateAssociationTypeMetaData.reducer(state, action, {
-    //     REQUEST: () => {
-    //       // TODO: not ideal. perhaps there's a better way to get access to the trigger action value
-    //       const seqAction :SequenceAction = (action :any);
-    //       return state.setIn(['actions', 'updateAssociationTypeMetaData', seqAction.id], fromJS(seqAction));
-    //     },
-    //     SUCCESS: () => {
-    //
-    //       const seqAction :SequenceAction = (action :any);
-    //       const storedSeqAction :Map<*, *> = state.getIn(
-    //         ['actions', 'updateAssociationTypeMetaData', seqAction.id],
-    //         Map()
-    //       );
-    //
-    //       if (storedSeqAction.isEmpty()) {
-    //         return state;
-    //       }
-    //
-    //       const associationTypeId :string = storedSeqAction.getIn(['value', 'associationTypeId']);
-    //       const associationTypeIndex :number = state.getIn(['associationTypesById', associationTypeId], -1);
-    //       if (associationTypeIndex < 0) {
-    //         return state;
-    //       }
-    //
-    //       const metadata :Map<*, *> = storedSeqAction.getIn(['value', 'metadata']);
-    //       if (metadata.has('description')) {
-    //         return state.setIn(
-    //           ['associationTypes', associationTypeIndex, 'entityType', 'description'],
-    //           metadata.get('description')
-    //         );
-    //       }
-    //       if (metadata.has('title')) {
-    //         return state.setIn(
-    //           ['associationTypes', associationTypeIndex, 'entityType', 'title'],
-    //           metadata.get('title')
-    //         );
-    //       }
-    //       if (metadata.has('type')) {
-    //         // TODO: potential bug with how immutable.js deals with custom objects
-    //         // TODO: consider storing plain object instead of FullyQualifiedName object
-    //         return state.setIn(
-    //           ['associationTypes', associationTypeIndex, 'entityType', 'type'],
-    //           metadata.get('type')
-    //         );
-    //       }
-    //
-    //       return state;
-    //     },
-    //     FAILURE: () => {
-    //       // TODO: need to properly handle the failure case
-    //       return state;
-    //     },
-    //     FINALLY: () => {
-    //       const seqAction :SequenceAction = (action :any);
-    //       return state.deleteIn(['actions', 'updateAssociationTypeMetaData', seqAction.id]);
     //     }
     //   });
     // }

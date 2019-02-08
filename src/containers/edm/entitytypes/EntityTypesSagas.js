@@ -283,8 +283,8 @@ function* localUpdateEntityTypeMetaWorker(seqAction :SequenceAction) :Generator<
     yield put(localUpdateEntityTypeMeta.request(id, value));
 
     const {
-      metadata,
       entityTypeId,
+      metadata,
     } :UpdateEntityTypeMeta = value;
 
     const isOnline :boolean = yield select(
@@ -294,7 +294,7 @@ function* localUpdateEntityTypeMetaWorker(seqAction :SequenceAction) :Generator<
     if (isOnline && isValidUUID(entityTypeId)) {
       const response :Object = yield call(
         updateEntityTypeMetaDataWorker,
-        updateEntityTypeMetaData({ metadata, entityTypeId })
+        updateEntityTypeMetaData({ entityTypeId, metadata })
       );
       if (response.error) throw response.error;
     }
