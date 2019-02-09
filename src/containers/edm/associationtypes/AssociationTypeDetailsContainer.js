@@ -50,6 +50,7 @@ type Props = {
   actions :{
     localAddPropertyTypeToAssociationType :RequestSequence;
     localDeleteAssociationType :RequestSequence;
+    localRemovePropertyTypeFromAssociationType :RequestSequence;
   };
   associationType :Map<*, *>;
   entityTypes :List<Map<*, *>>;
@@ -125,15 +126,23 @@ class AssociationTypeDetailsContainer extends React.Component<Props> {
     }
   }
 
-  handleRemovePropertyTypeFromAssociationType = (propertyTypeIdToRemove :string) => {
+  handleRemovePropertyTypeFromAssociationType = (selectedPropertyTypeFQN :FQN) => {
 
-    const { actions, associationType } = this.props;
+    const {
+      actions,
+      associationType,
+      propertyTypes,
+      propertyTypesIndexMap,
+    } = this.props;
 
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
       const associationEntityType :Map<*, *> = associationType.get('entityType', Map());
-      actions.removePropertyTypeFromEntityType({
-        entityTypeId: associationEntityType.get('id'),
-        propertyTypeId: propertyTypeIdToRemove
+      const propertyTypesIndex :number = propertyTypesIndexMap.get(selectedPropertyTypeFQN, -1);
+      const propertyTypeId :UUID = propertyTypes.getIn([propertyTypesIndex, 'id']);
+      actions.localRemovePropertyTypeFromAssociationType({
+        propertyTypeId,
+        associationTypeFQN: new FullyQualifiedName(associationEntityType.get('type')),
+        associationTypeId: associationEntityType.get('id'),
       });
     }
   }
@@ -151,23 +160,24 @@ class AssociationTypeDetailsContainer extends React.Component<Props> {
     }
   }
 
-  handleReorderPropertyTypes = (oldIndex :number, newIndex :number) => {
-
-    const { actions, associationType } = this.props;
-
-    if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
-
-      const associationEntityType :Map<*, *> = associationType.get('entityType', Map());
-      const propertyTypeIds :List<string> = associationEntityType.get('properties');
-      const idToMove :string = propertyTypeIds.get(oldIndex);
-      const reorderedPropertyTypeIds :List<string> = propertyTypeIds.delete(oldIndex).insert(newIndex, idToMove);
-
-      actions.reorderEntityTypePropertyTypes({
-        entityTypeId: associationEntityType.get('id'),
-        propertyTypeIds: reorderedPropertyTypeIds.toJS()
-      });
-    }
-  }
+  // TODO: uncomment when re-enabling this feature
+  // handleReorderPropertyTypes = (oldIndex :number, newIndex :number) => {
+  //
+  //   const { actions, associationType } = this.props;
+  //
+  //   if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
+  //
+  //     const associationEntityType :Map<*, *> = associationType.get('entityType', Map());
+  //     const propertyTypeIds :List<string> = associationEntityType.get('properties');
+  //     const idToMove :string = propertyTypeIds.get(oldIndex);
+  //     const reorderedPropertyTypeIds :List<string> = propertyTypeIds.delete(oldIndex).insert(newIndex, idToMove);
+  //
+  //     actions.reorderEntityTypePropertyTypes({
+  //       entityTypeId: associationEntityType.get('id'),
+  //       propertyTypeIds: reorderedPropertyTypeIds.toJS()
+  //     });
+  //   }
+  // }
 
   handleOnClickDelete = () => {
 
@@ -551,6 +561,7 @@ const mapDispatchToProps = (dispatch :Function) :Object => ({
   actions: bindActionCreators({
     localAddPropertyTypeToAssociationType: AssociationTypesActions.localAddPropertyTypeToAssociationType,
     localDeleteAssociationType: AssociationTypesActions.localDeleteAssociationType,
+    localRemovePropertyTypeFromAssociationType: AssociationTypesActions.localRemovePropertyTypeFromAssociationType,
   }, dispatch)
 });
 

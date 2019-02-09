@@ -40,6 +40,7 @@ const {
   addPropertyTypeToEntityType,
   createAssociationType,
   deleteAssociationType,
+  removePropertyTypeFromEntityType,
   updateAssociationTypeMetaData,
 } = EntityDataModelApiActions;
 
@@ -47,6 +48,7 @@ const {
   addPropertyTypeToEntityTypeWorker,
   createAssociationTypeWorker,
   deleteAssociationTypeWorker,
+  removePropertyTypeFromEntityTypeWorker,
   updateAssociationTypeMetaDataWorker,
 } = EntityDataModelApiSagas;
 
@@ -213,6 +215,54 @@ function* localDeleteAssociationTypeWatcher() :Generator<*, *, *> {
 
 /*
  *
+ * AssociationTypesActions.localRemovePropertyTypeFromAssociationType()
+ *
+ */
+
+function* localRemovePropertyTypeFromAssociationTypeWorker(seqAction :SequenceAction) :Generator<*, *, *> {
+
+  const { id, value } = seqAction;
+  if (value === null || value === undefined) {
+    yield put(localRemovePropertyTypeFromAssociationType.failure(id, ERR_ACTION_VALUE_NOT_DEFINED));
+    return;
+  }
+
+  try {
+    yield put(localRemovePropertyTypeFromAssociationType.request(id, value));
+
+    const entityTypeId :?UUID = value.associationTypeId;
+    const propertyTypeId :?UUID = value.propertyTypeId;
+
+    const isOnline :boolean = yield select(
+      state => state.getIn(['app', 'isOnline'])
+    );
+
+    if (isOnline && isValidUUID(entityTypeId) && isValidUUID(propertyTypeId)) {
+      const response :Object = yield call(
+        removePropertyTypeFromEntityTypeWorker,
+        removePropertyTypeFromEntityType({ entityTypeId, propertyTypeId })
+      );
+      if (response.error) throw response.error;
+    }
+
+    yield put(localRemovePropertyTypeFromAssociationType.success(id));
+  }
+  catch (error) {
+    LOG.error(ERR_WORKER_SAGA, error);
+    yield put(localRemovePropertyTypeFromAssociationType.failure(id));
+  }
+  finally {
+    yield put(localRemovePropertyTypeFromAssociationType.finally(id));
+  }
+}
+
+function* localRemovePropertyTypeFromAssociationTypeWatcher() :Generator<*, *, *> {
+
+  yield takeEvery(LOCAL_REMOVE_PT_FROM_AT, localRemovePropertyTypeFromAssociationTypeWorker);
+}
+
+/*
+ *
  * AssociationTypesActions.localUpdateAssociationTypeMeta()
  *
  */
@@ -268,6 +318,8 @@ export {
   localCreateAssociationTypeWorker,
   localDeleteAssociationTypeWatcher,
   localDeleteAssociationTypeWorker,
+  localRemovePropertyTypeFromAssociationTypeWatcher,
+  localRemovePropertyTypeFromAssociationTypeWorker,
   localUpdateAssociationTypeMetaWatcher,
   localUpdateAssociationTypeMetaWorker,
 };

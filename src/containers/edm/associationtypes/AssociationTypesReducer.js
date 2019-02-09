@@ -339,6 +339,60 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
       });
     }
 
+    case localRemovePropertyTypeFromAssociationType.case(action.type): {
+      return localRemovePropertyTypeFromAssociationType.reducer(state, action, {
+        REQUEST: () => {
+          const seqAction :SequenceAction = action;
+          return state.setIn([LOCAL_REMOVE_PT_FROM_AT, seqAction.id], seqAction);
+        },
+        SUCCESS: () => {
+
+          const seqAction :SequenceAction = action;
+          const storedSeqAction :SequenceAction = state.getIn([LOCAL_REMOVE_PT_FROM_AT, seqAction.id]);
+
+          if (storedSeqAction) {
+
+            const associationTypeFQN :FQN = storedSeqAction.value.associationTypeFQN;
+            const associationTypeId :?UUID = storedSeqAction.value.associationTypeId;
+            const propertyTypeId :?UUID = storedSeqAction.value.propertyTypeId;
+
+            const targetIndex :number = state.getIn(['associationTypesIndexMap', associationTypeFQN], -1);
+            if (targetIndex === -1) {
+              LOG.error('AssociationType does not exist in store', associationTypeFQN);
+              return state;
+            }
+
+            const target :Map<*, *> = state.getIn(['associationTypes', targetIndex], Map());
+            const targetFQN :FQN = new FullyQualifiedName(target.getIn(['entityType', 'type'], Map()));
+            const targetId :?UUID = target.getIn(['entityType', 'id']);
+            if (targetId !== associationTypeId || targetFQN.toString() !== associationTypeFQN.toString()) {
+              LOG.error('AssociationType does not match id or fqn', associationTypeId, associationTypeFQN);
+              return state;
+            }
+
+            const currentPropertyTypeIds :List<UUID> = target.getIn(['entityType', 'properties'], List());
+            const updatedPropertyTypeIds :List<UUID> = currentPropertyTypeIds.filter(id => id !== propertyTypeId);
+            return state.setIn(['associationTypes', targetIndex, 'entityType', 'properties'], updatedPropertyTypeIds);
+          }
+
+          return state;
+        },
+        FAILURE: () => {
+          const seqAction :SequenceAction = action;
+          const storedSeqAction :SequenceAction = state.getIn([LOCAL_REMOVE_PT_FROM_AT, seqAction.id]);
+          if (storedSeqAction) {
+            // TODO: we need a better pattern for setting and handling errors
+            return state.setIn([LOCAL_REMOVE_PT_FROM_AT, 'error'], true);
+          }
+          return state;
+        },
+        FINALLY: () => {
+          const seqAction :SequenceAction = action;
+          return state.deleteIn([LOCAL_REMOVE_PT_FROM_AT, seqAction.id]);
+        },
+      });
+    }
+
     case localUpdateAssociationTypeMeta.case(action.type): {
       return localUpdateAssociationTypeMeta.reducer(state, action, {
         REQUEST: () => {
@@ -488,66 +542,6 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
     //   });
     // }
 
-    // case addPropertyTypeToEntityType.case(action.type): {
-    //   return addPropertyTypeToEntityType.reducer(state, action, {
-    //     REQUEST: () => {
-    //       // TODO: not ideal. perhaps there's a better way to get access to the trigger action value
-    //       const seqAction :SequenceAction = (action :any);
-    //       return state.setIn(['actions', 'addPropertyTypeToEntityType', seqAction.id], fromJS(seqAction));
-    //     },
-    //     SUCCESS: () => {
-    //
-    //       const seqAction :SequenceAction = (action :any);
-    //       const storedSeqAction :Map<*, *> = state.getIn(
-    //         ['actions', 'addPropertyTypeToEntityType', seqAction.id],
-    //         Map()
-    //       );
-    //
-    //       if (storedSeqAction.isEmpty()) {
-    //         return state;
-    //       }
-    //
-    //       const targetId :string = storedSeqAction.getIn(['value', 'entityTypeId']);
-    //       const targetIndex :number = state.getIn(['associationTypesById', targetId], -1);
-    //
-    //       // don't do anything if the AssociationType being modified isn't available
-    //       if (targetIndex === -1) {
-    //         return state;
-    //       }
-    //
-    //       const propertyTypeIdToAdd :string = storedSeqAction.getIn(['value', 'propertyTypeId']);
-    //       const currentAssociationType :Map<*, *> = state.getIn(['associationTypes', targetIndex], Map());
-    //       const currentPropertyTypeIds :List<string> = currentAssociationType.getIn(
-    //         ['entityType', 'properties'],
-    //         List()
-    //       );
-    //       const propertyTypeIndex :number = currentPropertyTypeIds.findIndex((propertyTypeId :string) => {
-    //         return propertyTypeId === propertyTypeIdToAdd;
-    //       });
-    //
-    //       // don't do anything if the PropertyType being added is already in the list
-    //       if (propertyTypeIndex !== -1) {
-    //         return state;
-    //       }
-    //
-    //       const updatedPropertyTypeIds :List<string> = currentPropertyTypeIds.push(propertyTypeIdToAdd);
-    //       const updatedAssociationType :Map<*, *> = currentAssociationType.setIn(
-    //         ['entityType', 'properties'],
-    //         updatedPropertyTypeIds
-    //       );
-    //       return state.setIn(['associationTypes', targetIndex], updatedAssociationType);
-    //     },
-    //     FAILURE: () => {
-    //       // TODO: need to properly handle the failure case
-    //       return state;
-    //     },
-    //     FINALLY: () => {
-    //       const seqAction :SequenceAction = (action :any);
-    //       return state.deleteIn(['actions', 'addPropertyTypeToEntityType', seqAction.id]);
-    //     }
-    //   });
-    // }
-
     // case addSrcEntityTypeToAssociationType.case(action.type): {
     //   return addSrcEntityTypeToAssociationType.reducer(state, action, {
     //     REQUEST: () => {
@@ -657,65 +651,6 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
     //     FINALLY: () => {
     //       const seqAction :SequenceAction = (action :any);
     //       return state.deleteIn(['actions', 'removeDstEntityTypeFromAssociationType', seqAction.id]);
-    //     }
-    //   });
-    // }
-
-    // case removePropertyTypeFromEntityType.case(action.type): {
-    //   return removePropertyTypeFromEntityType.reducer(state, action, {
-    //     REQUEST: () => {
-    //       // TODO: not ideal. perhaps there's a better way to get access to the trigger action value
-    //       const seqAction :SequenceAction = (action :any);
-    //       return state.setIn(['actions', 'removePropertyTypeFromEntityType', seqAction.id], fromJS(seqAction));
-    //     },
-    //     SUCCESS: () => {
-    //
-    //       const seqAction :SequenceAction = (action :any);
-    //       const storedSeqAction :Map<*, *> = state.getIn(
-    //         ['actions', 'removePropertyTypeFromEntityType', seqAction.id],
-    //         Map()
-    //       );
-    //
-    //       if (storedSeqAction.isEmpty()) {
-    //         return state;
-    //       }
-    //
-    //       const targetId :string = storedSeqAction.getIn(['value', 'entityTypeId']);
-    //       const targetIndex :number = state.getIn(['associationTypesById', targetId], -1);
-    //
-    //       // don't do anything if the AssociationType being modified isn't available
-    //       if (targetIndex === -1) {
-    //         return state;
-    //       }
-    //
-    //       const currentAssociationType :Map<*, *> = state.getIn(['associationTypes', targetIndex], Map());
-    //       const currentPropertyTypeIds :List<string> = currentAssociationType.getIn(
-    //         ['entityType', 'properties'],
-    //         List()
-    //       );
-    //       const removalIndex :number = currentPropertyTypeIds.findIndex((propertyTypeId :string) => {
-    //         return propertyTypeId === storedSeqAction.getIn(['value', 'propertyTypeId']);
-    //       });
-    //
-    //       // don't do anything if the PropertyType being removed is not actually in the list
-    //       if (removalIndex === -1) {
-    //         return state;
-    //       }
-    //
-    //       const updatedPropertyTypeIds :List<string> = currentPropertyTypeIds.delete(removalIndex);
-    //       const updatedAssociationType :Map<*, *> = currentAssociationType.setIn(
-    //         ['entityType', 'properties'],
-    //         updatedPropertyTypeIds
-    //       );
-    //       return state.setIn(['associationTypes', targetIndex], updatedAssociationType);
-    //     },
-    //     FAILURE: () => {
-    //       // TODO: need to properly handle the failure case
-    //       return state;
-    //     },
-    //     FINALLY: () => {
-    //       const seqAction :SequenceAction = (action :any);
-    //       return state.deleteIn(['actions', 'removePropertyTypeFromEntityType', seqAction.id]);
     //     }
     //   });
     // }
