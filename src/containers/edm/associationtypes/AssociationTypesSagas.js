@@ -21,6 +21,7 @@ import {
   ERR_WORKER_SAGA,
 } from '../../../utils/Errors';
 import {
+  LOCAL_ADD_DST_ET_TO_AT,
   LOCAL_ADD_PT_TO_AT,
   LOCAL_ADD_SRC_ET_TO_AT,
   LOCAL_CREATE_ASSOCIATION_TYPE,
@@ -28,6 +29,7 @@ import {
   LOCAL_REMOVE_PT_FROM_AT,
   LOCAL_REMOVE_SRC_ET_FROM_AT,
   LOCAL_UPDATE_ASSOCIATION_TYPE_META,
+  localAddDstEntityTypeToAssociationType,
   localAddPropertyTypeToAssociationType,
   localAddSrcEntityTypeToAssociationType,
   localCreateAssociationType,
@@ -41,6 +43,7 @@ import type { IndexMap, UpdateAssociationTypeMeta } from '../Types';
 const LOG = new Logger('EntityTypesSagas');
 
 const {
+  addDstEntityTypeToAssociationType,
   addPropertyTypeToEntityType,
   addSrcEntityTypeToAssociationType,
   createAssociationType,
@@ -51,6 +54,7 @@ const {
 } = EntityDataModelApiActions;
 
 const {
+  addDstEntityTypeToAssociationTypeWorker,
   addPropertyTypeToEntityTypeWorker,
   addSrcEntityTypeToAssociationTypeWorker,
   createAssociationTypeWorker,
@@ -63,6 +67,54 @@ const {
 const {
   AssociationType,
 } = Models;
+
+/*
+ *
+ * AssociationTypesActions.localAddDstEntityTypeToAssociationType()
+ *
+ */
+
+function* localAddDstEntityTypeToAssociationTypeWorker(seqAction :SequenceAction) :Generator<*, *, *> {
+
+  const { id, value } = seqAction;
+  if (value === null || value === undefined) {
+    yield put(localAddDstEntityTypeToAssociationType.failure(id, ERR_ACTION_VALUE_NOT_DEFINED));
+    return;
+  }
+
+  try {
+    yield put(localAddDstEntityTypeToAssociationType.request(id, value));
+
+    const associationTypeId :?UUID = value.associationTypeId;
+    const entityTypeId :?UUID = value.entityTypeId;
+
+    const isOnline :boolean = yield select(
+      state => state.getIn(['app', 'isOnline'])
+    );
+
+    if (isOnline && isValidUUID(associationTypeId) && isValidUUID(entityTypeId)) {
+      const response :Object = yield call(
+        addDstEntityTypeToAssociationTypeWorker,
+        addDstEntityTypeToAssociationType({ associationTypeId, entityTypeId })
+      );
+      if (response.error) throw response.error;
+    }
+
+    yield put(localAddDstEntityTypeToAssociationType.success(id));
+  }
+  catch (error) {
+    LOG.error(ERR_WORKER_SAGA, error);
+    yield put(localAddDstEntityTypeToAssociationType.failure(id));
+  }
+  finally {
+    yield put(localAddDstEntityTypeToAssociationType.finally(id));
+  }
+}
+
+function* localAddDstEntityTypeToAssociationTypeWatcher() :Generator<*, *, *> {
+
+  yield takeEvery(LOCAL_ADD_DST_ET_TO_AT, localAddDstEntityTypeToAssociationTypeWorker);
+}
 
 /*
  *
@@ -424,6 +476,8 @@ export {
   localCreateAssociationTypeWorker,
   localDeleteAssociationTypeWatcher,
   localDeleteAssociationTypeWorker,
+  localAddDstEntityTypeToAssociationTypeWatcher,
+  localAddDstEntityTypeToAssociationTypeWorker,
   localRemovePropertyTypeFromAssociationTypeWatcher,
   localRemovePropertyTypeFromAssociationTypeWorker,
   localRemoveSrcEntityTypeFromAssociationTypeWatcher,

@@ -48,6 +48,7 @@ const AbstractTypeSearchableSelectWrapper = styled.div`
 
 type Props = {
   actions :{
+    localAddDstEntityTypeToAssociationType :RequestSequence;
     localAddPropertyTypeToAssociationType :RequestSequence;
     localAddSrcEntityTypeToAssociationType :RequestSequence;
     localDeleteAssociationType :RequestSequence;
@@ -63,15 +64,28 @@ type Props = {
 
 class AssociationTypeDetailsContainer extends React.Component<Props> {
 
-  handleAddDestinationEntityTypeToAssociationType = (entityTypeIdToAdd :string) => {
+  handleAddDestinationEntityTypeToAssociationType = (selectedEntityTypeFQN :string) => {
 
-    const { actions, associationType } = this.props;
+    const {
+      actions,
+      associationType,
+      entityTypes,
+      entityTypesIndexMap,
+    } = this.props;
 
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
       const associationEntityType :Map<*, *> = associationType.get('entityType', Map());
-      actions.addDstEntityTypeToAssociationType({
+      const entityTypesIndex :number = entityTypesIndexMap.get(selectedEntityTypeFQN, -1);
+      const entityTypeId :?UUID = entityTypes.getIn([entityTypesIndex, 'id']);
+      if (!isValidUUID(entityTypeId)) {
+        const errorMsg = 'EntityType id must be a valid UUID, otherwise it cannot be added to an AssociationType';
+        LOG.error(errorMsg, entityTypeId);
+        return;
+      }
+      actions.localAddDstEntityTypeToAssociationType({
+        entityTypeId,
+        associationTypeFQN: new FullyQualifiedName(associationEntityType.get('type')),
         associationTypeId: associationEntityType.get('id'),
-        entityTypeId: entityTypeIdToAdd
       });
     }
   }
@@ -582,6 +596,7 @@ const mapStateToProps = (state :Map<*, *>) :Object => ({
 
 const mapDispatchToProps = (dispatch :Function) :Object => ({
   actions: bindActionCreators({
+    localAddDstEntityTypeToAssociationType: AssociationTypesActions.localAddDstEntityTypeToAssociationType,
     localAddPropertyTypeToAssociationType: AssociationTypesActions.localAddPropertyTypeToAssociationType,
     localAddSrcEntityTypeToAssociationType: AssociationTypesActions.localAddSrcEntityTypeToAssociationType,
     localDeleteAssociationType: AssociationTypesActions.localDeleteAssociationType,
