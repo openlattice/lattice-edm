@@ -8,7 +8,7 @@ const LOCAL_ADD_PT_TO_AT :'LOCAL_ADD_PT_TO_AT' = 'LOCAL_ADD_PT_TO_AT';
 const localAddPropertyTypeToAssociationType :RequestSequence = newRequestSequence(LOCAL_ADD_PT_TO_AT);
 
 const LOCAL_ADD_SRC_ET_TO_AT :'LOCAL_ADD_SRC_ET_TO_AT' = 'LOCAL_ADD_SRC_ET_TO_AT';
-const localAddSourceEntityTypeToAssociationType :RequestSequence = newRequestSequence(LOCAL_ADD_SRC_ET_TO_AT);
+const localAddSrcEntityTypeToAssociationType :RequestSequence = newRequestSequence(LOCAL_ADD_SRC_ET_TO_AT);
 
 const LOCAL_CREATE_ASSOCIATION_TYPE :'LOCAL_CREATE_ASSOCIATION_TYPE' = 'LOCAL_CREATE_ASSOCIATION_TYPE';
 const localCreateAssociationType :RequestSequence = newRequestSequence(LOCAL_CREATE_ASSOCIATION_TYPE);
@@ -34,7 +34,7 @@ export {
   LOCAL_REMOVE_SRC_ET_FROM_AT,
   LOCAL_UPDATE_ASSOCIATION_TYPE_META,
   localAddPropertyTypeToAssociationType,
-  localAddSourceEntityTypeToAssociationType,
+  localAddSrcEntityTypeToAssociationType,
   localCreateAssociationType,
   localDeleteAssociationType,
   localRemovePropertyTypeFromAssociationType,

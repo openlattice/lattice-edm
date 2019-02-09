@@ -49,7 +49,7 @@ const AbstractTypeSearchableSelectWrapper = styled.div`
 type Props = {
   actions :{
     localAddPropertyTypeToAssociationType :RequestSequence;
-    localAddSourceEntityTypeToAssociationType :RequestSequence;
+    localAddSrcEntityTypeToAssociationType :RequestSequence;
     localDeleteAssociationType :RequestSequence;
     localRemovePropertyTypeFromAssociationType :RequestSequence;
     localRemoveSrcEntityTypeFromAssociationType :RequestSequence;
@@ -120,7 +120,7 @@ class AssociationTypeDetailsContainer extends React.Component<Props> {
         LOG.error(errorMsg, entityTypeId);
         return;
       }
-      actions.localAddSourceEntityTypeToAssociationType({
+      actions.localAddSrcEntityTypeToAssociationType({
         entityTypeId,
         associationTypeFQN: new FullyQualifiedName(associationEntityType.get('type')),
         associationTypeId: associationEntityType.get('id'),
@@ -583,7 +583,7 @@ const mapStateToProps = (state :Map<*, *>) :Object => ({
 const mapDispatchToProps = (dispatch :Function) :Object => ({
   actions: bindActionCreators({
     localAddPropertyTypeToAssociationType: AssociationTypesActions.localAddPropertyTypeToAssociationType,
-    localAddSourceEntityTypeToAssociationType: AssociationTypesActions.localAddSourceEntityTypeToAssociationType,
+    localAddSrcEntityTypeToAssociationType: AssociationTypesActions.localAddSrcEntityTypeToAssociationType,
     localDeleteAssociationType: AssociationTypesActions.localDeleteAssociationType,
     localRemovePropertyTypeFromAssociationType: AssociationTypesActions.localRemovePropertyTypeFromAssociationType,
     localRemoveSrcEntityTypeFromAssociationType: AssociationTypesActions.localRemoveSrcEntityTypeFromAssociationType,

@@ -29,7 +29,7 @@ import {
   LOCAL_REMOVE_SRC_ET_FROM_AT,
   LOCAL_UPDATE_ASSOCIATION_TYPE_META,
   localAddPropertyTypeToAssociationType,
-  localAddSourceEntityTypeToAssociationType,
+  localAddSrcEntityTypeToAssociationType,
   localCreateAssociationType,
   localDeleteAssociationType,
   localRemovePropertyTypeFromAssociationType,
@@ -114,20 +114,20 @@ function* localAddPropertyTypeToAssociationTypeWatcher() :Generator<*, *, *> {
 
 /*
  *
- * AssociationTypesActions.localAddSourceEntityTypeToAssociationType()
+ * AssociationTypesActions.localAddSrcEntityTypeToAssociationType()
  *
  */
 
-function* localAddSourceEntityTypeToAssociationTypeWorker(seqAction :SequenceAction) :Generator<*, *, *> {
+function* localAddSrcEntityTypeToAssociationTypeWorker(seqAction :SequenceAction) :Generator<*, *, *> {
 
   const { id, value } = seqAction;
   if (value === null || value === undefined) {
-    yield put(localAddSourceEntityTypeToAssociationType.failure(id, ERR_ACTION_VALUE_NOT_DEFINED));
+    yield put(localAddSrcEntityTypeToAssociationType.failure(id, ERR_ACTION_VALUE_NOT_DEFINED));
     return;
   }
 
   try {
-    yield put(localAddSourceEntityTypeToAssociationType.request(id, value));
+    yield put(localAddSrcEntityTypeToAssociationType.request(id, value));
 
     const associationTypeId :?UUID = value.associationTypeId;
     const entityTypeId :?UUID = value.entityTypeId;
@@ -144,20 +144,20 @@ function* localAddSourceEntityTypeToAssociationTypeWorker(seqAction :SequenceAct
       if (response.error) throw response.error;
     }
 
-    yield put(localAddSourceEntityTypeToAssociationType.success(id));
+    yield put(localAddSrcEntityTypeToAssociationType.success(id));
   }
   catch (error) {
     LOG.error(ERR_WORKER_SAGA, error);
-    yield put(localAddSourceEntityTypeToAssociationType.failure(id));
+    yield put(localAddSrcEntityTypeToAssociationType.failure(id));
   }
   finally {
-    yield put(localAddSourceEntityTypeToAssociationType.finally(id));
+    yield put(localAddSrcEntityTypeToAssociationType.finally(id));
   }
 }
 
-function* localAddSourceEntityTypeToAssociationTypeWatcher() :Generator<*, *, *> {
+function* localAddSrcEntityTypeToAssociationTypeWatcher() :Generator<*, *, *> {
 
-  yield takeEvery(LOCAL_ADD_SRC_ET_TO_AT, localAddSourceEntityTypeToAssociationTypeWorker);
+  yield takeEvery(LOCAL_ADD_SRC_ET_TO_AT, localAddSrcEntityTypeToAssociationTypeWorker);
 }
 
 /*
@@ -418,8 +418,8 @@ function* localUpdateAssociationTypeMetaWatcher() :Generator<*, *, *> {
 export {
   localAddPropertyTypeToAssociationTypeWatcher,
   localAddPropertyTypeToAssociationTypeWorker,
-  localAddSourceEntityTypeToAssociationTypeWatcher,
-  localAddSourceEntityTypeToAssociationTypeWorker,
+  localAddSrcEntityTypeToAssociationTypeWatcher,
+  localAddSrcEntityTypeToAssociationTypeWorker,
   localCreateAssociationTypeWatcher,
   localCreateAssociationTypeWorker,
   localDeleteAssociationTypeWatcher,

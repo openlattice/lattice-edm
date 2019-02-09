@@ -25,7 +25,7 @@ import {
   LOCAL_REMOVE_SRC_ET_FROM_AT,
   LOCAL_UPDATE_ASSOCIATION_TYPE_META,
   localAddPropertyTypeToAssociationType,
-  localAddSourceEntityTypeToAssociationType,
+  localAddSrcEntityTypeToAssociationType,
   localCreateAssociationType,
   localDeleteAssociationType,
   localRemovePropertyTypeFromAssociationType,
@@ -193,8 +193,8 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
       });
     }
 
-    case localAddSourceEntityTypeToAssociationType.case(action.type): {
-      return localAddSourceEntityTypeToAssociationType.reducer(state, action, {
+    case localAddSrcEntityTypeToAssociationType.case(action.type): {
+      return localAddSrcEntityTypeToAssociationType.reducer(state, action, {
         REQUEST: () => {
           const seqAction :SequenceAction = action;
           return state.setIn([LOCAL_ADD_SRC_ET_TO_AT, seqAction.id], seqAction);
