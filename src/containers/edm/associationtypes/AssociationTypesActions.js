@@ -19,6 +19,9 @@ const localDeleteAssociationType :RequestSequence = newRequestSequence(LOCAL_DEL
 const LOCAL_REMOVE_PT_FROM_AT :'LOCAL_REMOVE_PT_FROM_AT' = 'LOCAL_REMOVE_PT_FROM_AT';
 const localRemovePropertyTypeFromAssociationType :RequestSequence = newRequestSequence(LOCAL_REMOVE_PT_FROM_AT);
 
+const LOCAL_REMOVE_SRC_ET_FROM_AT :'LOCAL_REMOVE_SRC_ET_FROM_AT' = 'LOCAL_REMOVE_SRC_ET_FROM_AT';
+const localRemoveSrcEntityTypeFromAssociationType :RequestSequence = newRequestSequence(LOCAL_REMOVE_SRC_ET_FROM_AT);
+
 const LOCAL_UPDATE_ASSOCIATION_TYPE_META :'LOCAL_UPDATE_ASSOCIATION_TYPE_META' = 'LOCAL_UPDATE_ASSOCIATION_TYPE_META';
 const localUpdateAssociationTypeMeta :RequestSequence = newRequestSequence(LOCAL_UPDATE_ASSOCIATION_TYPE_META);
 
@@ -28,11 +31,13 @@ export {
   LOCAL_CREATE_ASSOCIATION_TYPE,
   LOCAL_DELETE_ASSOCIATION_TYPE,
   LOCAL_REMOVE_PT_FROM_AT,
+  LOCAL_REMOVE_SRC_ET_FROM_AT,
   LOCAL_UPDATE_ASSOCIATION_TYPE_META,
   localAddPropertyTypeToAssociationType,
   localAddSourceEntityTypeToAssociationType,
   localCreateAssociationType,
   localDeleteAssociationType,
   localRemovePropertyTypeFromAssociationType,
+  localRemoveSrcEntityTypeFromAssociationType,
   localUpdateAssociationTypeMeta,
 };

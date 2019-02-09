@@ -52,6 +52,7 @@ type Props = {
     localAddSourceEntityTypeToAssociationType :RequestSequence;
     localDeleteAssociationType :RequestSequence;
     localRemovePropertyTypeFromAssociationType :RequestSequence;
+    localRemoveSrcEntityTypeFromAssociationType :RequestSequence;
   };
   associationType :Map<*, *>;
   entityTypes :List<Map<*, *>>;
@@ -161,15 +162,23 @@ class AssociationTypeDetailsContainer extends React.Component<Props> {
     }
   }
 
-  handleRemoveSourceEntityTypeFromAssociationType = (entityTypeIdToRemove :string) => {
+  handleRemoveSourceEntityTypeFromAssociationType = (selectedEntityTypeFQN :string) => {
 
-    const { actions, associationType } = this.props;
+    const {
+      actions,
+      associationType,
+      entityTypes,
+      entityTypesIndexMap,
+    } = this.props;
 
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
       const associationEntityType :Map<*, *> = associationType.get('entityType', Map());
-      actions.removeSrcEntityTypeFromAssociationType({
+      const entityTypesIndex :number = entityTypesIndexMap.get(selectedEntityTypeFQN, -1);
+      const entityTypeId :UUID = entityTypes.getIn([entityTypesIndex, 'id']);
+      actions.localRemoveSrcEntityTypeFromAssociationType({
+        entityTypeId,
+        associationTypeFQN: new FullyQualifiedName(associationEntityType.get('type')),
         associationTypeId: associationEntityType.get('id'),
-        entityTypeId: entityTypeIdToRemove
       });
     }
   }
@@ -577,6 +586,7 @@ const mapDispatchToProps = (dispatch :Function) :Object => ({
     localAddSourceEntityTypeToAssociationType: AssociationTypesActions.localAddSourceEntityTypeToAssociationType,
     localDeleteAssociationType: AssociationTypesActions.localDeleteAssociationType,
     localRemovePropertyTypeFromAssociationType: AssociationTypesActions.localRemovePropertyTypeFromAssociationType,
+    localRemoveSrcEntityTypeFromAssociationType: AssociationTypesActions.localRemoveSrcEntityTypeFromAssociationType,
   }, dispatch)
 });
 

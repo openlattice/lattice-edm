@@ -26,12 +26,14 @@ import {
   LOCAL_CREATE_ASSOCIATION_TYPE,
   LOCAL_DELETE_ASSOCIATION_TYPE,
   LOCAL_REMOVE_PT_FROM_AT,
+  LOCAL_REMOVE_SRC_ET_FROM_AT,
   LOCAL_UPDATE_ASSOCIATION_TYPE_META,
   localAddPropertyTypeToAssociationType,
   localAddSourceEntityTypeToAssociationType,
   localCreateAssociationType,
   localDeleteAssociationType,
   localRemovePropertyTypeFromAssociationType,
+  localRemoveSrcEntityTypeFromAssociationType,
   localUpdateAssociationTypeMeta,
 } from './AssociationTypesActions';
 import type { IndexMap, UpdateAssociationTypeMeta } from '../Types';
@@ -44,6 +46,7 @@ const {
   createAssociationType,
   deleteAssociationType,
   removePropertyTypeFromEntityType,
+  removeSrcEntityTypeFromAssociationType,
   updateAssociationTypeMetaData,
 } = EntityDataModelApiActions;
 
@@ -53,6 +56,7 @@ const {
   createAssociationTypeWorker,
   deleteAssociationTypeWorker,
   removePropertyTypeFromEntityTypeWorker,
+  removeSrcEntityTypeFromAssociationTypeWorker,
   updateAssociationTypeMetaDataWorker,
 } = EntityDataModelApiSagas;
 
@@ -315,6 +319,54 @@ function* localRemovePropertyTypeFromAssociationTypeWatcher() :Generator<*, *, *
 
 /*
  *
+ * AssociationTypesActions.localRemoveSrcEntityTypeFromAssociationType()
+ *
+ */
+
+function* localRemoveSrcEntityTypeFromAssociationTypeWorker(seqAction :SequenceAction) :Generator<*, *, *> {
+
+  const { id, value } = seqAction;
+  if (value === null || value === undefined) {
+    yield put(localRemoveSrcEntityTypeFromAssociationType.failure(id, ERR_ACTION_VALUE_NOT_DEFINED));
+    return;
+  }
+
+  try {
+    yield put(localRemoveSrcEntityTypeFromAssociationType.request(id, value));
+
+    const associationTypeId :?UUID = value.associationTypeId;
+    const entityTypeId :?UUID = value.entityTypeId;
+
+    const isOnline :boolean = yield select(
+      state => state.getIn(['app', 'isOnline'])
+    );
+
+    if (isOnline && isValidUUID(associationTypeId) && isValidUUID(entityTypeId)) {
+      const response :Object = yield call(
+        removeSrcEntityTypeFromAssociationTypeWorker,
+        removeSrcEntityTypeFromAssociationType({ associationTypeId, entityTypeId })
+      );
+      if (response.error) throw response.error;
+    }
+
+    yield put(localRemoveSrcEntityTypeFromAssociationType.success(id));
+  }
+  catch (error) {
+    LOG.error(ERR_WORKER_SAGA, error);
+    yield put(localRemoveSrcEntityTypeFromAssociationType.failure(id));
+  }
+  finally {
+    yield put(localRemoveSrcEntityTypeFromAssociationType.finally(id));
+  }
+}
+
+function* localRemoveSrcEntityTypeFromAssociationTypeWatcher() :Generator<*, *, *> {
+
+  yield takeEvery(LOCAL_REMOVE_SRC_ET_FROM_AT, localRemoveSrcEntityTypeFromAssociationTypeWorker);
+}
+
+/*
+ *
  * AssociationTypesActions.localUpdateAssociationTypeMeta()
  *
  */
@@ -374,6 +426,8 @@ export {
   localDeleteAssociationTypeWorker,
   localRemovePropertyTypeFromAssociationTypeWatcher,
   localRemovePropertyTypeFromAssociationTypeWorker,
+  localRemoveSrcEntityTypeFromAssociationTypeWatcher,
+  localRemoveSrcEntityTypeFromAssociationTypeWorker,
   localUpdateAssociationTypeMetaWatcher,
   localUpdateAssociationTypeMetaWorker,
 };
