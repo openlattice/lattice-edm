@@ -62,16 +62,16 @@ const RemoveButtonWrapper = styled.div`
 
 type Props = {
   abstractTypes :List<Map<*, *>>;
-  height :number;
-  highlightOnHover :boolean;
-  highlightOnSelect :boolean;
-  maxHeight :number;
-  orderable :boolean;
-  showRemoveColumn :boolean;
+  height ?:number;
+  highlightOnHover ?:boolean;
+  highlightOnSelect ?:boolean;
+  maxHeight ?:number;
+  orderable ?:boolean;
+  showRemoveColumn ?:boolean;
   workingAbstractTypeType :AbstractType;
-  onAbstractTypeRemove :(selectedAbstractTypeFQN :FQN) => void;
-  onAbstractTypeSelect :(selectedAbstractTypeFQN :FQN) => void;
-  onReorder :(oldIndex :number, newIndex :number) => void;
+  onAbstractTypeRemove ?:(selectedAbstractTypeFQN :FQN) => void;
+  onAbstractTypeSelect ?:(selectedAbstractTypeFQN :FQN) => void;
+  onReorder ?:(oldIndex :number, newIndex :number) => void;
 };
 
 type State = {
@@ -85,14 +85,12 @@ type State = {
 class AbstractTypeDataTable extends React.Component<Props, State> {
 
   static defaultProps = {
-    abstractTypes: List(),
     height: -1,
     highlightOnHover: false,
     highlightOnSelect: false,
     maxHeight: -1,
     orderable: false,
     showRemoveColumn: false,
-    workingAbstractTypeType: AbstractTypes.PropertyType,
     onAbstractTypeRemove: () => {},
     onAbstractTypeSelect: () => {},
     onReorder: () => {}

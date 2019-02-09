@@ -7,7 +7,6 @@ import React from 'react';
 import styled from 'styled-components';
 import { List, Map, Set } from 'immutable';
 import { Models, Types } from 'lattice';
-import { EntityDataModelApiActionFactory } from 'lattice-sagas';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import type { AnalyzerType, FQN } from 'lattice';
@@ -28,11 +27,6 @@ import type { AbstractType } from '../../utils/AbstractTypes';
 const LOG :Logger = new Logger('AbstractTypeCreateContainer');
 
 const {
-  createAssociationType,
-  createSchema
-} = EntityDataModelApiActionFactory;
-
-const {
   AssociationType,
   AssociationTypeBuilder,
   EntityType,
@@ -41,7 +35,7 @@ const {
   PropertyType,
   PropertyTypeBuilder,
   Schema,
-  SchemaBuilder
+  SchemaBuilder,
 } = Models;
 
 const {
@@ -251,7 +245,7 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
         .setFullyQualifiedName(new FullyQualifiedName(namespaceValue, nameValue))
         .build();
 
-      actions.createSchema(newSchema);
+      // actions.createSchema(newSchema);
     }
     else if (workingAbstractTypeType === AbstractTypes.PropertyType) {
 

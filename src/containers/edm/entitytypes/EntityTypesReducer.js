@@ -412,7 +412,7 @@ export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, act
               .setPropertyTypes(currentEntityType.properties)
               .setSchemas(currentEntityType.schemas)
               .setTitle(currentEntityType.title)
-              .setType(currentEntityType.type)
+              .setType(currentEntityType.type);
 
             if (has(metadata, 'description')) {
               entityTypeBuilder.setDescription(metadata.description);
@@ -452,113 +452,6 @@ export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, act
         },
       });
     }
-
-    // case addPropertyTypeToEntityType.case(action.type): {
-    //   return addPropertyTypeToEntityType.reducer(state, action, {
-    //     REQUEST: () => {
-    //       // TODO: not ideal. perhaps there's a better way to get access to the trigger action value
-    //       const seqAction :SequenceAction = (action :any);
-    //       return state.setIn(['actions', 'addPropertyTypeToEntityType', seqAction.id], fromJS(seqAction));
-    //     },
-    //     SUCCESS: () => {
-    //
-    //       const seqAction :SequenceAction = (action :any);
-    //       const storedSeqAction :Map<*, *> = state.getIn(
-    //         ['actions', 'addPropertyTypeToEntityType', seqAction.id],
-    //         Map()
-    //       );
-    //
-    //       if (storedSeqAction.isEmpty()) {
-    //         return state;
-    //       }
-    //
-    //       const targetId :string = storedSeqAction.getIn(['value', 'entityTypeId']);
-    //       const targetIndex :number = state.getIn(['entityTypesById', targetId], -1);
-    //
-    //       // don't do anything if the EntityType being modified isn't available
-    //       if (targetIndex === -1) {
-    //         return state;
-    //       }
-    //
-    //       const propertyTypeIdToAdd :string = storedSeqAction.getIn(['value', 'propertyTypeId']);
-    //       const currentEntityType :Map<*, *> = state.getIn(['entityTypes', targetIndex], Map());
-    //       const currentPropertyTypeIds :List<string> = currentEntityType.get('properties', List());
-    //       const propertyTypeIndex :number = currentPropertyTypeIds.findIndex((propertyTypeId :string) => {
-    //         return propertyTypeId === propertyTypeIdToAdd;
-    //       });
-    //
-    //       // don't do anything if the PropertyType being added is already in the list
-    //       if (propertyTypeIndex !== -1) {
-    //         return state;
-    //       }
-    //
-    //       const updatedPropertyTypeIds :List<string> = currentPropertyTypeIds.push(propertyTypeIdToAdd);
-    //       const updatedEntityType :Map<*, *> = currentEntityType.set('properties', updatedPropertyTypeIds);
-    //       return state.setIn(['entityTypes', targetIndex], updatedEntityType);
-    //     },
-    //     FAILURE: () => {
-    //       // TODO: need to properly handle the failure case
-    //       return state;
-    //     },
-    //     FINALLY: () => {
-    //       const seqAction :SequenceAction = (action :any);
-    //       return state.deleteIn(['actions', 'addPropertyTypeToEntityType', seqAction.id]);
-    //     }
-    //   });
-    // }
-
-    // case removePropertyTypeFromEntityType.case(action.type): {
-    //   return removePropertyTypeFromEntityType.reducer(state, action, {
-    //     REQUEST: () => {
-    //       // TODO: not ideal. perhaps there's a better way to get access to the trigger action value
-    //       const seqAction :SequenceAction = (action :any);
-    //       return state.setIn(['actions', 'removePropertyTypeFromEntityType', seqAction.id], fromJS(seqAction));
-    //     },
-    //     SUCCESS: () => {
-    //
-    //       const seqAction :SequenceAction = (action :any);
-    //       const storedSeqAction :Map<*, *> = state.getIn(
-    //         ['actions', 'removePropertyTypeFromEntityType', seqAction.id],
-    //         Map()
-    //       );
-    //
-    //       if (storedSeqAction.isEmpty()) {
-    //         return state;
-    //       }
-    //
-    //       const targetId :string = storedSeqAction.getIn(['value', 'entityTypeId']);
-    //       const targetIndex :number = state.getIn(['entityTypesById', targetId], -1);
-    //
-    //       // don't do anything if the EntityType being modified isn't available
-    //       if (targetIndex === -1) {
-    //         return state;
-    //       }
-    //
-    //       const currentEntityType :Map<*, *> = state.getIn(['entityTypes', targetIndex], Map());
-    //       const currentPropertyTypeIds :List<string> = currentEntityType.get('properties', List());
-    //       const removalIndex :number = currentPropertyTypeIds.findIndex((propertyTypeId :string) => {
-    //         return propertyTypeId === storedSeqAction.getIn(['value', 'propertyTypeId']);
-    //       });
-    //
-    //       // don't do anything if the PropertyType being removed is not actually in the list
-    //       if (removalIndex === -1) {
-    //         return state;
-    //       }
-    //
-    //       const updatedPropertyTypeIds :List<string> = currentPropertyTypeIds.delete(removalIndex);
-    //       const updatedEntityType :Map<*, *> = currentEntityType.set('properties', updatedPropertyTypeIds);
-    //       return state.setIn(['entityTypes', targetIndex], updatedEntityType);
-    //     },
-    //     FAILURE: () => {
-    //       // TODO: need to properly handle the failure case
-    //       return state;
-    //     },
-    //     FINALLY: () => {
-    //       const seqAction :SequenceAction = (action :any);
-    //       return state.deleteIn(['actions', 'removePropertyTypeFromEntityType', seqAction.id]);
-    //     }
-    //   });
-    // }
 
     // case reorderEntityTypePropertyTypes.case(action.type): {
     //   return reorderEntityTypePropertyTypes.reducer(state, action, {
