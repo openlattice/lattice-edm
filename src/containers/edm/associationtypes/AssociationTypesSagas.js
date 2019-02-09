@@ -22,11 +22,13 @@ import {
 } from '../../../utils/Errors';
 import {
   LOCAL_ADD_PT_TO_AT,
+  LOCAL_ADD_SOURCE_ET_TO_AT,
   LOCAL_CREATE_ASSOCIATION_TYPE,
   LOCAL_DELETE_ASSOCIATION_TYPE,
   LOCAL_REMOVE_PT_FROM_AT,
   LOCAL_UPDATE_ASSOCIATION_TYPE_META,
   localAddPropertyTypeToAssociationType,
+  localAddSourceEntityTypeToAssociationType,
   localCreateAssociationType,
   localDeleteAssociationType,
   localRemovePropertyTypeFromAssociationType,
@@ -38,6 +40,7 @@ const LOG = new Logger('EntityTypesSagas');
 
 const {
   addPropertyTypeToEntityType,
+  addSrcEntityTypeToAssociationType,
   createAssociationType,
   deleteAssociationType,
   removePropertyTypeFromEntityType,
@@ -46,6 +49,7 @@ const {
 
 const {
   addPropertyTypeToEntityTypeWorker,
+  addSrcEntityTypeToAssociationTypeWorker,
   createAssociationTypeWorker,
   deleteAssociationTypeWorker,
   removePropertyTypeFromEntityTypeWorker,
@@ -102,6 +106,54 @@ function* localAddPropertyTypeToAssociationTypeWorker(seqAction :SequenceAction)
 function* localAddPropertyTypeToAssociationTypeWatcher() :Generator<*, *, *> {
 
   yield takeEvery(LOCAL_ADD_PT_TO_AT, localAddPropertyTypeToAssociationTypeWorker);
+}
+
+/*
+ *
+ * AssociationTypesActions.localAddSourceEntityTypeToAssociationType()
+ *
+ */
+
+function* localAddSourceEntityTypeToAssociationTypeWorker(seqAction :SequenceAction) :Generator<*, *, *> {
+
+  const { id, value } = seqAction;
+  if (value === null || value === undefined) {
+    yield put(localAddSourceEntityTypeToAssociationType.failure(id, ERR_ACTION_VALUE_NOT_DEFINED));
+    return;
+  }
+
+  try {
+    yield put(localAddSourceEntityTypeToAssociationType.request(id, value));
+
+    const associationTypeId :?UUID = value.associationTypeId;
+    const entityTypeId :?UUID = value.entityTypeId;
+
+    const isOnline :boolean = yield select(
+      state => state.getIn(['app', 'isOnline'])
+    );
+
+    if (isOnline && isValidUUID(associationTypeId) && isValidUUID(entityTypeId)) {
+      const response :Object = yield call(
+        addSrcEntityTypeToAssociationTypeWorker,
+        addSrcEntityTypeToAssociationType({ associationTypeId, entityTypeId })
+      );
+      if (response.error) throw response.error;
+    }
+
+    yield put(localAddSourceEntityTypeToAssociationType.success(id));
+  }
+  catch (error) {
+    LOG.error(ERR_WORKER_SAGA, error);
+    yield put(localAddSourceEntityTypeToAssociationType.failure(id));
+  }
+  finally {
+    yield put(localAddSourceEntityTypeToAssociationType.finally(id));
+  }
+}
+
+function* localAddSourceEntityTypeToAssociationTypeWatcher() :Generator<*, *, *> {
+
+  yield takeEvery(LOCAL_ADD_SOURCE_ET_TO_AT, localAddSourceEntityTypeToAssociationTypeWorker);
 }
 
 /*
@@ -314,6 +366,8 @@ function* localUpdateAssociationTypeMetaWatcher() :Generator<*, *, *> {
 export {
   localAddPropertyTypeToAssociationTypeWatcher,
   localAddPropertyTypeToAssociationTypeWorker,
+  localAddSourceEntityTypeToAssociationTypeWatcher,
+  localAddSourceEntityTypeToAssociationTypeWorker,
   localCreateAssociationTypeWatcher,
   localCreateAssociationTypeWorker,
   localDeleteAssociationTypeWatcher,

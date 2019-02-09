@@ -18,11 +18,13 @@ import Logger from '../../../utils/Logger';
 import { isValidUUID } from '../../../utils/ValidationUtils';
 import {
   LOCAL_ADD_PT_TO_AT,
+  LOCAL_ADD_SOURCE_ET_TO_AT,
   LOCAL_CREATE_ASSOCIATION_TYPE,
   LOCAL_DELETE_ASSOCIATION_TYPE,
   LOCAL_REMOVE_PT_FROM_AT,
   LOCAL_UPDATE_ASSOCIATION_TYPE_META,
   localAddPropertyTypeToAssociationType,
+  localAddSourceEntityTypeToAssociationType,
   localCreateAssociationType,
   localDeleteAssociationType,
   localRemovePropertyTypeFromAssociationType,
@@ -162,7 +164,7 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
 
             const currentPropertyTypeIds :List<UUID> = target.getIn(['entityType', 'properties'], List());
 
-            // don't do anything if the PropertyType id being added is already a part of the EntityType
+            // don't do anything if the PropertyType id being added is already a part of the AssociationType
             if (currentPropertyTypeIds.includes(propertyTypeId)) {
               return state;
             }
@@ -185,6 +187,71 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
         FINALLY: () => {
           const seqAction :SequenceAction = action;
           return state.deleteIn([LOCAL_ADD_PT_TO_AT, seqAction.id]);
+        },
+      });
+    }
+
+    case localAddSourceEntityTypeToAssociationType.case(action.type): {
+      return localAddSourceEntityTypeToAssociationType.reducer(state, action, {
+        REQUEST: () => {
+          const seqAction :SequenceAction = action;
+          return state.setIn([LOCAL_ADD_SOURCE_ET_TO_AT, seqAction.id], seqAction);
+        },
+        SUCCESS: () => {
+
+          const seqAction :SequenceAction = action;
+          const storedSeqAction :SequenceAction = state.getIn([LOCAL_ADD_SOURCE_ET_TO_AT, seqAction.id]);
+
+          if (storedSeqAction) {
+
+            const associationTypeFQN :FQN = storedSeqAction.value.associationTypeFQN;
+            const associationTypeId :?UUID = storedSeqAction.value.associationTypeId;
+            const entityTypeId :?UUID = storedSeqAction.value.entityTypeId;
+
+            if (!isValidUUID(entityTypeId)) {
+              LOG.error('EntityType id must be a valid UUID', entityTypeId);
+              return state;
+            }
+
+            const targetIndex :number = state.getIn(['associationTypesIndexMap', associationTypeFQN], -1);
+            if (targetIndex === -1) {
+              LOG.error('AssociationType does not exist in store', associationTypeFQN);
+              return state;
+            }
+
+            const target :Map<*, *> = state.getIn(['associationTypes', targetIndex], Map());
+            const targetFQN :FQN = new FullyQualifiedName(target.getIn(['entityType', 'type'], Map()));
+            const targetId :?UUID = target.getIn(['entityType', 'id']);
+            if (targetId !== associationTypeId || targetFQN.toString() !== associationTypeFQN.toString()) {
+              LOG.error('AssociationType does not match id or fqn', associationTypeId, associationTypeFQN);
+              return state;
+            }
+
+            const currentEntityTypeIds :List<UUID> = target.get('src', List());
+
+            // don't do anything if the EntityType id being added is already a part of the AssociationType
+            if (currentEntityTypeIds.includes(entityTypeId)) {
+              return state;
+            }
+
+            const updatedEntityTypeIds :List<UUID> = currentEntityTypeIds.push(entityTypeId);
+            return state.setIn(['associationTypes', targetIndex, 'src'], updatedEntityTypeIds);
+          }
+
+          return state;
+        },
+        FAILURE: () => {
+          const seqAction :SequenceAction = action;
+          const storedSeqAction :SequenceAction = state.getIn([LOCAL_ADD_SOURCE_ET_TO_AT, seqAction.id]);
+          if (storedSeqAction) {
+            // TODO: we need a better pattern for setting and handling errors
+            return state.setIn([LOCAL_ADD_SOURCE_ET_TO_AT, 'error'], true);
+          }
+          return state;
+        },
+        FINALLY: () => {
+          const seqAction :SequenceAction = action;
+          return state.deleteIn([LOCAL_ADD_SOURCE_ET_TO_AT, seqAction.id]);
         },
       });
     }
