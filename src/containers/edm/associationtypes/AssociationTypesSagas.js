@@ -22,7 +22,7 @@ import {
 } from '../../../utils/Errors';
 import {
   LOCAL_ADD_PT_TO_AT,
-  LOCAL_ADD_SOURCE_ET_TO_AT,
+  LOCAL_ADD_SRC_ET_TO_AT,
   LOCAL_CREATE_ASSOCIATION_TYPE,
   LOCAL_DELETE_ASSOCIATION_TYPE,
   LOCAL_REMOVE_PT_FROM_AT,
@@ -157,7 +157,7 @@ function* localAddSourceEntityTypeToAssociationTypeWorker(seqAction :SequenceAct
 
 function* localAddSourceEntityTypeToAssociationTypeWatcher() :Generator<*, *, *> {
 
-  yield takeEvery(LOCAL_ADD_SOURCE_ET_TO_AT, localAddSourceEntityTypeToAssociationTypeWorker);
+  yield takeEvery(LOCAL_ADD_SRC_ET_TO_AT, localAddSourceEntityTypeToAssociationTypeWorker);
 }
 
 /*

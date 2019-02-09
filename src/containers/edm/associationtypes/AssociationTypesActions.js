@@ -7,8 +7,8 @@ import { newRequestSequence } from 'redux-reqseq';
 const LOCAL_ADD_PT_TO_AT :'LOCAL_ADD_PT_TO_AT' = 'LOCAL_ADD_PT_TO_AT';
 const localAddPropertyTypeToAssociationType :RequestSequence = newRequestSequence(LOCAL_ADD_PT_TO_AT);
 
-const LOCAL_ADD_SOURCE_ET_TO_AT :'LOCAL_ADD_SOURCE_ET_TO_AT' = 'LOCAL_ADD_SOURCE_ET_TO_AT';
-const localAddSourceEntityTypeToAssociationType :RequestSequence = newRequestSequence(LOCAL_ADD_SOURCE_ET_TO_AT);
+const LOCAL_ADD_SRC_ET_TO_AT :'LOCAL_ADD_SRC_ET_TO_AT' = 'LOCAL_ADD_SRC_ET_TO_AT';
+const localAddSourceEntityTypeToAssociationType :RequestSequence = newRequestSequence(LOCAL_ADD_SRC_ET_TO_AT);
 
 const LOCAL_CREATE_ASSOCIATION_TYPE :'LOCAL_CREATE_ASSOCIATION_TYPE' = 'LOCAL_CREATE_ASSOCIATION_TYPE';
 const localCreateAssociationType :RequestSequence = newRequestSequence(LOCAL_CREATE_ASSOCIATION_TYPE);
@@ -27,7 +27,7 @@ const localUpdateAssociationTypeMeta :RequestSequence = newRequestSequence(LOCAL
 
 export {
   LOCAL_ADD_PT_TO_AT,
-  LOCAL_ADD_SOURCE_ET_TO_AT,
+  LOCAL_ADD_SRC_ET_TO_AT,
   LOCAL_CREATE_ASSOCIATION_TYPE,
   LOCAL_DELETE_ASSOCIATION_TYPE,
   LOCAL_REMOVE_PT_FROM_AT,

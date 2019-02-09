@@ -18,7 +18,7 @@ import Logger from '../../../utils/Logger';
 import { isValidUUID } from '../../../utils/ValidationUtils';
 import {
   LOCAL_ADD_PT_TO_AT,
-  LOCAL_ADD_SOURCE_ET_TO_AT,
+  LOCAL_ADD_SRC_ET_TO_AT,
   LOCAL_CREATE_ASSOCIATION_TYPE,
   LOCAL_DELETE_ASSOCIATION_TYPE,
   LOCAL_REMOVE_PT_FROM_AT,
@@ -197,12 +197,12 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
       return localAddSourceEntityTypeToAssociationType.reducer(state, action, {
         REQUEST: () => {
           const seqAction :SequenceAction = action;
-          return state.setIn([LOCAL_ADD_SOURCE_ET_TO_AT, seqAction.id], seqAction);
+          return state.setIn([LOCAL_ADD_SRC_ET_TO_AT, seqAction.id], seqAction);
         },
         SUCCESS: () => {
 
           const seqAction :SequenceAction = action;
-          const storedSeqAction :SequenceAction = state.getIn([LOCAL_ADD_SOURCE_ET_TO_AT, seqAction.id]);
+          const storedSeqAction :SequenceAction = state.getIn([LOCAL_ADD_SRC_ET_TO_AT, seqAction.id]);
 
           if (storedSeqAction) {
 
@@ -244,16 +244,16 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
         },
         FAILURE: () => {
           const seqAction :SequenceAction = action;
-          const storedSeqAction :SequenceAction = state.getIn([LOCAL_ADD_SOURCE_ET_TO_AT, seqAction.id]);
+          const storedSeqAction :SequenceAction = state.getIn([LOCAL_ADD_SRC_ET_TO_AT, seqAction.id]);
           if (storedSeqAction) {
             // TODO: we need a better pattern for setting and handling errors
-            return state.setIn([LOCAL_ADD_SOURCE_ET_TO_AT, 'error'], true);
+            return state.setIn([LOCAL_ADD_SRC_ET_TO_AT, 'error'], true);
           }
           return state;
         },
         FINALLY: () => {
           const seqAction :SequenceAction = action;
-          return state.deleteIn([LOCAL_ADD_SOURCE_ET_TO_AT, seqAction.id]);
+          return state.deleteIn([LOCAL_ADD_SRC_ET_TO_AT, seqAction.id]);
         },
       });
     }
