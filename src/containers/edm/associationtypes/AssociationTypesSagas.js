@@ -26,6 +26,7 @@ import {
   LOCAL_ADD_SRC_ET_TO_AT,
   LOCAL_CREATE_ASSOCIATION_TYPE,
   LOCAL_DELETE_ASSOCIATION_TYPE,
+  LOCAL_REMOVE_DST_ET_FROM_AT,
   LOCAL_REMOVE_PT_FROM_AT,
   LOCAL_REMOVE_SRC_ET_FROM_AT,
   LOCAL_UPDATE_ASSOCIATION_TYPE_META,
@@ -34,6 +35,7 @@ import {
   localAddSrcEntityTypeToAssociationType,
   localCreateAssociationType,
   localDeleteAssociationType,
+  localRemoveDstEntityTypeFromAssociationType,
   localRemovePropertyTypeFromAssociationType,
   localRemoveSrcEntityTypeFromAssociationType,
   localUpdateAssociationTypeMeta,
@@ -48,6 +50,7 @@ const {
   addSrcEntityTypeToAssociationType,
   createAssociationType,
   deleteAssociationType,
+  removeDstEntityTypeFromAssociationType,
   removePropertyTypeFromEntityType,
   removeSrcEntityTypeFromAssociationType,
   updateAssociationTypeMetaData,
@@ -59,6 +62,7 @@ const {
   addSrcEntityTypeToAssociationTypeWorker,
   createAssociationTypeWorker,
   deleteAssociationTypeWorker,
+  removeDstEntityTypeFromAssociationTypeWorker,
   removePropertyTypeFromEntityTypeWorker,
   removeSrcEntityTypeFromAssociationTypeWorker,
   updateAssociationTypeMetaDataWorker,
@@ -323,6 +327,54 @@ function* localDeleteAssociationTypeWatcher() :Generator<*, *, *> {
 
 /*
  *
+ * AssociationTypesActions.localRemoveDstEntityTypeFromAssociationType()
+ *
+ */
+
+function* localRemoveDstEntityTypeFromAssociationTypeWorker(seqAction :SequenceAction) :Generator<*, *, *> {
+
+  const { id, value } = seqAction;
+  if (value === null || value === undefined) {
+    yield put(localRemoveDstEntityTypeFromAssociationType.failure(id, ERR_ACTION_VALUE_NOT_DEFINED));
+    return;
+  }
+
+  try {
+    yield put(localRemoveDstEntityTypeFromAssociationType.request(id, value));
+
+    const associationTypeId :?UUID = value.associationTypeId;
+    const entityTypeId :?UUID = value.entityTypeId;
+
+    const isOnline :boolean = yield select(
+      state => state.getIn(['app', 'isOnline'])
+    );
+
+    if (isOnline && isValidUUID(associationTypeId) && isValidUUID(entityTypeId)) {
+      const response :Object = yield call(
+        removeDstEntityTypeFromAssociationTypeWorker,
+        removeDstEntityTypeFromAssociationType({ associationTypeId, entityTypeId })
+      );
+      if (response.error) throw response.error;
+    }
+
+    yield put(localRemoveDstEntityTypeFromAssociationType.success(id));
+  }
+  catch (error) {
+    LOG.error(ERR_WORKER_SAGA, error);
+    yield put(localRemoveDstEntityTypeFromAssociationType.failure(id));
+  }
+  finally {
+    yield put(localRemoveDstEntityTypeFromAssociationType.finally(id));
+  }
+}
+
+function* localRemoveDstEntityTypeFromAssociationTypeWatcher() :Generator<*, *, *> {
+
+  yield takeEvery(LOCAL_REMOVE_DST_ET_FROM_AT, localRemoveDstEntityTypeFromAssociationTypeWorker);
+}
+
+/*
+ *
  * AssociationTypesActions.localRemovePropertyTypeFromAssociationType()
  *
  */
@@ -478,6 +530,8 @@ export {
   localDeleteAssociationTypeWorker,
   localAddDstEntityTypeToAssociationTypeWatcher,
   localAddDstEntityTypeToAssociationTypeWorker,
+  localRemoveDstEntityTypeFromAssociationTypeWatcher,
+  localRemoveDstEntityTypeFromAssociationTypeWorker,
   localRemovePropertyTypeFromAssociationTypeWatcher,
   localRemovePropertyTypeFromAssociationTypeWorker,
   localRemoveSrcEntityTypeFromAssociationTypeWatcher,

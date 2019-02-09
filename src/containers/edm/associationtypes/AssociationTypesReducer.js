@@ -22,6 +22,7 @@ import {
   LOCAL_ADD_SRC_ET_TO_AT,
   LOCAL_CREATE_ASSOCIATION_TYPE,
   LOCAL_DELETE_ASSOCIATION_TYPE,
+  LOCAL_REMOVE_DST_ET_FROM_AT,
   LOCAL_REMOVE_PT_FROM_AT,
   LOCAL_REMOVE_SRC_ET_FROM_AT,
   LOCAL_UPDATE_ASSOCIATION_TYPE_META,
@@ -30,6 +31,7 @@ import {
   localAddSrcEntityTypeToAssociationType,
   localCreateAssociationType,
   localDeleteAssociationType,
+  localRemoveDstEntityTypeFromAssociationType,
   localRemovePropertyTypeFromAssociationType,
   localRemoveSrcEntityTypeFromAssociationType,
   localUpdateAssociationTypeMeta,
@@ -471,6 +473,60 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
         FINALLY: () => {
           const seqAction :SequenceAction = action;
           return state.deleteIn([LOCAL_DELETE_ASSOCIATION_TYPE, seqAction.id]);
+        },
+      });
+    }
+
+    case localRemoveDstEntityTypeFromAssociationType.case(action.type): {
+      return localRemoveDstEntityTypeFromAssociationType.reducer(state, action, {
+        REQUEST: () => {
+          const seqAction :SequenceAction = action;
+          return state.setIn([LOCAL_REMOVE_DST_ET_FROM_AT, seqAction.id], seqAction);
+        },
+        SUCCESS: () => {
+
+          const seqAction :SequenceAction = action;
+          const storedSeqAction :SequenceAction = state.getIn([LOCAL_REMOVE_DST_ET_FROM_AT, seqAction.id]);
+
+          if (storedSeqAction) {
+
+            const associationTypeFQN :FQN = storedSeqAction.value.associationTypeFQN;
+            const associationTypeId :?UUID = storedSeqAction.value.associationTypeId;
+            const entityTypeId :?UUID = storedSeqAction.value.entityTypeId;
+
+            const targetIndex :number = state.getIn(['associationTypesIndexMap', associationTypeFQN], -1);
+            if (targetIndex === -1) {
+              LOG.error('AssociationType does not exist in store', associationTypeFQN);
+              return state;
+            }
+
+            const target :Map<*, *> = state.getIn(['associationTypes', targetIndex], Map());
+            const targetFQN :FQN = new FullyQualifiedName(target.getIn(['entityType', 'type'], Map()));
+            const targetId :?UUID = target.getIn(['entityType', 'id']);
+            if (targetId !== associationTypeId || targetFQN.toString() !== associationTypeFQN.toString()) {
+              LOG.error('AssociationType does not match id or fqn', associationTypeId, associationTypeFQN);
+              return state;
+            }
+
+            const currentEntityTypeIds :List<UUID> = target.get('dst', List());
+            const updatedEntityTypeIds :List<UUID> = currentEntityTypeIds.filter(id => id !== entityTypeId);
+            return state.setIn(['associationTypes', targetIndex, 'dst'], updatedEntityTypeIds);
+          }
+
+          return state;
+        },
+        FAILURE: () => {
+          const seqAction :SequenceAction = action;
+          const storedSeqAction :SequenceAction = state.getIn([LOCAL_REMOVE_DST_ET_FROM_AT, seqAction.id]);
+          if (storedSeqAction) {
+            // TODO: we need a better pattern for setting and handling errors
+            return state.setIn([LOCAL_REMOVE_DST_ET_FROM_AT, 'error'], true);
+          }
+          return state;
+        },
+        FINALLY: () => {
+          const seqAction :SequenceAction = action;
+          return state.deleteIn([LOCAL_REMOVE_DST_ET_FROM_AT, seqAction.id]);
         },
       });
     }
