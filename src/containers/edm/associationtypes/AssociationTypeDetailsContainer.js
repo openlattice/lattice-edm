@@ -18,10 +18,13 @@ import AbstractTypeFieldDescription from '../AbstractTypeFieldDescription';
 import AbstractTypeFieldTitle from '../AbstractTypeFieldTitle';
 import AbstractTypeFieldType from '../AbstractTypeFieldType';
 import AbstractTypeSearchableSelect from '../../../components/controls/AbstractTypeSearchableSelect';
+import Logger from '../../../utils/Logger';
 import StyledButton from '../../../components/buttons/StyledButton';
 import * as AssociationTypesActions from './AssociationTypesActions';
 import { isValidUUID } from '../../../utils/ValidationUtils';
 import type { IndexMap } from '../Types';
+
+const LOG :Logger = new Logger('AssociationTypeDetailsContainer');
 
 const {
   FullyQualifiedName
@@ -45,6 +48,7 @@ const AbstractTypeSearchableSelectWrapper = styled.div`
 
 type Props = {
   actions :{
+    localAddPropertyTypeToAssociationType :RequestSequence;
     localDeleteAssociationType :RequestSequence;
   };
   associationType :Map<*, *>;
@@ -69,15 +73,28 @@ class AssociationTypeDetailsContainer extends React.Component<Props> {
     }
   }
 
-  handleAddPropertyTypeToAssociationType = (propertyTypeIdToAdd :string) => {
+  handleAddPropertyTypeToAssociationType = (selectedPropertyTypeFQN :FQN) => {
 
-    const { actions, associationType } = this.props;
+    const {
+      actions,
+      associationType,
+      propertyTypes,
+      propertyTypesIndexMap,
+    } = this.props;
 
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
       const associationEntityType :Map<*, *> = associationType.get('entityType', Map());
-      actions.addPropertyTypeToEntityType({
-        entityTypeId: associationEntityType.get('id'),
-        propertyTypeId: propertyTypeIdToAdd
+      const propertyTypesIndex :number = propertyTypesIndexMap.get(selectedPropertyTypeFQN, -1);
+      const propertyTypeId :?UUID = propertyTypes.getIn([propertyTypesIndex, 'id']);
+      if (!isValidUUID(propertyTypeId)) {
+        const errorMsg = 'PropertyType id must be a valid UUID, otherwise it cannot be added to an AssociationType';
+        LOG.error(errorMsg, propertyTypeId);
+        return;
+      }
+      actions.localAddPropertyTypeToAssociationType({
+        propertyTypeId,
+        associationTypeFQN: new FullyQualifiedName(associationEntityType.get('type')),
+        associationTypeId: associationEntityType.get('id'),
       });
     }
   }
@@ -532,6 +549,7 @@ const mapStateToProps = (state :Map<*, *>) :Object => ({
 
 const mapDispatchToProps = (dispatch :Function) :Object => ({
   actions: bindActionCreators({
+    localAddPropertyTypeToAssociationType: AssociationTypesActions.localAddPropertyTypeToAssociationType,
     localDeleteAssociationType: AssociationTypesActions.localDeleteAssociationType,
   }, dispatch)
 });

@@ -124,6 +124,71 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
       });
     }
 
+    case localAddPropertyTypeToAssociationType.case(action.type): {
+      return localAddPropertyTypeToAssociationType.reducer(state, action, {
+        REQUEST: () => {
+          const seqAction :SequenceAction = action;
+          return state.setIn([LOCAL_ADD_PT_TO_AT, seqAction.id], seqAction);
+        },
+        SUCCESS: () => {
+
+          const seqAction :SequenceAction = action;
+          const storedSeqAction :SequenceAction = state.getIn([LOCAL_ADD_PT_TO_AT, seqAction.id]);
+
+          if (storedSeqAction) {
+
+            const associationTypeFQN :FQN = storedSeqAction.value.associationTypeFQN;
+            const associationTypeId :?UUID = storedSeqAction.value.associationTypeId;
+            const propertyTypeId :?UUID = storedSeqAction.value.propertyTypeId;
+
+            if (!isValidUUID(propertyTypeId)) {
+              LOG.error('PropertyType id must be a valid UUID', propertyTypeId);
+              return state;
+            }
+
+            const targetIndex :number = state.getIn(['associationTypesIndexMap', associationTypeFQN], -1);
+            if (targetIndex === -1) {
+              LOG.error('AssociationType does not exist in store', associationTypeFQN);
+              return state;
+            }
+
+            const target :Map<*, *> = state.getIn(['associationTypes', targetIndex], Map());
+            const targetFQN :FQN = new FullyQualifiedName(target.getIn(['entityType', 'type'], Map()));
+            const targetId :?UUID = target.getIn(['entityType', 'id']);
+            if (targetId !== associationTypeId || targetFQN.toString() !== associationTypeFQN.toString()) {
+              LOG.error('AssociationType does not match id or fqn', associationTypeId, associationTypeFQN);
+              return state;
+            }
+
+            const currentPropertyTypeIds :List<UUID> = target.getIn(['entityType', 'properties'], List());
+
+            // don't do anything if the PropertyType id being added is already a part of the EntityType
+            if (currentPropertyTypeIds.includes(propertyTypeId)) {
+              return state;
+            }
+
+            const updatedPropertyTypeIds :List<UUID> = currentPropertyTypeIds.push(propertyTypeId);
+            return state.setIn(['associationTypes', targetIndex, 'entityType', 'properties'], updatedPropertyTypeIds);
+          }
+
+          return state;
+        },
+        FAILURE: () => {
+          const seqAction :SequenceAction = action;
+          const storedSeqAction :SequenceAction = state.getIn([LOCAL_ADD_PT_TO_AT, seqAction.id]);
+          if (storedSeqAction) {
+            // TODO: we need a better pattern for setting and handling errors
+            return state.setIn([LOCAL_ADD_PT_TO_AT, 'error'], true);
+          }
+          return state;
+        },
+        FINALLY: () => {
+          const seqAction :SequenceAction = action;
+          return state.deleteIn([LOCAL_ADD_PT_TO_AT, seqAction.id]);
+        },
+      });
+    }
+
     case localCreateAssociationType.case(action.type): {
       return localCreateAssociationType.reducer(state, action, {
         REQUEST: () => {

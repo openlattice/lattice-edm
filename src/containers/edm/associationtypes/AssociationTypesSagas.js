@@ -37,12 +37,14 @@ import type { IndexMap, UpdateAssociationTypeMeta } from '../Types';
 const LOG = new Logger('EntityTypesSagas');
 
 const {
+  addPropertyTypeToEntityType,
   createAssociationType,
   deleteAssociationType,
   updateAssociationTypeMetaData,
 } = EntityDataModelApiActions;
 
 const {
+  addPropertyTypeToEntityTypeWorker,
   createAssociationTypeWorker,
   deleteAssociationTypeWorker,
   updateAssociationTypeMetaDataWorker,
@@ -51,6 +53,54 @@ const {
 const {
   AssociationType,
 } = Models;
+
+/*
+ *
+ * AssociationTypesActions.localAddPropertyTypeToAssociationType()
+ *
+ */
+
+function* localAddPropertyTypeToAssociationTypeWorker(seqAction :SequenceAction) :Generator<*, *, *> {
+
+  const { id, value } = seqAction;
+  if (value === null || value === undefined) {
+    yield put(localAddPropertyTypeToAssociationType.failure(id, ERR_ACTION_VALUE_NOT_DEFINED));
+    return;
+  }
+
+  try {
+    yield put(localAddPropertyTypeToAssociationType.request(id, value));
+
+    const entityTypeId :?UUID = value.associationTypeId;
+    const propertyTypeId :?UUID = value.propertyTypeId;
+
+    const isOnline :boolean = yield select(
+      state => state.getIn(['app', 'isOnline'])
+    );
+
+    if (isOnline && isValidUUID(entityTypeId) && isValidUUID(propertyTypeId)) {
+      const response :Object = yield call(
+        addPropertyTypeToEntityTypeWorker,
+        addPropertyTypeToEntityType({ entityTypeId, propertyTypeId })
+      );
+      if (response.error) throw response.error;
+    }
+
+    yield put(localAddPropertyTypeToAssociationType.success(id));
+  }
+  catch (error) {
+    LOG.error(ERR_WORKER_SAGA, error);
+    yield put(localAddPropertyTypeToAssociationType.failure(id));
+  }
+  finally {
+    yield put(localAddPropertyTypeToAssociationType.finally(id));
+  }
+}
+
+function* localAddPropertyTypeToAssociationTypeWatcher() :Generator<*, *, *> {
+
+  yield takeEvery(LOCAL_ADD_PT_TO_AT, localAddPropertyTypeToAssociationTypeWorker);
+}
 
 /*
  *
@@ -212,6 +262,8 @@ function* localUpdateAssociationTypeMetaWatcher() :Generator<*, *, *> {
 }
 
 export {
+  localAddPropertyTypeToAssociationTypeWatcher,
+  localAddPropertyTypeToAssociationTypeWorker,
   localCreateAssociationTypeWatcher,
   localCreateAssociationTypeWorker,
   localDeleteAssociationTypeWatcher,
