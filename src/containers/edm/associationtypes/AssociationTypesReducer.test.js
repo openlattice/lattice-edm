@@ -457,6 +457,78 @@ describe('AssociationTypesReducer', () => {
 
   });
 
+  describe(LOCAL_CREATE_ASSOCIATION_TYPE, () => {
+
+    test(localCreateAssociationType.REQUEST, () => {
+
+      const { id } = localCreateAssociationType();
+      const requestAction = localCreateAssociationType.request(id, MOCK_ASSOCIATION_TYPE);
+      const state = reducer(INITIAL_STATE, requestAction);
+
+      expect(state.getIn([LOCAL_CREATE_ASSOCIATION_TYPE, id])).toEqual(requestAction);
+      expect(state.get('newlyCreatedAssociationTypeFQN')).toEqual(undefined);
+    });
+
+    test(localCreateAssociationType.SUCCESS, () => {
+
+      const { id } = localCreateAssociationType();
+      const requestAction = localCreateAssociationType.request(id, MOCK_ASSOCIATION_TYPE);
+      let state = reducer(INITIAL_STATE, requestAction);
+      state = reducer(state, localCreateAssociationType.success(id, MOCK_ASSOCIATION_TYPE.entityType.id));
+
+      expect(state.getIn([LOCAL_CREATE_ASSOCIATION_TYPE, id])).toEqual(requestAction);
+      expect(state.get('newlyCreatedAssociationTypeFQN')).toEqual(MOCK_ASSOCIATION_TYPE.entityType.type);
+      expect(state.get('newlyCreatedAssociationTypeFQN')).toBeInstanceOf(FullyQualifiedName);
+
+      const expectedAssociationTypes = List().push(MOCK_ASSOCIATION_TYPE.toImmutable());
+      expect(state.get('associationTypes').hashCode()).toEqual(expectedAssociationTypes.hashCode());
+      expect(state.get('associationTypes').equals(expectedAssociationTypes)).toEqual(true);
+
+      const expectedAssociationTypesIndexMap = Map()
+        .set(MOCK_ASSOCIATION_TYPE.entityType.id, 0)
+        .set(MOCK_ASSOCIATION_TYPE.entityType.type, 0);
+      expect(state.get('associationTypesIndexMap').hashCode()).toEqual(expectedAssociationTypesIndexMap.hashCode());
+      expect(state.get('associationTypesIndexMap').equals(expectedAssociationTypesIndexMap)).toEqual(true);
+      state.get('associationTypesIndexMap')
+        .filter((v, k) => FullyQualifiedName.isValid(k))
+        .keySeq()
+        .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+    });
+
+    test(localCreateAssociationType.FAILURE, () => {
+
+      const { id } = localCreateAssociationType();
+      const requestAction = localCreateAssociationType.request(id, MOCK_ASSOCIATION_TYPE);
+      let state = reducer(INITIAL_STATE, requestAction);
+      state = reducer(state, localCreateAssociationType.failure(id));
+
+      expect(state.getIn([LOCAL_CREATE_ASSOCIATION_TYPE, id])).toEqual(requestAction);
+      expect(state.getIn([LOCAL_CREATE_ASSOCIATION_TYPE, 'error'])).toEqual(true);
+      expect(state.get('newlyCreatedAssociationTypeFQN')).toEqual(undefined);
+
+      const expectedAssociationTypes = List();
+      expect(state.get('associationTypes').hashCode()).toEqual(expectedAssociationTypes.hashCode());
+      expect(state.get('associationTypes').equals(expectedAssociationTypes)).toEqual(true);
+
+      const expectedAssociationTypesIndexMap = Map();
+      expect(state.get('associationTypesIndexMap').hashCode()).toEqual(expectedAssociationTypesIndexMap.hashCode());
+      expect(state.get('associationTypesIndexMap').equals(expectedAssociationTypesIndexMap)).toEqual(true);
+    });
+
+    test(localCreateAssociationType.FINALLY, () => {
+
+      const { id } = localCreateAssociationType();
+      let state = reducer(INITIAL_STATE, localCreateAssociationType.request(id, MOCK_ASSOCIATION_TYPE));
+      state = reducer(state, localCreateAssociationType.success(id, MOCK_ASSOCIATION_TYPE.entityType.id));
+      state = reducer(state, localCreateAssociationType.finally(id));
+
+      expect(state.hasIn([LOCAL_CREATE_ASSOCIATION_TYPE, id])).toEqual(false);
+      expect(state.get('newlyCreatedAssociationTypeFQN')).toEqual(MOCK_ASSOCIATION_TYPE.entityType.type);
+      expect(state.get('newlyCreatedAssociationTypeFQN')).toBeInstanceOf(FullyQualifiedName);
+    });
+
+  });
+
   describe(LOCAL_REMOVE_DST_ET_FROM_AT, () => {
 
     const initialState = INITIAL_STATE
