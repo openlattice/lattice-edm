@@ -435,8 +435,9 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
             }
 
             const target :Map<*, *> = state.getIn(['associationTypes', targetIndex], Map());
-            const targetFQN :FQN = new FullyQualifiedName(target.get('type', Map()));
-            if (target.get('id') !== associationTypeId || targetFQN.toString() !== associationTypeFQN.toString()) {
+            const targetFQN :FQN = new FullyQualifiedName(target.getIn(['entityType', 'type'], Map()));
+            const targetId :?UUID = target.getIn(['entityType', 'id']);
+            if (targetId !== associationTypeId || targetFQN.toString() !== associationTypeFQN.toString()) {
               LOG.error('AssociationType does not match id or fqn', associationTypeId, associationTypeFQN);
               return state;
             }
@@ -452,7 +453,7 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
               const associationEntityType :Map<*, *> = associationType.get('entityType', Map());
               const fqn :FQN = new FullyQualifiedName(associationEntityType.get('type'));
               updatedAssociationTypesIndexMap.set(fqn, index);
-              const id :?UUID = associationType.get('id');
+              const id :?UUID = associationType.getIn(['entityType', 'id']);
               if (isValidUUID(id)) {
                 updatedAssociationTypesIndexMap.set(id, index);
               }

@@ -2,8 +2,11 @@
  * @flow
  */
 
+import randomUUID from 'uuid/v4';
 import { Models, Types } from 'lattice';
 import type { FQN } from 'lattice';
+
+import { genRandomBoolean, genRandomString } from './MockUtils';
 
 const {
   AnalyzerTypes,
@@ -44,6 +47,20 @@ const MOCK_ENTITY_TYPE :EntityType = new EntityTypeBuilder()
   .setSchemas([MOCK_SCHEMA_FQN])
   .build();
 
+function genRandomEntityType() :EntityType {
+  return new EntityTypeBuilder()
+    .setId(randomUUID())
+    .setType(new FullyQualifiedName(genRandomString(), genRandomString()))
+    .setTitle(genRandomString())
+    .setDescription(genRandomString())
+    .setKey([randomUUID(), randomUUID()])
+    .setPropertyTypes([randomUUID(), randomUUID(), randomUUID()])
+    .setBaseType(randomUUID())
+    .setCategory(SecurableTypes.EntityType)
+    .setSchemas([new FullyQualifiedName(genRandomString(), genRandomString())])
+    .build();
+}
+
 const MOCK_PROPERTY_TYPE :PropertyType = new PropertyTypeBuilder()
   .setId('ec6865e6-e60e-424b-a071-6a9c1603d735')
   .setType(MOCK_PROPERTY_TYPE_FQN)
@@ -81,9 +98,20 @@ const MOCK_ASSOCIATION_TYPE :AssociationType = new AssociationTypeBuilder()
   .setBidirectional(false)
   .build();
 
+function genRandomAssociationType() :AssociationType {
+  return new AssociationTypeBuilder()
+    .setEntityType(genRandomEntityType())
+    .setSourceEntityTypeIds([randomUUID(), randomUUID()])
+    .setDestinationEntityTypeIds([randomUUID(), randomUUID(), randomUUID()])
+    .setBidirectional(genRandomBoolean())
+    .build();
+}
+
 export {
   MOCK_ASSOCIATION_TYPE,
   MOCK_ENTITY_TYPE,
   MOCK_PROPERTY_TYPE,
   MOCK_SCHEMA_FQN,
+  genRandomAssociationType,
+  genRandomEntityType,
 };

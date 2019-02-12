@@ -4,7 +4,7 @@ import { Models } from 'lattice';
 import { EntityDataModelApiActions } from 'lattice-sagas';
 
 import reducer from './PropertyTypesReducer';
-import { MOCK_PROPERTY_TYPE } from '../../../utils/MockDataModels';
+import { MOCK_PROPERTY_TYPE } from '../../../utils/testing/MockDataModels';
 import { randomStringId } from '../../../utils/Utils';
 
 import {

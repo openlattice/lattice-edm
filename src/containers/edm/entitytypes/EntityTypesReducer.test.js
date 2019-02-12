@@ -4,7 +4,7 @@ import { Models } from 'lattice';
 import { EntityDataModelApiActions } from 'lattice-sagas';
 
 import reducer from './EntityTypesReducer';
-import { MOCK_ENTITY_TYPE } from '../../../utils/MockDataModels';
+import { MOCK_ENTITY_TYPE } from '../../../utils/testing/MockDataModels';
 import { randomStringId } from '../../../utils/Utils';
 import {
   LOCAL_ADD_PT_TO_ET,
@@ -39,6 +39,7 @@ describe('EntityTypesReducer', () => {
       [LOCAL_ADD_PT_TO_ET]: { error: false },
       [LOCAL_CREATE_ENTITY_TYPE]: { error: false },
       [LOCAL_DELETE_ENTITY_TYPE]: { error: false },
+      [LOCAL_REMOVE_PT_FROM_ET]: { error: false },
       [LOCAL_UPDATE_ENTITY_TYPE_META]: { error: false },
       entityTypes: [],
       entityTypesIndexMap: {},

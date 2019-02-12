@@ -1,11 +1,14 @@
 import randomUUID from 'uuid/v4';
-import { List, Map, fromJS } from 'immutable';
-import { Models, Types } from 'lattice';
+import { List, Map } from 'immutable';
+import { Models } from 'lattice';
 import { EntityDataModelApiActions } from 'lattice-sagas';
 
 import reducer from './AssociationTypesReducer';
-import { MOCK_ASSOCIATION_TYPE } from '../../../utils/MockDataModels';
-import { randomStringId } from '../../../utils/Utils';
+import { genRandomString } from '../../../utils/testing/MockUtils';
+import {
+  MOCK_ASSOCIATION_TYPE,
+  genRandomAssociationType,
+} from '../../../utils/testing/MockDataModels';
 import {
   LOCAL_ADD_DST_ET_TO_AT,
   LOCAL_ADD_PT_TO_AT,
@@ -30,10 +33,6 @@ import {
 const {
   FullyQualifiedName,
 } = Models;
-
-const {
-  ActionTypes,
-} = Types;
 
 const {
   GET_ENTITY_DATA_MODEL,
@@ -525,6 +524,166 @@ describe('AssociationTypesReducer', () => {
       expect(state.hasIn([LOCAL_CREATE_ASSOCIATION_TYPE, id])).toEqual(false);
       expect(state.get('newlyCreatedAssociationTypeFQN')).toEqual(MOCK_ASSOCIATION_TYPE.entityType.type);
       expect(state.get('newlyCreatedAssociationTypeFQN')).toBeInstanceOf(FullyQualifiedName);
+    });
+
+  });
+
+  describe(LOCAL_DELETE_ASSOCIATION_TYPE, () => {
+
+    test(localDeleteAssociationType.REQUEST, () => {
+
+      const { id } = localDeleteAssociationType();
+      const requestAction = localDeleteAssociationType.request(
+        id,
+        {
+          associationTypeFQN: MOCK_ASSOCIATION_TYPE.entityType.type,
+          associationTypeId: MOCK_ASSOCIATION_TYPE.entityType.id,
+        },
+      );
+      const state = reducer(INITIAL_STATE, requestAction);
+      expect(state.getIn([LOCAL_DELETE_ASSOCIATION_TYPE, id])).toEqual(requestAction);
+    });
+
+    describe(localDeleteAssociationType.SUCCESS, () => {
+
+      test('should delete AssociationType', () => {
+
+        const initialState = INITIAL_STATE
+          .setIn(['associationTypes', 0], MOCK_ASSOCIATION_TYPE.toImmutable())
+          .setIn(['associationTypesIndexMap', MOCK_ASSOCIATION_TYPE.entityType.id], 0)
+          .setIn(['associationTypesIndexMap', MOCK_ASSOCIATION_TYPE.entityType.type], 0);
+
+        const { id } = localDeleteAssociationType();
+        const requestAction = localDeleteAssociationType.request(
+          id,
+          {
+            associationTypeFQN: MOCK_ASSOCIATION_TYPE.entityType.type,
+            associationTypeId: MOCK_ASSOCIATION_TYPE.entityType.id,
+          },
+        );
+        let state = reducer(initialState, requestAction);
+        state = reducer(state, localDeleteAssociationType.success(id));
+
+        expect(state.getIn([LOCAL_DELETE_ASSOCIATION_TYPE, id])).toEqual(requestAction);
+        expect(state.get('associationTypes').toJS()).toEqual([]);
+        expect(state.get('associationTypesIndexMap').toJS()).toEqual({});
+      });
+
+      test('should correctly update "associationTypes" and "associationTypesIndexMap"', () => {
+
+        const mockAssociationType0 = genRandomAssociationType();
+        const mockAssociationType1 = genRandomAssociationType();
+        const mockAssociationType2 = genRandomAssociationType();
+
+        const initialState = INITIAL_STATE
+          .setIn(['associationTypes', 0], mockAssociationType0.toImmutable())
+          .setIn(['associationTypes', 1], mockAssociationType1.toImmutable())
+          .setIn(['associationTypes', 2], mockAssociationType2.toImmutable())
+          .setIn(['associationTypesIndexMap', mockAssociationType0.entityType.id], 0)
+          .setIn(['associationTypesIndexMap', mockAssociationType0.entityType.type], 0)
+          .setIn(['associationTypesIndexMap', mockAssociationType1.entityType.id], 1)
+          .setIn(['associationTypesIndexMap', mockAssociationType1.entityType.type], 1)
+          .setIn(['associationTypesIndexMap', mockAssociationType2.entityType.id], 2)
+          .setIn(['associationTypesIndexMap', mockAssociationType2.entityType.type], 2);
+
+        const { id } = localDeleteAssociationType();
+        const requestAction = localDeleteAssociationType.request(
+          id,
+          {
+            associationTypeFQN: mockAssociationType1.entityType.type,
+            associationTypeId: mockAssociationType1.entityType.id,
+          },
+        );
+        let state = reducer(initialState, requestAction);
+        state = reducer(state, localDeleteAssociationType.success(id));
+        expect(state.getIn([LOCAL_DELETE_ASSOCIATION_TYPE, id])).toEqual(requestAction);
+
+        const expectedAssociationTypes = List()
+          .push(mockAssociationType0.toImmutable())
+          .push(mockAssociationType2.toImmutable());
+        expect(state.get('associationTypes').hashCode()).toEqual(expectedAssociationTypes.hashCode());
+        expect(state.get('associationTypes').equals(expectedAssociationTypes)).toEqual(true);
+
+        const expectedAssociationTypesIndexMap = Map()
+          .set(mockAssociationType0.entityType.id, 0)
+          .set(mockAssociationType0.entityType.type, 0)
+          .set(mockAssociationType2.entityType.id, 1)
+          .set(mockAssociationType2.entityType.type, 1);
+        expect(state.get('associationTypesIndexMap').hashCode()).toEqual(expectedAssociationTypesIndexMap.hashCode());
+        expect(state.get('associationTypesIndexMap').equals(expectedAssociationTypesIndexMap)).toEqual(true);
+        state.get('associationTypesIndexMap')
+          .filter((v, k) => FullyQualifiedName.isValid(k))
+          .keySeq()
+          .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+      });
+
+      test('should not mutate state if attempting to delete a non-existent EntityType', () => {
+
+        const initialState = INITIAL_STATE
+          .setIn(['associationTypes', 0], MOCK_ASSOCIATION_TYPE.toImmutable())
+          .setIn(['associationTypesIndexMap', MOCK_ASSOCIATION_TYPE.entityType.id], 0)
+          .setIn(['associationTypesIndexMap', MOCK_ASSOCIATION_TYPE.entityType.type], 0);
+
+        const { id } = localDeleteAssociationType();
+        const stateAfterRequest = reducer(initialState, localDeleteAssociationType.request(
+          id,
+          {
+            associationTypeFQN: new FullyQualifiedName(genRandomString(), genRandomString()),
+            associationTypeId: randomUUID(),
+          },
+        ));
+        const stateAfterSuccess = reducer(stateAfterRequest, localDeleteAssociationType.success(id));
+        expect(stateAfterSuccess.hashCode()).toEqual(stateAfterRequest.hashCode());
+        expect(stateAfterSuccess.equals(stateAfterRequest)).toEqual(true);
+      });
+
+    });
+
+    test(localDeleteAssociationType.FAILURE, () => {
+
+      const initialState = INITIAL_STATE
+        .setIn(['associationTypes', 0], MOCK_ASSOCIATION_TYPE.toImmutable())
+        .setIn(['associationTypesIndexMap', MOCK_ASSOCIATION_TYPE.id], 0)
+        .setIn(['associationTypesIndexMap', MOCK_ASSOCIATION_TYPE.type], 0);
+
+      const { id } = localDeleteAssociationType();
+      const requestAction = localDeleteAssociationType.request(
+        id,
+        {
+          associationTypeFQN: MOCK_ASSOCIATION_TYPE.entityType.type,
+          associationTypeId: MOCK_ASSOCIATION_TYPE.entityType.id,
+        },
+      );
+      let state = reducer(initialState, requestAction);
+      state = reducer(state, localDeleteAssociationType.failure(id));
+
+      expect(state.getIn([LOCAL_DELETE_ASSOCIATION_TYPE, id])).toEqual(requestAction);
+      expect(state.getIn([LOCAL_DELETE_ASSOCIATION_TYPE, 'error'])).toEqual(true);
+      expect(state.get('newlyCreatedEntityTypeFQN')).toEqual(undefined);
+
+      const expectedAssociationTypes = initialState.get('associationTypes');
+      expect(state.get('associationTypes').hashCode()).toEqual(expectedAssociationTypes.hashCode());
+      expect(state.get('associationTypes').equals(expectedAssociationTypes)).toEqual(true);
+
+      const expectedAssociationTypesIndexMap = initialState.get('associationTypesIndexMap');
+      expect(state.get('associationTypesIndexMap').hashCode()).toEqual(expectedAssociationTypesIndexMap.hashCode());
+      expect(state.get('associationTypesIndexMap').equals(expectedAssociationTypesIndexMap)).toEqual(true);
+    });
+
+    test(localDeleteAssociationType.FINALLY, () => {
+
+      const { id } = localDeleteAssociationType();
+      const requestAction = localDeleteAssociationType.request(
+        id,
+        {
+          associationTypeFQN: MOCK_ASSOCIATION_TYPE.entityType.type,
+          associationTypeId: MOCK_ASSOCIATION_TYPE.entityType.id,
+        },
+      );
+      let state = reducer(INITIAL_STATE, requestAction);
+      state = reducer(state, localDeleteAssociationType.success(id));
+      state = reducer(state, localDeleteAssociationType.finally(id));
+      expect(state.hasIn([LOCAL_DELETE_ASSOCIATION_TYPE, id])).toEqual(false);
     });
 
   });
