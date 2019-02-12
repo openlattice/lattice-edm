@@ -457,6 +457,123 @@ describe('AssociationTypesReducer', () => {
 
   });
 
+  describe(LOCAL_REMOVE_PT_FROM_AT, () => {
+
+    const initialState = INITIAL_STATE
+      .setIn(['associationTypes', 0], MOCK_ASSOCIATION_TYPE.toImmutable())
+      .setIn(['associationTypesIndexMap', MOCK_ASSOCIATION_TYPE.entityType.id], 0)
+      .setIn(['associationTypesIndexMap', MOCK_ASSOCIATION_TYPE.entityType.type], 0);
+
+    const mockActionValue = {
+      associationTypeFQN: MOCK_ASSOCIATION_TYPE.entityType.type,
+      associationTypeId: MOCK_ASSOCIATION_TYPE.entityType.id,
+      propertyTypeId: MOCK_ASSOCIATION_TYPE.entityType.properties[0],
+    };
+
+    test(localRemovePropertyTypeFromAssociationType.REQUEST, () => {
+
+      const { id } = localRemovePropertyTypeFromAssociationType();
+      const requestAction = localRemovePropertyTypeFromAssociationType.request(id, mockActionValue);
+      const state = reducer(initialState, requestAction);
+      expect(state.getIn([LOCAL_REMOVE_PT_FROM_AT, id])).toEqual(requestAction);
+    });
+
+    describe(localRemovePropertyTypeFromAssociationType.SUCCESS, () => {
+
+      test('should remove PropertyType id', () => {
+
+        const { id } = localRemovePropertyTypeFromAssociationType();
+        const requestAction = localRemovePropertyTypeFromAssociationType.request(id, mockActionValue);
+        let state = reducer(initialState, requestAction);
+        state = reducer(state, localRemovePropertyTypeFromAssociationType.success(id));
+        expect(state.getIn([LOCAL_REMOVE_PT_FROM_AT, id])).toEqual(requestAction);
+
+
+        const associationType = MOCK_ASSOCIATION_TYPE.toImmutable();
+        const expectedAssociationTypes = List().push(
+          associationType.setIn(
+            ['entityType', 'properties'],
+            associationType.getIn(['entityType', 'properties']).delete(0)
+          )
+        );
+        expect(state.get('associationTypes').hashCode()).toEqual(expectedAssociationTypes.hashCode());
+        expect(state.get('associationTypes').equals(expectedAssociationTypes)).toEqual(true);
+
+        const expectedAssociationTypesIndexMap = Map()
+          .set(MOCK_ASSOCIATION_TYPE.entityType.id, 0)
+          .set(MOCK_ASSOCIATION_TYPE.entityType.type, 0);
+        expect(state.get('associationTypesIndexMap').hashCode()).toEqual(expectedAssociationTypesIndexMap.hashCode());
+        expect(state.get('associationTypesIndexMap').equals(expectedAssociationTypesIndexMap)).toEqual(true);
+        state.get('associationTypesIndexMap')
+          .filter((v, k) => FullyQualifiedName.isValid(k))
+          .keySeq()
+          .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+      });
+
+      test('should not change anything if the PropertyType id is not in the list', () => {
+
+        const { id } = localRemovePropertyTypeFromAssociationType();
+        const requestAction = localRemovePropertyTypeFromAssociationType.request(id, {
+          associationTypeFQN: MOCK_ASSOCIATION_TYPE.entityType.type,
+          associationTypeId: MOCK_ASSOCIATION_TYPE.entityType.id,
+          propertyTypeId: randomUUID(),
+        });
+        const stateAfterRequest = reducer(initialState, requestAction);
+        const stateAfterSuccess = reducer(stateAfterRequest, localRemovePropertyTypeFromAssociationType.success(id));
+        expect(stateAfterSuccess.hashCode()).toEqual(stateAfterRequest.hashCode());
+        expect(stateAfterSuccess.equals(stateAfterRequest)).toEqual(true);
+      });
+
+      test('should not change anything if the PropertyType id is invalid', () => {
+
+        const { id } = localRemovePropertyTypeFromAssociationType();
+        const requestAction = localRemovePropertyTypeFromAssociationType.request(id, {
+          associationTypeFQN: MOCK_ASSOCIATION_TYPE.entityType.type,
+          associationTypeId: MOCK_ASSOCIATION_TYPE.entityType.id,
+          propertyTypeId: '',
+        });
+        const stateAfterRequest = reducer(initialState, requestAction);
+        const stateAfterSuccess = reducer(stateAfterRequest, localRemovePropertyTypeFromAssociationType.success(id));
+        expect(stateAfterSuccess.hashCode()).toEqual(stateAfterRequest.hashCode());
+        expect(stateAfterSuccess.equals(stateAfterRequest)).toEqual(true);
+      });
+
+    });
+
+    test(localRemovePropertyTypeFromAssociationType.FAILURE, () => {
+
+      const { id } = localRemovePropertyTypeFromAssociationType();
+      const requestAction = localRemovePropertyTypeFromAssociationType.request(id, mockActionValue);
+      let state = reducer(initialState, requestAction);
+      state = reducer(state, localRemovePropertyTypeFromAssociationType.failure(id));
+      expect(state.getIn([LOCAL_REMOVE_PT_FROM_AT, id])).toEqual(requestAction);
+
+      const expectedAssociationTypes = List().push(MOCK_ASSOCIATION_TYPE.toImmutable());
+      expect(state.get('associationTypes').hashCode()).toEqual(expectedAssociationTypes.hashCode());
+      expect(state.get('associationTypes').equals(expectedAssociationTypes)).toEqual(true);
+
+      const expectedAssociationTypesIndexMap = Map()
+        .set(MOCK_ASSOCIATION_TYPE.entityType.id, 0)
+        .set(MOCK_ASSOCIATION_TYPE.entityType.type, 0);
+      expect(state.get('associationTypesIndexMap').hashCode()).toEqual(expectedAssociationTypesIndexMap.hashCode());
+      expect(state.get('associationTypesIndexMap').equals(expectedAssociationTypesIndexMap)).toEqual(true);
+      state.get('associationTypesIndexMap')
+        .filter((v, k) => FullyQualifiedName.isValid(k))
+        .keySeq()
+        .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+    });
+
+    test(localRemovePropertyTypeFromAssociationType.FINALLY, () => {
+
+      const { id } = localRemovePropertyTypeFromAssociationType();
+      let state = reducer(initialState, localRemovePropertyTypeFromAssociationType.request(id, mockActionValue));
+      state = reducer(state, localRemovePropertyTypeFromAssociationType.success(id));
+      state = reducer(state, localRemovePropertyTypeFromAssociationType.finally(id));
+      expect(state.hasIn([LOCAL_REMOVE_PT_FROM_AT, id])).toEqual(false);
+    });
+
+  });
+
   // describe(CREATE_ASSOCIATION_TYPE, () => {
   //
   //   test(createAssociationType.REQUEST, () => {
