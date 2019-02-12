@@ -138,7 +138,7 @@ describe('AssociationTypesReducer', () => {
 
     describe(localAddDstEntityTypeToAssociationType.SUCCESS, () => {
 
-      test('should add EntityType id', () => {
+      test('should add id', () => {
 
         const { id } = localAddDstEntityTypeToAssociationType();
         const requestAction = localAddDstEntityTypeToAssociationType.request(id, mockActionValue);
@@ -251,7 +251,7 @@ describe('AssociationTypesReducer', () => {
 
     describe(localAddPropertyTypeToAssociationType.SUCCESS, () => {
 
-      test('should add PropertyType id', () => {
+      test('should add id', () => {
 
         const { id } = localAddPropertyTypeToAssociationType();
         const requestAction = localAddPropertyTypeToAssociationType.request(id, mockActionValue);
@@ -367,7 +367,7 @@ describe('AssociationTypesReducer', () => {
 
     describe(localAddSrcEntityTypeToAssociationType.SUCCESS, () => {
 
-      test('should add EntityType id', () => {
+      test('should add id', () => {
 
         const { id } = localAddSrcEntityTypeToAssociationType();
         const requestAction = localAddSrcEntityTypeToAssociationType.request(id, mockActionValue);
@@ -457,7 +457,7 @@ describe('AssociationTypesReducer', () => {
 
   });
 
-  describe.only(LOCAL_REMOVE_DST_ET_FROM_AT, () => {
+  describe(LOCAL_REMOVE_DST_ET_FROM_AT, () => {
 
     const initialState = INITIAL_STATE
       .setIn(['associationTypes', 0], MOCK_ASSOCIATION_TYPE.toImmutable())
@@ -480,7 +480,7 @@ describe('AssociationTypesReducer', () => {
 
     describe(localRemoveDstEntityTypeFromAssociationType.SUCCESS, () => {
 
-      test('should remove EntityType id', () => {
+      test('should remove id', () => {
 
         const { id } = localRemoveDstEntityTypeFromAssociationType();
         const requestAction = localRemoveDstEntityTypeFromAssociationType.request(id, mockActionValue);
@@ -593,7 +593,7 @@ describe('AssociationTypesReducer', () => {
 
     describe(localRemovePropertyTypeFromAssociationType.SUCCESS, () => {
 
-      test('should remove PropertyType id', () => {
+      test('should remove id', () => {
 
         const { id } = localRemovePropertyTypeFromAssociationType();
         const requestAction = localRemovePropertyTypeFromAssociationType.request(id, mockActionValue);
@@ -682,6 +682,119 @@ describe('AssociationTypesReducer', () => {
       state = reducer(state, localRemovePropertyTypeFromAssociationType.success(id));
       state = reducer(state, localRemovePropertyTypeFromAssociationType.finally(id));
       expect(state.hasIn([LOCAL_REMOVE_PT_FROM_AT, id])).toEqual(false);
+    });
+
+  });
+
+  describe(LOCAL_REMOVE_SRC_ET_FROM_AT, () => {
+
+    const initialState = INITIAL_STATE
+      .setIn(['associationTypes', 0], MOCK_ASSOCIATION_TYPE.toImmutable())
+      .setIn(['associationTypesIndexMap', MOCK_ASSOCIATION_TYPE.entityType.id], 0)
+      .setIn(['associationTypesIndexMap', MOCK_ASSOCIATION_TYPE.entityType.type], 0);
+
+    const mockActionValue = {
+      associationTypeFQN: MOCK_ASSOCIATION_TYPE.entityType.type,
+      associationTypeId: MOCK_ASSOCIATION_TYPE.entityType.id,
+      entityTypeId: MOCK_ASSOCIATION_TYPE.src[0],
+    };
+
+    test(localRemoveSrcEntityTypeFromAssociationType.REQUEST, () => {
+
+      const { id } = localRemoveSrcEntityTypeFromAssociationType();
+      const requestAction = localRemoveSrcEntityTypeFromAssociationType.request(id, mockActionValue);
+      const state = reducer(initialState, requestAction);
+      expect(state.getIn([LOCAL_REMOVE_SRC_ET_FROM_AT, id])).toEqual(requestAction);
+    });
+
+    describe(localRemoveSrcEntityTypeFromAssociationType.SUCCESS, () => {
+
+      test('should remove id', () => {
+
+        const { id } = localRemoveSrcEntityTypeFromAssociationType();
+        const requestAction = localRemoveSrcEntityTypeFromAssociationType.request(id, mockActionValue);
+        let state = reducer(initialState, requestAction);
+        state = reducer(state, localRemoveSrcEntityTypeFromAssociationType.success(id));
+        expect(state.getIn([LOCAL_REMOVE_SRC_ET_FROM_AT, id])).toEqual(requestAction);
+
+        const associationType = MOCK_ASSOCIATION_TYPE.toImmutable();
+        const expectedAssociationTypes = List().push(
+          associationType.set('src', associationType.get('src').delete(0))
+        );
+        expect(state.get('associationTypes').hashCode()).toEqual(expectedAssociationTypes.hashCode());
+        expect(state.get('associationTypes').equals(expectedAssociationTypes)).toEqual(true);
+
+        const expectedAssociationTypesIndexMap = Map()
+          .set(MOCK_ASSOCIATION_TYPE.entityType.id, 0)
+          .set(MOCK_ASSOCIATION_TYPE.entityType.type, 0);
+        expect(state.get('associationTypesIndexMap').hashCode()).toEqual(expectedAssociationTypesIndexMap.hashCode());
+        expect(state.get('associationTypesIndexMap').equals(expectedAssociationTypesIndexMap)).toEqual(true);
+        state.get('associationTypesIndexMap')
+          .filter((v, k) => FullyQualifiedName.isValid(k))
+          .keySeq()
+          .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+      });
+
+      test('should not mutate state if the id is not in the list', () => {
+
+        const { id } = localRemoveSrcEntityTypeFromAssociationType();
+        const requestAction = localRemoveSrcEntityTypeFromAssociationType.request(id, {
+          associationTypeFQN: MOCK_ASSOCIATION_TYPE.entityType.type,
+          associationTypeId: MOCK_ASSOCIATION_TYPE.entityType.id,
+          entityTypeId: randomUUID(),
+        });
+        const stateAfterRequest = reducer(initialState, requestAction);
+        const stateAfterSuccess = reducer(stateAfterRequest, localRemoveSrcEntityTypeFromAssociationType.success(id));
+        expect(stateAfterSuccess.hashCode()).toEqual(stateAfterRequest.hashCode());
+        expect(stateAfterSuccess.equals(stateAfterRequest)).toEqual(true);
+      });
+
+      test('should not mutate state if the id is invalid', () => {
+
+        const { id } = localRemoveSrcEntityTypeFromAssociationType();
+        const requestAction = localRemoveSrcEntityTypeFromAssociationType.request(id, {
+          associationTypeFQN: MOCK_ASSOCIATION_TYPE.entityType.type,
+          associationTypeId: MOCK_ASSOCIATION_TYPE.entityType.id,
+          entityTypeId: '',
+        });
+        const stateAfterRequest = reducer(initialState, requestAction);
+        const stateAfterSuccess = reducer(stateAfterRequest, localRemoveSrcEntityTypeFromAssociationType.success(id));
+        expect(stateAfterSuccess.hashCode()).toEqual(stateAfterRequest.hashCode());
+        expect(stateAfterSuccess.equals(stateAfterRequest)).toEqual(true);
+      });
+
+    });
+
+    test(localRemoveSrcEntityTypeFromAssociationType.FAILURE, () => {
+
+      const { id } = localRemoveSrcEntityTypeFromAssociationType();
+      const requestAction = localRemoveSrcEntityTypeFromAssociationType.request(id, mockActionValue);
+      let state = reducer(initialState, requestAction);
+      state = reducer(state, localRemoveSrcEntityTypeFromAssociationType.failure(id));
+      expect(state.getIn([LOCAL_REMOVE_SRC_ET_FROM_AT, id])).toEqual(requestAction);
+
+      const expectedAssociationTypes = List().push(MOCK_ASSOCIATION_TYPE.toImmutable());
+      expect(state.get('associationTypes').hashCode()).toEqual(expectedAssociationTypes.hashCode());
+      expect(state.get('associationTypes').equals(expectedAssociationTypes)).toEqual(true);
+
+      const expectedAssociationTypesIndexMap = Map()
+        .set(MOCK_ASSOCIATION_TYPE.entityType.id, 0)
+        .set(MOCK_ASSOCIATION_TYPE.entityType.type, 0);
+      expect(state.get('associationTypesIndexMap').hashCode()).toEqual(expectedAssociationTypesIndexMap.hashCode());
+      expect(state.get('associationTypesIndexMap').equals(expectedAssociationTypesIndexMap)).toEqual(true);
+      state.get('associationTypesIndexMap')
+        .filter((v, k) => FullyQualifiedName.isValid(k))
+        .keySeq()
+        .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+    });
+
+    test(localRemoveSrcEntityTypeFromAssociationType.FINALLY, () => {
+
+      const { id } = localRemoveSrcEntityTypeFromAssociationType();
+      let state = reducer(initialState, localRemoveSrcEntityTypeFromAssociationType.request(id, mockActionValue));
+      state = reducer(state, localRemoveSrcEntityTypeFromAssociationType.success(id));
+      state = reducer(state, localRemoveSrcEntityTypeFromAssociationType.finally(id));
+      expect(state.hasIn([LOCAL_REMOVE_SRC_ET_FROM_AT, id])).toEqual(false);
     });
 
   });

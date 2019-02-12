@@ -120,7 +120,7 @@ describe('EntityTypesReducer', () => {
 
     describe(localAddPropertyTypeToEntityType.SUCCESS, () => {
 
-      test('should add PropertyType id', () => {
+      test('should add id', () => {
 
         const { id } = localAddPropertyTypeToEntityType();
         const requestAction = localAddPropertyTypeToEntityType.request(id, mockActionValue);
@@ -449,7 +449,7 @@ describe('EntityTypesReducer', () => {
 
     describe(localRemovePropertyTypeFromEntityType.SUCCESS, () => {
 
-      test('should remove PropertyType id', () => {
+      test('should remove id', () => {
 
         const { id } = localRemovePropertyTypeFromEntityType();
         const requestAction = localRemovePropertyTypeFromEntityType.request(id, mockActionValue);
