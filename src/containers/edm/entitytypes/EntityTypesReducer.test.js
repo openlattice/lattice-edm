@@ -144,7 +144,7 @@ describe('EntityTypesReducer', () => {
           .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
       });
 
-      test('should not change anything if the PropertyType id is already in the list', () => {
+      test('should not mutate state if the id is already in the list', () => {
 
         const { id } = localAddPropertyTypeToEntityType();
         const requestAction = localAddPropertyTypeToEntityType.request(id, {
@@ -158,7 +158,7 @@ describe('EntityTypesReducer', () => {
         expect(stateAfterSuccess.equals(stateAfterRequest)).toEqual(true);
       });
 
-      test('should not change anything if the PropertyType id is invalid', () => {
+      test('should not mutate state if the id is invalid', () => {
 
         const { id } = localAddPropertyTypeToEntityType();
         const requestAction = localAddPropertyTypeToEntityType.request(id, {
@@ -473,7 +473,7 @@ describe('EntityTypesReducer', () => {
           .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
       });
 
-      test('should not change anything if the PropertyType id is not in the list', () => {
+      test('should not mutate state if the id is not in the list', () => {
 
         const { id } = localRemovePropertyTypeFromEntityType();
         const requestAction = localRemovePropertyTypeFromEntityType.request(id, {
@@ -487,7 +487,7 @@ describe('EntityTypesReducer', () => {
         expect(stateAfterSuccess.equals(stateAfterRequest)).toEqual(true);
       });
 
-      test('should not change anything if the PropertyType id is invalid', () => {
+      test('should not mutate state if the id is invalid', () => {
 
         const { id } = localRemovePropertyTypeFromEntityType();
         const requestAction = localRemovePropertyTypeFromEntityType.request(id, {
