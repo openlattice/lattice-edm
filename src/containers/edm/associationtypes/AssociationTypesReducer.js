@@ -57,10 +57,14 @@ const {
 } = Types;
 
 const INITIAL_STATE :Map<*, *> = fromJS({
+  [LOCAL_ADD_DST_ET_TO_AT]: { error: false },
   [LOCAL_ADD_PT_TO_AT]: { error: false },
+  [LOCAL_ADD_SRC_ET_TO_AT]: { error: false },
   [LOCAL_CREATE_ASSOCIATION_TYPE]: { error: false },
   [LOCAL_DELETE_ASSOCIATION_TYPE]: { error: false },
+  [LOCAL_REMOVE_DST_ET_FROM_AT]: { error: false },
   [LOCAL_REMOVE_PT_FROM_AT]: { error: false },
+  [LOCAL_REMOVE_SRC_ET_FROM_AT]: { error: false },
   [LOCAL_UPDATE_ASSOCIATION_TYPE_META]: { error: false },
   associationTypes: List(),
   associationTypesIndexMap: Map(),
