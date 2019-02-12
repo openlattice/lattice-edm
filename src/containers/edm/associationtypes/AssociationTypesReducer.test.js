@@ -344,6 +344,119 @@ describe('AssociationTypesReducer', () => {
 
   });
 
+  describe(LOCAL_ADD_SRC_ET_TO_AT, () => {
+
+    const initialState = INITIAL_STATE
+      .setIn(['associationTypes', 0], MOCK_ASSOCIATION_TYPE.toImmutable())
+      .setIn(['associationTypesIndexMap', MOCK_ASSOCIATION_TYPE.entityType.id], 0)
+      .setIn(['associationTypesIndexMap', MOCK_ASSOCIATION_TYPE.entityType.type], 0);
+
+    const mockActionValue = {
+      associationTypeFQN: MOCK_ASSOCIATION_TYPE.entityType.type,
+      associationTypeId: MOCK_ASSOCIATION_TYPE.entityType.id,
+      entityTypeId: randomUUID(),
+    };
+
+    test(localAddSrcEntityTypeToAssociationType.REQUEST, () => {
+
+      const { id } = localAddSrcEntityTypeToAssociationType();
+      const requestAction = localAddSrcEntityTypeToAssociationType.request(id, mockActionValue);
+      const state = reducer(initialState, requestAction);
+      expect(state.getIn([LOCAL_ADD_SRC_ET_TO_AT, id])).toEqual(requestAction);
+    });
+
+    describe(localAddSrcEntityTypeToAssociationType.SUCCESS, () => {
+
+      test('should add EntityType id', () => {
+
+        const { id } = localAddSrcEntityTypeToAssociationType();
+        const requestAction = localAddSrcEntityTypeToAssociationType.request(id, mockActionValue);
+        let state = reducer(initialState, requestAction);
+        state = reducer(state, localAddSrcEntityTypeToAssociationType.success(id));
+        expect(state.getIn([LOCAL_ADD_SRC_ET_TO_AT, id])).toEqual(requestAction);
+
+        const associationType = MOCK_ASSOCIATION_TYPE.toImmutable();
+        const expectedAssociationTypes = List().push(
+          associationType.set('src', associationType.get('src').push(mockActionValue.entityTypeId))
+        );
+        expect(state.get('associationTypes').hashCode()).toEqual(expectedAssociationTypes.hashCode());
+        expect(state.get('associationTypes').equals(expectedAssociationTypes)).toEqual(true);
+
+        const expectedAssociationTypesIndexMap = Map()
+          .set(MOCK_ASSOCIATION_TYPE.entityType.id, 0)
+          .set(MOCK_ASSOCIATION_TYPE.entityType.type, 0);
+        expect(state.get('associationTypesIndexMap').hashCode()).toEqual(expectedAssociationTypesIndexMap.hashCode());
+        expect(state.get('associationTypesIndexMap').equals(expectedAssociationTypesIndexMap)).toEqual(true);
+        state.get('associationTypesIndexMap')
+          .filter((v, k) => FullyQualifiedName.isValid(k))
+          .keySeq()
+          .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+      });
+
+      test('should not change anything if the EntityType id is already in the list', () => {
+
+        const { id } = localAddSrcEntityTypeToAssociationType();
+        const requestAction = localAddSrcEntityTypeToAssociationType.request(id, {
+          associationTypeFQN: MOCK_ASSOCIATION_TYPE.entityType.type,
+          associationTypeId: MOCK_ASSOCIATION_TYPE.entityType.id,
+          entityTypeId: MOCK_ASSOCIATION_TYPE.src[0],
+        });
+        const stateAfterRequest = reducer(initialState, requestAction);
+        const stateAfterSuccess = reducer(stateAfterRequest, localAddSrcEntityTypeToAssociationType.success(id));
+        expect(stateAfterSuccess.hashCode()).toEqual(stateAfterRequest.hashCode());
+        expect(stateAfterSuccess.equals(stateAfterRequest)).toEqual(true);
+      });
+
+      test('should not change anything if the EntityType id is invalid', () => {
+
+        const { id } = localAddSrcEntityTypeToAssociationType();
+        const requestAction = localAddSrcEntityTypeToAssociationType.request(id, {
+          associationTypeFQN: MOCK_ASSOCIATION_TYPE.entityType.type,
+          associationTypeId: MOCK_ASSOCIATION_TYPE.entityType.id,
+          entityTypeId: '',
+        });
+        const stateAfterRequest = reducer(initialState, requestAction);
+        const stateAfterSuccess = reducer(stateAfterRequest, localAddSrcEntityTypeToAssociationType.success(id));
+        expect(stateAfterSuccess.hashCode()).toEqual(stateAfterRequest.hashCode());
+        expect(stateAfterSuccess.equals(stateAfterRequest)).toEqual(true);
+      });
+
+    });
+
+    test(localAddSrcEntityTypeToAssociationType.FAILURE, () => {
+
+      const { id } = localAddSrcEntityTypeToAssociationType();
+      const requestAction = localAddSrcEntityTypeToAssociationType.request(id, mockActionValue);
+      let state = reducer(initialState, requestAction);
+      state = reducer(state, localAddSrcEntityTypeToAssociationType.failure(id));
+      expect(state.getIn([LOCAL_ADD_SRC_ET_TO_AT, id])).toEqual(requestAction);
+
+      const expectedAssociationTypes = List().push(MOCK_ASSOCIATION_TYPE.toImmutable());
+      expect(state.get('associationTypes').hashCode()).toEqual(expectedAssociationTypes.hashCode());
+      expect(state.get('associationTypes').equals(expectedAssociationTypes)).toEqual(true);
+
+      const expectedAssociationTypesIndexMap = Map()
+        .set(MOCK_ASSOCIATION_TYPE.entityType.id, 0)
+        .set(MOCK_ASSOCIATION_TYPE.entityType.type, 0);
+      expect(state.get('associationTypesIndexMap').hashCode()).toEqual(expectedAssociationTypesIndexMap.hashCode());
+      expect(state.get('associationTypesIndexMap').equals(expectedAssociationTypesIndexMap)).toEqual(true);
+      state.get('associationTypesIndexMap')
+        .filter((v, k) => FullyQualifiedName.isValid(k))
+        .keySeq()
+        .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+    });
+
+    test(localAddSrcEntityTypeToAssociationType.FINALLY, () => {
+
+      const { id } = localAddSrcEntityTypeToAssociationType();
+      let state = reducer(initialState, localAddSrcEntityTypeToAssociationType.request(id, mockActionValue));
+      state = reducer(state, localAddSrcEntityTypeToAssociationType.success(id));
+      state = reducer(state, localAddSrcEntityTypeToAssociationType.finally(id));
+      expect(state.hasIn([LOCAL_ADD_SRC_ET_TO_AT, id])).toEqual(false);
+    });
+
+  });
+
   // describe(CREATE_ASSOCIATION_TYPE, () => {
   //
   //   test(createAssociationType.REQUEST, () => {
