@@ -228,6 +228,122 @@ describe('AssociationTypesReducer', () => {
 
   });
 
+  describe(LOCAL_ADD_PT_TO_AT, () => {
+
+    const initialState = INITIAL_STATE
+      .setIn(['associationTypes', 0], MOCK_ASSOCIATION_TYPE.toImmutable())
+      .setIn(['associationTypesIndexMap', MOCK_ASSOCIATION_TYPE.entityType.id], 0)
+      .setIn(['associationTypesIndexMap', MOCK_ASSOCIATION_TYPE.entityType.type], 0);
+
+    const mockActionValue = {
+      associationTypeFQN: MOCK_ASSOCIATION_TYPE.entityType.type,
+      associationTypeId: MOCK_ASSOCIATION_TYPE.entityType.id,
+      propertyTypeId: randomUUID(),
+    };
+
+    test(localAddPropertyTypeToAssociationType.REQUEST, () => {
+
+      const { id } = localAddPropertyTypeToAssociationType();
+      const requestAction = localAddPropertyTypeToAssociationType.request(id, mockActionValue);
+      const state = reducer(initialState, requestAction);
+      expect(state.getIn([LOCAL_ADD_PT_TO_AT, id])).toEqual(requestAction);
+    });
+
+    describe(localAddPropertyTypeToAssociationType.SUCCESS, () => {
+
+      test('should add PropertyType id', () => {
+
+        const { id } = localAddPropertyTypeToAssociationType();
+        const requestAction = localAddPropertyTypeToAssociationType.request(id, mockActionValue);
+        let state = reducer(initialState, requestAction);
+        state = reducer(state, localAddPropertyTypeToAssociationType.success(id));
+        expect(state.getIn([LOCAL_ADD_PT_TO_AT, id])).toEqual(requestAction);
+
+        const associationType = MOCK_ASSOCIATION_TYPE.toImmutable();
+        const expectedAssociationTypes = List().push(
+          associationType.setIn(
+            ['entityType', 'properties'],
+            associationType.getIn(['entityType', 'properties']).push(mockActionValue.propertyTypeId)
+          )
+        );
+        expect(state.get('associationTypes').hashCode()).toEqual(expectedAssociationTypes.hashCode());
+        expect(state.get('associationTypes').equals(expectedAssociationTypes)).toEqual(true);
+
+        const expectedAssociationTypesIndexMap = Map()
+          .set(MOCK_ASSOCIATION_TYPE.entityType.id, 0)
+          .set(MOCK_ASSOCIATION_TYPE.entityType.type, 0);
+        expect(state.get('associationTypesIndexMap').hashCode()).toEqual(expectedAssociationTypesIndexMap.hashCode());
+        expect(state.get('associationTypesIndexMap').equals(expectedAssociationTypesIndexMap)).toEqual(true);
+        state.get('associationTypesIndexMap')
+          .filter((v, k) => FullyQualifiedName.isValid(k))
+          .keySeq()
+          .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+      });
+
+      test('should not change anything if the PropertyType id is already in the list', () => {
+
+        const { id } = localAddPropertyTypeToAssociationType();
+        const requestAction = localAddPropertyTypeToAssociationType.request(id, {
+          associationTypeFQN: MOCK_ASSOCIATION_TYPE.entityType.type,
+          associationTypeId: MOCK_ASSOCIATION_TYPE.entityType.id,
+          propertyTypeId: MOCK_ASSOCIATION_TYPE.entityType.properties[0],
+        });
+        const stateAfterRequest = reducer(initialState, requestAction);
+        const stateAfterSuccess = reducer(stateAfterRequest, localAddPropertyTypeToAssociationType.success(id));
+        expect(stateAfterSuccess.hashCode()).toEqual(stateAfterRequest.hashCode());
+        expect(stateAfterSuccess.equals(stateAfterRequest)).toEqual(true);
+      });
+
+      test('should not change anything if the PropertyType id is invalid', () => {
+
+        const { id } = localAddPropertyTypeToAssociationType();
+        const requestAction = localAddPropertyTypeToAssociationType.request(id, {
+          associationTypeFQN: MOCK_ASSOCIATION_TYPE.entityType.type,
+          associationTypeId: MOCK_ASSOCIATION_TYPE.entityType.id,
+          propertyTypeId: '',
+        });
+        const stateAfterRequest = reducer(initialState, requestAction);
+        const stateAfterSuccess = reducer(stateAfterRequest, localAddPropertyTypeToAssociationType.success(id));
+        expect(stateAfterSuccess.hashCode()).toEqual(stateAfterRequest.hashCode());
+        expect(stateAfterSuccess.equals(stateAfterRequest)).toEqual(true);
+      });
+
+    });
+
+    test(localAddPropertyTypeToAssociationType.FAILURE, () => {
+
+      const { id } = localAddPropertyTypeToAssociationType();
+      const requestAction = localAddPropertyTypeToAssociationType.request(id, mockActionValue);
+      let state = reducer(initialState, requestAction);
+      state = reducer(state, localAddPropertyTypeToAssociationType.failure(id));
+      expect(state.getIn([LOCAL_ADD_PT_TO_AT, id])).toEqual(requestAction);
+
+      const expectedAssociationTypes = List().push(MOCK_ASSOCIATION_TYPE.toImmutable());
+      expect(state.get('associationTypes').hashCode()).toEqual(expectedAssociationTypes.hashCode());
+      expect(state.get('associationTypes').equals(expectedAssociationTypes)).toEqual(true);
+
+      const expectedAssociationTypesIndexMap = Map()
+        .set(MOCK_ASSOCIATION_TYPE.entityType.id, 0)
+        .set(MOCK_ASSOCIATION_TYPE.entityType.type, 0);
+      expect(state.get('associationTypesIndexMap').hashCode()).toEqual(expectedAssociationTypesIndexMap.hashCode());
+      expect(state.get('associationTypesIndexMap').equals(expectedAssociationTypesIndexMap)).toEqual(true);
+      state.get('associationTypesIndexMap')
+        .filter((v, k) => FullyQualifiedName.isValid(k))
+        .keySeq()
+        .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+    });
+
+    test(localAddPropertyTypeToAssociationType.FINALLY, () => {
+
+      const { id } = localAddPropertyTypeToAssociationType();
+      let state = reducer(initialState, localAddPropertyTypeToAssociationType.request(id, mockActionValue));
+      state = reducer(state, localAddPropertyTypeToAssociationType.success(id));
+      state = reducer(state, localAddPropertyTypeToAssociationType.finally(id));
+      expect(state.hasIn([LOCAL_ADD_PT_TO_AT, id])).toEqual(false);
+    });
+
+  });
+
   // describe(CREATE_ASSOCIATION_TYPE, () => {
   //
   //   test(createAssociationType.REQUEST, () => {
