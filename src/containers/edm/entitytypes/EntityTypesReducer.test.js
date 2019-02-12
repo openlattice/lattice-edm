@@ -5,7 +5,7 @@ import { EntityDataModelApiActions } from 'lattice-sagas';
 
 import reducer from './EntityTypesReducer';
 import { MOCK_ENTITY_TYPE } from '../../../utils/testing/MockDataModels';
-import { randomStringId } from '../../../utils/Utils';
+import { genRandomString } from '../../../utils/testing/MockUtils';
 import {
   LOCAL_ADD_PT_TO_ET,
   LOCAL_CREATE_ENTITY_TYPE,
@@ -314,27 +314,27 @@ describe('EntityTypesReducer', () => {
           .setId(randomUUID())
           .setKey([randomUUID()])
           .setPropertyTypes([randomUUID(), randomUUID()])
-          .setSchemas([new FullyQualifiedName(randomStringId(), randomStringId())])
-          .setTitle(randomStringId())
-          .setType(new FullyQualifiedName(randomStringId(), randomStringId()))
+          .setSchemas([new FullyQualifiedName(genRandomString(), genRandomString())])
+          .setTitle(genRandomString())
+          .setType(new FullyQualifiedName(genRandomString(), genRandomString()))
           .build();
 
         const mockEntityType1 = new EntityTypeBuilder()
           .setId(randomUUID())
           .setKey([randomUUID()])
           .setPropertyTypes([randomUUID(), randomUUID()])
-          .setSchemas([new FullyQualifiedName(randomStringId(), randomStringId())])
-          .setTitle(randomStringId())
-          .setType(new FullyQualifiedName(randomStringId(), randomStringId()))
+          .setSchemas([new FullyQualifiedName(genRandomString(), genRandomString())])
+          .setTitle(genRandomString())
+          .setType(new FullyQualifiedName(genRandomString(), genRandomString()))
           .build();
 
         const mockEntityType2 = new EntityTypeBuilder()
           .setId(randomUUID())
           .setKey([randomUUID()])
           .setPropertyTypes([randomUUID(), randomUUID()])
-          .setSchemas([new FullyQualifiedName(randomStringId(), randomStringId())])
-          .setTitle(randomStringId())
-          .setType(new FullyQualifiedName(randomStringId(), randomStringId()))
+          .setSchemas([new FullyQualifiedName(genRandomString(), genRandomString())])
+          .setTitle(genRandomString())
+          .setType(new FullyQualifiedName(genRandomString(), genRandomString()))
           .build();
 
         const initialState = INITIAL_STATE
@@ -381,7 +381,7 @@ describe('EntityTypesReducer', () => {
           .setIn(['entityTypesIndexMap', MOCK_ENTITY_TYPE.type], 0);
 
         const { id } = localDeleteEntityType();
-        const entityTypeFQN = new FullyQualifiedName(randomStringId(), randomStringId());
+        const entityTypeFQN = new FullyQualifiedName(genRandomString(), genRandomString());
         const stateAfterRequest = reducer(initialState, localDeleteEntityType.request(id, { entityTypeFQN }));
         const stateAfterSuccess = reducer(stateAfterRequest, localDeleteEntityType.success(id));
         expect(stateAfterSuccess.hashCode()).toEqual(stateAfterRequest.hashCode());
@@ -548,7 +548,7 @@ describe('EntityTypesReducer', () => {
       const mockActionValue = {
         entityTypeId: MOCK_ENTITY_TYPE.id,
         entityTypeFQN: MOCK_ENTITY_TYPE.type,
-        metadata: { description: randomStringId() },
+        metadata: { description: genRandomString() },
       };
 
       test(localUpdateEntityTypeMeta.REQUEST, () => {
@@ -619,7 +619,7 @@ describe('EntityTypesReducer', () => {
       const mockActionValue = {
         entityTypeId: MOCK_ENTITY_TYPE.id,
         entityTypeFQN: MOCK_ENTITY_TYPE.type,
-        metadata: { title: randomStringId() },
+        metadata: { title: genRandomString() },
       };
 
       test(localUpdateEntityTypeMeta.REQUEST, () => {
@@ -690,7 +690,7 @@ describe('EntityTypesReducer', () => {
       const mockActionValue = {
         entityTypeId: MOCK_ENTITY_TYPE.id,
         entityTypeFQN: MOCK_ENTITY_TYPE.type,
-        metadata: { type: new FullyQualifiedName(randomStringId(), randomStringId()) },
+        metadata: { type: new FullyQualifiedName(genRandomString(), genRandomString()) },
       };
 
       test(localUpdateEntityTypeMeta.REQUEST, () => {

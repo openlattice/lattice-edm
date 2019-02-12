@@ -5,7 +5,7 @@ import { EntityDataModelApiActions } from 'lattice-sagas';
 
 import reducer from './PropertyTypesReducer';
 import { MOCK_PROPERTY_TYPE } from '../../../utils/testing/MockDataModels';
-import { randomStringId } from '../../../utils/Utils';
+import { genRandomString } from '../../../utils/testing/MockUtils';
 
 import {
   LOCAL_CREATE_PROPERTY_TYPE,
@@ -211,21 +211,21 @@ describe('PropertyTypesReducer', () => {
           .setDataType('String')
           .setId(randomUUID())
           .setTitle('title')
-          .setType(new FullyQualifiedName(randomStringId(), randomStringId()))
+          .setType(new FullyQualifiedName(genRandomString(), genRandomString()))
           .build();
 
         const mockPropertyType1 = new PropertyTypeBuilder()
           .setDataType('String')
           .setId(randomUUID())
           .setTitle('title')
-          .setType(new FullyQualifiedName(randomStringId(), randomStringId()))
+          .setType(new FullyQualifiedName(genRandomString(), genRandomString()))
           .build();
 
         const mockPropertyType2 = new PropertyTypeBuilder()
           .setDataType('String')
           .setId(randomUUID())
           .setTitle('title')
-          .setType(new FullyQualifiedName(randomStringId(), randomStringId()))
+          .setType(new FullyQualifiedName(genRandomString(), genRandomString()))
           .build();
 
         const initialState = INITIAL_STATE
@@ -272,7 +272,7 @@ describe('PropertyTypesReducer', () => {
           .setIn(['propertyTypesIndexMap', MOCK_PROPERTY_TYPE.type], 0);
 
         const { id } = localDeletePropertyType();
-        const propertyTypeFQN = new FullyQualifiedName(randomStringId(), randomStringId());
+        const propertyTypeFQN = new FullyQualifiedName(genRandomString(), genRandomString());
         const stateAfterRequest = reducer(initialState, localDeletePropertyType.request(id, { propertyTypeFQN }));
         const stateAfterSuccess = reducer(stateAfterRequest, localDeletePropertyType.success(id));
         expect(stateAfterSuccess.hashCode()).toEqual(stateAfterRequest.hashCode());
@@ -328,7 +328,7 @@ describe('PropertyTypesReducer', () => {
     describe('description', () => {
 
       const mockActionValue = {
-        metadata: { description: randomStringId() },
+        metadata: { description: genRandomString() },
         propertyTypeId: MOCK_PROPERTY_TYPE.id,
         propertyTypeFQN: MOCK_PROPERTY_TYPE.type,
       };
@@ -401,7 +401,7 @@ describe('PropertyTypesReducer', () => {
     describe('title', () => {
 
       const mockActionValue = {
-        metadata: { title: randomStringId() },
+        metadata: { title: genRandomString() },
         propertyTypeId: MOCK_PROPERTY_TYPE.id,
         propertyTypeFQN: MOCK_PROPERTY_TYPE.type,
       };
@@ -476,7 +476,7 @@ describe('PropertyTypesReducer', () => {
     describe('type', () => {
 
       const mockActionValue = {
-        metadata: { type: new FullyQualifiedName(randomStringId(), randomStringId()) },
+        metadata: { type: new FullyQualifiedName(genRandomString(), genRandomString()) },
         propertyTypeId: MOCK_PROPERTY_TYPE.id,
         propertyTypeFQN: MOCK_PROPERTY_TYPE.type,
       };
