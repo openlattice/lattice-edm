@@ -10,11 +10,16 @@ import { Models, Types } from 'lattice';
 import { AuthUtils } from 'lattice-auth';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
+import type { FQN } from 'lattice';
 
 import AbstractTypes from '../../../utils/AbstractTypes';
 import AbstractTypeDataTable from '../../../components/datatable/AbstractTypeDataTable';
 import AbstractTypeSearchableSelect from '../../../components/controls/AbstractTypeSearchableSelect';
+import Logger from '../../../utils/Logger';
 import * as SchemasActions from './SchemasActions';
+import { isValidUUID } from '../../../utils/ValidationUtils';
+
+const LOG :Logger = new Logger('SchemaDetailsContainer');
 
 const { FullyQualifiedName } = Models;
 const { ActionTypes } = Types;
@@ -33,7 +38,7 @@ const AbstractTypeSearchableSelectWrapper = styled.div`
 
 type Props = {
   actions :{
-    updateSchema :RequestSequence;
+    localUpdateSchema :RequestSequence;
   };
   associationTypes :List<Map<*, *>>;
   associationTypesIndexMap :Map<string, number>;
@@ -46,119 +51,168 @@ type Props = {
 
 class SchemaDetailsContainer extends React.Component<Props> {
 
-  handleAddAssociationType = (entityTypeId :string) => {
+  handleAddAssociationType = (associationTypeFQN :FQN) => {
 
     const {
       actions,
       associationTypes,
       associationTypesIndexMap,
-      schema
+      schema,
     } = this.props;
 
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
-      // NOTE: this is slightly hacky. updateSchema() will ignore the "entityTypes" field, but our reducer will still
-      // have access to it
-      let entityTypes :Map<*, *> = Map();
-      if (associationTypesIndexMap.has(entityTypeId)) {
-        const targetIndex :number = associationTypesIndexMap.get(entityTypeId);
-        const targetEntityType :Map<*, *> = associationTypes.getIn([targetIndex, 'entityType'], Map());
-        // confirm retrieved EntityType id matches "entityTypeId"
-        if (entityTypeId === targetEntityType.get('id')) {
-          entityTypes = entityTypes.set(entityTypeId, targetEntityType);
+      const associationTypeIndex :number = associationTypesIndexMap.get(associationTypeFQN, -1);
+      if (associationTypeIndex !== -1) {
+        const associationEntityType :Map<*, *> = associationTypes.getIn([associationTypeIndex, 'entityType']);
+        if (isValidUUID(associationEntityType.get('id'))) {
+          actions.localUpdateSchema({
+            actionType: ActionTypes.ADD,
+            entityTypes: [associationEntityType],
+            schemaFQN: new FullyQualifiedName(schema.get('fqn')),
+          });
+        }
+        else {
+          LOG.error('invalid id', associationEntityType.get('id'));
         }
       }
-      actions.updateSchema({
-        entityTypes,
-        action: ActionTypes.ADD,
-        entityTypeIds: [entityTypeId],
-        schemaFqn: new FullyQualifiedName(schema.get('fqn')),
-      });
+      else {
+        LOG.error('AssociationType not found in store', associationTypeFQN);
+      }
     }
   }
 
-  handleAddEntityType = (entityTypeId :string) => {
+  handleAddEntityType = (entityTypeFQN :FQN) => {
 
     const {
       actions,
       entityTypes,
       entityTypesIndexMap,
-      schema
+      schema,
     } = this.props;
 
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
-      // NOTE: this is slightly hacky. updateSchema() will ignore the "entityTypes" field, but our reducer will still
-      // have access to it
-      let theEntityTypes :Map<*, *> = Map();
-      if (entityTypesIndexMap.has(entityTypeId)) {
-        const targetIndex :number = entityTypesIndexMap.get(entityTypeId);
-        const targetEntityType :Map<*, *> = entityTypes.get(targetIndex, Map());
-        // confirm retrieved EntityType id matches "entityTypeId"
-        if (entityTypeId === targetEntityType.get('id')) {
-          theEntityTypes = theEntityTypes.set(entityTypeId, targetEntityType);
+      const entityTypeIndex :number = entityTypesIndexMap.get(entityTypeFQN, -1);
+      if (entityTypeIndex !== -1) {
+        const entityType :Map<*, *> = entityTypes.get(entityTypeIndex);
+        if (isValidUUID(entityType.get('id'))) {
+          actions.localUpdateSchema({
+            actionType: ActionTypes.ADD,
+            entityTypes: [entityType],
+            schemaFQN: new FullyQualifiedName(schema.get('fqn')),
+          });
+        }
+        else {
+          LOG.error('invalid id', entityType.get('id'));
         }
       }
-      actions.updateSchema({
-        action: ActionTypes.ADD,
-        entityTypes: theEntityTypes,
-        entityTypeIds: [entityTypeId],
-        schemaFqn: new FullyQualifiedName(schema.get('fqn')),
-      });
+      else {
+        LOG.error('EntityType not found in store', entityTypeFQN);
+      }
     }
   }
 
-  handleAddPropertyType = (propertyTypeId :string) => {
+  handleAddPropertyType = (propertyTypeFQN :FQN) => {
 
     const {
       actions,
       propertyTypes,
       propertyTypesIndexMap,
-      schema
+      schema,
     } = this.props;
 
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
-      // NOTE: this is slightly hacky. updateSchema() will ignore the "propertyTypes" field, but our reducer will still
-      // have access to it
-      let thePropertyTypes :Map<*, *> = Map();
-      if (propertyTypesIndexMap.has(propertyTypeId)) {
-        const targetIndex :number = propertyTypesIndexMap.get(propertyTypeId);
-        const targetPropertyType :Map<*, *> = propertyTypes.get(targetIndex, Map());
-        // confirm retrieved PropertyType id matches "propertyTypeId"
-        if (propertyTypeId === targetPropertyType.get('id')) {
-          thePropertyTypes = thePropertyTypes.set(propertyTypeId, targetPropertyType);
+      const propertyTypeIndex :number = propertyTypesIndexMap.get(propertyTypeFQN, -1);
+      if (propertyTypeIndex !== -1) {
+        const propertyType :Map<*, *> = propertyTypes.get(propertyTypeIndex);
+        if (isValidUUID(propertyType.get('id'))) {
+          actions.localUpdateSchema({
+            actionType: ActionTypes.ADD,
+            propertyTypes: [propertyType],
+            schemaFQN: new FullyQualifiedName(schema.get('fqn')),
+          });
+        }
+        else {
+          LOG.error('invalid id', propertyType.get('id'));
         }
       }
-      actions.updateSchema({
-        action: ActionTypes.ADD,
-        propertyTypes: thePropertyTypes,
-        propertyTypeIds: [propertyTypeId],
-        schemaFqn: new FullyQualifiedName(schema.get('fqn')),
-      });
+      else {
+        LOG.error('PropertyType not found in store', propertyTypeFQN);
+      }
     }
   }
 
-  handleRemoveEntityType = (entityTypeId :string) => {
+  handleRemoveAssociationType = (associationTypeFQN :FQN) => {
 
-    const { actions, schema } = this.props;
+    const {
+      actions,
+      associationTypes,
+      associationTypesIndexMap,
+      schema,
+    } = this.props;
 
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
-      actions.updateSchema({
-        action: ActionTypes.REMOVE,
-        entityTypeIds: [entityTypeId],
-        schemaFqn: new FullyQualifiedName(schema.get('fqn')),
-      });
+      const associationTypeIndex :number = associationTypesIndexMap.get(associationTypeFQN, -1);
+      if (associationTypeIndex !== -1) {
+        const associationTypeId :UUID = associationTypes.getIn([associationTypeIndex, 'entityType', 'id']);
+        actions.localUpdateSchema({
+          actionType: ActionTypes.REMOVE,
+          entityTypeIds: [associationTypeId],
+          schemaFQN: new FullyQualifiedName(schema.get('fqn')),
+        });
+      }
+      else {
+        LOG.error('AssociationType not found in store', associationTypeFQN);
+      }
     }
   }
 
-  handleRemovePropertyType = (propertyTypeId :string) => {
+  handleRemoveEntityType = (entityTypeFQN :FQN) => {
 
-    const { actions, schema } = this.props;
+    const {
+      actions,
+      entityTypes,
+      entityTypesIndexMap,
+      schema,
+    } = this.props;
 
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
-      actions.updateSchema({
-        action: ActionTypes.REMOVE,
-        propertyTypeIds: [propertyTypeId],
-        schemaFqn: new FullyQualifiedName(schema.get('fqn')),
-      });
+      const entityTypeIndex :number = entityTypesIndexMap.get(entityTypeFQN, -1);
+      if (entityTypeIndex !== -1) {
+        const entityTypeId :UUID = entityTypes.getIn([entityTypeIndex, 'id']);
+        actions.localUpdateSchema({
+          actionType: ActionTypes.REMOVE,
+          entityTypeIds: [entityTypeId],
+          schemaFQN: new FullyQualifiedName(schema.get('fqn')),
+        });
+      }
+      else {
+        LOG.error('EntityType not found in store', entityTypeFQN);
+      }
+    }
+  }
+
+  handleRemovePropertyType = (propertyTypeFQN :FQN) => {
+
+    const {
+      actions,
+      propertyTypes,
+      propertyTypesIndexMap,
+      schema,
+    } = this.props;
+
+    if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
+      const propertyTypeIndex :number = propertyTypesIndexMap.get(propertyTypeFQN, -1);
+      if (propertyTypeIndex !== -1) {
+        const propertyTypeId :UUID = propertyTypes.getIn([propertyTypeIndex, 'id']);
+        actions.localUpdateSchema({
+          actionType: ActionTypes.REMOVE,
+          propertyTypeIds: [propertyTypeId],
+          schemaFQN: new FullyQualifiedName(schema.get('fqn')),
+        });
+      }
+      else {
+        LOG.error('PropertyType not found in store', propertyTypeFQN);
+      }
     }
   }
 
@@ -332,7 +386,7 @@ class SchemaDetailsContainer extends React.Component<Props> {
             highlightOnHover
             maxHeight={500}
             showRemoveColumn
-            onAbstractTypeRemove={this.handleRemoveEntityType}
+            onAbstractTypeRemove={this.handleRemoveAssociationType}
             workingAbstractTypeType={AbstractTypes.EntityType} />
       );
     }

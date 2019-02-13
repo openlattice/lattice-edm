@@ -54,6 +54,7 @@ export default function* sagas() :Generator<*, *, *> {
 
     // SchemasSagas
     fork(SchemasSagas.localCreateSchemaWatcher),
+    fork(SchemasSagas.localUpdateSchemaWatcher),
 
     // SyncSagas
     fork(SyncSagas.syncProdEntityDataModelWatcher),
