@@ -94,6 +94,7 @@ export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, act
               entityTypesIndexMap.set(entityTypeFQN, index);
             }
             catch (e) {
+              LOG.error('getEntityDataModel()', et);
               LOG.error('getEntityDataModel()', e);
             }
           });

@@ -120,6 +120,7 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
               associationTypesIndexMap.set(associationTypeFQN, index);
             }
             catch (e) {
+              LOG.error('getEntityDataModel()', at);
               LOG.error('getEntityDataModel()', e);
             }
           });

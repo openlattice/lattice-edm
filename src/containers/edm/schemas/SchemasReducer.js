@@ -70,6 +70,7 @@ export default function schemasReducer(state :Map<*, *> = INITIAL_STATE, action 
               schemasIndexMap.set(schemaFQN, index);
             }
             catch (e) {
+              LOG.error('getEntityDataModel()', s);
               LOG.error('getEntityDataModel()', e);
             }
           });

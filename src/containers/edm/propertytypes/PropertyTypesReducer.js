@@ -87,6 +87,7 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
               propertyTypesIndexMap.set(propertyTypeFQN, index);
             }
             catch (e) {
+              LOG.error('getEntityDataModel()', pt);
               LOG.error('getEntityDataModel()', e);
             }
           });
