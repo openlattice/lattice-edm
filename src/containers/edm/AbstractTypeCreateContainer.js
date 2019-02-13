@@ -21,6 +21,7 @@ import StyledCard from '../../components/cards/StyledCard';
 import * as AssociationTypesActions from './associationtypes/AssociationTypesActions';
 import * as EntityTypesActions from './entitytypes/EntityTypesActions';
 import * as PropertyTypesActions from './propertytypes/PropertyTypesActions';
+import * as SchemasActions from './schemas/SchemasActions';
 import { EDM_PRIMITIVE_TYPES } from '../../utils/EdmPrimitiveTypes';
 import type { AbstractType } from '../../utils/AbstractTypes';
 
@@ -129,6 +130,7 @@ type Props = {
     localCreateAssociationType :RequestSequence;
     localCreateEntityType :RequestSequence;
     localCreatePropertyType :RequestSequence;
+    localCreateSchema :RequestSequence;
   };
   entityTypes :List<Map<*, *>>;
   propertyTypes :List<Map<*, *>>;
@@ -245,7 +247,7 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
         .setFullyQualifiedName(new FullyQualifiedName(namespaceValue, nameValue))
         .build();
 
-      // actions.createSchema(newSchema);
+      actions.localCreateSchema(newSchema);
     }
     else if (workingAbstractTypeType === AbstractTypes.PropertyType) {
 
@@ -978,6 +980,7 @@ const mapDispatchToProps = (dispatch :Function) :{} => ({
     localCreateAssociationType: AssociationTypesActions.localCreateAssociationType,
     localCreateEntityType: EntityTypesActions.localCreateEntityType,
     localCreatePropertyType: PropertyTypesActions.localCreatePropertyType,
+    localCreateSchema: SchemasActions.localCreateSchema,
   }, dispatch)
 });
 

@@ -92,6 +92,8 @@ function maybeGetAbstractTypeMatchingFQN(
     entityTypesIndexMap,
     propertyTypes,
     propertyTypesIndexMap,
+    schemas,
+    schemasIndexMap,
     workingAbstractTypeType,
   } = props;
 
@@ -125,7 +127,12 @@ function maybeGetAbstractTypeMatchingFQN(
       break;
     }
     case AbstractTypes.Schema: {
-      LOG.warn('not implemented');
+      if (FullyQualifiedName.isValid(abstractTypeFQN)) {
+        abstractTypeIndex = schemasIndexMap.get(abstractTypeFQN, -1);
+        if (abstractTypeIndex !== -1) {
+          return schemas.get(abstractTypeIndex, Map());
+        }
+      }
       break;
     }
     default:
@@ -161,8 +168,9 @@ function maybeGetNewlyCreatedAbstractTypeFQN(
       break;
     }
     case AbstractTypes.Schema: {
-      LOG.warn('not implemented');
-      return undefined;
+      prevFQN = prevProps.newlyCreatedSchemaFQN;
+      nextFQN = nextProps.newlyCreatedSchemaFQN;
+      break;
     }
     default:
       LOG.error('invalid abstract type', nextProps.workingAbstractTypeType);

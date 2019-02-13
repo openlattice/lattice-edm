@@ -2,7 +2,6 @@
  * @flow
  */
 
-import { Models } from 'lattice';
 import { EntityDataModelApiActions, EntityDataModelApiSagas } from 'lattice-sagas';
 import {
   call,
@@ -10,7 +9,7 @@ import {
   select,
   takeEvery,
 } from 'redux-saga/effects';
-import type { FQN } from 'lattice';
+import type { FQN, PropertyType } from 'lattice';
 
 import Logger from '../../../utils/Logger';
 import { isValidUUID } from '../../../utils/ValidationUtils';
@@ -43,10 +42,6 @@ const {
   deletePropertyTypeWorker,
   updatePropertyTypeMetaDataWorker,
 } = EntityDataModelApiSagas;
-
-const {
-  PropertyType,
-} = Models;
 
 /*
  *

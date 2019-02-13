@@ -10,6 +10,7 @@ import * as AssociationTypesSagas from '../../containers/edm/associationtypes/As
 import * as EntityTypesSagas from '../../containers/edm/entitytypes/EntityTypesSagas';
 import * as GitHubSagas from '../../containers/github/GitHubSagas';
 import * as PropertyTypesSagas from '../../containers/edm/propertytypes/PropertyTypesSagas';
+import * as SchemasSagas from '../../containers/edm/schemas/SchemasSagas';
 import * as SyncSagas from '../../containers/sync/SyncSagas';
 
 // injected by Webpack.DefinePlugin
@@ -50,6 +51,9 @@ export default function* sagas() :Generator<*, *, *> {
     fork(PropertyTypesSagas.localCreatePropertyTypeWatcher),
     fork(PropertyTypesSagas.localDeletePropertyTypeWatcher),
     fork(PropertyTypesSagas.localUpdatePropertyTypeMetaWatcher),
+
+    // SchemasSagas
+    fork(SchemasSagas.localCreateSchemaWatcher),
 
     // SyncSagas
     fork(SyncSagas.syncProdEntityDataModelWatcher),

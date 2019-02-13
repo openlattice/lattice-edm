@@ -18,10 +18,11 @@ type AbstractTypeOverviewContainerProps = {
   newlyCreatedAssociationTypeFQN :FQN;
   newlyCreatedEntityTypeFQN :FQN;
   newlyCreatedPropertyTypeFQN :FQN;
+  newlyCreatedSchemaFQN :FQN;
   propertyTypes :List<Map<*, *>>;
   propertyTypesIndexMap :IndexMap;
   schemas :List<Map<*, *>>;
-  schemasByFqn :Map<string, number>;
+  schemasIndexMap :IndexMap;
   workingAbstractTypeType :AbstractType;
 };
 

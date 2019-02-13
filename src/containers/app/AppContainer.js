@@ -10,6 +10,7 @@ import { AuthActionFactory, AuthUtils } from 'lattice-auth';
 import { EntityDataModelApiActions } from 'lattice-sagas';
 import { connect } from 'react-redux';
 import { Redirect, Route, Switch } from 'react-router';
+import { bindActionCreators } from 'redux';
 
 import OpenLatticeLogo from '../../assets/images/logo_and_name.png';
 import StyledButton from '../../components/buttons/StyledButton';
@@ -20,9 +21,6 @@ import GitHubContainer from '../github/GitHubContainer';
 import NavContainer from './NavContainer';
 import OnlineToggleContainer from './OnlineToggleContainer';
 import SyncContainer from '../sync/SyncContainer';
-
-const { logout } = AuthActionFactory;
-const { getEntityDataModel } = EntityDataModelApiActions;
 
 /*
  * styled components
@@ -64,8 +62,6 @@ const StyledActionButton = styled(StyledButton)`
   right: 50px;
 `;
 
-const LoginAnchor = StyledActionButton.withComponent('a');
-
 const Logo = styled.img`
   position: absolute;
   left: 50px;
@@ -76,8 +72,10 @@ const Logo = styled.img`
  */
 
 type Props = {
-  getEntityDataModel :RequestSequence;
-  logout :() => void;
+  actions :{
+    getEntityDataModel :RequestSequence;
+    logout :() => void;
+  };
 };
 
 function getLoginUrl() :string {
@@ -94,12 +92,13 @@ class AppContainer extends Component<Props> {
 
   componentDidMount() {
 
-    /* eslint-disable react/destructuring-assignment */
-    this.props.getEntityDataModel();
-    /* eslint-enable */
+    const { actions } = this.props;
+    actions.getEntityDataModel();
   }
 
   render() {
+
+    const { actions } = this.props;
 
     return (
       <AppWrapper>
@@ -112,12 +111,10 @@ class AppContainer extends Component<Props> {
             {
               AuthUtils.isAuthenticated()
                 ? (
-                  /* eslint-disable react/destructuring-assignment */
-                  <StyledActionButton onClick={this.props.logout}>Logout</StyledActionButton>
-                  /* eslint-enable */
+                  <StyledActionButton onClick={actions.logout}>Logout</StyledActionButton>
                 )
                 : (
-                  <LoginAnchor href={`${getLoginUrl()}`}>Login</LoginAnchor>
+                  <StyledActionButton as="a" href={`${getLoginUrl()}`}>Login</StyledActionButton>
                 )
             }
           </AppHeaderInnerWrapper>
@@ -135,4 +132,11 @@ class AppContainer extends Component<Props> {
   }
 }
 
-export default connect(null, { getEntityDataModel, logout })(AppContainer);
+const mapDispatchToProps = (dispatch :Function) :Object => ({
+  actions: bindActionCreators({
+    getEntityDataModel: EntityDataModelApiActions.getEntityDataModel,
+    logout: AuthActionFactory.logout,
+  }, dispatch)
+});
+
+export default connect(null, mapDispatchToProps)(AppContainer);

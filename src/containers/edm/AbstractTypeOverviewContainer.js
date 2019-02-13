@@ -356,10 +356,11 @@ const mapStateToProps = (state :Map<*, *>) :{} => ({
   newlyCreatedAssociationTypeFQN: state.getIn(['edm', 'associationTypes', 'newlyCreatedAssociationTypeFQN']),
   newlyCreatedEntityTypeFQN: state.getIn(['edm', 'entityTypes', 'newlyCreatedEntityTypeFQN']),
   newlyCreatedPropertyTypeFQN: state.getIn(['edm', 'propertyTypes', 'newlyCreatedPropertyTypeFQN']),
+  newlyCreatedSchemaFQN: state.getIn(['edm', 'schemas', 'newlyCreatedSchemaFQN']),
   propertyTypes: state.getIn(['edm', 'propertyTypes', 'propertyTypes']),
   propertyTypesIndexMap: state.getIn(['edm', 'propertyTypes', 'propertyTypesIndexMap']),
   schemas: state.getIn(['edm', 'schemas', 'schemas']),
-  schemasByFqn: state.getIn(['edm', 'schemas', 'schemasByFqn']),
+  schemasIndexMap: state.getIn(['edm', 'schemas', 'schemasIndexMap']),
 });
 
 export default connect(mapStateToProps)(AbstractTypeOverviewContainer);

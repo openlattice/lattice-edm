@@ -34,7 +34,7 @@
     "date-fns": "^1.29.0",
     "history": "^4.7.2",
     "immutable": "4.0.0-rc.9",
-    "lattice": "0.52.0",
+    "lattice": "0.53.0",
     "lattice-auth": "0.10.3",
     "lattice-sagas": "0.14.0",
     "lodash": "^4.17.10",

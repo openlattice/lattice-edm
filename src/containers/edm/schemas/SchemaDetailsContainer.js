@@ -8,17 +8,16 @@ import styled from 'styled-components';
 import { List, Map } from 'immutable';
 import { Models, Types } from 'lattice';
 import { AuthUtils } from 'lattice-auth';
-import { EntityDataModelApiActionFactory } from 'lattice-sagas';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 
 import AbstractTypes from '../../../utils/AbstractTypes';
 import AbstractTypeDataTable from '../../../components/datatable/AbstractTypeDataTable';
 import AbstractTypeSearchableSelect from '../../../components/controls/AbstractTypeSearchableSelect';
+import * as SchemasActions from './SchemasActions';
 
 const { FullyQualifiedName } = Models;
 const { ActionTypes } = Types;
-const { updateSchema } = EntityDataModelApiActionFactory;
 
 /*
  * styled components
@@ -37,11 +36,11 @@ type Props = {
     updateSchema :RequestSequence;
   };
   associationTypes :List<Map<*, *>>;
-  associationTypesById :Map<string, number>;
+  associationTypesIndexMap :Map<string, number>;
   entityTypes :List<Map<*, *>>;
-  entityTypesById :Map<string, number>;
+  entityTypesIndexMap :Map<string, number>;
   propertyTypes :List<Map<*, *>>;
-  propertyTypesById :Map<string, number>;
+  propertyTypesIndexMap :Map<string, number>;
   schema :Map<*, *>;
 };
 
@@ -52,7 +51,7 @@ class SchemaDetailsContainer extends React.Component<Props> {
     const {
       actions,
       associationTypes,
-      associationTypesById,
+      associationTypesIndexMap,
       schema
     } = this.props;
 
@@ -60,8 +59,8 @@ class SchemaDetailsContainer extends React.Component<Props> {
       // NOTE: this is slightly hacky. updateSchema() will ignore the "entityTypes" field, but our reducer will still
       // have access to it
       let entityTypes :Map<*, *> = Map();
-      if (associationTypesById.has(entityTypeId)) {
-        const targetIndex :number = associationTypesById.get(entityTypeId);
+      if (associationTypesIndexMap.has(entityTypeId)) {
+        const targetIndex :number = associationTypesIndexMap.get(entityTypeId);
         const targetEntityType :Map<*, *> = associationTypes.getIn([targetIndex, 'entityType'], Map());
         // confirm retrieved EntityType id matches "entityTypeId"
         if (entityTypeId === targetEntityType.get('id')) {
@@ -82,7 +81,7 @@ class SchemaDetailsContainer extends React.Component<Props> {
     const {
       actions,
       entityTypes,
-      entityTypesById,
+      entityTypesIndexMap,
       schema
     } = this.props;
 
@@ -90,8 +89,8 @@ class SchemaDetailsContainer extends React.Component<Props> {
       // NOTE: this is slightly hacky. updateSchema() will ignore the "entityTypes" field, but our reducer will still
       // have access to it
       let theEntityTypes :Map<*, *> = Map();
-      if (entityTypesById.has(entityTypeId)) {
-        const targetIndex :number = entityTypesById.get(entityTypeId);
+      if (entityTypesIndexMap.has(entityTypeId)) {
+        const targetIndex :number = entityTypesIndexMap.get(entityTypeId);
         const targetEntityType :Map<*, *> = entityTypes.get(targetIndex, Map());
         // confirm retrieved EntityType id matches "entityTypeId"
         if (entityTypeId === targetEntityType.get('id')) {
@@ -112,7 +111,7 @@ class SchemaDetailsContainer extends React.Component<Props> {
     const {
       actions,
       propertyTypes,
-      propertyTypesById,
+      propertyTypesIndexMap,
       schema
     } = this.props;
 
@@ -120,8 +119,8 @@ class SchemaDetailsContainer extends React.Component<Props> {
       // NOTE: this is slightly hacky. updateSchema() will ignore the "propertyTypes" field, but our reducer will still
       // have access to it
       let thePropertyTypes :Map<*, *> = Map();
-      if (propertyTypesById.has(propertyTypeId)) {
-        const targetIndex :number = propertyTypesById.get(propertyTypeId);
+      if (propertyTypesIndexMap.has(propertyTypeId)) {
+        const targetIndex :number = propertyTypesIndexMap.get(propertyTypeId);
         const targetPropertyType :Map<*, *> = propertyTypes.get(targetIndex, Map());
         // confirm retrieved PropertyType id matches "propertyTypeId"
         if (propertyTypeId === targetPropertyType.get('id')) {
@@ -420,27 +419,19 @@ class SchemaDetailsContainer extends React.Component<Props> {
   }
 }
 
-function mapStateToProps(state :Map<*, *>) :Object {
+const mapStateToProps = (state :Map<*, *>) :Object => ({
+  associationTypes: state.getIn(['edm', 'associationTypes', 'associationTypes']),
+  associationTypesIndexMap: state.getIn(['edm', 'associationTypes', 'associationTypesIndexMap']),
+  entityTypes: state.getIn(['edm', 'entityTypes', 'entityTypes']),
+  entityTypesIndexMap: state.getIn(['edm', 'entityTypes', 'entityTypesIndexMap']),
+  propertyTypes: state.getIn(['edm', 'propertyTypes', 'propertyTypes']),
+  propertyTypesIndexMap: state.getIn(['edm', 'propertyTypes', 'propertyTypesIndexMap'])
+});
 
-  return {
-    associationTypes: state.getIn(['edm', 'associationTypes', 'associationTypes']),
-    associationTypesById: state.getIn(['edm', 'associationTypes', 'associationTypesById']),
-    entityTypes: state.getIn(['edm', 'entityTypes', 'entityTypes']),
-    entityTypesById: state.getIn(['edm', 'entityTypes', 'entityTypesById']),
-    propertyTypes: state.getIn(['edm', 'propertyTypes', 'propertyTypes']),
-    propertyTypesById: state.getIn(['edm', 'propertyTypes', 'propertyTypesById'])
-  };
-}
-
-function mapDispatchToProps(dispatch :Function) :Object {
-
-  const actions = {
-    updateSchema
-  };
-
-  return {
-    actions: bindActionCreators(actions, dispatch)
-  };
-}
+const mapDispatchToProps = (dispatch :Function) :Object => ({
+  actions: bindActionCreators({
+    localUpdateSchema: SchemasActions.localUpdateSchema,
+  }, dispatch)
+});
 
 export default connect(mapStateToProps, mapDispatchToProps)(SchemaDetailsContainer);
