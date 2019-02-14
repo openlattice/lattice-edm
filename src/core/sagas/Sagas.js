@@ -13,12 +13,9 @@ import * as PropertyTypesSagas from '../../containers/edm/propertytypes/Property
 import * as SchemasSagas from '../../containers/edm/schemas/SchemasSagas';
 import * as SyncSagas from '../../containers/sync/SyncSagas';
 
-// injected by Webpack.DefinePlugin
-declare var __ENV_PROD__ :boolean;
-
 export default function* sagas() :Generator<*, *, *> {
 
-  const required = [
+  yield all([
     // "lattice-auth" Sagas
     fork(AuthSagas.watchAuthAttempt),
     fork(AuthSagas.watchAuthSuccess),
@@ -28,40 +25,6 @@ export default function* sagas() :Generator<*, *, *> {
 
     // "lattice-sagas" Sagas
     fork(EntityDataModelApiSagas.getEntityDataModelWatcher),
-
-    // AssociationTypesSagas
-    fork(AssociationTypesSagas.localAddDstEntityTypeToAssociationTypeWatcher),
-    fork(AssociationTypesSagas.localAddPropertyTypeToAssociationTypeWatcher),
-    fork(AssociationTypesSagas.localAddSrcEntityTypeToAssociationTypeWatcher),
-    fork(AssociationTypesSagas.localCreateAssociationTypeWatcher),
-    fork(AssociationTypesSagas.localDeleteAssociationTypeWatcher),
-    fork(AssociationTypesSagas.localRemoveDstEntityTypeFromAssociationTypeWatcher),
-    fork(AssociationTypesSagas.localRemovePropertyTypeFromAssociationTypeWatcher),
-    fork(AssociationTypesSagas.localRemoveSrcEntityTypeFromAssociationTypeWatcher),
-    fork(AssociationTypesSagas.localUpdateAssociationTypeMetaWatcher),
-
-    // EntityTypesSagas
-    fork(EntityTypesSagas.localAddPropertyTypeToEntityTypeWatcher),
-    fork(EntityTypesSagas.localCreateEntityTypeWatcher),
-    fork(EntityTypesSagas.localDeleteEntityTypeWatcher),
-    fork(EntityTypesSagas.localRemovePropertyTypeFromEntityTypeWatcher),
-    fork(EntityTypesSagas.localUpdateEntityTypeMetaWatcher),
-
-    // PropertyTypesSagas
-    fork(PropertyTypesSagas.localCreatePropertyTypeWatcher),
-    fork(PropertyTypesSagas.localDeletePropertyTypeWatcher),
-    fork(PropertyTypesSagas.localUpdatePropertyTypeMetaWatcher),
-
-    // SchemasSagas
-    fork(SchemasSagas.localCreateSchemaWatcher),
-    fork(SchemasSagas.localUpdateSchemaWatcher),
-
-    // SyncSagas
-    fork(SyncSagas.syncProdEntityDataModelWatcher),
-  ];
-
-  const optional = [
-    // "lattice-sagas" Sagas
     fork(EntityDataModelApiSagas.addDstEntityTypeToAssociationTypeWatcher),
     fork(EntityDataModelApiSagas.addPropertyTypeToEntityTypeWatcher),
     fork(EntityDataModelApiSagas.addSrcEntityTypeToAssociationTypeWatcher),
@@ -84,17 +47,37 @@ export default function* sagas() :Generator<*, *, *> {
     fork(EntityDataModelApiSagas.updatePropertyTypeMetaDataWatcher),
     fork(EntityDataModelApiSagas.updateSchemaWatcher),
 
+    // AssociationTypesSagas
+    fork(AssociationTypesSagas.localAddDstEntityTypeToAssociationTypeWatcher),
+    fork(AssociationTypesSagas.localAddPropertyTypeToAssociationTypeWatcher),
+    fork(AssociationTypesSagas.localAddSrcEntityTypeToAssociationTypeWatcher),
+    fork(AssociationTypesSagas.localCreateAssociationTypeWatcher),
+    fork(AssociationTypesSagas.localDeleteAssociationTypeWatcher),
+    fork(AssociationTypesSagas.localRemoveDstEntityTypeFromAssociationTypeWatcher),
+    fork(AssociationTypesSagas.localRemovePropertyTypeFromAssociationTypeWatcher),
+    fork(AssociationTypesSagas.localRemoveSrcEntityTypeFromAssociationTypeWatcher),
+    fork(AssociationTypesSagas.localUpdateAssociationTypeMetaWatcher),
+
+    // EntityTypesSagas
+    fork(EntityTypesSagas.localAddPropertyTypeToEntityTypeWatcher),
+    fork(EntityTypesSagas.localCreateEntityTypeWatcher),
+    fork(EntityTypesSagas.localDeleteEntityTypeWatcher),
+    fork(EntityTypesSagas.localRemovePropertyTypeFromEntityTypeWatcher),
+    fork(EntityTypesSagas.localUpdateEntityTypeMetaWatcher),
+
     // GitHubSagas
     fork(GitHubSagas.openPullRequestWatcher),
-  ];
 
-  if (__ENV_PROD__) {
-    yield all(required);
-  }
-  else {
-    yield all([
-      ...required,
-      ...optional,
-    ]);
-  }
+    // PropertyTypesSagas
+    fork(PropertyTypesSagas.localCreatePropertyTypeWatcher),
+    fork(PropertyTypesSagas.localDeletePropertyTypeWatcher),
+    fork(PropertyTypesSagas.localUpdatePropertyTypeMetaWatcher),
+
+    // SchemasSagas
+    fork(SchemasSagas.localCreateSchemaWatcher),
+    fork(SchemasSagas.localUpdateSchemaWatcher),
+
+    // SyncSagas
+    fork(SyncSagas.syncProdEntityDataModelWatcher),
+  ]);
 }
