@@ -3,7 +3,13 @@ import { Models, Types } from 'lattice';
 import { EntityDataModelApiActions } from 'lattice-sagas';
 
 import reducer from './SchemasReducer';
-import { MOCK_SCHEMA, genRandomEntityType, genRandomPropertyType } from '../../../utils/testing/MockDataModels';
+import { INVALID_PARAMS_SS } from '../../../utils/testing/Invalid';
+import {
+  MOCK_SCHEMA,
+  genRandomEntityType,
+  genRandomFQN,
+  genRandomPropertyType
+} from '../../../utils/testing/MockDataModels';
 import {
   LOCAL_CREATE_SCHEMA,
   LOCAL_UPDATE_SCHEMA,
@@ -176,6 +182,22 @@ describe('SchemasReducer', () => {
         schemaFQN: MOCK_SCHEMA.fqn,
       };
 
+      test('should not mutate state', () => {
+
+        List(INVALID_PARAMS_SS).push(genRandomFQN()).forEach((invalidParam) => {
+          const { id } = localUpdateSchema();
+          const requestAction = localUpdateSchema.request(id, {
+            actionType: ActionTypes.ADD,
+            entityTypes: [genRandomEntityType().toImmutable()],
+            schemaFQN: invalidParam,
+          });
+          const stateAfterRequest = reducer(initialState, requestAction);
+          const stateAfterSuccess = reducer(stateAfterRequest, localUpdateSchema.success(id));
+          expect(stateAfterSuccess.hashCode()).toEqual(stateAfterRequest.hashCode());
+          expect(stateAfterSuccess.equals(stateAfterRequest)).toEqual(true);
+        });
+      });
+
       test(localUpdateSchema.REQUEST, () => {
 
         const { id } = localUpdateSchema();
@@ -247,6 +269,22 @@ describe('SchemasReducer', () => {
         propertyTypes: [genRandomPropertyType().toImmutable()],
         schemaFQN: MOCK_SCHEMA.fqn,
       };
+
+      test('should not mutate state', () => {
+
+        List(INVALID_PARAMS_SS).push(genRandomFQN()).forEach((invalidParam) => {
+          const { id } = localUpdateSchema();
+          const requestAction = localUpdateSchema.request(id, {
+            actionType: ActionTypes.ADD,
+            propertyTypes: [genRandomPropertyType().toImmutable()],
+            schemaFQN: invalidParam,
+          });
+          const stateAfterRequest = reducer(initialState, requestAction);
+          const stateAfterSuccess = reducer(stateAfterRequest, localUpdateSchema.success(id));
+          expect(stateAfterSuccess.hashCode()).toEqual(stateAfterRequest.hashCode());
+          expect(stateAfterSuccess.equals(stateAfterRequest)).toEqual(true);
+        });
+      });
 
       test(localUpdateSchema.REQUEST, () => {
 
@@ -320,6 +358,22 @@ describe('SchemasReducer', () => {
         schemaFQN: MOCK_SCHEMA.fqn,
       };
 
+      test('should not mutate state', () => {
+
+        List(INVALID_PARAMS_SS).push(genRandomFQN()).forEach((invalidParam) => {
+          const { id } = localUpdateSchema();
+          const requestAction = localUpdateSchema.request(id, {
+            actionType: ActionTypes.ADD,
+            entityTypeIds: [MOCK_SCHEMA.entityTypes[0].id],
+            schemaFQN: invalidParam,
+          });
+          const stateAfterRequest = reducer(initialState, requestAction);
+          const stateAfterSuccess = reducer(stateAfterRequest, localUpdateSchema.success(id));
+          expect(stateAfterSuccess.hashCode()).toEqual(stateAfterRequest.hashCode());
+          expect(stateAfterSuccess.equals(stateAfterRequest)).toEqual(true);
+        });
+      });
+
       test(localUpdateSchema.REQUEST, () => {
 
         const { id } = localUpdateSchema();
@@ -391,6 +445,22 @@ describe('SchemasReducer', () => {
         propertyTypeIds: [MOCK_SCHEMA.propertyTypes[0].id],
         schemaFQN: MOCK_SCHEMA.fqn,
       };
+
+      test('should not mutate state', () => {
+
+        List(INVALID_PARAMS_SS).push(genRandomFQN()).forEach((invalidParam) => {
+          const { id } = localUpdateSchema();
+          const requestAction = localUpdateSchema.request(id, {
+            actionType: ActionTypes.ADD,
+            propertyTypeIds: [MOCK_SCHEMA.propertyTypes[0].id],
+            schemaFQN: invalidParam,
+          });
+          const stateAfterRequest = reducer(initialState, requestAction);
+          const stateAfterSuccess = reducer(stateAfterRequest, localUpdateSchema.success(id));
+          expect(stateAfterSuccess.hashCode()).toEqual(stateAfterRequest.hashCode());
+          expect(stateAfterSuccess.equals(stateAfterRequest)).toEqual(true);
+        });
+      });
 
       test(localUpdateSchema.REQUEST, () => {
 

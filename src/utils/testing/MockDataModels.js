@@ -139,5 +139,6 @@ export {
   MOCK_SCHEMA,
   genRandomAssociationType,
   genRandomEntityType,
+  genRandomFQN,
   genRandomPropertyType,
 };
