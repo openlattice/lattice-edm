@@ -30,6 +30,10 @@ const MOCK_ENTITY_TYPE_FQN :FQN = new FullyQualifiedName('OpenLattice', 'MockEnt
 const MOCK_PROPERTY_TYPE_FQN :FQN = new FullyQualifiedName('OpenLattice', 'MockPropertyType');
 const MOCK_SCHEMA_FQN :FQN = new FullyQualifiedName('OpenLattice', 'MockSchema');
 
+function genRandomFQN() :FQN {
+  return new FullyQualifiedName(genRandomString(), genRandomString());
+}
+
 const MOCK_ENTITY_TYPE :EntityType = new EntityTypeBuilder()
   .setId('ec6865e6-e60e-424b-a071-6a9c1603d735')
   .setType(MOCK_ENTITY_TYPE_FQN)
@@ -52,14 +56,14 @@ const MOCK_ENTITY_TYPE :EntityType = new EntityTypeBuilder()
 function genRandomEntityType() :EntityType {
   return new EntityTypeBuilder()
     .setId(randomUUID())
-    .setType(new FullyQualifiedName(genRandomString(), genRandomString()))
+    .setType(genRandomFQN())
     .setTitle(genRandomString())
     .setDescription(genRandomString())
     .setKey([randomUUID(), randomUUID()])
     .setPropertyTypes([randomUUID(), randomUUID(), randomUUID()])
     .setBaseType(randomUUID())
     .setCategory(SecurableTypes.EntityType)
-    .setSchemas([new FullyQualifiedName(genRandomString(), genRandomString())])
+    .setSchemas([genRandomFQN()])
     .build();
 }
 
@@ -73,6 +77,19 @@ const MOCK_PROPERTY_TYPE :PropertyType = new PropertyTypeBuilder()
   .setAnalyzer(AnalyzerTypes.STANDARD)
   .setSchemas([MOCK_SCHEMA_FQN])
   .build();
+
+function genRandomPropertyType() :PropertyType {
+  return new PropertyTypeBuilder()
+    .setAnalyzer(AnalyzerTypes.STANDARD)
+    .setDataType('String')
+    .setDescription(genRandomString())
+    .setId(randomUUID())
+    .setPii(genRandomBoolean())
+    .setSchemas([genRandomFQN()])
+    .setTitle(genRandomString())
+    .setType(genRandomFQN())
+    .build();
+}
 
 const MOCK_ASSOCIATION_ENTITY_TYPE :EntityType = new EntityTypeBuilder()
   .setId('ec6865e6-e60e-424b-a071-6a9c1603d735')
@@ -122,4 +139,5 @@ export {
   MOCK_SCHEMA,
   genRandomAssociationType,
   genRandomEntityType,
+  genRandomPropertyType,
 };
