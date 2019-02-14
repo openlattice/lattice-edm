@@ -16,7 +16,7 @@ import {
 } from 'immutable';
 import type { FQN } from 'lattice';
 
-import AbstractCell from './AbstractCell';
+import AbstractCell, { AbstractCellTypes } from './AbstractCell';
 import AbstractDataTable from './AbstractDataTable';
 import AbstractTypes from '../../utils/AbstractTypes';
 import type { AbstractType } from '../../utils/AbstractTypes';
@@ -89,11 +89,11 @@ class AbstractTypeDataTable extends React.Component<Props, State> {
     highlightOnHover: false,
     highlightOnSelect: false,
     maxHeight: -1,
+    onAbstractTypeRemove: undefined,
+    onAbstractTypeSelect: undefined,
+    onReorder: undefined,
     orderable: false,
     showRemoveColumn: false,
-    onAbstractTypeRemove: () => {},
-    onAbstractTypeSelect: () => {},
-    onReorder: () => {}
   }
 
   constructor(props :Props) {
@@ -194,7 +194,9 @@ class AbstractTypeDataTable extends React.Component<Props, State> {
       // selectedAbstractTypeId = FullyQualifiedName.toString(selectedAbstractType.get('fqn', Map()));
     }
 
-    onAbstractTypeRemove(selectedAbstractTypeFQN);
+    if (typeof onAbstractTypeRemove === 'function') {
+      onAbstractTypeRemove(selectedAbstractTypeFQN);
+    }
 
     if (clickedRowIndex === selectedRowIndex) {
       this.setState({
@@ -233,7 +235,9 @@ class AbstractTypeDataTable extends React.Component<Props, State> {
       selectedAbstractTypeFQN = new FullyQualifiedName(selectedAbstractType.get('type', Map()));
     }
 
-    onAbstractTypeSelect(selectedAbstractTypeFQN);
+    if (typeof onAbstractTypeSelect === 'function') {
+      onAbstractTypeSelect(selectedAbstractTypeFQN);
+    }
 
     this.setState({
       selectedRowIndex,
@@ -250,18 +254,20 @@ class AbstractTypeDataTable extends React.Component<Props, State> {
       const itemToMove = data.get(oldIndex);
       const reorderedData = data.delete(oldIndex).insert(newIndex, itemToMove);
       this.setState({ data: reorderedData });
-      onReorder(oldIndex, newIndex);
+      if (typeof onReorder === 'function') {
+        onReorder(oldIndex, newIndex);
+      }
     }
   }
 
-  renderBodyCell = (params :Object, cellValue :mixed) => {
+  renderBodyCell = (params :Object, cellValue :any) => {
 
     const { highlightOnHover, highlightOnSelect, showRemoveColumn } = this.props;
     const { headers, hoveredRowIndex, selectedRowIndex } = this.state;
 
     const shouldHighlightCell :boolean = (
-      (highlightOnHover && params.rowIndex === hoveredRowIndex)
-      || (highlightOnSelect && params.rowIndex === selectedRowIndex)
+      (highlightOnHover === true && params.rowIndex === hoveredRowIndex)
+      || (highlightOnSelect === true && params.rowIndex === selectedRowIndex)
     );
 
     if (showRemoveColumn && params.columnIndex === headers.size - 1) {
@@ -276,6 +282,7 @@ class AbstractTypeDataTable extends React.Component<Props, State> {
             justifyContent="flex-end"
             key={params.key}
             style={params.style}
+            type={AbstractCellTypes.BODY}
             value={(
               <RemoveButtonWrapper
                   onMouseDown={() => {
@@ -307,6 +314,7 @@ class AbstractTypeDataTable extends React.Component<Props, State> {
           highlight={shouldHighlightCell}
           key={params.key}
           style={params.style}
+          type={AbstractCellTypes.BODY}
           value={cellValue}
           onMouseDown={() => {
             this.handleOnAbstractTypeSelect(params.rowIndex);

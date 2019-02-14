@@ -3,6 +3,7 @@
  */
 
 import React from 'react';
+import type { Node } from 'react';
 
 import styled, { css } from 'styled-components';
 
@@ -88,14 +89,14 @@ const CellValueWrapper = styled.div`
  */
 
 type Props = {
-  highlight :boolean;
-  justifyContent :string;
+  highlight ?:boolean;
+  justifyContent ?:string;
   style :Object;
   type :string;
-  value :mixed;
-  onMouseDown :() => void;
-  onMouseLeave :() => void;
-  onMouseOver :() => void;
+  value :Node;
+  onMouseDown ?:() => void;
+  onMouseLeave ?:() => void;
+  onMouseOver ?:() => void;
 }
 
 class AbstractCell extends React.Component<Props> {
@@ -103,12 +104,9 @@ class AbstractCell extends React.Component<Props> {
   static defaultProps = {
     highlight: false,
     justifyContent: 'flex-start',
-    style: {},
-    type: TYPES.BODY,
-    value: '',
-    onMouseDown: () => {},
-    onMouseLeave: () => {},
-    onMouseOver: () => {}
+    onMouseDown: undefined,
+    onMouseLeave: undefined,
+    onMouseOver: undefined,
   }
 
   render() {

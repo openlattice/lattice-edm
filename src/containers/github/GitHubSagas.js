@@ -28,9 +28,9 @@ const Base64 = {
  *
  */
 
-function* openPullRequestWorker(action :SequenceAction) :Generator<*, *, *> {
+function* openPullRequestWorker(seqAction :SequenceAction) :Generator<*, *, *> {
 
-  const { id, value } :{ id :string, value :Object } = action;
+  const { id, value } = seqAction;
   if (value === null || value === undefined) {
     yield put(openPullRequest.failure(id, ERR_ACTION_VALUE_NOT_DEFINED));
     return;
@@ -39,7 +39,7 @@ function* openPullRequestWorker(action :SequenceAction) :Generator<*, *, *> {
   let response :any;
 
   try {
-    yield put(openPullRequest.request(action.id, value));
+    yield put(openPullRequest.request(id, value));
 
     const edmAsString = JSON.stringify(value.edm, undefined, 2);
     const edmAsBase64 = Base64.encode(edmAsString);
@@ -135,14 +135,14 @@ function* openPullRequestWorker(action :SequenceAction) :Generator<*, *, *> {
       title: `edm changes ${formattedDateTime}`,
     });
 
-    yield put(openPullRequest.success(action.id));
+    yield put(openPullRequest.success(id));
   }
   catch (error) {
     LOG.error(ERR_WORKER_SAGA, error);
-    yield put(openPullRequest.failure(action.id, error));
+    yield put(openPullRequest.failure(id, error));
   }
   finally {
-    yield put(openPullRequest.finally(action.id));
+    yield put(openPullRequest.finally(id));
   }
 }
 

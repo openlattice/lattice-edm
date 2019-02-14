@@ -134,22 +134,21 @@ const STYLE_MAP = {
 };
 
 type Props = {
-  placeholder :string;
-  size :string;
-  type :string;
-  value :string;
-  viewOnly :boolean;
-  onChange :Function;
-  // onChangeConfirm :Function;
-  onEditToggle :Function;
-  validate :Function;
-}
+  onChange :(value :string) => void;
+  onEditToggle ?:(editable :boolean) => void;
+  placeholder ?:string;
+  size ?:string;
+  type ?:string;
+  validate ?:(value :string) => boolean;
+  value ?:string;
+  viewOnly ?:boolean;
+};
 
 type State = {
   currentValue :string;
   editable :boolean;
   previousValue :string;
-}
+};
 
 /*
  * TODO: explore how to handle children. for example, there's a use case where the non-edit view could display
@@ -158,21 +157,19 @@ type State = {
 
 export default class InlineEditableControl extends React.Component<Props, State> {
 
-  control :any
+  control :any;
 
   static defaultProps = {
+    onEditToggle: undefined,
     placeholder: 'Click to edit...',
     size: 'small',
     type: 'text',
+    validate: (value :string) :boolean => isNonEmptyString(value),
     value: '',
     viewOnly: false,
-    onChange: () => {},
-    // onChangeConfirm: () => {},
-    onEditToggle: () => {},
-    validate: (value :string) :boolean => isNonEmptyString(value)
   };
 
-  constructor(props :Object) {
+  constructor(props :Props) {
 
     super(props);
 
@@ -255,9 +252,11 @@ export default class InlineEditableControl extends React.Component<Props, State>
     }
 
     // currentValue must be valid
-    if (!validate(currentValue)) {
-      // TODO: update UI to indicate invalid input; onValidate callback
-      return;
+    if (typeof validate === 'function') {
+      if (!validate(currentValue)) {
+        // TODO: update UI to indicate invalid input; onValidate callback
+        return;
+      }
     }
 
     this.setState({
@@ -278,13 +277,15 @@ export default class InlineEditableControl extends React.Component<Props, State>
     }
 
     // currentValue must be valid
-    if (!validate(currentValue)) {
+    if (validate && !validate(currentValue)) {
       // TODO: update UI to indicate invalid input; onValidate callback
       return;
     }
 
     const editableToggled = !editable;
-    onEditToggle(editableToggled);
+    if (typeof onEditToggle === 'function') {
+      onEditToggle(editableToggled);
+    }
 
     this.setState(
       {
