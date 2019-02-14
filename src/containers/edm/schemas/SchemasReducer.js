@@ -106,6 +106,8 @@ export default function schemasReducer(state :Map<*, *> = INITIAL_STATE, action 
             const schemaFQN :FQN = new FullyQualifiedName(storedSchema.fqn);
             const newSchema :Schema = new SchemaBuilder()
               .setFullyQualifiedName(schemaFQN)
+              .setEntityTypes(storedSchema.entityTypes)
+              .setPropertyTypes(storedSchema.propertyTypes)
               .build();
 
             const updatedSchemas :List<Map<*, *>> = state

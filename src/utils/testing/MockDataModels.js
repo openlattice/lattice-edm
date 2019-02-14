@@ -21,6 +21,8 @@ const {
   FullyQualifiedName,
   PropertyType,
   PropertyTypeBuilder,
+  Schema,
+  SchemaBuilder,
 } = Models;
 
 const MOCK_ASSOCIATION_TYPE_FQN :FQN = new FullyQualifiedName('OpenLattice', 'MockAssociationType');
@@ -107,11 +109,17 @@ function genRandomAssociationType() :AssociationType {
     .build();
 }
 
+const MOCK_SCHEMA :Schema = new SchemaBuilder()
+  .setFullyQualifiedName(MOCK_SCHEMA_FQN)
+  .setEntityTypes([MOCK_ENTITY_TYPE])
+  .setPropertyTypes([MOCK_PROPERTY_TYPE])
+  .build();
+
 export {
   MOCK_ASSOCIATION_TYPE,
   MOCK_ENTITY_TYPE,
   MOCK_PROPERTY_TYPE,
-  MOCK_SCHEMA_FQN,
+  MOCK_SCHEMA,
   genRandomAssociationType,
   genRandomEntityType,
 };
