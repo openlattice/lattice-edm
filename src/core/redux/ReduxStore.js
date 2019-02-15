@@ -4,8 +4,7 @@
 
 import Immutable from 'immutable';
 import createSagaMiddleware from 'redux-saga';
-
-import { routerMiddleware } from 'react-router-redux';
+import { routerMiddleware } from 'connected-react-router/immutable';
 import { applyMiddleware, compose, createStore } from 'redux';
 
 import sagas from '../sagas/Sagas';
@@ -33,7 +32,7 @@ export default function initializeReduxStore(routerHistory :any) :Object {
   /* eslint-enable */
 
   const reduxStore = createStore(
-    reduxReducer(),
+    reduxReducer(routerHistory),
     Immutable.Map(),
     composeEnhancers(...reduxEnhancers)
   );
