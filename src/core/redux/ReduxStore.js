@@ -3,7 +3,7 @@
  */
 
 import Immutable from 'immutable';
-import createSagaMiddleware from 'redux-saga';
+import createSagaMiddleware from '@redux-saga/core';
 import { routerMiddleware } from 'connected-react-router/immutable';
 import { applyMiddleware, compose, createStore } from 'redux';
 
