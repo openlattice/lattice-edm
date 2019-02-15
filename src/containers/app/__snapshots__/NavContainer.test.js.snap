@@ -27,6 +27,11 @@ exports[`NavContainer snapshots dev should match snapshot, admin and authenticat
   >
     Sync
   </NavContainer__NavTab>
+  <NavContainer__NavTab
+    to="/github"
+  >
+    GitHub
+  </NavContainer__NavTab>
 </NavContainer__Nav>
 `;
 
@@ -126,6 +131,11 @@ exports[`NavContainer snapshots prod should match snapshot, admin and authentica
     to="/schemas"
   >
     Schemas
+  </NavContainer__NavTab>
+  <NavContainer__NavTab
+    to="/github"
+  >
+    GitHub
   </NavContainer__NavTab>
 </NavContainer__Nav>
 `;
