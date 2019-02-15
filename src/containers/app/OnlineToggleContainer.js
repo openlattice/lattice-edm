@@ -7,9 +7,10 @@ import React, { Component } from 'react';
 import styled from 'styled-components';
 import { faToggleOn } from '@fortawesome/pro-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 
-import { toggleOnline } from './AppActions';
+import * as AppActions from './AppActions';
 
 const ToggleContainerWrapper = styled.div`
   align-items: center;
@@ -41,15 +42,16 @@ const Text = styled.span`
 `;
 
 type Props = {
+  actions :{
+    toggleOnline :() => void;
+  };
   isOnline :boolean;
-  toggleOnline :() => void;
 };
 
 class OnlineToggleContainer extends Component<Props> {
 
   render() {
-    const { props } = this;
-    const { isOnline } = props;
+    const { actions, isOnline } = this.props;
     return (
       <ToggleContainerWrapper>
         {
@@ -57,7 +59,7 @@ class OnlineToggleContainer extends Component<Props> {
             ? (
               <>
                 <Text>ONLINE</Text>
-                <OnlineIcon onClick={props.toggleOnline}>
+                <OnlineIcon onClick={actions.toggleOnline}>
                   <FontAwesomeIcon icon={faToggleOn} size="2x" />
                 </OnlineIcon>
               </>
@@ -65,7 +67,7 @@ class OnlineToggleContainer extends Component<Props> {
             : (
               <>
                 <Text>OFFLINE</Text>
-                <OfflineIcon onClick={props.toggleOnline}>
+                <OfflineIcon onClick={actions.toggleOnline}>
                   <FontAwesomeIcon icon={faToggleOn} size="2x" rotation={180} />
                 </OfflineIcon>
               </>
@@ -80,4 +82,10 @@ const mapStateToProps = state => ({
   isOnline: state.getIn(['app', 'isOnline'], false),
 });
 
-export default connect(mapStateToProps, { toggleOnline })(OnlineToggleContainer);
+const mapDispatchToProps = (dispatch :Function) :Object => ({
+  actions: bindActionCreators({
+    toggleOnline: AppActions.toggleOnline,
+  }, dispatch)
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(OnlineToggleContainer);
