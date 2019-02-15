@@ -21,7 +21,7 @@
   "bugs": {
     "url": "https://github.com/openlattice/lattice-edm/issues"
   },
-  "license": "GPLv3",
+  "license": "GPL-3.0",
   "dependencies": {
     "@babel/polyfill": "~7.2.0",
     "@babel/runtime": "~7.3.0",
