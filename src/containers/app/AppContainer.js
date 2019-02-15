@@ -99,6 +99,7 @@ class AppContainer extends Component<Props> {
   render() {
 
     const { actions } = this.props;
+    const showOnlineToggle :boolean = AuthUtils.isAuthenticated() && AuthUtils.isAdmin();
 
     return (
       <AppWrapper>
@@ -120,7 +121,11 @@ class AppContainer extends Component<Props> {
           </AppHeaderInnerWrapper>
         </AppHeaderOuterWrapper>
         <NavContainer />
-        <OnlineToggleContainer />
+        {
+          showOnlineToggle && (
+            <OnlineToggleContainer />
+          )
+        }
         <Switch>
           <Route path={Routes.SYNC} component={SyncContainer} />
           <Route path={Routes.GITHUB} component={GitHubContainer} />

@@ -39,8 +39,8 @@ describe('NavContainer', () => {
 
       test('should match snapshot, admin and authenticated', () => {
 
-        LatticeAuth.AuthUtils.isAdmin = jest.fn().mockImplementationOnce(() => true);
-        LatticeAuth.AuthUtils.isAuthenticated = jest.fn().mockImplementationOnce(() => true);
+        LatticeAuth.AuthUtils.isAdmin = jest.fn().mockImplementation(() => true);
+        LatticeAuth.AuthUtils.isAuthenticated = jest.fn().mockImplementation(() => true);
 
         const nav = shallow(
           <NavContainer />
@@ -50,8 +50,8 @@ describe('NavContainer', () => {
 
       test('should match snapshot, admin but not authenticated', () => {
 
-        LatticeAuth.AuthUtils.isAdmin = jest.fn().mockImplementationOnce(() => true);
-        LatticeAuth.AuthUtils.isAuthenticated = jest.fn().mockImplementationOnce(() => false);
+        LatticeAuth.AuthUtils.isAdmin = jest.fn().mockImplementation(() => true);
+        LatticeAuth.AuthUtils.isAuthenticated = jest.fn().mockImplementation(() => false);
 
         const nav = shallow(
           <NavContainer />
@@ -61,8 +61,8 @@ describe('NavContainer', () => {
 
       test('should match snapshot, not admin but authenticated', () => {
 
-        LatticeAuth.AuthUtils.isAdmin = jest.fn().mockImplementationOnce(() => false);
-        LatticeAuth.AuthUtils.isAuthenticated = jest.fn().mockImplementationOnce(() => true);
+        LatticeAuth.AuthUtils.isAdmin = jest.fn().mockImplementation(() => false);
+        LatticeAuth.AuthUtils.isAuthenticated = jest.fn().mockImplementation(() => true);
 
         const nav = shallow(
           <NavContainer />
@@ -72,8 +72,8 @@ describe('NavContainer', () => {
 
       test('should match snapshot, not admin and not authenticated', () => {
 
-        LatticeAuth.AuthUtils.isAdmin = jest.fn().mockImplementationOnce(() => false);
-        LatticeAuth.AuthUtils.isAuthenticated = jest.fn().mockImplementationOnce(() => true);
+        LatticeAuth.AuthUtils.isAdmin = jest.fn().mockImplementation(() => false);
+        LatticeAuth.AuthUtils.isAuthenticated = jest.fn().mockImplementation(() => true);
 
         const nav = shallow(
           <NavContainer />
@@ -92,8 +92,8 @@ describe('NavContainer', () => {
 
       test('should match snapshot, admin and authenticated', () => {
 
-        LatticeAuth.AuthUtils.isAdmin = jest.fn().mockImplementationOnce(() => true);
-        LatticeAuth.AuthUtils.isAuthenticated = jest.fn().mockImplementationOnce(() => true);
+        LatticeAuth.AuthUtils.isAdmin = jest.fn().mockImplementation(() => true);
+        LatticeAuth.AuthUtils.isAuthenticated = jest.fn().mockImplementation(() => true);
 
         const nav = shallow(
           <NavContainer />
@@ -103,8 +103,8 @@ describe('NavContainer', () => {
 
       test('should match snapshot, admin but not authenticated', () => {
 
-        LatticeAuth.AuthUtils.isAdmin = jest.fn().mockImplementationOnce(() => true);
-        LatticeAuth.AuthUtils.isAuthenticated = jest.fn().mockImplementationOnce(() => false);
+        LatticeAuth.AuthUtils.isAdmin = jest.fn().mockImplementation(() => true);
+        LatticeAuth.AuthUtils.isAuthenticated = jest.fn().mockImplementation(() => false);
 
         const nav = shallow(
           <NavContainer />
@@ -114,8 +114,8 @@ describe('NavContainer', () => {
 
       test('should match snapshot, not admin but authenticated', () => {
 
-        LatticeAuth.AuthUtils.isAdmin = jest.fn().mockImplementationOnce(() => false);
-        LatticeAuth.AuthUtils.isAuthenticated = jest.fn().mockImplementationOnce(() => true);
+        LatticeAuth.AuthUtils.isAdmin = jest.fn().mockImplementation(() => false);
+        LatticeAuth.AuthUtils.isAuthenticated = jest.fn().mockImplementation(() => true);
 
         const nav = shallow(
           <NavContainer />
@@ -125,8 +125,8 @@ describe('NavContainer', () => {
 
       test('should match snapshot, not admin and not authenticated', () => {
 
-        LatticeAuth.AuthUtils.isAdmin = jest.fn().mockImplementationOnce(() => false);
-        LatticeAuth.AuthUtils.isAuthenticated = jest.fn().mockImplementationOnce(() => false);
+        LatticeAuth.AuthUtils.isAdmin = jest.fn().mockImplementation(() => false);
+        LatticeAuth.AuthUtils.isAuthenticated = jest.fn().mockImplementation(() => false);
 
         const nav = shallow(
           <NavContainer />
