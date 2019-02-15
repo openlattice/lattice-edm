@@ -5,8 +5,8 @@
 /* eslint-disable no-use-before-define */
 
 import Lattice, { Models } from 'lattice';
+import { call, put, takeEvery } from '@redux-saga/core/effects';
 import { EntityDataModelApiActionFactory, EntityDataModelApiSagas } from 'lattice-sagas';
-import { call, put, takeEvery } from 'redux-saga/effects';
 
 import { resetLatticeConfig } from '../../utils/Utils';
 import {

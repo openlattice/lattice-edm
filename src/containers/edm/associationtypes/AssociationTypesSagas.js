@@ -2,13 +2,13 @@
  * @flow
  */
 
-import { EntityDataModelApiActions, EntityDataModelApiSagas } from 'lattice-sagas';
 import {
   call,
   put,
   select,
   takeEvery,
-} from 'redux-saga/effects';
+} from '@redux-saga/core/effects';
+import { EntityDataModelApiActions, EntityDataModelApiSagas } from 'lattice-sagas';
 import type { FQN, AssociationType } from 'lattice';
 
 import Logger from '../../../utils/Logger';

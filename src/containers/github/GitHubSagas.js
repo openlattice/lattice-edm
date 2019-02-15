@@ -4,8 +4,8 @@
 
 import axios from 'axios';
 import format from 'date-fns/format';
+import { put, takeEvery } from '@redux-saga/core/effects';
 import { Map, fromJS } from 'immutable';
-import { put, takeEvery } from 'redux-saga/effects';
 
 import Logger from '../../utils/Logger';
 import { ERR_ACTION_VALUE_NOT_DEFINED, ERR_WORKER_SAGA } from '../../utils/Errors';
