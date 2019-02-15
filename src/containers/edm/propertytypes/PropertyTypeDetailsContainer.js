@@ -6,8 +6,8 @@ import React from 'react';
 
 import styled from 'styled-components';
 import { Map, List } from 'immutable';
+import { Models } from 'lattice';
 import { AuthUtils } from 'lattice-auth';
-import { EntityDataModelApiActionFactory } from 'lattice-sagas';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 
@@ -17,8 +17,9 @@ import AbstractTypeFieldDescription from '../AbstractTypeFieldDescription';
 import AbstractTypeFieldTitle from '../AbstractTypeFieldTitle';
 import AbstractTypeFieldType from '../AbstractTypeFieldType';
 import StyledButton from '../../../components/buttons/StyledButton';
+import * as PropertyTypesActions from './PropertyTypesActions';
 
-const { deletePropertyType } = EntityDataModelApiActionFactory;
+const { FullyQualifiedName } = Models;
 
 /*
  * styled components
@@ -34,10 +35,10 @@ const DeleteButton = styled(StyledButton)`
 
 type Props = {
   actions :{
-    deletePropertyType :RequestSequence;
+    localDeletePropertyType :RequestSequence;
   };
-  propertyType :Map<*, *>;
   entityTypes :List<Map<*, *>>;
+  propertyType :Map<*, *>;
 };
 
 class PropertyTypeDetailsContainer extends React.Component<Props> {
@@ -47,38 +48,36 @@ class PropertyTypeDetailsContainer extends React.Component<Props> {
     const { actions, propertyType } = this.props;
 
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
-      actions.deletePropertyType(propertyType.get('id'));
+      const propertyTypeId :?UUID = propertyType.get('id');
+      const propertyTypeFQN :FQN = new FullyQualifiedName(propertyType.get('type'));
+      actions.localDeletePropertyType({ propertyTypeFQN, propertyTypeId });
     }
   }
 
-  renderEntityTypesSection = (entityTypes :List<Map<*, *>>) => {
+  renderEntityTypesSection = () => {
 
-    if (entityTypes.isEmpty()) {
+    const { entityTypes } = this.props;
+    if (!entityTypes || entityTypes.isEmpty()) {
       return null;
     }
-
-    const entityTypesDataTable :React$Node = (
-      <AbstractTypeDataTable
-          abstractTypes={entityTypes}
-          highlightOnHover
-          maxHeight={500}
-          workingAbstractTypeType={AbstractTypes.EntityType} />
-    );
 
     return (
       <section>
         <h2>
           EntityTypes Utilizing this PropertyType
         </h2>
-        { entityTypesDataTable }
+        <AbstractTypeDataTable
+            abstractTypes={entityTypes}
+            highlightOnHover
+            maxHeight={500}
+            workingAbstractTypeType={AbstractTypes.EntityType} />
       </section>
     );
   }
 
   render() {
 
-    const { entityTypes, propertyType } = this.props;
-
+    const { propertyType } = this.props;
     if (!propertyType || propertyType.isEmpty()) {
       return null;
     }
@@ -138,7 +137,7 @@ class PropertyTypeDetailsContainer extends React.Component<Props> {
             { propertyType.get('analyzer') }
           </p>
         </section>
-        { this.renderEntityTypesSection(entityTypes) }
+        { this.renderEntityTypesSection() }
         {
           AuthUtils.isAuthenticated() && AuthUtils.isAdmin()
             ? (
@@ -155,24 +154,21 @@ class PropertyTypeDetailsContainer extends React.Component<Props> {
   }
 }
 
-function mapStateToProps(state :Map<*, *>, ownProps) :Object {
-  const propertyTypeId = ownProps.propertyType.get('id');
-  const entityTypes :List<string> = state.getIn(['edm', 'entityTypes', 'entityTypes'], List())
+const mapStateToProps = (state :Map<*, *>, props :Object) :Object => {
+
+  const propertyTypeId :?UUID = props.propertyType.get('id');
+  const entityTypes :List<Map<*, *>> = state.getIn(['edm', 'entityTypes', 'entityTypes'], List())
     .filter((entityType :Map<*, *>) => entityType.get('properties').includes(propertyTypeId));
-  return {
-    entityTypes
-  };
-}
-
-function mapDispatchToProps(dispatch :Function) :Object {
-
-  const actions = {
-    deletePropertyType
-  };
 
   return {
-    actions: bindActionCreators(actions, dispatch)
+    entityTypes,
   };
-}
+};
+
+const mapDispatchToProps = (dispatch :Function) :Object => ({
+  actions: bindActionCreators({
+    localDeletePropertyType: PropertyTypesActions.localDeletePropertyType,
+  }, dispatch)
+});
 
 export default connect(mapStateToProps, mapDispatchToProps)(PropertyTypeDetailsContainer);

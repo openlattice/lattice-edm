@@ -48,6 +48,8 @@ const NavTab = styled(NavLink).attrs({
 const NavContainer = () => {
 
   const showSync :boolean = AuthUtils.isAuthenticated() && AuthUtils.isAdmin() && __ENV_DEV__;
+  const showGitHub :boolean = AuthUtils.isAuthenticated() && AuthUtils.isAdmin() && __ENV_DEV__;
+
   return (
     <Nav>
       <NavTab to={Routes.PROPERTY_TYPES}>
@@ -66,6 +68,13 @@ const NavContainer = () => {
         showSync && (
           <NavTab to={Routes.SYNC}>
             Sync
+          </NavTab>
+        )
+      }
+      {
+        showGitHub && (
+          <NavTab to={Routes.GITHUB}>
+            GitHub
           </NavTab>
         )
       }

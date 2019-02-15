@@ -14,8 +14,9 @@ import {
   OrderedMap,
   fromJS
 } from 'immutable';
+import type { FQN } from 'lattice';
 
-import AbstractCell from './AbstractCell';
+import AbstractCell, { AbstractCellTypes } from './AbstractCell';
 import AbstractDataTable from './AbstractDataTable';
 import AbstractTypes from '../../utils/AbstractTypes';
 import type { AbstractType } from '../../utils/AbstractTypes';
@@ -61,16 +62,16 @@ const RemoveButtonWrapper = styled.div`
 
 type Props = {
   abstractTypes :List<Map<*, *>>;
-  height :number;
-  highlightOnHover :boolean;
-  highlightOnSelect :boolean;
-  maxHeight :number;
-  orderable :boolean;
-  showRemoveColumn :boolean;
+  height ?:number;
+  highlightOnHover ?:boolean;
+  highlightOnSelect ?:boolean;
+  maxHeight ?:number;
+  orderable ?:boolean;
+  showRemoveColumn ?:boolean;
   workingAbstractTypeType :AbstractType;
-  onAbstractTypeRemove :(selectedAbstractTypeId :string) => void;
-  onAbstractTypeSelect :(selectedAbstractTypeId :string) => void;
-  onReorder :(oldIndex :number, newIndex :number) => void;
+  onAbstractTypeRemove ?:(selectedAbstractTypeFQN :FQN) => void;
+  onAbstractTypeSelect ?:(selectedAbstractTypeFQN :FQN) => void;
+  onReorder ?:(oldIndex :number, newIndex :number) => void;
 };
 
 type State = {
@@ -84,17 +85,15 @@ type State = {
 class AbstractTypeDataTable extends React.Component<Props, State> {
 
   static defaultProps = {
-    abstractTypes: List(),
     height: -1,
     highlightOnHover: false,
     highlightOnSelect: false,
     maxHeight: -1,
+    onAbstractTypeRemove: undefined,
+    onAbstractTypeSelect: undefined,
+    onReorder: undefined,
     orderable: false,
     showRemoveColumn: false,
-    workingAbstractTypeType: AbstractTypes.PropertyType,
-    onAbstractTypeRemove: () => {},
-    onAbstractTypeSelect: () => {},
-    onReorder: () => {}
   }
 
   constructor(props :Props) {
@@ -138,17 +137,17 @@ class AbstractTypeDataTable extends React.Component<Props, State> {
         ? type.get('entityType', Map())
         : type;
 
-      const abstractTypeFqn :FullyQualifiedName = (props.workingAbstractTypeType === AbstractTypes.Schema)
+      const abstractTypeFQN :FullyQualifiedName = (props.workingAbstractTypeType === AbstractTypes.Schema)
         ? new FullyQualifiedName(abstractType.get('fqn', Map()))
         : new FullyQualifiedName(abstractType.get('type', Map()));
 
       return OrderedMap().withMutations((map :OrderedMap<string, string>) => {
         if (props.workingAbstractTypeType === AbstractTypes.Schema) {
-          map.set(NAMESPACE_HEADER_ID, abstractTypeFqn.getNamespace());
-          map.set(NAME_HEADER_ID, abstractTypeFqn.getName());
+          map.set(NAMESPACE_HEADER_ID, abstractTypeFQN.getNamespace());
+          map.set(NAME_HEADER_ID, abstractTypeFQN.getName());
         }
         else {
-          map.set(TYPE_HEADER_ID, abstractTypeFqn.toString());
+          map.set(TYPE_HEADER_ID, abstractTypeFQN.toString());
           map.set(TITLE_HEADER_ID, abstractType.get('title', ''));
         }
         if (props.showRemoveColumn) {
@@ -184,17 +183,20 @@ class AbstractTypeDataTable extends React.Component<Props, State> {
     const { selectedRowIndex } = this.state;
 
     const selectedAbstractType :Map<*, *> = abstractTypes.get(clickedRowIndex, Map());
-    let selectedAbstractTypeId :string = selectedAbstractType.get('id', '');
+    let selectedAbstractTypeFQN :FQN = new FullyQualifiedName(selectedAbstractType.get('type'));
 
     if (workingAbstractTypeType === AbstractTypes.AssociationType) {
       const entityType :Map<*, *> = selectedAbstractType.get('entityType', Map());
-      selectedAbstractTypeId = entityType.get('id', '');
+      selectedAbstractTypeFQN = new FullyQualifiedName(entityType.get('type'));
     }
     else if (workingAbstractTypeType === AbstractTypes.Schema) {
-      selectedAbstractTypeId = FullyQualifiedName.toString(selectedAbstractType.get('fqn', Map()));
+      selectedAbstractTypeFQN = new FullyQualifiedName(selectedAbstractType.get('fqn'));
+      // selectedAbstractTypeId = FullyQualifiedName.toString(selectedAbstractType.get('fqn', Map()));
     }
 
-    onAbstractTypeRemove(selectedAbstractTypeId);
+    if (typeof onAbstractTypeRemove === 'function') {
+      onAbstractTypeRemove(selectedAbstractTypeFQN);
+    }
 
     if (clickedRowIndex === selectedRowIndex) {
       this.setState({
@@ -219,18 +221,23 @@ class AbstractTypeDataTable extends React.Component<Props, State> {
 
     const { abstractTypes, onAbstractTypeSelect, workingAbstractTypeType } = this.props;
 
+    let selectedAbstractTypeFQN :FQN;
     const selectedAbstractType :Map<*, *> = abstractTypes.get(selectedRowIndex, Map());
-    let selectedAbstractTypeId :string = selectedAbstractType.get('id', '');
 
     if (workingAbstractTypeType === AbstractTypes.AssociationType) {
       const entityType :Map<*, *> = selectedAbstractType.get('entityType', Map());
-      selectedAbstractTypeId = entityType.get('id', '');
+      selectedAbstractTypeFQN = new FullyQualifiedName(entityType.get('type', Map()));
     }
     else if (workingAbstractTypeType === AbstractTypes.Schema) {
-      selectedAbstractTypeId = FullyQualifiedName.toString(selectedAbstractType.get('fqn', Map()));
+      selectedAbstractTypeFQN = new FullyQualifiedName(selectedAbstractType.get('fqn', Map()));
+    }
+    else {
+      selectedAbstractTypeFQN = new FullyQualifiedName(selectedAbstractType.get('type', Map()));
     }
 
-    onAbstractTypeSelect(selectedAbstractTypeId);
+    if (typeof onAbstractTypeSelect === 'function') {
+      onAbstractTypeSelect(selectedAbstractTypeFQN);
+    }
 
     this.setState({
       selectedRowIndex,
@@ -247,18 +254,20 @@ class AbstractTypeDataTable extends React.Component<Props, State> {
       const itemToMove = data.get(oldIndex);
       const reorderedData = data.delete(oldIndex).insert(newIndex, itemToMove);
       this.setState({ data: reorderedData });
-      onReorder(oldIndex, newIndex);
+      if (typeof onReorder === 'function') {
+        onReorder(oldIndex, newIndex);
+      }
     }
   }
 
-  renderBodyCell = (params :Object, cellValue :mixed) => {
+  renderBodyCell = (params :Object, cellValue :any) => {
 
     const { highlightOnHover, highlightOnSelect, showRemoveColumn } = this.props;
     const { headers, hoveredRowIndex, selectedRowIndex } = this.state;
 
     const shouldHighlightCell :boolean = (
-      (highlightOnHover && params.rowIndex === hoveredRowIndex)
-      || (highlightOnSelect && params.rowIndex === selectedRowIndex)
+      (highlightOnHover === true && params.rowIndex === hoveredRowIndex)
+      || (highlightOnSelect === true && params.rowIndex === selectedRowIndex)
     );
 
     if (showRemoveColumn && params.columnIndex === headers.size - 1) {
@@ -273,6 +282,7 @@ class AbstractTypeDataTable extends React.Component<Props, State> {
             justifyContent="flex-end"
             key={params.key}
             style={params.style}
+            type={AbstractCellTypes.BODY}
             value={(
               <RemoveButtonWrapper
                   onMouseDown={() => {
@@ -304,6 +314,7 @@ class AbstractTypeDataTable extends React.Component<Props, State> {
           highlight={shouldHighlightCell}
           key={params.key}
           style={params.style}
+          type={AbstractCellTypes.BODY}
           value={cellValue}
           onMouseDown={() => {
             this.handleOnAbstractTypeSelect(params.rowIndex);

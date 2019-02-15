@@ -6,10 +6,11 @@ import React from 'react';
 
 import styled from 'styled-components';
 import { List, Map, OrderedSet } from 'immutable';
+import { Models } from 'lattice';
 import { AuthUtils } from 'lattice-auth';
-import { EntityDataModelApiActionFactory } from 'lattice-sagas';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
+import type { FQN } from 'lattice';
 
 import AbstractTypes from '../../../utils/AbstractTypes';
 import AbstractTypeDataTable from '../../../components/datatable/AbstractTypeDataTable';
@@ -17,18 +18,17 @@ import AbstractTypeFieldDescription from '../AbstractTypeFieldDescription';
 import AbstractTypeFieldTitle from '../AbstractTypeFieldTitle';
 import AbstractTypeFieldType from '../AbstractTypeFieldType';
 import AbstractTypeSearchableSelect from '../../../components/controls/AbstractTypeSearchableSelect';
+import Logger from '../../../utils/Logger';
 import StyledButton from '../../../components/buttons/StyledButton';
+import * as AssociationTypesActions from './AssociationTypesActions';
+import { isValidUUID } from '../../../utils/ValidationUtils';
+import type { IndexMap } from '../Types';
+
+const LOG :Logger = new Logger('AssociationTypeDetailsContainer');
 
 const {
-  addDstEntityTypeToAssociationType,
-  addPropertyTypeToEntityType,
-  addSrcEntityTypeToAssociationType,
-  deleteAssociationType,
-  removeDstEntityTypeFromAssociationType,
-  removePropertyTypeFromEntityType,
-  removeSrcEntityTypeFromAssociationType,
-  reorderEntityTypePropertyTypes
-} = EntityDataModelApiActionFactory;
+  FullyQualifiedName
+} = Models;
 
 /*
  * styled components
@@ -48,119 +48,182 @@ const AbstractTypeSearchableSelectWrapper = styled.div`
 
 type Props = {
   actions :{
-    addDstEntityTypeToAssociationType :RequestSequence;
-    addPropertyTypeToEntityType :RequestSequence;
-    addSrcEntityTypeToAssociationType :RequestSequence;
-    deleteAssociationType :RequestSequence;
-    removeDstEntityTypeFromAssociationType :RequestSequence;
-    removePropertyTypeFromEntityType :RequestSequence;
-    removeSrcEntityTypeFromAssociationType :RequestSequence;
-    reorderEntityTypePropertyTypes :RequestSequence;
+    localAddDstEntityTypeToAssociationType :RequestSequence;
+    localAddPropertyTypeToAssociationType :RequestSequence;
+    localAddSrcEntityTypeToAssociationType :RequestSequence;
+    localDeleteAssociationType :RequestSequence;
+    localRemoveDstEntityTypeFromAssociationType :RequestSequence;
+    localRemovePropertyTypeFromAssociationType :RequestSequence;
+    localRemoveSrcEntityTypeFromAssociationType :RequestSequence;
   };
   associationType :Map<*, *>;
   entityTypes :List<Map<*, *>>;
-  entityTypesById :Map<string, number>;
+  entityTypesIndexMap :IndexMap;
   propertyTypes :List<Map<*, *>>;
-  propertyTypesById :Map<string, number>;
+  propertyTypesIndexMap :IndexMap;
 };
 
-class AssoctTypeDetailsContainer extends React.Component<Props> {
+class AssociationTypeDetailsContainer extends React.Component<Props> {
 
-  handleAddDestinationEntityTypeToAssociationType = (entityTypeIdToAdd :string) => {
+  handleAddDestinationEntityTypeToAssociationType = (selectedEntityTypeFQN :FQN) => {
 
-    const { actions, associationType } = this.props;
+    const {
+      actions,
+      associationType,
+      entityTypes,
+      entityTypesIndexMap,
+    } = this.props;
 
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
       const associationEntityType :Map<*, *> = associationType.get('entityType', Map());
-      actions.addDstEntityTypeToAssociationType({
+      const entityTypesIndex :number = entityTypesIndexMap.get(selectedEntityTypeFQN, -1);
+      const entityTypeId :?UUID = entityTypes.getIn([entityTypesIndex, 'id']);
+      if (!isValidUUID(entityTypeId)) {
+        const errorMsg = 'EntityType id must be a valid UUID, otherwise it cannot be added to an AssociationType';
+        LOG.error(errorMsg, entityTypeId);
+        return;
+      }
+      actions.localAddDstEntityTypeToAssociationType({
+        entityTypeId,
+        associationTypeFQN: new FullyQualifiedName(associationEntityType.get('type')),
         associationTypeId: associationEntityType.get('id'),
-        entityTypeId: entityTypeIdToAdd
       });
     }
   }
 
-  handleAddPropertyTypeToAssociationType = (propertyTypeIdToAdd :string) => {
+  handleAddPropertyTypeToAssociationType = (selectedPropertyTypeFQN :FQN) => {
 
-    const { actions, associationType } = this.props;
-
-    if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
-      const associationEntityType :Map<*, *> = associationType.get('entityType', Map());
-      actions.addPropertyTypeToEntityType({
-        entityTypeId: associationEntityType.get('id'),
-        propertyTypeId: propertyTypeIdToAdd
-      });
-    }
-  }
-
-  handleAddSourceEntityTypeToAssociationType = (entityTypeIdToAdd :string) => {
-
-    const { actions, associationType } = this.props;
+    const {
+      actions,
+      associationType,
+      propertyTypes,
+      propertyTypesIndexMap,
+    } = this.props;
 
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
       const associationEntityType :Map<*, *> = associationType.get('entityType', Map());
-      actions.addSrcEntityTypeToAssociationType({
+      const propertyTypesIndex :number = propertyTypesIndexMap.get(selectedPropertyTypeFQN, -1);
+      const propertyTypeId :?UUID = propertyTypes.getIn([propertyTypesIndex, 'id']);
+      if (!isValidUUID(propertyTypeId)) {
+        const errorMsg = 'PropertyType id must be a valid UUID, otherwise it cannot be added to an AssociationType';
+        LOG.error(errorMsg, propertyTypeId);
+        return;
+      }
+      actions.localAddPropertyTypeToAssociationType({
+        propertyTypeId,
+        associationTypeFQN: new FullyQualifiedName(associationEntityType.get('type')),
         associationTypeId: associationEntityType.get('id'),
-        entityTypeId: entityTypeIdToAdd
       });
     }
   }
 
-  handleRemoveDestinationEntityTypeFromAssociationType = (entityTypeIdToRemove :string) => {
+  handleAddSourceEntityTypeToAssociationType = (selectedEntityTypeFQN :FQN) => {
 
-    const { actions, associationType } = this.props;
+    const {
+      actions,
+      associationType,
+      entityTypes,
+      entityTypesIndexMap,
+    } = this.props;
 
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
       const associationEntityType :Map<*, *> = associationType.get('entityType', Map());
-      actions.removeDstEntityTypeFromAssociationType({
+      const entityTypesIndex :number = entityTypesIndexMap.get(selectedEntityTypeFQN, -1);
+      const entityTypeId :?UUID = entityTypes.getIn([entityTypesIndex, 'id']);
+      if (!isValidUUID(entityTypeId)) {
+        const errorMsg = 'EntityType id must be a valid UUID, otherwise it cannot be added to an AssociationType';
+        LOG.error(errorMsg, entityTypeId);
+        return;
+      }
+      actions.localAddSrcEntityTypeToAssociationType({
+        entityTypeId,
+        associationTypeFQN: new FullyQualifiedName(associationEntityType.get('type')),
         associationTypeId: associationEntityType.get('id'),
-        entityTypeId: entityTypeIdToRemove
       });
     }
   }
 
-  handleRemovePropertyTypeFromAssociationType = (propertyTypeIdToRemove :string) => {
+  handleRemoveDestinationEntityTypeFromAssociationType = (selectedEntityTypeFQN :FQN) => {
 
-    const { actions, associationType } = this.props;
-
-    if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
-      const associationEntityType :Map<*, *> = associationType.get('entityType', Map());
-      actions.removePropertyTypeFromEntityType({
-        entityTypeId: associationEntityType.get('id'),
-        propertyTypeId: propertyTypeIdToRemove
-      });
-    }
-  }
-
-  handleRemoveSourceEntityTypeFromAssociationType = (entityTypeIdToRemove :string) => {
-
-    const { actions, associationType } = this.props;
+    const {
+      actions,
+      associationType,
+      entityTypes,
+      entityTypesIndexMap,
+    } = this.props;
 
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
       const associationEntityType :Map<*, *> = associationType.get('entityType', Map());
-      actions.removeSrcEntityTypeFromAssociationType({
+      const entityTypesIndex :number = entityTypesIndexMap.get(selectedEntityTypeFQN, -1);
+      const entityTypeId :UUID = entityTypes.getIn([entityTypesIndex, 'id']);
+      actions.localRemoveDstEntityTypeFromAssociationType({
+        entityTypeId,
+        associationTypeFQN: new FullyQualifiedName(associationEntityType.get('type')),
         associationTypeId: associationEntityType.get('id'),
-        entityTypeId: entityTypeIdToRemove
       });
     }
   }
 
-  handleReorderPropertyTypes = (oldIndex :number, newIndex :number) => {
+  handleRemovePropertyTypeFromAssociationType = (selectedPropertyTypeFQN :FQN) => {
 
-    const { actions, associationType } = this.props;
+    const {
+      actions,
+      associationType,
+      propertyTypes,
+      propertyTypesIndexMap,
+    } = this.props;
 
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
-
       const associationEntityType :Map<*, *> = associationType.get('entityType', Map());
-      const propertyTypeIds :List<string> = associationEntityType.get('properties');
-      const idToMove :string = propertyTypeIds.get(oldIndex);
-      const reorderedPropertyTypeIds :List<string> = propertyTypeIds.delete(oldIndex).insert(newIndex, idToMove);
-
-      actions.reorderEntityTypePropertyTypes({
-        entityTypeId: associationEntityType.get('id'),
-        propertyTypeIds: reorderedPropertyTypeIds.toJS()
+      const propertyTypesIndex :number = propertyTypesIndexMap.get(selectedPropertyTypeFQN, -1);
+      const propertyTypeId :UUID = propertyTypes.getIn([propertyTypesIndex, 'id']);
+      actions.localRemovePropertyTypeFromAssociationType({
+        propertyTypeId,
+        associationTypeFQN: new FullyQualifiedName(associationEntityType.get('type')),
+        associationTypeId: associationEntityType.get('id'),
       });
     }
   }
+
+  handleRemoveSourceEntityTypeFromAssociationType = (selectedEntityTypeFQN :FQN) => {
+
+    const {
+      actions,
+      associationType,
+      entityTypes,
+      entityTypesIndexMap,
+    } = this.props;
+
+    if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
+      const associationEntityType :Map<*, *> = associationType.get('entityType', Map());
+      const entityTypesIndex :number = entityTypesIndexMap.get(selectedEntityTypeFQN, -1);
+      const entityTypeId :UUID = entityTypes.getIn([entityTypesIndex, 'id']);
+      actions.localRemoveSrcEntityTypeFromAssociationType({
+        entityTypeId,
+        associationTypeFQN: new FullyQualifiedName(associationEntityType.get('type')),
+        associationTypeId: associationEntityType.get('id'),
+      });
+    }
+  }
+
+  // TODO: uncomment when re-enabling this feature
+  // handleReorderPropertyTypes = (oldIndex :number, newIndex :number) => {
+  //
+  //   const { actions, associationType } = this.props;
+  //
+  //   if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
+  //
+  //     const associationEntityType :Map<*, *> = associationType.get('entityType', Map());
+  //     const propertyTypeIds :List<string> = associationEntityType.get('properties');
+  //     const idToMove :string = propertyTypeIds.get(oldIndex);
+  //     const reorderedPropertyTypeIds :List<string> = propertyTypeIds.delete(oldIndex).insert(newIndex, idToMove);
+  //
+  //     actions.reorderEntityTypePropertyTypes({
+  //       entityTypeId: associationEntityType.get('id'),
+  //       propertyTypeIds: reorderedPropertyTypeIds.toJS()
+  //     });
+  //   }
+  // }
 
   handleOnClickDelete = () => {
 
@@ -168,13 +231,15 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
 
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
       const associationEntityType :Map<*, *> = associationType.get('entityType', Map());
-      actions.deleteAssociationType(associationEntityType.get('id'));
+      const associationTypeId :?UUID = associationEntityType.get('id');
+      const associationTypeFQN :FQN = new FullyQualifiedName(associationEntityType.get('type'));
+      actions.localDeleteAssociationType({ associationTypeFQN, associationTypeId });
     }
   }
 
   renderEntityTypeDetails = () => {
 
-    const { associationType, propertyTypes, propertyTypesById } = this.props;
+    const { associationType, propertyTypes, propertyTypesIndexMap } = this.props;
 
     // TODO: consider refactoring this since it's basically a copy of EntityTypeDetailsContainer
 
@@ -187,7 +252,7 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
 
     const keyPropertyTypes :List<Map<*, *>> = keyPropertyTypeIds
       .map((propertyTypeId :string) => {
-        const index :number = propertyTypesById.get(propertyTypeId, -1);
+        const index :number = propertyTypesIndexMap.get(propertyTypeId, -1);
         if (index === -1) {
           return Map();
         }
@@ -197,7 +262,7 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
 
     const thePropertyTypes :List<Map<*, *>> = propertyTypeIds
       .map((propertyTypeId :string) => {
-        const index :number = propertyTypesById.get(propertyTypeId, -1);
+        const index :number = propertyTypesIndexMap.get(propertyTypeId, -1);
         if (index === -1) {
           return Map();
         }
@@ -219,7 +284,7 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
             highlightOnHover
             maxHeight={500}
             onAbstractTypeRemove={this.handleRemovePropertyTypeFromAssociationType}
-            onReorder={this.handleReorderPropertyTypes}
+            // onReorder={this.handleReorderPropertyTypes}
             orderable
             showRemoveColumn
             workingAbstractTypeType={AbstractTypes.PropertyType} />
@@ -464,7 +529,7 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
 
   render() {
 
-    const { associationType, entityTypes, entityTypesById } = this.props;
+    const { associationType, entityTypes, entityTypesIndexMap } = this.props;
 
     if (!associationType || associationType.isEmpty()) {
       return null;
@@ -481,7 +546,7 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
 
     const sourceEntityTypes :List<Map<*, *>> = associationType.get('src', List())
       .map((entityTypeId :string) => {
-        const index :number = entityTypesById.get(entityTypeId, -1);
+        const index :number = entityTypesIndexMap.get(entityTypeId, -1);
         if (index === -1) {
           return Map();
         }
@@ -490,7 +555,7 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
 
     const destinationEntityTypes :List<Map<*, *>> = associationType.get('dst', List())
       .map((entityTypeId :string) => {
-        const index :number = entityTypesById.get(entityTypeId, -1);
+        const index :number = entityTypesIndexMap.get(entityTypeId, -1);
         if (index === -1) {
           return Map();
         }
@@ -531,32 +596,23 @@ class AssoctTypeDetailsContainer extends React.Component<Props> {
   }
 }
 
-function mapStateToProps(state :Map<*, *>) :Object {
+const mapStateToProps = (state :Map<*, *>) :Object => ({
+  entityTypes: state.getIn(['edm', 'entityTypes', 'entityTypes'], List()),
+  entityTypesIndexMap: state.getIn(['edm', 'entityTypes', 'entityTypesIndexMap'], Map()),
+  propertyTypes: state.getIn(['edm', 'propertyTypes', 'propertyTypes'], List()),
+  propertyTypesIndexMap: state.getIn(['edm', 'propertyTypes', 'propertyTypesIndexMap'], Map()),
+});
 
-  return {
-    entityTypes: state.getIn(['edm', 'entityTypes', 'entityTypes'], List()),
-    entityTypesById: state.getIn(['edm', 'entityTypes', 'entityTypesById'], Map()),
-    propertyTypes: state.getIn(['edm', 'propertyTypes', 'propertyTypes'], List()),
-    propertyTypesById: state.getIn(['edm', 'propertyTypes', 'propertyTypesById'], Map())
-  };
-}
+const mapDispatchToProps = (dispatch :Function) :Object => ({
+  actions: bindActionCreators({
+    localAddDstEntityTypeToAssociationType: AssociationTypesActions.localAddDstEntityTypeToAssociationType,
+    localAddPropertyTypeToAssociationType: AssociationTypesActions.localAddPropertyTypeToAssociationType,
+    localAddSrcEntityTypeToAssociationType: AssociationTypesActions.localAddSrcEntityTypeToAssociationType,
+    localDeleteAssociationType: AssociationTypesActions.localDeleteAssociationType,
+    localRemoveDstEntityTypeFromAssociationType: AssociationTypesActions.localRemoveDstEntityTypeFromAssociationType,
+    localRemovePropertyTypeFromAssociationType: AssociationTypesActions.localRemovePropertyTypeFromAssociationType,
+    localRemoveSrcEntityTypeFromAssociationType: AssociationTypesActions.localRemoveSrcEntityTypeFromAssociationType,
+  }, dispatch)
+});
 
-function mapDispatchToProps(dispatch :Function) :Object {
-
-  const actions = {
-    addDstEntityTypeToAssociationType,
-    addPropertyTypeToEntityType,
-    addSrcEntityTypeToAssociationType,
-    deleteAssociationType,
-    removeDstEntityTypeFromAssociationType,
-    removePropertyTypeFromEntityType,
-    removeSrcEntityTypeFromAssociationType,
-    reorderEntityTypePropertyTypes
-  };
-
-  return {
-    actions: bindActionCreators(actions, dispatch)
-  };
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(AssoctTypeDetailsContainer);
+export default connect(mapStateToProps, mapDispatchToProps)(AssociationTypeDetailsContainer);
