@@ -10,7 +10,7 @@ import {
   fromJS,
   has,
 } from 'immutable';
-import { Models } from 'lattice';
+import { Models, Types } from 'lattice';
 import { EntityDataModelApiActions } from 'lattice-sagas';
 import type { FQN, PropertyTypeObject } from 'lattice';
 
@@ -24,6 +24,10 @@ import {
   localDeletePropertyType,
   localUpdatePropertyTypeMeta,
 } from './PropertyTypesActions';
+import {
+  LOCAL_UPDATE_SCHEMA,
+  localUpdateSchema,
+} from '../schemas/SchemasActions';
 import type { IndexMap, UpdatePropertyTypeMeta } from '../Types';
 
 const LOG :Logger = new Logger('PropertyTypesReducer');
@@ -38,10 +42,15 @@ const {
   PropertyTypeBuilder,
 } = Models;
 
+const {
+  ActionTypes,
+} = Types;
+
 const INITIAL_STATE :Map<*, *> = fromJS({
   [LOCAL_CREATE_PROPERTY_TYPE]: { error: false },
   [LOCAL_DELETE_PROPERTY_TYPE]: { error: false },
   [LOCAL_UPDATE_PROPERTY_TYPE_META]: { error: false },
+  [LOCAL_UPDATE_SCHEMA]: { error: false },
   newlyCreatedPropertyTypeFQN: undefined,
   propertyTypes: List(),
   propertyTypesIndexMap: Map(),
@@ -307,62 +316,77 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
       });
     }
 
-    /*
-    case updateSchema.case(action.type): {
-      return updateSchema.reducer(state, action, {
+    case localUpdateSchema.case(action.type): {
+      return localUpdateSchema.reducer(state, action, {
         REQUEST: () => {
           const seqAction :SequenceAction = action;
-          return state.setIn(['actions', 'updateSchema', seqAction.id], fromJS(seqAction));
+          return state.setIn([LOCAL_UPDATE_SCHEMA, seqAction.id], seqAction);
         },
         SUCCESS: () => {
 
           const seqAction :SequenceAction = action;
-          const storedSeqAction :Map<*, *> = state.getIn(['actions', 'updateSchema', seqAction.id], Map());
-          if (storedSeqAction.isEmpty()) {
-            return state;
-          }
+          const storedSeqAction :SequenceAction = state.getIn([LOCAL_UPDATE_SCHEMA, seqAction.id]);
 
-          const schemaFqn :FullyQualifiedName = new FullyQualifiedName(storedSeqAction.getIn(['value', 'schemaFqn']));
-          const actionPropertyTypeIds :List<string> = storedSeqAction.getIn(['value', 'propertyTypeIds'], List());
-          // TODO: ":string" should be ":ActionType"
-          const actionType :string = storedSeqAction.getIn(['value', 'action']);
+          if (storedSeqAction) {
 
-          let updatedState :Map<*, *> = state;
-          actionPropertyTypeIds.forEach((propertyTypeId :string) => {
-            const propertyTypeIndex :number = state.getIn(['propertyTypesById', propertyTypeId], -1);
-            if (propertyTypeIndex >= 0) {
-              const existingSchemas :List<FullyQualifiedName> = updatedState.getIn(
-                ['propertyTypes', propertyTypeIndex, 'schemas'],
-                List(),
+            const {
+              actionType,
+              propertyTypeIds,
+              propertyTypes,
+              schemaFQN,
+            } = storedSeqAction.value;
+
+            let newState :Map<*, *> = state;
+            let ids :UUID[] = propertyTypeIds;
+            if (propertyTypes && propertyTypes.length > 0) {
+              ids = propertyTypes.map((propertyType :Map<*, *>) => propertyType.get('id'));
+            }
+
+            if (!ids || ids.length <= 0) {
+              return state;
+            }
+
+            ids.forEach((propertyTypeId :UUID) => {
+              const propertyTypeIndex :number = state.get('propertyTypes').findIndex(
+                (propertyType :Map<*, *>) => propertyType.get('id') === propertyTypeId
               );
-              if (actionType === ActionTypes.ADD) {
-                const updatedSchemas :List<FullyQualifiedName> = existingSchemas.push(schemaFqn);
-                updatedState = updatedState.setIn(['propertyTypes', propertyTypeIndex, 'schemas'], updatedSchemas);
-              }
-              else if (actionType === ActionTypes.REMOVE) {
-                const targetIndex :number = existingSchemas.findIndex((fqn :FullyQualifiedName) => (
-                  FullyQualifiedName.toString(fqn) === schemaFqn.toString()
-                ));
-                if (targetIndex >= 0) {
-                  const updatedSchemas :List<FullyQualifiedName> = existingSchemas.delete(targetIndex);
-                  updatedState = updatedState.setIn(['propertyTypes', propertyTypeIndex, 'schemas'], updatedSchemas);
+              if (propertyTypeIndex !== -1) {
+                const path = ['propertyTypes', propertyTypeIndex, 'schemas'];
+                if (actionType === ActionTypes.ADD) {
+                  newState = newState.setIn(path, newState.getIn(path).push(schemaFQN));
+                }
+                else if (actionType === ActionTypes.REMOVE) {
+                  const schemaIndex :number = newState.getIn(path).findIndex(
+                    (fqn :Map<*, *>) => FullyQualifiedName.toString(fqn) === schemaFQN.toString()
+                  );
+                  if (schemaIndex !== -1) {
+                    path.push(schemaIndex);
+                    newState = newState.deleteIn(path);
+                  }
                 }
               }
-            }
-          });
+            });
 
-          return updatedState;
+            return newState;
+          }
+
+          return state;
         },
         FAILURE: () => {
+          const seqAction :SequenceAction = action;
+          const storedSeqAction :SequenceAction = state.getIn([LOCAL_UPDATE_SCHEMA, seqAction.id]);
+          if (storedSeqAction) {
+            // TODO: we need a better pattern for setting and handling errors
+            return state.setIn([LOCAL_UPDATE_SCHEMA, 'error'], true);
+          }
           return state;
         },
         FINALLY: () => {
           const seqAction :SequenceAction = action;
-          return state.deleteIn(['actions', 'updateSchema', seqAction.id]);
+          return state.deleteIn([LOCAL_UPDATE_SCHEMA, seqAction.id]);
         },
       });
     }
-    */
 
     default:
       return state;

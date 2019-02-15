@@ -36,6 +36,10 @@ import {
   localRemoveSrcEntityTypeFromAssociationType,
   localUpdateAssociationTypeMeta,
 } from './AssociationTypesActions';
+import {
+  LOCAL_UPDATE_SCHEMA,
+  localUpdateSchema,
+} from '../schemas/SchemasActions';
 import type { IndexMap, UpdateAssociationTypeMeta } from '../Types';
 
 const LOG :Logger = new Logger('AssociationTypesReducer');
@@ -737,113 +741,77 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
       });
     }
 
-    // case reorderEntityTypePropertyTypes.case(action.type): {
-    //   return reorderEntityTypePropertyTypes.reducer(state, action, {
-    //     REQUEST: () => {
-    //       // TODO: not ideal. perhaps there's a better way to get access to the trigger action value
-    //       const seqAction :SequenceAction = (action :any);
-    //       return state.setIn(['actions', 'reorderEntityTypePropertyTypes', seqAction.id], fromJS(seqAction));
-    //     },
-    //     SUCCESS: () => {
-    //
-    //       const seqAction :SequenceAction = (action :any);
-    //       const storedSeqAction :Map<*, *> = state.getIn(
-    //         ['actions', 'reorderEntityTypePropertyTypes', seqAction.id],
-    //         Map()
-    //       );
-    //
-    //       if (storedSeqAction.isEmpty()) {
-    //         return state;
-    //       }
-    //
-    //       const targetId :string = storedSeqAction.getIn(['value', 'entityTypeId']);
-    //       const targetIndex :number = state.getIn(['associationTypesById', targetId], -1);
-    //
-    //       // don't do anything if the AssociationType being modified isn't available
-    //       if (targetIndex === -1) {
-    //         return state;
-    //       }
-    //
-    //       const reorderedPropertyTypeIds :List<string> = storedSeqAction.getIn(['value', 'propertyTypeIds'], List());
-    //       const currentAssociationType :Map<*, *> = state.getIn(['associationTypes', targetIndex], Map());
-    //       const updatedAssociationType :Map<*, *> = currentAssociationType.setIn(
-    //         ['entityType', 'properties'],
-    //         reorderedPropertyTypeIds
-    //       );
-    //
-    //       return state.setIn(['associationTypes', targetIndex], updatedAssociationType);
-    //     },
-    //     FAILURE: () => {
-    //       // TODO: need to properly handle the failure case
-    //       return state;
-    //     },
-    //     FINALLY: () => {
-    //       const seqAction :SequenceAction = (action :any);
-    //       return state.deleteIn(['actions', 'reorderEntityTypePropertyTypes', seqAction.id]);
-    //     }
-    //   });
-    // }
+    case localUpdateSchema.case(action.type): {
+      return localUpdateSchema.reducer(state, action, {
+        REQUEST: () => {
+          const seqAction :SequenceAction = action;
+          return state.setIn([LOCAL_UPDATE_SCHEMA, seqAction.id], seqAction);
+        },
+        SUCCESS: () => {
 
-    // case updateSchema.case(action.type): {
-    //   return updateSchema.reducer(state, action, {
-    //     REQUEST: () => {
-    //       const seqAction :SequenceAction = action;
-    //       return state.setIn(['actions', 'updateSchema', seqAction.id], fromJS(seqAction));
-    //     },
-    //     SUCCESS: () => {
-    //
-    //       const seqAction :SequenceAction = action;
-    //       const storedSeqAction :Map<*, *> = state.getIn(['actions', 'updateSchema', seqAction.id], Map());
-    //       if (storedSeqAction.isEmpty()) {
-    //         return state;
-    //       }
-    //
-    //       const schemaFqn :FullyQualifiedName = new FullyQualifiedName(storedSeqAction.getIn(['value', 'schemaFqn']));
-    //       const actionAssociationTypeIds :List<string> = storedSeqAction.getIn(['value', 'entityTypeIds'], List());
-    //       // TODO: ":string" should be ":ActionType"
-    //       const actionType :string = storedSeqAction.getIn(['value', 'action']);
-    //
-    //       let updatedState :Map<*, *> = state;
-    //       actionAssociationTypeIds.forEach((associationTypeId :string) => {
-    //         const associationTypeIndex :number = state.getIn(['associationTypesById', associationTypeId], -1);
-    //         if (associationTypeIndex >= 0) {
-    //           const existingSchemas :List<FullyQualifiedName> = updatedState.getIn(
-    //             ['associationTypes', associationTypeIndex, 'entityType', 'schemas'],
-    //             List(),
-    //           );
-    //           if (actionType === ActionTypes.ADD) {
-    //             const updatedSchemas :List<FullyQualifiedName> = existingSchemas.push(schemaFqn);
-    //             updatedState = updatedState.setIn(
-    //               ['associationTypes', associationTypeIndex, 'entityType', 'schemas'],
-    //               updatedSchemas,
-    //             );
-    //           }
-    //           else if (actionType === ActionTypes.REMOVE) {
-    //             const targetIndex :number = existingSchemas.findIndex((fqn :FullyQualifiedName) => (
-    //               FullyQualifiedName.toString(fqn) === schemaFqn.toString()
-    //             ));
-    //             if (targetIndex >= 0) {
-    //               const updatedSchemas :List<FullyQualifiedName> = existingSchemas.delete(targetIndex);
-    //               updatedState = updatedState.setIn(
-    //                 ['associationTypes', associationTypeIndex, 'entityType', 'schemas'],
-    //                 updatedSchemas,
-    //               );
-    //             }
-    //           }
-    //         }
-    //       });
-    //
-    //       return updatedState;
-    //     },
-    //     FAILURE: () => {
-    //       return state;
-    //     },
-    //     FINALLY: () => {
-    //       const seqAction :SequenceAction = action;
-    //       return state.deleteIn(['actions', 'updateSchema', seqAction.id]);
-    //     },
-    //   });
-    // }
+          const seqAction :SequenceAction = action;
+          const storedSeqAction :SequenceAction = state.getIn([LOCAL_UPDATE_SCHEMA, seqAction.id]);
+
+          if (storedSeqAction) {
+
+            const {
+              actionType,
+              entityTypeIds,
+              entityTypes,
+              schemaFQN,
+            } = storedSeqAction.value;
+
+            let newState :Map<*, *> = state;
+            let ids :UUID[] = entityTypeIds;
+            if (entityTypes && entityTypes.length > 0) {
+              ids = entityTypes.map((entityType :Map<*, *>) => entityType.get('id'));
+            }
+
+            if (!ids || ids.length <= 0) {
+              return state;
+            }
+
+            ids.forEach((entityTypeId :UUID) => {
+              const associationTypesIndex :number = state.get('associationTypes').findIndex(
+                (associationTypes :Map<*, *>) => associationTypes.getIn(['entityType', 'id']) === entityTypeId
+              );
+              if (associationTypesIndex !== -1) {
+                const path = ['associationTypes', associationTypesIndex, 'entityType', 'schemas'];
+                if (actionType === ActionTypes.ADD) {
+                  newState = newState.setIn(path, newState.getIn(path).push(schemaFQN));
+                }
+                else if (actionType === ActionTypes.REMOVE) {
+                  const schemaIndex :number = newState.getIn(path).findIndex(
+                    (fqn :Map<*, *>) => FullyQualifiedName.toString(fqn) === schemaFQN.toString()
+                  );
+                  if (schemaIndex !== -1) {
+                    path.push(schemaIndex);
+                    newState = newState.deleteIn(path);
+                  }
+                }
+              }
+            });
+
+            return newState;
+          }
+
+          return state;
+        },
+        FAILURE: () => {
+          const seqAction :SequenceAction = action;
+          const storedSeqAction :SequenceAction = state.getIn([LOCAL_UPDATE_SCHEMA, seqAction.id]);
+          if (storedSeqAction) {
+            // TODO: we need a better pattern for setting and handling errors
+            return state.setIn([LOCAL_UPDATE_SCHEMA, 'error'], true);
+          }
+          return state;
+        },
+        FINALLY: () => {
+          const seqAction :SequenceAction = action;
+          return state.deleteIn([LOCAL_UPDATE_SCHEMA, seqAction.id]);
+        },
+      });
+    }
 
     default:
       return state;
