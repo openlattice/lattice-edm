@@ -40,6 +40,7 @@ CANVAS_CONTEXT.font = '14px "Open Sans", sans-serif';
  * helper components
  */
 
+// NOTE: will "withRef" be a problem in the future?
 const OrderableGrid = SortableContainer(Grid, { withRef: true });
 
 /*
