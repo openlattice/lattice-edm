@@ -353,7 +353,9 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
               if (propertyTypeIndex !== -1) {
                 const path = ['propertyTypes', propertyTypeIndex, 'schemas'];
                 if (actionType === ActionTypes.ADD) {
-                  newState = newState.setIn(path, newState.getIn(path).push(schemaFQN));
+                  const currentSchemas = newState.getIn(path);
+                  const updatedSchemas = currentSchemas.push(fromJS(schemaFQN.toObject()));
+                  newState = newState.setIn(path, updatedSchemas);
                 }
                 else if (actionType === ActionTypes.REMOVE) {
                   const schemaIndex :number = newState.getIn(path).findIndex(

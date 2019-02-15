@@ -1,6 +1,6 @@
 import randomUUID from 'uuid/v4';
 import { List, Map, fromJS } from 'immutable';
-import { Models } from 'lattice';
+import { Models, Types } from 'lattice';
 import { EntityDataModelApiActions } from 'lattice-sagas';
 
 import reducer from './AssociationTypesReducer';
@@ -8,6 +8,7 @@ import { genRandomString } from '../../../utils/testing/MockUtils';
 import {
   MOCK_ASSOCIATION_TYPE,
   genRandomAssociationType,
+  genRandomFQN,
 } from '../../../utils/testing/MockDataModels';
 import {
   LOCAL_ADD_DST_ET_TO_AT,
@@ -29,10 +30,18 @@ import {
   localRemoveSrcEntityTypeFromAssociationType,
   localUpdateAssociationTypeMeta,
 } from './AssociationTypesActions';
+import {
+  LOCAL_UPDATE_SCHEMA,
+  localUpdateSchema,
+} from '../schemas/SchemasActions';
 
 const {
   FullyQualifiedName,
 } = Models;
+
+const {
+  ActionTypes,
+} = Types;
 
 const {
   GET_ENTITY_DATA_MODEL,
@@ -1267,6 +1276,173 @@ describe('AssociationTypesReducer', () => {
         state = reducer(state, localUpdateAssociationTypeMeta.success(id));
         state = reducer(state, localUpdateAssociationTypeMeta.finally(id));
         expect(state.hasIn([LOCAL_UPDATE_ASSOCIATION_TYPE_META, id])).toEqual(false);
+      });
+
+    });
+
+  });
+
+  describe(LOCAL_UPDATE_SCHEMA, () => {
+
+    const initialState = INITIAL_STATE
+      .setIn(['associationTypes', 0], MOCK_ASSOCIATION_TYPE.toImmutable())
+      .setIn(['associationTypesIndexMap', MOCK_ASSOCIATION_TYPE.entityType.id], 0)
+      .setIn(['associationTypesIndexMap', MOCK_ASSOCIATION_TYPE.entityType.type], 0);
+
+    describe(ActionTypes.ADD, () => {
+
+      const mockActionValue = {
+        actionType: ActionTypes.ADD,
+        entityTypeIds: [MOCK_ASSOCIATION_TYPE.entityType.id],
+        schemaFQN: genRandomFQN(),
+      };
+
+      test(localUpdateSchema.REQUEST, () => {
+
+        const { id } = localUpdateSchema();
+        const requestAction = localUpdateSchema.request(id, mockActionValue);
+        const state = reducer(initialState, requestAction);
+        expect(state.getIn([LOCAL_UPDATE_SCHEMA, id])).toEqual(requestAction);
+      });
+
+      test(localUpdateSchema.SUCCESS, () => {
+
+        const { id } = localUpdateSchema();
+        const requestAction = localUpdateSchema.request(id, mockActionValue);
+        let state = reducer(initialState, requestAction);
+        state = reducer(state, localUpdateSchema.success(id));
+        expect(state.getIn([LOCAL_UPDATE_SCHEMA, id])).toEqual(requestAction);
+
+        const associationType = MOCK_ASSOCIATION_TYPE.toImmutable();
+        const expectedAssociationTypes = List().push(
+          associationType.setIn(
+            ['entityType', 'schemas'],
+            associationType.getIn(['entityType', 'schemas']).push(fromJS(mockActionValue.schemaFQN.toObject()))
+          )
+        );
+        expect(state.get('associationTypes').hashCode()).toEqual(expectedAssociationTypes.hashCode());
+        expect(state.get('associationTypes').equals(expectedAssociationTypes)).toEqual(true);
+
+        const expectedAssociationTypesIndexMap = Map()
+          .set(MOCK_ASSOCIATION_TYPE.entityType.id, 0)
+          .set(MOCK_ASSOCIATION_TYPE.entityType.type, 0);
+        expect(state.get('associationTypesIndexMap').hashCode()).toEqual(expectedAssociationTypesIndexMap.hashCode());
+        expect(state.get('associationTypesIndexMap').equals(expectedAssociationTypesIndexMap)).toEqual(true);
+        state.get('associationTypesIndexMap')
+          .filter((v, k) => FullyQualifiedName.isValid(k))
+          .keySeq()
+          .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+      });
+
+      test(localUpdateSchema.FAILURE, () => {
+
+        const { id } = localUpdateSchema();
+        const requestAction = localUpdateSchema.request(id, mockActionValue);
+        let state = reducer(initialState, requestAction);
+        state = reducer(state, localUpdateSchema.failure(id));
+        expect(state.getIn([LOCAL_UPDATE_SCHEMA, id])).toEqual(requestAction);
+
+        const expectedAssociationTypes = List().push(MOCK_ASSOCIATION_TYPE.toImmutable());
+        expect(state.get('associationTypes').hashCode()).toEqual(expectedAssociationTypes.hashCode());
+        expect(state.get('associationTypes').equals(expectedAssociationTypes)).toEqual(true);
+
+        const expectedAssociationTypesIndexMap = Map()
+          .set(MOCK_ASSOCIATION_TYPE.entityType.id, 0)
+          .set(MOCK_ASSOCIATION_TYPE.entityType.type, 0);
+        expect(state.get('associationTypesIndexMap').hashCode()).toEqual(expectedAssociationTypesIndexMap.hashCode());
+        expect(state.get('associationTypesIndexMap').equals(expectedAssociationTypesIndexMap)).toEqual(true);
+        state.get('associationTypesIndexMap')
+          .filter((v, k) => FullyQualifiedName.isValid(k))
+          .keySeq()
+          .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+      });
+
+      test(localUpdateSchema.FINALLY, () => {
+
+        const { id } = localUpdateSchema();
+        let state = reducer(initialState, localUpdateSchema.request(id, mockActionValue));
+        state = reducer(state, localUpdateSchema.success(id));
+        state = reducer(state, localUpdateSchema.finally(id));
+        expect(state.hasIn([LOCAL_UPDATE_SCHEMA, id])).toEqual(false);
+      });
+
+    });
+
+    describe(ActionTypes.REMOVE, () => {
+
+      const mockActionValue = {
+        actionType: ActionTypes.REMOVE,
+        entityTypeIds: [MOCK_ASSOCIATION_TYPE.entityType.id],
+        schemaFQN: MOCK_ASSOCIATION_TYPE.entityType.schemas[0],
+      };
+
+      test(localUpdateSchema.REQUEST, () => {
+
+        const { id } = localUpdateSchema();
+        const requestAction = localUpdateSchema.request(id, mockActionValue);
+        const state = reducer(initialState, requestAction);
+        expect(state.getIn([LOCAL_UPDATE_SCHEMA, id])).toEqual(requestAction);
+      });
+
+      test(localUpdateSchema.SUCCESS, () => {
+
+        const { id } = localUpdateSchema();
+        const requestAction = localUpdateSchema.request(id, mockActionValue);
+        let state = reducer(initialState, requestAction);
+        state = reducer(state, localUpdateSchema.success(id));
+        expect(state.getIn([LOCAL_UPDATE_SCHEMA, id])).toEqual(requestAction);
+
+        const associationType = MOCK_ASSOCIATION_TYPE.toImmutable();
+        const expectedAssociationTypes = List().push(
+          associationType.setIn(
+            ['entityType', 'schemas'],
+            associationType.getIn(['entityType', 'schemas']).delete(0)
+          )
+        );
+        expect(state.get('associationTypes').hashCode()).toEqual(expectedAssociationTypes.hashCode());
+        expect(state.get('associationTypes').equals(expectedAssociationTypes)).toEqual(true);
+
+        const expectedAssociationTypesIndexMap = Map()
+          .set(MOCK_ASSOCIATION_TYPE.entityType.id, 0)
+          .set(MOCK_ASSOCIATION_TYPE.entityType.type, 0);
+        expect(state.get('associationTypesIndexMap').hashCode()).toEqual(expectedAssociationTypesIndexMap.hashCode());
+        expect(state.get('associationTypesIndexMap').equals(expectedAssociationTypesIndexMap)).toEqual(true);
+        state.get('associationTypesIndexMap')
+          .filter((v, k) => FullyQualifiedName.isValid(k))
+          .keySeq()
+          .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+      });
+
+      test(localUpdateSchema.FAILURE, () => {
+
+        const { id } = localUpdateSchema();
+        const requestAction = localUpdateSchema.request(id, mockActionValue);
+        let state = reducer(initialState, requestAction);
+        state = reducer(state, localUpdateSchema.failure(id));
+        expect(state.getIn([LOCAL_UPDATE_SCHEMA, id])).toEqual(requestAction);
+
+        const expectedAssociationTypes = List().push(MOCK_ASSOCIATION_TYPE.toImmutable());
+        expect(state.get('associationTypes').hashCode()).toEqual(expectedAssociationTypes.hashCode());
+        expect(state.get('associationTypes').equals(expectedAssociationTypes)).toEqual(true);
+
+        const expectedAssociationTypesIndexMap = Map()
+          .set(MOCK_ASSOCIATION_TYPE.entityType.id, 0)
+          .set(MOCK_ASSOCIATION_TYPE.entityType.type, 0);
+        expect(state.get('associationTypesIndexMap').hashCode()).toEqual(expectedAssociationTypesIndexMap.hashCode());
+        expect(state.get('associationTypesIndexMap').equals(expectedAssociationTypesIndexMap)).toEqual(true);
+        state.get('associationTypesIndexMap')
+          .filter((v, k) => FullyQualifiedName.isValid(k))
+          .keySeq()
+          .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+      });
+
+      test(localUpdateSchema.FINALLY, () => {
+
+        const { id } = localUpdateSchema();
+        let state = reducer(initialState, localUpdateSchema.request(id, mockActionValue));
+        state = reducer(state, localUpdateSchema.success(id));
+        state = reducer(state, localUpdateSchema.finally(id));
+        expect(state.hasIn([LOCAL_UPDATE_SCHEMA, id])).toEqual(false);
       });
 
     });
