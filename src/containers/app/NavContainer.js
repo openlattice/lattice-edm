@@ -47,8 +47,11 @@ const NavTab = styled(NavLink).attrs({
 
 const NavContainer = () => {
 
+  // GitHub and Sync tabs should only ever be available when an admin is logged in
+  const showGitHub :boolean = AuthUtils.isAuthenticated() && AuthUtils.isAdmin();
+
+  // Sync should only ever be available when running locally, never on prod
   const showSync :boolean = AuthUtils.isAuthenticated() && AuthUtils.isAdmin() && __ENV_DEV__;
-  const showGitHub :boolean = AuthUtils.isAuthenticated() && AuthUtils.isAdmin() && __ENV_DEV__;
 
   return (
     <Nav>
