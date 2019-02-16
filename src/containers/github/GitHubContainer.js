@@ -19,9 +19,6 @@ import * as Routes from '../../core/router/Routes';
 import { openPullRequest } from './GitHubActions';
 import { SUBMIT_STATES } from './GitHubReducer';
 
-// injected by Webpack.DefinePlugin
-declare var __ENV_PROD__ :boolean;
-
 const { FullyQualifiedName } = Models;
 
 const ContainerWrapper = styled.div`
@@ -244,7 +241,7 @@ class GitHubContainer extends Component<Props, State> {
 
   render() {
 
-    if (!AuthUtils.isAuthenticated() || !AuthUtils.isAdmin() || __ENV_PROD__) {
+    if (!AuthUtils.isAuthenticated() || !AuthUtils.isAdmin()) {
       return <Redirect to={Routes.ROOT} />;
     }
 
