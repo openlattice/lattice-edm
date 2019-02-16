@@ -19,9 +19,6 @@ import * as Routes from '../../core/router/Routes';
 import { openPullRequest } from './GitHubActions';
 import { SUBMIT_STATES } from './GitHubReducer';
 
-// injected by Webpack.DefinePlugin
-declare var __ENV_PROD__ :boolean;
-
 const { FullyQualifiedName } = Models;
 
 const ContainerWrapper = styled.div`
