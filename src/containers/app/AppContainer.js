@@ -6,7 +6,7 @@ import React, { Component } from 'react';
 
 import qs from 'qs';
 import styled from 'styled-components';
-import { AuthActionFactory, AuthUtils } from 'lattice-auth';
+import { AuthActions, AuthUtils } from 'lattice-auth';
 import { EntityDataModelApiActions } from 'lattice-sagas';
 import { connect } from 'react-redux';
 import { Redirect, Route, Switch } from 'react-router';
@@ -140,7 +140,7 @@ class AppContainer extends Component<Props> {
 const mapDispatchToProps = (dispatch :Function) :Object => ({
   actions: bindActionCreators({
     getEntityDataModel: EntityDataModelApiActions.getEntityDataModel,
-    logout: AuthActionFactory.logout,
+    logout: AuthActions.logout,
   }, dispatch)
 });
 

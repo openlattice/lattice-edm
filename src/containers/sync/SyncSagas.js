@@ -6,13 +6,13 @@
 
 import Lattice, { Models } from 'lattice';
 import { call, put, takeEvery } from '@redux-saga/core/effects';
-import { EntityDataModelApiActionFactory, EntityDataModelApiSagas } from 'lattice-sagas';
+import { EntityDataModelApiActions, EntityDataModelApiSagas } from 'lattice-sagas';
 
 import { resetLatticeConfig } from '../../utils/Utils';
 import {
   SYNC_PROD_EDM,
   syncProdEntityDataModel,
-} from './SyncActionFactory';
+} from './SyncActions';
 
 // injected by Webpack.DefinePlugin
 declare var __ENV_PROD__ :boolean;
@@ -22,7 +22,7 @@ const {
   getEntityDataModelDiff,
   getEntityDataModelVersion,
   updateEntityDataModel,
-} = EntityDataModelApiActionFactory;
+} = EntityDataModelApiActions;
 
 const {
   getEntityDataModelWorker,

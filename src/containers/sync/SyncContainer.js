@@ -17,7 +17,7 @@ import StyledButton from '../../components/buttons/StyledButton';
 import Spinner from '../../components/spinner/Spinner';
 import * as Routes from '../../core/router/Routes';
 import { SYNC_STATES } from './SyncReducer';
-import { syncProdEntityDataModel } from './SyncActionFactory';
+import { syncProdEntityDataModel } from './SyncActions';
 
 // injected by Webpack.DefinePlugin
 declare var __ENV_PROD__ :boolean;
