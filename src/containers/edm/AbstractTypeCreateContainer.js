@@ -62,6 +62,12 @@ const DATA_TYPE_OPTIONS = EDM_PRIMITIVE_TYPES.map((primitive :string) => (
   </option>
 ));
 
+const ANALYZER_TYPE_OPTIONS = Object.keys(AnalyzerTypes).map((anaylzer :AnalyzerType) => (
+  <option key={anaylzer} value={anaylzer}>
+    { anaylzer }
+  </option>
+));
+
 /*
  * styled components
  */
@@ -83,7 +89,7 @@ const ActionButtons = styled.div`
   }
 `;
 
-const DataTypeSelect = styled.select`
+const TypeSelect = styled.select`
   align-self: left;
   background: none;
   border: 1px solid #c5d5e5;
@@ -140,6 +146,7 @@ type Props = {
 };
 
 type State = {
+  analyzerValue :AnalyzerType;
   bidiValue :boolean;
   datatypeValue :string;
   descriptionValue :string;
@@ -164,6 +171,7 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
     super(props);
 
     this.state = {
+      analyzerValue: AnalyzerTypes.STANDARD,
       bidiValue: false,
       datatypeValue: 'String',
       descriptionValue: '',
@@ -227,6 +235,7 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
 
     const { actions, onSubmit, workingAbstractTypeType } = this.props;
     const {
+      analyzerValue,
       bidiValue,
       datatypeValue,
       descriptionValue,
@@ -253,7 +262,7 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
 
       const analyzer :AnalyzerType = (datatypeValue === 'String' && phoneticSearchesValue)
         ? AnalyzerTypes.METAPHONE
-        : AnalyzerTypes.STANDARD;
+        : analyzerValue;
 
       const newPropertyType :PropertyType = new PropertyTypeBuilder()
         .setType(new FullyQualifiedName(namespaceValue, nameValue))
@@ -438,6 +447,13 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
     });
   }
 
+  handleOnChangeAnalyzerType = (event :SyntheticInputEvent<*>) => {
+
+    this.setState({
+      analyzerValue: event.target.value || AnalyzerTypes.STANDARD,
+    });
+  }
+
   handleOnChangeBidi = (event :SyntheticInputEvent<*>) => {
 
     this.setState({
@@ -447,8 +463,16 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
 
   handleOnChangeDataType = (event :SyntheticInputEvent<*>) => {
 
+    let { phoneticSearchesValue } = this.state;
+    const datatypeValue = event.target.value || 'String';
+
+    if (datatypeValue !== 'String') {
+      phoneticSearchesValue = false;
+    }
+
     this.setState({
-      datatypeValue: event.target.value || '',
+      datatypeValue,
+      phoneticSearchesValue,
     });
   }
 
@@ -477,8 +501,15 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
 
   handleOnChangePhoneticSearches = (event :SyntheticInputEvent<*>) => {
 
+    const { analyzerValue, datatypeValue } = this.state;
+    const phoneticSearchesValue = event.target.checked || false;
+    const analyzerType = (datatypeValue === 'String' && phoneticSearchesValue)
+      ? AnalyzerTypes.METAPHONE
+      : analyzerValue;
+
     this.setState({
-      phoneticSearchesValue: event.target.checked || false,
+      phoneticSearchesValue,
+      analyzerValue: analyzerType,
     });
   }
 
@@ -594,9 +625,9 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
         <h2>
           Data Type
         </h2>
-        <DataTypeSelect onChange={this.handleOnChangeDataType} defaultValue="String">
+        <TypeSelect onChange={this.handleOnChangeDataType} defaultValue="String">
           { DATA_TYPE_OPTIONS }
-        </DataTypeSelect>
+        </TypeSelect>
         {
           datatypeValue !== 'String'
             ? null
@@ -611,6 +642,26 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
               </PhoneticCheckboxWrapper>
             )
         }
+      </section>
+    );
+  }
+
+  renderPropertyTypeAnalyzerTypeSelectSection = () => {
+
+    const { workingAbstractTypeType } = this.props;
+    const { analyzerValue } = this.state;
+    if (workingAbstractTypeType !== AbstractTypes.PropertyType) {
+      return null;
+    }
+
+    return (
+      <section>
+        <h2>
+          Analyzer Type
+        </h2>
+        <TypeSelect onChange={this.handleOnChangeAnalyzerType} value={analyzerValue}>
+          { ANALYZER_TYPE_OPTIONS }
+        </TypeSelect>
       </section>
     );
   }
@@ -940,6 +991,7 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
         { this.renderTitleSection() }
         { this.renderDescriptionSection() }
         { this.renderPropertyTypeDataTypeSelectSection() }
+        { this.renderPropertyTypeAnalyzerTypeSelectSection() }
         { this.renderPropertyTypePiiSection() }
         { this.renderAssociationTypeBidirectionalSection() }
         { this.renderEntityTypePrimaryKeyPropertyTypesSelectSection() }
