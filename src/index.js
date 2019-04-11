@@ -45,16 +45,12 @@ const GlobalStyle = createGlobalStyle`
   }
 
   * {
-    -webkit-box-sizing: border-box;
-       -moz-box-sizing: border-box;
-            box-sizing: border-box;
+    box-sizing: border-box;
   }
 
-  *:before,
-  *:after {
-    -webkit-box-sizing: border-box;
-       -moz-box-sizing: border-box;
-            box-sizing: border-box;
+  *::before,
+  *::after {
+    box-sizing: border-box;
   }
 
   #app {
