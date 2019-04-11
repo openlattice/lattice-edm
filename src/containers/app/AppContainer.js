@@ -99,7 +99,8 @@ class AppContainer extends Component<Props> {
   render() {
 
     const { actions } = this.props;
-    const showOnlineToggle :boolean = AuthUtils.isAuthenticated() && AuthUtils.isAdmin();
+    // TODO: revert when ready to release
+    const showOnlineToggle :boolean = false; // AuthUtils.isAuthenticated() && AuthUtils.isAdmin();
 
     return (
       <AppWrapper>
