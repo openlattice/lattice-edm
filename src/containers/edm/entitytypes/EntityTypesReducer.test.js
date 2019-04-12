@@ -1,378 +1,930 @@
-import Immutable from 'immutable';
 import randomUUID from 'uuid/v4';
-import { EntityDataModelApiActionFactory } from 'lattice-sagas';
+import { List, Map, fromJS } from 'immutable';
+import { Models, Types } from 'lattice';
+import { EntityDataModelApiActions } from 'lattice-sagas';
 
 import reducer from './EntityTypesReducer';
-import { randomId } from '../../../utils/Utils';
-
+import { MOCK_ENTITY_TYPE, genRandomFQN } from '../../../utils/testing/MockDataModels';
+import { genRandomString } from '../../../utils/testing/MockUtils';
 import {
-  MOCK_ENTITY_TYPE,
-  MOCK_ENTITY_TYPE_JSON
-} from '../../../utils/MockDataModels';
+  LOCAL_ADD_PT_TO_ET,
+  LOCAL_CREATE_ENTITY_TYPE,
+  LOCAL_DELETE_ENTITY_TYPE,
+  LOCAL_REMOVE_PT_FROM_ET,
+  LOCAL_UPDATE_ENTITY_TYPE_META,
+  localAddPropertyTypeToEntityType,
+  localCreateEntityType,
+  localDeleteEntityType,
+  localRemovePropertyTypeFromEntityType,
+  localUpdateEntityTypeMeta,
+} from './EntityTypesActions';
+import {
+  LOCAL_UPDATE_SCHEMA,
+  localUpdateSchema,
+} from '../schemas/SchemasActions';
 
 const {
-  CREATE_ENTITY_TYPE,
-  DELETE_ENTITY_TYPE,
-  GET_ALL_ENTITY_TYPES,
-  UPDATE_ENTITY_TYPE_METADATA,
-  createEntityType,
-  deleteEntityType,
-  getAllEntityTypes,
-  updateEntityTypeMetaData
-} = EntityDataModelApiActionFactory;
+  FullyQualifiedName,
+  EntityTypeBuilder,
+} = Models;
+
+const {
+  ActionTypes,
+} = Types;
+
+const {
+  GET_ENTITY_DATA_MODEL,
+  getEntityDataModel,
+} = EntityDataModelApiActions;
 
 describe('EntityTypesReducer', () => {
 
   const INITIAL_STATE = reducer(undefined, { type: '__TEST__' });
 
   test('INITIAL_STATE', () => {
-    expect(INITIAL_STATE).toBeInstanceOf(Immutable.Map);
-    expect(INITIAL_STATE.get('entityTypes').toJS()).toEqual([]);
-    expect(INITIAL_STATE.get('entityTypesById').toJS()).toEqual({});
-    expect(INITIAL_STATE.get('isCreatingNewEntityType')).toEqual(false);
-    expect(INITIAL_STATE.get('isFetchingAllEntityTypes')).toEqual(false);
-    expect(INITIAL_STATE.get('newlyCreatedEntityTypeId')).toEqual('');
-    expect(INITIAL_STATE.get('actions').toJS()).toEqual({
-      addPropertyTypeToEntityType: {},
-      createEntityType: {},
-      deleteEntityType: {},
-      removePropertyTypeFromEntityType: {},
-      reorderEntityTypePropertyTypes: {},
-      updateEntityTypeMetaData: {}
+    expect(INITIAL_STATE).toBeInstanceOf(Map);
+    expect(INITIAL_STATE.toJS()).toEqual({
+      [LOCAL_ADD_PT_TO_ET]: { error: false },
+      [LOCAL_CREATE_ENTITY_TYPE]: { error: false },
+      [LOCAL_DELETE_ENTITY_TYPE]: { error: false },
+      [LOCAL_REMOVE_PT_FROM_ET]: { error: false },
+      [LOCAL_UPDATE_ENTITY_TYPE_META]: { error: false },
+      [LOCAL_UPDATE_SCHEMA]: { error: false },
+      entityTypes: [],
+      entityTypesIndexMap: {},
+      newlyCreatedEntityTypeFQN: undefined,
     });
   });
 
-  describe(CREATE_ENTITY_TYPE, () => {
+  describe(GET_ENTITY_DATA_MODEL, () => {
 
-    test(createEntityType.REQUEST, () => {
+    test(getEntityDataModel.REQUEST, () => {
 
-      const { id } = createEntityType();
-      const state = reducer(INITIAL_STATE, createEntityType.request(id, MOCK_ENTITY_TYPE));
-
-      expect(state.get('isCreatingNewEntityType')).toEqual(true);
-      expect(state.get('newlyCreatedEntityTypeId')).toEqual('');
-      expect(state.getIn(['actions', 'createEntityType', id]).toJS())
-        .toEqual({
-          id,
-          type: createEntityType.REQUEST,
-          value: MOCK_ENTITY_TYPE
-        });
+      const { id } = getEntityDataModel();
+      const stateAfterRequest = reducer(INITIAL_STATE, getEntityDataModel.request(id));
+      expect(stateAfterRequest.hashCode()).toEqual(INITIAL_STATE.hashCode());
+      expect(stateAfterRequest.equals(INITIAL_STATE)).toEqual(true);
     });
 
-    test(createEntityType.SUCCESS, () => {
+    // TODO: test SUCCESS with variable size result
+    test(getEntityDataModel.SUCCESS, () => {
 
-      const { id } = createEntityType();
-      let state = reducer(INITIAL_STATE, createEntityType.request(id, MOCK_ENTITY_TYPE));
-      state = reducer(state, createEntityType.success(id, MOCK_ENTITY_TYPE.id));
+      const { id } = getEntityDataModel();
+      const response = { entityTypes: [MOCK_ENTITY_TYPE.toObject()] };
+      let state = reducer(INITIAL_STATE, getEntityDataModel.request(id));
+      state = reducer(state, getEntityDataModel.success(id, response));
 
-      expect(state.get('isCreatingNewEntityType')).toEqual(true);
-      expect(state.get('newlyCreatedEntityTypeId')).toEqual(MOCK_ENTITY_TYPE.id);
+      const expectedPropertyTypes = List().push(MOCK_ENTITY_TYPE.toImmutable());
+      expect(state.get('entityTypes').hashCode()).toEqual(expectedPropertyTypes.hashCode());
+      expect(state.get('entityTypes').equals(expectedPropertyTypes)).toEqual(true);
 
-      expect(state.get('entityTypes').toJS()).toEqual(
-        [MOCK_ENTITY_TYPE]
-      );
-
-      expect(state.get('entityTypesById').toJS()).toEqual(
-        { [MOCK_ENTITY_TYPE.id]: 0 }
-      );
-
-      expect(state.getIn(['actions', 'createEntityType', id]).toJS())
-        .toEqual({
-          id,
-          type: createEntityType.REQUEST,
-          value: MOCK_ENTITY_TYPE
-        });
+      const expectedPropertyTypesIndexMap = Map().set(MOCK_ENTITY_TYPE.id, 0).set(MOCK_ENTITY_TYPE.type, 0);
+      expect(state.get('entityTypesIndexMap').hashCode()).toEqual(expectedPropertyTypesIndexMap.hashCode());
+      expect(state.get('entityTypesIndexMap').equals(expectedPropertyTypesIndexMap)).toEqual(true);
+      state.get('entityTypesIndexMap')
+        .filter((v, k) => FullyQualifiedName.isValid(k))
+        .keySeq()
+        .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
     });
 
-    test(createEntityType.FAILURE, () => {
+    test(getEntityDataModel.FAILURE, () => {
 
-      const { id } = createEntityType();
-      let state = reducer(INITIAL_STATE, createEntityType.request(id, MOCK_ENTITY_TYPE));
-      state = reducer(state, createEntityType.failure(id));
-
-      expect(state.get('isCreatingNewEntityType')).toEqual(true);
-      expect(state.get('newlyCreatedEntityTypeId')).toEqual('');
-      expect(state.getIn(['actions', 'createEntityType', id]).toJS())
-        .toEqual({
-          id,
-          type: createEntityType.REQUEST,
-          value: MOCK_ENTITY_TYPE
-        });
+      const { id } = getEntityDataModel();
+      let state = reducer(INITIAL_STATE, getEntityDataModel.request(id));
+      state = reducer(state, getEntityDataModel.failure(id));
+      expect(state.get('entityTypes').toJS()).toEqual([]);
+      expect(state.get('entityTypesIndexMap').toJS()).toEqual({});
     });
 
-    test(createEntityType.FINALLY, () => {
+    test(getEntityDataModel.FINALLY, () => {
 
-      const { id } = createEntityType();
-      let state = reducer(INITIAL_STATE, createEntityType.request(id, MOCK_ENTITY_TYPE));
-      state = reducer(INITIAL_STATE, createEntityType.finally(id));
-
-      expect(state.get('isCreatingNewEntityType')).toEqual(false);
-      expect(state.get('newlyCreatedEntityTypeId')).toEqual('');
-      expect(state.hasIn(['actions', 'createEntityType', id])).toEqual(false);
+      const { id } = getEntityDataModel();
+      const stateAfterRequest = reducer(INITIAL_STATE, getEntityDataModel.request(id));
+      const stateAfterFinally = reducer(stateAfterRequest, getEntityDataModel.finally(id));
+      expect(stateAfterFinally.hashCode()).toEqual(stateAfterRequest.hashCode());
+      expect(stateAfterFinally.equals(stateAfterRequest)).toEqual(true);
     });
 
   });
 
-  describe(DELETE_ENTITY_TYPE, () => {
+  describe(LOCAL_ADD_PT_TO_ET, () => {
 
-    test(deleteEntityType.REQUEST, () => {
+    const initialState = INITIAL_STATE
+      .setIn(['entityTypes', 0], MOCK_ENTITY_TYPE.toImmutable())
+      .setIn(['entityTypesIndexMap', MOCK_ENTITY_TYPE.id], 0)
+      .setIn(['entityTypesIndexMap', MOCK_ENTITY_TYPE.type], 0);
 
-      const { id } = deleteEntityType();
-      const entityTypeId = MOCK_ENTITY_TYPE.id;
-      const state = reducer(INITIAL_STATE, deleteEntityType.request(id, entityTypeId));
+    const mockActionValue = {
+      entityTypeFQN: MOCK_ENTITY_TYPE.type,
+      entityTypeId: MOCK_ENTITY_TYPE.id,
+      propertyTypeId: randomUUID(),
+    };
 
-      expect(state.getIn(['actions', 'deleteEntityType', id]).toJS())
-        .toEqual({
-          id,
-          type: deleteEntityType.REQUEST,
-          value: entityTypeId
-        });
+    test(localAddPropertyTypeToEntityType.REQUEST, () => {
+
+      const { id } = localAddPropertyTypeToEntityType();
+      const requestAction = localAddPropertyTypeToEntityType.request(id, mockActionValue);
+      const state = reducer(INITIAL_STATE, requestAction);
+      expect(state.getIn([LOCAL_ADD_PT_TO_ET, id])).toEqual(requestAction);
     });
 
-    describe(deleteEntityType.SUCCESS, () => {
+    describe(localAddPropertyTypeToEntityType.SUCCESS, () => {
+
+      test('should add id', () => {
+
+        const { id } = localAddPropertyTypeToEntityType();
+        const requestAction = localAddPropertyTypeToEntityType.request(id, mockActionValue);
+        let state = reducer(initialState, requestAction);
+        state = reducer(state, localAddPropertyTypeToEntityType.success(id));
+        expect(state.getIn([LOCAL_ADD_PT_TO_ET, id])).toEqual(requestAction);
+
+        const entityType = MOCK_ENTITY_TYPE.toImmutable();
+        const expectedEntityTypes = List().push(
+          entityType.set('properties', entityType.get('properties').push(mockActionValue.propertyTypeId))
+        );
+        expect(state.get('entityTypes').hashCode()).toEqual(expectedEntityTypes.hashCode());
+        expect(state.get('entityTypes').equals(expectedEntityTypes)).toEqual(true);
+
+        const expectedEntityTypesIndexMap = Map().set(MOCK_ENTITY_TYPE.id, 0).set(MOCK_ENTITY_TYPE.type, 0);
+        expect(state.get('entityTypesIndexMap').hashCode()).toEqual(expectedEntityTypesIndexMap.hashCode());
+        expect(state.get('entityTypesIndexMap').equals(expectedEntityTypesIndexMap)).toEqual(true);
+        state.get('entityTypesIndexMap')
+          .filter((v, k) => FullyQualifiedName.isValid(k))
+          .keySeq()
+          .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+      });
+
+      test('should not mutate state if the id is already in the list', () => {
+
+        const { id } = localAddPropertyTypeToEntityType();
+        const requestAction = localAddPropertyTypeToEntityType.request(id, {
+          entityTypeFQN: MOCK_ENTITY_TYPE.type,
+          entityTypeId: MOCK_ENTITY_TYPE.id,
+          propertyTypeId: MOCK_ENTITY_TYPE.properties[0],
+        });
+        const stateAfterRequest = reducer(initialState, requestAction);
+        const stateAfterSuccess = reducer(stateAfterRequest, localAddPropertyTypeToEntityType.success(id));
+        expect(stateAfterSuccess.hashCode()).toEqual(stateAfterRequest.hashCode());
+        expect(stateAfterSuccess.equals(stateAfterRequest)).toEqual(true);
+      });
+
+      test('should not mutate state if the id is invalid', () => {
+
+        const { id } = localAddPropertyTypeToEntityType();
+        const requestAction = localAddPropertyTypeToEntityType.request(id, {
+          entityTypeFQN: MOCK_ENTITY_TYPE.type,
+          entityTypeId: MOCK_ENTITY_TYPE.id,
+          propertyTypeId: '',
+        });
+        const stateAfterRequest = reducer(initialState, requestAction);
+        const stateAfterSuccess = reducer(stateAfterRequest, localAddPropertyTypeToEntityType.success(id));
+        expect(stateAfterSuccess.hashCode()).toEqual(stateAfterRequest.hashCode());
+        expect(stateAfterSuccess.equals(stateAfterRequest)).toEqual(true);
+      });
+
+    });
+
+    test(localAddPropertyTypeToEntityType.FAILURE, () => {
+
+      const { id } = localAddPropertyTypeToEntityType();
+      const requestAction = localAddPropertyTypeToEntityType.request(id, mockActionValue);
+      let state = reducer(initialState, requestAction);
+      state = reducer(state, localAddPropertyTypeToEntityType.failure(id));
+      expect(state.getIn([LOCAL_ADD_PT_TO_ET, id])).toEqual(requestAction);
+
+      const expectedEntityTypes = List().push(MOCK_ENTITY_TYPE.toImmutable());
+      expect(state.get('entityTypes').hashCode()).toEqual(expectedEntityTypes.hashCode());
+      expect(state.get('entityTypes').equals(expectedEntityTypes)).toEqual(true);
+
+      const expectedEntityTypesIndexMap = Map().set(MOCK_ENTITY_TYPE.id, 0).set(MOCK_ENTITY_TYPE.type, 0);
+      expect(state.get('entityTypesIndexMap').hashCode()).toEqual(expectedEntityTypesIndexMap.hashCode());
+      expect(state.get('entityTypesIndexMap').equals(expectedEntityTypesIndexMap)).toEqual(true);
+      state.get('entityTypesIndexMap')
+        .filter((v, k) => FullyQualifiedName.isValid(k))
+        .keySeq()
+        .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+    });
+
+    test(localAddPropertyTypeToEntityType.FINALLY, () => {
+
+      const { id } = localAddPropertyTypeToEntityType();
+      let state = reducer(initialState, localAddPropertyTypeToEntityType.request(id, mockActionValue));
+      state = reducer(state, localAddPropertyTypeToEntityType.success(id));
+      state = reducer(state, localAddPropertyTypeToEntityType.finally(id));
+      expect(state.hasIn([LOCAL_ADD_PT_TO_ET, id])).toEqual(false);
+    });
+
+  });
+
+  describe(LOCAL_CREATE_ENTITY_TYPE, () => {
+
+    test(localCreateEntityType.REQUEST, () => {
+
+      const { id } = localCreateEntityType();
+      const requestAction = localCreateEntityType.request(id, MOCK_ENTITY_TYPE);
+      const state = reducer(INITIAL_STATE, requestAction);
+
+      expect(state.getIn([LOCAL_CREATE_ENTITY_TYPE, id])).toEqual(requestAction);
+      expect(state.get('newlyCreatedEntityTypeFQN')).toEqual(undefined);
+    });
+
+    test(localCreateEntityType.SUCCESS, () => {
+
+      const { id } = localCreateEntityType();
+      const requestAction = localCreateEntityType.request(id, MOCK_ENTITY_TYPE);
+      let state = reducer(INITIAL_STATE, requestAction);
+      state = reducer(state, localCreateEntityType.success(id, MOCK_ENTITY_TYPE.id));
+
+      expect(state.getIn([LOCAL_CREATE_ENTITY_TYPE, id])).toEqual(requestAction);
+      expect(state.get('newlyCreatedEntityTypeFQN')).toEqual(MOCK_ENTITY_TYPE.type);
+      expect(state.get('newlyCreatedEntityTypeFQN')).toBeInstanceOf(FullyQualifiedName);
+
+      const expectedEntityTypes = List().push(MOCK_ENTITY_TYPE.toImmutable());
+      expect(state.get('entityTypes').hashCode()).toEqual(expectedEntityTypes.hashCode());
+      expect(state.get('entityTypes').equals(expectedEntityTypes)).toEqual(true);
+
+      const expectedEntityTypesIndexMap = Map()
+        .set(MOCK_ENTITY_TYPE.id, 0)
+        .set(MOCK_ENTITY_TYPE.type, 0);
+      expect(state.get('entityTypesIndexMap').hashCode()).toEqual(expectedEntityTypesIndexMap.hashCode());
+      expect(state.get('entityTypesIndexMap').equals(expectedEntityTypesIndexMap)).toEqual(true);
+      state.get('entityTypesIndexMap')
+        .filter((v, k) => FullyQualifiedName.isValid(k))
+        .keySeq()
+        .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+    });
+
+    test(localCreateEntityType.FAILURE, () => {
+
+      const { id } = localCreateEntityType();
+      const requestAction = localCreateEntityType.request(id, MOCK_ENTITY_TYPE);
+      let state = reducer(INITIAL_STATE, requestAction);
+      state = reducer(state, localCreateEntityType.failure(id));
+
+      expect(state.getIn([LOCAL_CREATE_ENTITY_TYPE, id])).toEqual(requestAction);
+      expect(state.getIn([LOCAL_CREATE_ENTITY_TYPE, 'error'])).toEqual(true);
+      expect(state.get('newlyCreatedEntityTypeFQN')).toEqual(undefined);
+
+      const expectedEntityTypes = List();
+      expect(state.get('entityTypes').hashCode()).toEqual(expectedEntityTypes.hashCode());
+      expect(state.get('entityTypes').equals(expectedEntityTypes)).toEqual(true);
+
+      const expectedEntityTypesIndexMap = Map();
+      expect(state.get('entityTypesIndexMap').hashCode()).toEqual(expectedEntityTypesIndexMap.hashCode());
+      expect(state.get('entityTypesIndexMap').equals(expectedEntityTypesIndexMap)).toEqual(true);
+    });
+
+    test(localCreateEntityType.FINALLY, () => {
+
+      const { id } = localCreateEntityType();
+      let state = reducer(INITIAL_STATE, localCreateEntityType.request(id, MOCK_ENTITY_TYPE));
+      state = reducer(state, localCreateEntityType.success(id, MOCK_ENTITY_TYPE.id));
+      state = reducer(state, localCreateEntityType.finally(id));
+
+      expect(state.hasIn([LOCAL_CREATE_ENTITY_TYPE, id])).toEqual(false);
+      expect(state.get('newlyCreatedEntityTypeFQN')).toEqual(MOCK_ENTITY_TYPE.type);
+      expect(state.get('newlyCreatedEntityTypeFQN')).toBeInstanceOf(FullyQualifiedName);
+    });
+
+  });
+
+  describe(LOCAL_DELETE_ENTITY_TYPE, () => {
+
+    test(localDeleteEntityType.REQUEST, () => {
+
+      const { id } = localDeleteEntityType();
+      const requestAction = localDeleteEntityType.request(id, { entityTypeFQN: MOCK_ENTITY_TYPE.type });
+      const state = reducer(INITIAL_STATE, requestAction);
+      expect(state.getIn([LOCAL_DELETE_ENTITY_TYPE, id])).toEqual(requestAction);
+    });
+
+    describe(localDeleteEntityType.SUCCESS, () => {
 
       test('should delete EntityType', () => {
 
-        // yes, this is not a valid EntityType, but the reducer only cares about the id
-        const mockEntityType = { id: randomUUID() };
+        const initialState = INITIAL_STATE
+          .setIn(['entityTypes', 0], MOCK_ENTITY_TYPE.toImmutable())
+          .setIn(['entityTypesIndexMap', MOCK_ENTITY_TYPE.id], 0)
+          .setIn(['entityTypesIndexMap', MOCK_ENTITY_TYPE.type], 0);
 
-        let state = INITIAL_STATE
-          .set('entityTypes', Immutable.fromJS([mockEntityType]))
-          .set('entityTypesById', Immutable.fromJS({ [mockEntityType.id]: 0 }));
+        const { id } = localDeleteEntityType();
+        const requestAction = localDeleteEntityType.request(id, { entityTypeFQN: MOCK_ENTITY_TYPE.type });
+        let state = reducer(initialState, requestAction);
+        state = reducer(state, localDeleteEntityType.success(id));
 
-        const { id } = deleteEntityType();
-        state = reducer(state, deleteEntityType.request(id, mockEntityType.id));
-        state = reducer(state, deleteEntityType.success(id));
-
+        expect(state.getIn([LOCAL_DELETE_ENTITY_TYPE, id])).toEqual(requestAction);
         expect(state.get('entityTypes').toJS()).toEqual([]);
-        expect(state.get('entityTypesById').toJS()).toEqual({});
-        expect(state.getIn(['actions', 'deleteEntityType', id]).toJS())
-          .toEqual({
-            id,
-            type: deleteEntityType.REQUEST,
-            value: mockEntityType.id
-          });
+        expect(state.get('entityTypesIndexMap').toJS()).toEqual({});
       });
 
-      test('should correctly update "entityTypes" and "entityTypesById"', () => {
+      test('should correctly update "entityTypes" and "entityTypesIndexMap"', () => {
 
-        // yes, this is not a valid PropertyType, but the reducer only cares about the id
-        const mockEntityType1 = { id: randomUUID() };
-        const mockEntityType2 = { id: randomUUID() };
-        const mockEntityType3 = { id: randomUUID() };
+        const mockEntityType0 = new EntityTypeBuilder()
+          .setId(randomUUID())
+          .setKey([randomUUID()])
+          .setPropertyTypes([randomUUID(), randomUUID()])
+          .setSchemas([new FullyQualifiedName(genRandomString(), genRandomString())])
+          .setTitle(genRandomString())
+          .setType(new FullyQualifiedName(genRandomString(), genRandomString()))
+          .build();
 
-        let state = INITIAL_STATE
-          .set('entityTypes', Immutable.fromJS([
-            mockEntityType1,
-            mockEntityType2,
-            mockEntityType3
-          ]))
-          .set('entityTypesById', Immutable.fromJS({
-            [mockEntityType1.id]: 0,
-            [mockEntityType2.id]: 1,
-            [mockEntityType3.id]: 2
-          }));
+        const mockEntityType1 = new EntityTypeBuilder()
+          .setId(randomUUID())
+          .setKey([randomUUID()])
+          .setPropertyTypes([randomUUID(), randomUUID()])
+          .setSchemas([new FullyQualifiedName(genRandomString(), genRandomString())])
+          .setTitle(genRandomString())
+          .setType(new FullyQualifiedName(genRandomString(), genRandomString()))
+          .build();
 
-        const { id } = deleteEntityType();
-        state = reducer(state, deleteEntityType.request(id, mockEntityType2.id));
-        state = reducer(state, deleteEntityType.success(id));
+        const mockEntityType2 = new EntityTypeBuilder()
+          .setId(randomUUID())
+          .setKey([randomUUID()])
+          .setPropertyTypes([randomUUID(), randomUUID()])
+          .setSchemas([new FullyQualifiedName(genRandomString(), genRandomString())])
+          .setTitle(genRandomString())
+          .setType(new FullyQualifiedName(genRandomString(), genRandomString()))
+          .build();
 
-        expect(state.get('entityTypes').toJS()).toEqual([
-          mockEntityType1,
-          mockEntityType3
-        ]);
-        expect(state.get('entityTypesById').toJS()).toEqual({
-          [mockEntityType1.id]: 0,
-          [mockEntityType3.id]: 1
-        });
+        const initialState = INITIAL_STATE
+          .setIn(['entityTypes', 0], mockEntityType0.toImmutable())
+          .setIn(['entityTypes', 1], mockEntityType1.toImmutable())
+          .setIn(['entityTypes', 2], mockEntityType2.toImmutable())
+          .setIn(['entityTypesIndexMap', mockEntityType0.id], 0)
+          .setIn(['entityTypesIndexMap', mockEntityType0.type], 0)
+          .setIn(['entityTypesIndexMap', mockEntityType1.id], 1)
+          .setIn(['entityTypesIndexMap', mockEntityType1.type], 1)
+          .setIn(['entityTypesIndexMap', mockEntityType2.id], 2)
+          .setIn(['entityTypesIndexMap', mockEntityType2.type], 2);
+
+        const { id } = localDeleteEntityType();
+        const requestAction = localDeleteEntityType.request(id, { entityTypeFQN: mockEntityType1.type });
+        let state = reducer(initialState, requestAction);
+        state = reducer(state, localDeleteEntityType.success(id));
+        expect(state.getIn([LOCAL_DELETE_ENTITY_TYPE, id])).toEqual(requestAction);
+
+        const expectedEntityTypes = List()
+          .push(mockEntityType0.toImmutable())
+          .push(mockEntityType2.toImmutable());
+        expect(state.get('entityTypes').hashCode()).toEqual(expectedEntityTypes.hashCode());
+        expect(state.get('entityTypes').equals(expectedEntityTypes)).toEqual(true);
+
+        const expectedEntityTypesIndexMap = Map()
+          .set(mockEntityType0.id, 0)
+          .set(mockEntityType0.type, 0)
+          .set(mockEntityType2.id, 1)
+          .set(mockEntityType2.type, 1);
+        expect(state.get('entityTypesIndexMap').hashCode()).toEqual(expectedEntityTypesIndexMap.hashCode());
+        expect(state.get('entityTypesIndexMap').equals(expectedEntityTypesIndexMap)).toEqual(true);
+        state.get('entityTypesIndexMap')
+          .filter((v, k) => FullyQualifiedName.isValid(k))
+          .keySeq()
+          .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
       });
 
       test('should not mutate state if attempting to delete a non-existent EntityType', () => {
 
-        // yes, this is not a valid PropertyType, but the reducer only cares about the id
-        const mockEntityType = { id: randomUUID() };
-
         const initialState = INITIAL_STATE
-          .set('entityTypes', Immutable.fromJS([mockEntityType]))
-          .set('entityTypesById', Immutable.fromJS({ [mockEntityType.id]: 0 }));
+          .setIn(['entityTypes', 0], MOCK_ENTITY_TYPE.toImmutable())
+          .setIn(['entityTypesIndexMap', MOCK_ENTITY_TYPE.id], 0)
+          .setIn(['entityTypesIndexMap', MOCK_ENTITY_TYPE.type], 0);
 
-        const { id } = deleteEntityType();
-        const stateAfterRequest = reducer(initialState, deleteEntityType.request(id, randomUUID()));
-        const stateAfterSuccess = reducer(stateAfterRequest, deleteEntityType.success(id));
-        expect(stateAfterSuccess.toJS()).toEqual(stateAfterRequest.toJS());
+        const { id } = localDeleteEntityType();
+        const entityTypeFQN = new FullyQualifiedName(genRandomString(), genRandomString());
+        const stateAfterRequest = reducer(initialState, localDeleteEntityType.request(id, { entityTypeFQN }));
+        const stateAfterSuccess = reducer(stateAfterRequest, localDeleteEntityType.success(id));
+        expect(stateAfterSuccess.hashCode()).toEqual(stateAfterRequest.hashCode());
+        expect(stateAfterSuccess.equals(stateAfterRequest)).toEqual(true);
       });
+
     });
 
-    test(deleteEntityType.FAILURE, () => {
+    test(localDeleteEntityType.FAILURE, () => {
 
-      const { id } = deleteEntityType();
-      const entityTypeId = MOCK_ENTITY_TYPE.id;
+      const initialState = INITIAL_STATE
+        .setIn(['entityTypes', 0], MOCK_ENTITY_TYPE.toImmutable())
+        .setIn(['entityTypesIndexMap', MOCK_ENTITY_TYPE.id], 0)
+        .setIn(['entityTypesIndexMap', MOCK_ENTITY_TYPE.type], 0);
 
-      let state = reducer(INITIAL_STATE, deleteEntityType.request(id, entityTypeId));
-      state = reducer(state, deleteEntityType.failure(id));
+      const { id } = localDeleteEntityType();
+      const requestAction = localDeleteEntityType.request(id, { entityTypeFQN: MOCK_ENTITY_TYPE.type });
+      let state = reducer(initialState, requestAction);
+      state = reducer(state, localDeleteEntityType.failure(id));
 
-      expect(state.getIn(['actions', 'deleteEntityType', id]).toJS())
-        .toEqual({
-          id,
-          type: deleteEntityType.REQUEST,
-          value: entityTypeId
-        });
+      expect(state.getIn([LOCAL_DELETE_ENTITY_TYPE, id])).toEqual(requestAction);
+      expect(state.getIn([LOCAL_DELETE_ENTITY_TYPE, 'error'])).toEqual(true);
+      expect(state.get('newlyCreatedEntityTypeFQN')).toEqual(undefined);
+
+      const expectedEntityTypes = initialState.get('entityTypes');
+      expect(state.get('entityTypes').hashCode()).toEqual(expectedEntityTypes.hashCode());
+      expect(state.get('entityTypes').equals(expectedEntityTypes)).toEqual(true);
+
+      const expectedEntityTypesIndexMap = initialState.get('entityTypesIndexMap');
+      expect(state.get('entityTypesIndexMap').hashCode()).toEqual(expectedEntityTypesIndexMap.hashCode());
+      expect(state.get('entityTypesIndexMap').equals(expectedEntityTypesIndexMap)).toEqual(true);
     });
 
-    test(deleteEntityType.FINALLY, () => {
+    test(localDeleteEntityType.FINALLY, () => {
 
-      const { id } = deleteEntityType();
-      const entityTypeId = MOCK_ENTITY_TYPE.id;
-
-      let state = reducer(INITIAL_STATE, deleteEntityType.request(id, entityTypeId));
-      expect(state.getIn(['actions', 'deleteEntityType', id]).toJS())
-        .toEqual({
-          id,
-          type: deleteEntityType.REQUEST,
-          value: entityTypeId
-        });
-
-      state = reducer(state, deleteEntityType.finally(id));
-      expect(state.hasIn(['actions', 'deleteEntityType', id])).toEqual(false);
-    });
-
-  });
-
-  describe(GET_ALL_ENTITY_TYPES, () => {
-
-    test(getAllEntityTypes.REQUEST, () => {
-      const { id } = getAllEntityTypes();
-      const state = reducer(INITIAL_STATE, getAllEntityTypes.request(id));
-      expect(state.get('isFetchingAllEntityTypes')).toEqual(true);
-    });
-
-    // TODO: test SUCCESS with variable size result
-    test(getAllEntityTypes.SUCCESS, () => {
-
-      const { id } = getAllEntityTypes();
-      const response = [MOCK_ENTITY_TYPE_JSON];
-      let state = reducer(INITIAL_STATE, getAllEntityTypes.request(id));
-      state = reducer(state, getAllEntityTypes.success(id, response));
-
-      expect(state.get('isFetchingAllEntityTypes')).toEqual(true);
-
-      expect(state.get('entityTypes').toJS()).toEqual(
-        [MOCK_ENTITY_TYPE_JSON]
-      );
-
-      expect(state.get('entityTypesById').toJS()).toEqual(
-        { [MOCK_ENTITY_TYPE_JSON.id]: 0 }
-      );
-    });
-
-    test(getAllEntityTypes.FAILURE, () => {
-
-      const { id } = getAllEntityTypes();
-      let state = reducer(INITIAL_STATE, getAllEntityTypes.request(id));
-      state = reducer(state, getAllEntityTypes.failure(id));
-
-      expect(state.get('entityTypes').toJS()).toEqual([]);
-      expect(state.get('entityTypesById').toJS()).toEqual({});
-      expect(state.get('isFetchingAllEntityTypes')).toEqual(true);
-    });
-
-    test(getAllEntityTypes.FINALLY, () => {
-
-      const { id } = getAllEntityTypes();
-      let state = reducer(INITIAL_STATE, getAllEntityTypes.request(id));
-      expect(state.get('isFetchingAllEntityTypes')).toEqual(true);
-
-      state = reducer(state, getAllEntityTypes.finally(id));
-      expect(state.get('isFetchingAllEntityTypes')).toEqual(false);
+      const { id } = localDeleteEntityType();
+      const requestAction = localDeleteEntityType.request(id, { entityTypeFQN: MOCK_ENTITY_TYPE.type });
+      let state = reducer(INITIAL_STATE, requestAction);
+      state = reducer(state, localDeleteEntityType.success(id));
+      state = reducer(state, localDeleteEntityType.finally(id));
+      expect(state.hasIn([LOCAL_DELETE_ENTITY_TYPE, id])).toEqual(false);
     });
 
   });
 
-  describe(UPDATE_ENTITY_TYPE_METADATA, () => {
+  describe(LOCAL_REMOVE_PT_FROM_ET, () => {
 
-    // TODO: beforeEach()?
-    // TODO: need tests for other metadata fields
+    const initialState = INITIAL_STATE
+      .setIn(['entityTypes', 0], MOCK_ENTITY_TYPE.toImmutable())
+      .setIn(['entityTypesIndexMap', MOCK_ENTITY_TYPE.id], 0)
+      .setIn(['entityTypesIndexMap', MOCK_ENTITY_TYPE.type], 0);
+
+    const mockActionValue = {
+      entityTypeFQN: MOCK_ENTITY_TYPE.type,
+      entityTypeId: MOCK_ENTITY_TYPE.id,
+      propertyTypeId: MOCK_ENTITY_TYPE.properties[0],
+    };
+
+    test(localRemovePropertyTypeFromEntityType.REQUEST, () => {
+
+      const { id } = localRemovePropertyTypeFromEntityType();
+      const requestAction = localRemovePropertyTypeFromEntityType.request(id, mockActionValue);
+      const state = reducer(initialState, requestAction);
+      expect(state.getIn([LOCAL_REMOVE_PT_FROM_ET, id])).toEqual(requestAction);
+    });
+
+    describe(localRemovePropertyTypeFromEntityType.SUCCESS, () => {
+
+      test('should remove id', () => {
+
+        const { id } = localRemovePropertyTypeFromEntityType();
+        const requestAction = localRemovePropertyTypeFromEntityType.request(id, mockActionValue);
+        let state = reducer(initialState, requestAction);
+        state = reducer(state, localRemovePropertyTypeFromEntityType.success(id));
+        expect(state.getIn([LOCAL_REMOVE_PT_FROM_ET, id])).toEqual(requestAction);
+
+        const entityType = MOCK_ENTITY_TYPE.toImmutable();
+        const expectedEntityTypes = List().push(
+          entityType.set('properties', entityType.get('properties').delete(0))
+        );
+        expect(state.get('entityTypes').hashCode()).toEqual(expectedEntityTypes.hashCode());
+        expect(state.get('entityTypes').equals(expectedEntityTypes)).toEqual(true);
+
+        const expectedEntityTypesIndexMap = Map().set(MOCK_ENTITY_TYPE.id, 0).set(MOCK_ENTITY_TYPE.type, 0);
+        expect(state.get('entityTypesIndexMap').hashCode()).toEqual(expectedEntityTypesIndexMap.hashCode());
+        expect(state.get('entityTypesIndexMap').equals(expectedEntityTypesIndexMap)).toEqual(true);
+        state.get('entityTypesIndexMap')
+          .filter((v, k) => FullyQualifiedName.isValid(k))
+          .keySeq()
+          .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+      });
+
+      test('should not mutate state if the id is not in the list', () => {
+
+        const { id } = localRemovePropertyTypeFromEntityType();
+        const requestAction = localRemovePropertyTypeFromEntityType.request(id, {
+          entityTypeFQN: MOCK_ENTITY_TYPE.type,
+          entityTypeId: MOCK_ENTITY_TYPE.id,
+          propertyTypeId: randomUUID(),
+        });
+        const stateAfterRequest = reducer(initialState, requestAction);
+        const stateAfterSuccess = reducer(stateAfterRequest, localRemovePropertyTypeFromEntityType.success(id));
+        expect(stateAfterSuccess.hashCode()).toEqual(stateAfterRequest.hashCode());
+        expect(stateAfterSuccess.equals(stateAfterRequest)).toEqual(true);
+      });
+
+      test('should not mutate state if the id is invalid', () => {
+
+        const { id } = localRemovePropertyTypeFromEntityType();
+        const requestAction = localRemovePropertyTypeFromEntityType.request(id, {
+          entityTypeFQN: MOCK_ENTITY_TYPE.type,
+          entityTypeId: MOCK_ENTITY_TYPE.id,
+          propertyTypeId: '',
+        });
+        const stateAfterRequest = reducer(initialState, requestAction);
+        const stateAfterSuccess = reducer(stateAfterRequest, localRemovePropertyTypeFromEntityType.success(id));
+        expect(stateAfterSuccess.hashCode()).toEqual(stateAfterRequest.hashCode());
+        expect(stateAfterSuccess.equals(stateAfterRequest)).toEqual(true);
+      });
+
+    });
+
+    test(localRemovePropertyTypeFromEntityType.FAILURE, () => {
+
+      const { id } = localRemovePropertyTypeFromEntityType();
+      const requestAction = localRemovePropertyTypeFromEntityType.request(id, mockActionValue);
+      let state = reducer(initialState, requestAction);
+      state = reducer(state, localRemovePropertyTypeFromEntityType.failure(id));
+      expect(state.getIn([LOCAL_REMOVE_PT_FROM_ET, id])).toEqual(requestAction);
+
+      const expectedEntityTypes = List().push(MOCK_ENTITY_TYPE.toImmutable());
+      expect(state.get('entityTypes').hashCode()).toEqual(expectedEntityTypes.hashCode());
+      expect(state.get('entityTypes').equals(expectedEntityTypes)).toEqual(true);
+
+      const expectedEntityTypesIndexMap = Map().set(MOCK_ENTITY_TYPE.id, 0).set(MOCK_ENTITY_TYPE.type, 0);
+      expect(state.get('entityTypesIndexMap').hashCode()).toEqual(expectedEntityTypesIndexMap.hashCode());
+      expect(state.get('entityTypesIndexMap').equals(expectedEntityTypesIndexMap)).toEqual(true);
+      state.get('entityTypesIndexMap')
+        .filter((v, k) => FullyQualifiedName.isValid(k))
+        .keySeq()
+        .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+    });
+
+    test(localRemovePropertyTypeFromEntityType.FINALLY, () => {
+
+      const { id } = localRemovePropertyTypeFromEntityType();
+      let state = reducer(initialState, localRemovePropertyTypeFromEntityType.request(id, mockActionValue));
+      state = reducer(state, localRemovePropertyTypeFromEntityType.success(id));
+      state = reducer(state, localRemovePropertyTypeFromEntityType.finally(id));
+      expect(state.hasIn([LOCAL_REMOVE_PT_FROM_ET, id])).toEqual(false);
+    });
+
+  });
+
+  describe(LOCAL_UPDATE_ENTITY_TYPE_META, () => {
+
+    const initialState = INITIAL_STATE
+      .setIn(['entityTypes', 0], MOCK_ENTITY_TYPE.toImmutable())
+      .setIn(['entityTypesIndexMap', MOCK_ENTITY_TYPE.id], 0)
+      .setIn(['entityTypesIndexMap', MOCK_ENTITY_TYPE.type], 0);
+
+    describe('description', () => {
+
+      const mockActionValue = {
+        entityTypeId: MOCK_ENTITY_TYPE.id,
+        entityTypeFQN: MOCK_ENTITY_TYPE.type,
+        metadata: { description: genRandomString() },
+      };
+
+      test(localUpdateEntityTypeMeta.REQUEST, () => {
+
+        const { id } = localUpdateEntityTypeMeta();
+        const requestAction = localUpdateEntityTypeMeta.request(id, mockActionValue);
+        const state = reducer(initialState, requestAction);
+        expect(state.getIn([LOCAL_UPDATE_ENTITY_TYPE_META, id])).toEqual(requestAction);
+      });
+
+      test(localUpdateEntityTypeMeta.SUCCESS, () => {
+
+        const { id } = localUpdateEntityTypeMeta();
+        const requestAction = localUpdateEntityTypeMeta.request(id, mockActionValue);
+        let state = reducer(initialState, requestAction);
+        state = reducer(state, localUpdateEntityTypeMeta.success(id));
+        expect(state.getIn([LOCAL_UPDATE_ENTITY_TYPE_META, id])).toEqual(requestAction);
+
+        const expectedEntityTypes = List().push(
+          MOCK_ENTITY_TYPE.toImmutable().set('description', mockActionValue.metadata.description)
+        );
+        expect(state.get('entityTypes').hashCode()).toEqual(expectedEntityTypes.hashCode());
+        expect(state.get('entityTypes').equals(expectedEntityTypes)).toEqual(true);
+
+        const expectedEntityTypesIndexMap = Map().set(MOCK_ENTITY_TYPE.id, 0).set(MOCK_ENTITY_TYPE.type, 0);
+        expect(state.get('entityTypesIndexMap').hashCode()).toEqual(expectedEntityTypesIndexMap.hashCode());
+        expect(state.get('entityTypesIndexMap').equals(expectedEntityTypesIndexMap)).toEqual(true);
+        state.get('entityTypesIndexMap')
+          .filter((v, k) => FullyQualifiedName.isValid(k))
+          .keySeq()
+          .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+      });
+
+      test(localUpdateEntityTypeMeta.FAILURE, () => {
+
+        const { id } = localUpdateEntityTypeMeta();
+        const requestAction = localUpdateEntityTypeMeta.request(id, mockActionValue);
+        let state = reducer(initialState, requestAction);
+        state = reducer(state, localUpdateEntityTypeMeta.failure(id));
+        expect(state.getIn([LOCAL_UPDATE_ENTITY_TYPE_META, id])).toEqual(requestAction);
+
+        const expectedEntityTypes = List().push(MOCK_ENTITY_TYPE.toImmutable());
+        expect(state.get('entityTypes').hashCode()).toEqual(expectedEntityTypes.hashCode());
+        expect(state.get('entityTypes').equals(expectedEntityTypes)).toEqual(true);
+
+        const expectedEntityTypesIndexMap = Map().set(MOCK_ENTITY_TYPE.id, 0).set(MOCK_ENTITY_TYPE.type, 0);
+        expect(state.get('entityTypesIndexMap').hashCode()).toEqual(expectedEntityTypesIndexMap.hashCode());
+        expect(state.get('entityTypesIndexMap').equals(expectedEntityTypesIndexMap)).toEqual(true);
+        state.get('entityTypesIndexMap')
+          .filter((v, k) => FullyQualifiedName.isValid(k))
+          .keySeq()
+          .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+      });
+
+      test(localUpdateEntityTypeMeta.FINALLY, () => {
+
+        const { id } = localUpdateEntityTypeMeta();
+        let state = reducer(initialState, localUpdateEntityTypeMeta.request(id, mockActionValue));
+        state = reducer(state, localUpdateEntityTypeMeta.success(id));
+        state = reducer(state, localUpdateEntityTypeMeta.finally(id));
+        expect(state.hasIn([LOCAL_UPDATE_ENTITY_TYPE_META, id])).toEqual(false);
+      });
+
+    });
 
     describe('title', () => {
 
-      const entityTypeId = MOCK_ENTITY_TYPE.id;
       const mockActionValue = {
-        entityTypeId,
-        metadata: {
-          title: randomId()
-        }
+        entityTypeId: MOCK_ENTITY_TYPE.id,
+        entityTypeFQN: MOCK_ENTITY_TYPE.type,
+        metadata: { title: genRandomString() },
       };
 
-      test(updateEntityTypeMetaData.REQUEST, () => {
+      test(localUpdateEntityTypeMeta.REQUEST, () => {
 
-        const { id } = updateEntityTypeMetaData();
-        const seqAction = updateEntityTypeMetaData.request(id, mockActionValue);
-        const state = reducer(INITIAL_STATE, seqAction);
-
-        expect(state.getIn(['actions', 'updateEntityTypeMetaData', id]).toJS())
-          .toEqual({
-            id,
-            type: updateEntityTypeMetaData.REQUEST,
-            value: mockActionValue
-          });
+        const { id } = localUpdateEntityTypeMeta();
+        const requestAction = localUpdateEntityTypeMeta.request(id, mockActionValue);
+        const state = reducer(initialState, requestAction);
+        expect(state.getIn([LOCAL_UPDATE_ENTITY_TYPE_META, id])).toEqual(requestAction);
       });
 
-      test(updateEntityTypeMetaData.SUCCESS, () => {
+      test(localUpdateEntityTypeMeta.SUCCESS, () => {
 
-        let state = INITIAL_STATE
-          .set('entityTypes', Immutable.fromJS([MOCK_ENTITY_TYPE.asImmutable()]))
-          .set('entityTypesById', Immutable.fromJS({ [entityTypeId]: 0 }));
+        const { id } = localUpdateEntityTypeMeta();
+        const requestAction = localUpdateEntityTypeMeta.request(id, mockActionValue);
+        let state = reducer(initialState, requestAction);
+        state = reducer(state, localUpdateEntityTypeMeta.success(id));
+        expect(state.getIn([LOCAL_UPDATE_ENTITY_TYPE_META, id])).toEqual(requestAction);
 
-        const { id } = updateEntityTypeMetaData();
-        state = reducer(state, updateEntityTypeMetaData.request(id, mockActionValue));
-        state = reducer(state, updateEntityTypeMetaData.success(id));
-
-        const expectedEntityType = MOCK_ENTITY_TYPE
-          .asImmutable()
-          .set('title', mockActionValue.metadata.title);
-
-        expect(state.get('entityTypes').toJS()).toEqual(
-          [expectedEntityType.toJS()]
+        const expectedEntityTypes = List().push(
+          MOCK_ENTITY_TYPE.toImmutable().set('title', mockActionValue.metadata.title)
         );
+        expect(state.get('entityTypes').hashCode()).toEqual(expectedEntityTypes.hashCode());
+        expect(state.get('entityTypes').equals(expectedEntityTypes)).toEqual(true);
 
-        expect(state.get('entityTypesById').toJS()).toEqual(
-          { [MOCK_ENTITY_TYPE.id]: 0 }
+        const expectedEntityTypesIndexMap = Map().set(MOCK_ENTITY_TYPE.id, 0).set(MOCK_ENTITY_TYPE.type, 0);
+        expect(state.get('entityTypesIndexMap').hashCode()).toEqual(expectedEntityTypesIndexMap.hashCode());
+        expect(state.get('entityTypesIndexMap').equals(expectedEntityTypesIndexMap)).toEqual(true);
+        state.get('entityTypesIndexMap')
+          .filter((v, k) => FullyQualifiedName.isValid(k))
+          .keySeq()
+          .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+      });
+
+      test(localUpdateEntityTypeMeta.FAILURE, () => {
+
+        const { id } = localUpdateEntityTypeMeta();
+        const requestAction = localUpdateEntityTypeMeta.request(id, mockActionValue);
+        let state = reducer(initialState, requestAction);
+        state = reducer(state, localUpdateEntityTypeMeta.failure(id));
+        expect(state.getIn([LOCAL_UPDATE_ENTITY_TYPE_META, id])).toEqual(requestAction);
+
+        const expectedEntityTypes = List().push(MOCK_ENTITY_TYPE.toImmutable());
+        expect(state.get('entityTypes').hashCode()).toEqual(expectedEntityTypes.hashCode());
+        expect(state.get('entityTypes').equals(expectedEntityTypes)).toEqual(true);
+
+        const expectedEntityTypesIndexMap = Map().set(MOCK_ENTITY_TYPE.id, 0).set(MOCK_ENTITY_TYPE.type, 0);
+        expect(state.get('entityTypesIndexMap').hashCode()).toEqual(expectedEntityTypesIndexMap.hashCode());
+        expect(state.get('entityTypesIndexMap').equals(expectedEntityTypesIndexMap)).toEqual(true);
+        state.get('entityTypesIndexMap')
+          .filter((v, k) => FullyQualifiedName.isValid(k))
+          .keySeq()
+          .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+      });
+
+      test(localUpdateEntityTypeMeta.FINALLY, () => {
+
+        const { id } = localUpdateEntityTypeMeta();
+        let state = reducer(initialState, localUpdateEntityTypeMeta.request(id, mockActionValue));
+        state = reducer(state, localUpdateEntityTypeMeta.success(id));
+        state = reducer(state, localUpdateEntityTypeMeta.finally(id));
+        expect(state.hasIn([LOCAL_UPDATE_ENTITY_TYPE_META, id])).toEqual(false);
+      });
+
+    });
+
+    describe('type', () => {
+
+      const mockActionValue = {
+        entityTypeId: MOCK_ENTITY_TYPE.id,
+        entityTypeFQN: MOCK_ENTITY_TYPE.type,
+        metadata: { type: new FullyQualifiedName(genRandomString(), genRandomString()) },
+      };
+
+      test(localUpdateEntityTypeMeta.REQUEST, () => {
+
+        const { id } = localUpdateEntityTypeMeta();
+        const requestAction = localUpdateEntityTypeMeta.request(id, mockActionValue);
+        const state = reducer(initialState, requestAction);
+        expect(state.getIn([LOCAL_UPDATE_ENTITY_TYPE_META, id])).toEqual(requestAction);
+      });
+
+      test(localUpdateEntityTypeMeta.SUCCESS, () => {
+
+        const { id } = localUpdateEntityTypeMeta();
+        const requestAction = localUpdateEntityTypeMeta.request(id, mockActionValue);
+        let state = reducer(initialState, requestAction);
+        state = reducer(state, localUpdateEntityTypeMeta.success(id));
+        expect(state.getIn([LOCAL_UPDATE_ENTITY_TYPE_META, id])).toEqual(requestAction);
+
+        const expectedEntityTypes = List().push(
+          MOCK_ENTITY_TYPE.toImmutable().set('type', fromJS(mockActionValue.metadata.type.toObject()))
         );
+        expect(state.get('entityTypes').hashCode()).toEqual(expectedEntityTypes.hashCode());
+        expect(state.get('entityTypes').equals(expectedEntityTypes)).toEqual(true);
 
-        expect(state.getIn(['actions', 'updateEntityTypeMetaData', id]).toJS())
-          .toEqual({
-            id,
-            type: updateEntityTypeMetaData.REQUEST,
-            value: mockActionValue
-          });
+        const expectedEntityTypesIndexMap = Map().set(MOCK_ENTITY_TYPE.id, 0).set(mockActionValue.metadata.type, 0);
+        expect(state.get('entityTypesIndexMap').hashCode()).toEqual(expectedEntityTypesIndexMap.hashCode());
+        expect(state.get('entityTypesIndexMap').equals(expectedEntityTypesIndexMap)).toEqual(true);
+        state.get('entityTypesIndexMap')
+          .filter((v, k) => FullyQualifiedName.isValid(k))
+          .keySeq()
+          .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
       });
 
-      test(updateEntityTypeMetaData.FAILURE, () => {
+      test(localUpdateEntityTypeMeta.FAILURE, () => {
 
-        const { id } = updateEntityTypeMetaData();
-        let state = reducer(INITIAL_STATE, updateEntityTypeMetaData.request(id, mockActionValue));
-        state = reducer(state, updateEntityTypeMetaData.failure(id));
-        expect(state.getIn(['actions', 'updateEntityTypeMetaData', id]).toJS())
-          .toEqual({
-            id,
-            type: updateEntityTypeMetaData.REQUEST,
-            value: mockActionValue
-          });
+        const { id } = localUpdateEntityTypeMeta();
+        const requestAction = localUpdateEntityTypeMeta.request(id, mockActionValue);
+        let state = reducer(initialState, requestAction);
+        state = reducer(state, localUpdateEntityTypeMeta.failure(id));
+        expect(state.getIn([LOCAL_UPDATE_ENTITY_TYPE_META, id])).toEqual(requestAction);
+
+        const expectedEntityTypes = List().push(MOCK_ENTITY_TYPE.toImmutable());
+        expect(state.get('entityTypes').hashCode()).toEqual(expectedEntityTypes.hashCode());
+        expect(state.get('entityTypes').equals(expectedEntityTypes)).toEqual(true);
+
+        const expectedEntityTypesIndexMap = Map().set(MOCK_ENTITY_TYPE.id, 0).set(MOCK_ENTITY_TYPE.type, 0);
+        expect(state.get('entityTypesIndexMap').hashCode()).toEqual(expectedEntityTypesIndexMap.hashCode());
+        expect(state.get('entityTypesIndexMap').equals(expectedEntityTypesIndexMap)).toEqual(true);
+        state.get('entityTypesIndexMap')
+          .filter((v, k) => FullyQualifiedName.isValid(k))
+          .keySeq()
+          .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
       });
 
-      test(updateEntityTypeMetaData.FINALLY, () => {
+      test(localUpdateEntityTypeMeta.FINALLY, () => {
 
-        const { id } = updateEntityTypeMetaData();
-        let state = reducer(INITIAL_STATE, updateEntityTypeMetaData.request(id, mockActionValue));
-        expect(state.getIn(['actions', 'updateEntityTypeMetaData', id]).toJS())
-          .toEqual({
-            id,
-            type: updateEntityTypeMetaData.REQUEST,
-            value: mockActionValue
-          });
+        const { id } = localUpdateEntityTypeMeta();
+        let state = reducer(initialState, localUpdateEntityTypeMeta.request(id, mockActionValue));
+        state = reducer(state, localUpdateEntityTypeMeta.success(id));
+        state = reducer(state, localUpdateEntityTypeMeta.finally(id));
+        expect(state.hasIn([LOCAL_UPDATE_ENTITY_TYPE_META, id])).toEqual(false);
+      });
 
-        state = reducer(state, updateEntityTypeMetaData.finally(id));
-        expect(state.hasIn(['actions', 'updateAssociationTypeMetaData', id])).toEqual(false);
+    });
+
+  });
+
+  describe(LOCAL_UPDATE_SCHEMA, () => {
+
+    const initialState = INITIAL_STATE
+      .setIn(['entityTypes', 0], MOCK_ENTITY_TYPE.toImmutable())
+      .setIn(['entityTypesIndexMap', MOCK_ENTITY_TYPE.id], 0)
+      .setIn(['entityTypesIndexMap', MOCK_ENTITY_TYPE.type], 0);
+
+    describe(ActionTypes.ADD, () => {
+
+      const mockActionValue = {
+        actionType: ActionTypes.ADD,
+        entityTypeIds: [MOCK_ENTITY_TYPE.id],
+        schemaFQN: genRandomFQN(),
+      };
+
+      test(localUpdateSchema.REQUEST, () => {
+
+        const { id } = localUpdateSchema();
+        const requestAction = localUpdateSchema.request(id, mockActionValue);
+        const state = reducer(initialState, requestAction);
+        expect(state.getIn([LOCAL_UPDATE_SCHEMA, id])).toEqual(requestAction);
+      });
+
+      test(localUpdateSchema.SUCCESS, () => {
+
+        const { id } = localUpdateSchema();
+        const requestAction = localUpdateSchema.request(id, mockActionValue);
+        let state = reducer(initialState, requestAction);
+        state = reducer(state, localUpdateSchema.success(id));
+        expect(state.getIn([LOCAL_UPDATE_SCHEMA, id])).toEqual(requestAction);
+
+        const entityType = MOCK_ENTITY_TYPE.toImmutable();
+        const expectedEntityTypes = List().push(
+          entityType.set(
+            'schemas',
+            entityType.get('schemas').push(fromJS(mockActionValue.schemaFQN.toObject()))
+          )
+        );
+        expect(state.get('entityTypes').hashCode()).toEqual(expectedEntityTypes.hashCode());
+        expect(state.get('entityTypes').equals(expectedEntityTypes)).toEqual(true);
+
+        const expectedEntityTypesIndexMap = Map()
+          .set(MOCK_ENTITY_TYPE.id, 0)
+          .set(MOCK_ENTITY_TYPE.type, 0);
+        expect(state.get('entityTypesIndexMap').hashCode()).toEqual(expectedEntityTypesIndexMap.hashCode());
+        expect(state.get('entityTypesIndexMap').equals(expectedEntityTypesIndexMap)).toEqual(true);
+        state.get('entityTypesIndexMap')
+          .filter((v, k) => FullyQualifiedName.isValid(k))
+          .keySeq()
+          .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+      });
+
+      test(localUpdateSchema.FAILURE, () => {
+
+        const { id } = localUpdateSchema();
+        const requestAction = localUpdateSchema.request(id, mockActionValue);
+        let state = reducer(initialState, requestAction);
+        state = reducer(state, localUpdateSchema.failure(id));
+        expect(state.getIn([LOCAL_UPDATE_SCHEMA, id])).toEqual(requestAction);
+
+        const expectedEntityTypes = List().push(MOCK_ENTITY_TYPE.toImmutable());
+        expect(state.get('entityTypes').hashCode()).toEqual(expectedEntityTypes.hashCode());
+        expect(state.get('entityTypes').equals(expectedEntityTypes)).toEqual(true);
+
+        const expectedEntityTypesIndexMap = Map()
+          .set(MOCK_ENTITY_TYPE.id, 0)
+          .set(MOCK_ENTITY_TYPE.type, 0);
+        expect(state.get('entityTypesIndexMap').hashCode()).toEqual(expectedEntityTypesIndexMap.hashCode());
+        expect(state.get('entityTypesIndexMap').equals(expectedEntityTypesIndexMap)).toEqual(true);
+        state.get('entityTypesIndexMap')
+          .filter((v, k) => FullyQualifiedName.isValid(k))
+          .keySeq()
+          .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+      });
+
+      test(localUpdateSchema.FINALLY, () => {
+
+        const { id } = localUpdateSchema();
+        let state = reducer(initialState, localUpdateSchema.request(id, mockActionValue));
+        state = reducer(state, localUpdateSchema.success(id));
+        state = reducer(state, localUpdateSchema.finally(id));
+        expect(state.hasIn([LOCAL_UPDATE_SCHEMA, id])).toEqual(false);
+      });
+
+    });
+
+    describe(ActionTypes.REMOVE, () => {
+
+      const mockActionValue = {
+        actionType: ActionTypes.REMOVE,
+        entityTypeIds: [MOCK_ENTITY_TYPE.id],
+        schemaFQN: MOCK_ENTITY_TYPE.schemas[0],
+      };
+
+      test(localUpdateSchema.REQUEST, () => {
+
+        const { id } = localUpdateSchema();
+        const requestAction = localUpdateSchema.request(id, mockActionValue);
+        const state = reducer(initialState, requestAction);
+        expect(state.getIn([LOCAL_UPDATE_SCHEMA, id])).toEqual(requestAction);
+      });
+
+      test(localUpdateSchema.SUCCESS, () => {
+
+        const { id } = localUpdateSchema();
+        const requestAction = localUpdateSchema.request(id, mockActionValue);
+        let state = reducer(initialState, requestAction);
+        state = reducer(state, localUpdateSchema.success(id));
+        expect(state.getIn([LOCAL_UPDATE_SCHEMA, id])).toEqual(requestAction);
+
+        const entityType = MOCK_ENTITY_TYPE.toImmutable();
+        const expectedEntityTypes = List().push(
+          entityType.set('schemas', entityType.get('schemas').delete(0))
+        );
+        expect(state.get('entityTypes').hashCode()).toEqual(expectedEntityTypes.hashCode());
+        expect(state.get('entityTypes').equals(expectedEntityTypes)).toEqual(true);
+
+        const expectedEntityTypesIndexMap = Map()
+          .set(MOCK_ENTITY_TYPE.id, 0)
+          .set(MOCK_ENTITY_TYPE.type, 0);
+        expect(state.get('entityTypesIndexMap').hashCode()).toEqual(expectedEntityTypesIndexMap.hashCode());
+        expect(state.get('entityTypesIndexMap').equals(expectedEntityTypesIndexMap)).toEqual(true);
+        state.get('entityTypesIndexMap')
+          .filter((v, k) => FullyQualifiedName.isValid(k))
+          .keySeq()
+          .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+      });
+
+      test(localUpdateSchema.FAILURE, () => {
+
+        const { id } = localUpdateSchema();
+        const requestAction = localUpdateSchema.request(id, mockActionValue);
+        let state = reducer(initialState, requestAction);
+        state = reducer(state, localUpdateSchema.failure(id));
+        expect(state.getIn([LOCAL_UPDATE_SCHEMA, id])).toEqual(requestAction);
+
+        const expectedEntityTypes = List().push(MOCK_ENTITY_TYPE.toImmutable());
+        expect(state.get('entityTypes').hashCode()).toEqual(expectedEntityTypes.hashCode());
+        expect(state.get('entityTypes').equals(expectedEntityTypes)).toEqual(true);
+
+        const expectedEntityTypesIndexMap = Map()
+          .set(MOCK_ENTITY_TYPE.id, 0)
+          .set(MOCK_ENTITY_TYPE.type, 0);
+        expect(state.get('entityTypesIndexMap').hashCode()).toEqual(expectedEntityTypesIndexMap.hashCode());
+        expect(state.get('entityTypesIndexMap').equals(expectedEntityTypesIndexMap)).toEqual(true);
+        state.get('entityTypesIndexMap')
+          .filter((v, k) => FullyQualifiedName.isValid(k))
+          .keySeq()
+          .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+      });
+
+      test(localUpdateSchema.FINALLY, () => {
+
+        const { id } = localUpdateSchema();
+        let state = reducer(initialState, localUpdateSchema.request(id, mockActionValue));
+        state = reducer(state, localUpdateSchema.success(id));
+        state = reducer(state, localUpdateSchema.finally(id));
+        expect(state.hasIn([LOCAL_UPDATE_SCHEMA, id])).toEqual(false);
       });
 
     });

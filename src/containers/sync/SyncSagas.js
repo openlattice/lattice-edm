@@ -5,14 +5,14 @@
 /* eslint-disable no-use-before-define */
 
 import Lattice, { Models } from 'lattice';
-import { EntityDataModelApiActionFactory, EntityDataModelApiSagas } from 'lattice-sagas';
-import { call, put, takeEvery } from 'redux-saga/effects';
+import { call, put, takeEvery } from '@redux-saga/core/effects';
+import { EntityDataModelApiActions, EntityDataModelApiSagas } from 'lattice-sagas';
 
 import { resetLatticeConfig } from '../../utils/Utils';
 import {
   SYNC_PROD_EDM,
   syncProdEntityDataModel,
-} from './SyncActionFactory';
+} from './SyncActions';
 
 // injected by Webpack.DefinePlugin
 declare var __ENV_PROD__ :boolean;
@@ -20,14 +20,12 @@ declare var __ENV_PROD__ :boolean;
 const {
   getEntityDataModel,
   getEntityDataModelDiff,
-  getEntityDataModelVersion,
   updateEntityDataModel,
-} = EntityDataModelApiActionFactory;
+} = EntityDataModelApiActions;
 
 const {
   getEntityDataModelWorker,
   getEntityDataModelDiffWorker,
-  getEntityDataModelVersionWorker,
   updateEntityDataModelWorker,
 } = EntityDataModelApiSagas;
 
@@ -66,24 +64,17 @@ function* syncProdEntityDataModelWorker(action :SequenceAction) :Generator<*, *,
       throw new Error('Sync is not allowed on prod.');
     }
 
-    let response :Object = yield call(getEntityDataModelVersionWorker, getEntityDataModelVersion());
-    if (response.error) {
-      throw new Error(response.error);
-    }
-    const localVersion :string = response.data;
-
     /*
      * the authToken doesn't actually matter since the prod EDM endpoint is publicly available. setting authToken to
      * null will result in requests without an "Authorization" header, which is what we want
      */
     Lattice.configure({ authToken: null, baseUrl: 'production' });
-    response = yield call(getEntityDataModelWorker, getEntityDataModel());
+    let response :Object = yield call(getEntityDataModelWorker, getEntityDataModel());
     if (response.error) {
       throw new Error(response.error);
     }
     let prodEntityDataModel :Object = response.data;
     prodEntityDataModel = removeOpenLatticeAuditType(prodEntityDataModel);
-    prodEntityDataModel = Object.assign({}, prodEntityDataModel, { version: localVersion });
 
     // revert back to initial configuration
     resetLatticeConfig();

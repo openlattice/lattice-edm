@@ -5,10 +5,10 @@
 /* eslint-disable arrow-body-style */
 
 import { Map, fromJS } from 'immutable';
-import { LOCATION_CHANGE } from 'react-router-redux';
+import { LOCATION_CHANGE } from 'connected-react-router';
 
 import * as Routes from '../../core/router/Routes';
-import { syncProdEntityDataModel } from './SyncActionFactory';
+import { syncProdEntityDataModel } from './SyncActions';
 
 // TODO: stop copying things
 export const SYNC_STATES = {

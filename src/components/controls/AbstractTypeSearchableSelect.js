@@ -8,13 +8,12 @@ import styled, { css } from 'styled-components';
 import { faSearch } from '@fortawesome/pro-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { List } from 'immutable';
+import type { FQN } from 'lattice';
 
-import AbstractTypes from '../../utils/AbstractTypes';
 import AbstractTypeDataTable from '../datatable/AbstractTypeDataTable';
 import { filterAbstractTypes } from '../../utils/AbstractTypeUtils';
-
 import type { AbstractType } from '../../utils/AbstractTypes';
-import type { AbstractTypeFilterParams } from '../../utils/AbstractTypeUtils';
+import type { FilterAbstractTypesParams } from '../../utils/AbstractTypeUtils';
 
 /*
  * styled components
@@ -87,9 +86,9 @@ const DataTableWrapper = styled.div`
 
 type Props = {
   abstractTypes :List<Map<*, *>>;
-  className :string;
-  maxHeight :number;
-  searchPlaceholder :string;
+  className ?:string;
+  maxHeight ?:number;
+  searchPlaceholder ?:string;
   workingAbstractTypeType :AbstractType;
   onAbstractTypeSelect :Function;
 }
@@ -103,12 +102,9 @@ type State = {
 class AbstractTypeSearchableSelect extends React.Component<Props, State> {
 
   static defaultProps = {
-    abstractTypes: List(),
     className: '',
     maxHeight: -1,
     searchPlaceholder: 'Search...',
-    workingAbstractTypeType: AbstractTypes.PropertyType,
-    onAbstractTypeSelect: () => {}
   }
 
   constructor(props :Props) {
@@ -146,11 +142,11 @@ class AbstractTypeSearchableSelect extends React.Component<Props, State> {
     });
   }
 
-  handleOnAbstractTypeSelect = (selectedAbstractTypeId :string) => {
+  handleOnAbstractTypeSelect = (selectedAbstractTypeFQN :FQN) => {
 
     const { onAbstractTypeSelect } = this.props;
 
-    onAbstractTypeSelect(selectedAbstractTypeId);
+    onAbstractTypeSelect(selectedAbstractTypeFQN);
     this.setState({
       searchQuery: ''
     });
@@ -160,7 +156,7 @@ class AbstractTypeSearchableSelect extends React.Component<Props, State> {
 
     const { abstractTypes, workingAbstractTypeType } = this.props;
 
-    const filterParams :AbstractTypeFilterParams = {
+    const filterParams :FilterAbstractTypesParams = {
       abstractTypes,
       workingAbstractTypeType,
       filterQuery: event.target.value

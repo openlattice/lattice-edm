@@ -40,6 +40,7 @@ CANVAS_CONTEXT.font = '14px "Open Sans", sans-serif';
  * helper components
  */
 
+// NOTE: will "withRef" be a problem in the future?
 const OrderableGrid = SortableContainer(Grid, { withRef: true });
 
 /*
@@ -85,15 +86,15 @@ type GridData = List<Map<string, string>>;
 type GridHeaders = List<Map<string, string>>;
 
 type Props = {
+  bodyCellRenderer ?:(params :Object, cellValue :any) => any;
   data :GridData;
   headers :GridHeaders;
-  height :number;
-  maxHeight :number;
-  maxWidth :number;
-  orderable :boolean;
-  width :number;
-  bodyCellRenderer :(params :Object, cellValue :mixed) => mixed;
-  onReorder :(oldIndex :number, newIndex :number) => void;
+  height ?:number;
+  maxHeight ?:number;
+  maxWidth ?:number;
+  onReorder ?:(oldIndex :number, newIndex :number) => void;
+  orderable ?:boolean;
+  width ?:number;
 };
 
 type State = {
@@ -116,15 +117,13 @@ class AbstractDataTable extends React.Component<Props, State> {
   bodyGrid :?Grid;
 
   static defaultProps = {
-    data: List(),
-    headers: List(),
+    bodyCellRenderer: undefined,
     height: -1,
     maxHeight: -1,
     maxWidth: -1,
+    onReorder: undefined,
     orderable: false,
     width: -1,
-    bodyCellRenderer: null,
-    onReorder: () => {}
   };
 
   constructor(props :Props) {
@@ -325,7 +324,7 @@ class AbstractDataTable extends React.Component<Props, State> {
     return DEFAULT_ROW_MIN_HEIGHT; // TODO: implement more intelligently
   }
 
-  getCellValue = (rowIndex :number, columnIndex :number) :string => {
+  getCellValue = (rowIndex :number, columnIndex :number) :any => {
 
     const { data, headers } = this.props;
 
@@ -370,7 +369,9 @@ class AbstractDataTable extends React.Component<Props, State> {
     const { onReorder } = this.props;
 
     if (rsParams.oldIndex !== rsParams.newIndex) {
-      onReorder(rsParams.oldIndex, rsParams.newIndex);
+      if (typeof onReorder === 'function') {
+        onReorder(rsParams.oldIndex, rsParams.newIndex);
+      }
     }
   }
 
@@ -391,9 +392,9 @@ class AbstractDataTable extends React.Component<Props, State> {
   renderBodyCell = (params :Object) => {
 
     const { bodyCellRenderer } = this.props;
-    const cellValue :string = this.getCellValue(params.rowIndex, params.columnIndex);
+    const cellValue :any = this.getCellValue(params.rowIndex, params.columnIndex);
 
-    if (bodyCellRenderer && typeof bodyCellRenderer === 'function') {
+    if (typeof bodyCellRenderer === 'function') {
       return bodyCellRenderer(params, cellValue);
     }
 
@@ -401,6 +402,7 @@ class AbstractDataTable extends React.Component<Props, State> {
       <AbstractCell
           key={params.key}
           style={params.style}
+          type={AbstractCellTypes.BODY}
           value={cellValue} />
     );
   }
@@ -452,7 +454,7 @@ class AbstractDataTable extends React.Component<Props, State> {
                               columnWidth={this.getColumnWidth}
                               estimatedColumnSize={DEFAULT_COLUMN_MIN_WIDTH}
                               height={computedHeadGridHeight}
-                              innerRef={this.setHeadGridRef}
+                              ref={this.setHeadGridRef}
                               overscanColumnCount={DEFAULT_OVERSCAN_COLUMN_COUNT}
                               overscanRowCount={DEFAULT_OVERSCAN_ROW_COUNT}
                               rowHeight={DEFAULT_ROW_MIN_HEIGHT}
@@ -471,7 +473,7 @@ class AbstractDataTable extends React.Component<Props, State> {
                                     columnWidth={this.getColumnWidth}
                                     estimatedColumnSize={DEFAULT_COLUMN_MIN_WIDTH}
                                     height={computedBodyGridHeight}
-                                    innerRef={this.setBodyGridRef}
+                                    ref={this.setBodyGridRef}
                                     lockAxis="y"
                                     onScroll={onScroll}
                                     onSortEnd={this.onSortEnd}
@@ -488,7 +490,7 @@ class AbstractDataTable extends React.Component<Props, State> {
                                     columnWidth={this.getColumnWidth}
                                     estimatedColumnSize={DEFAULT_COLUMN_MIN_WIDTH}
                                     height={computedBodyGridHeight}
-                                    innerRef={this.setBodyGridRef}
+                                    ref={this.setBodyGridRef}
                                     onScroll={onScroll}
                                     overscanColumnCount={DEFAULT_OVERSCAN_COLUMN_COUNT}
                                     overscanRowCount={DEFAULT_OVERSCAN_ROW_COUNT}

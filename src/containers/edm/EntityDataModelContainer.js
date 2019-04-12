@@ -5,9 +5,6 @@
 import React from 'react';
 
 import styled from 'styled-components';
-import { EntityDataModelApiActionFactory } from 'lattice-sagas';
-import { connect } from 'react-redux';
-import { bindActionCreators } from 'redux';
 import {
   Redirect,
   Route,
@@ -20,17 +17,6 @@ import * as Routes from '../../core/router/Routes';
 
 import AbstractTypeOverviewContainer from './AbstractTypeOverviewContainer';
 
-const {
-  getAllAssociationTypes,
-  getAllEntityTypes,
-  getAllPropertyTypes,
-  getAllSchemas
-} = EntityDataModelApiActionFactory;
-
-/*
- * styled components
- */
-
 const EDMContainerWrapper = styled.div`
   align-items: center;
   display: flex;
@@ -40,30 +26,7 @@ const EDMContainerWrapper = styled.div`
   padding: 0;
 `;
 
-/*
- * types
- */
-
-type Props = {
-  actions :{
-    getAllPropertyTypes :RequestSequence;
-    getAllEntityTypes :RequestSequence;
-    getAllAssociationTypes :RequestSequence;
-    getAllSchemas :RequestSequence;
-  };
-};
-
-class EntityDataModelContainer extends React.Component<Props> {
-
-  componentDidMount() {
-
-    const { actions } = this.props;
-
-    actions.getAllPropertyTypes();
-    actions.getAllEntityTypes();
-    actions.getAllAssociationTypes();
-    actions.getAllSchemas();
-  }
+class EntityDataModelContainer extends React.Component<{}> {
 
   renderAssociationTypesContainer = () => (
     <AbstractTypeOverviewContainer workingAbstractTypeType={AbstractTypes.AssociationType} />
@@ -97,20 +60,4 @@ class EntityDataModelContainer extends React.Component<Props> {
   }
 }
 
-function mapDispatchToProps(dispatch :Function) :Object {
-
-  const actions = {
-    getAllAssociationTypes,
-    getAllEntityTypes,
-    getAllPropertyTypes,
-    getAllSchemas
-  };
-
-  return {
-    actions: bindActionCreators(actions, dispatch)
-  };
-}
-
-export default withRouter(
-  connect(null, mapDispatchToProps)(EntityDataModelContainer)
-);
+export default withRouter(EntityDataModelContainer);

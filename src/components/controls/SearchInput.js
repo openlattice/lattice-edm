@@ -45,24 +45,24 @@ const SearchIcon = styled.div`
 `;
 
 type Props = {
-  className :string,
-  placeholder :string,
-  onChange :Function,
-  onSubmit :Function
-}
+  className ?:string;
+  onChange ?:(value :string) => void;
+  onSubmit ?:(value :string) => void;
+  placeholder ?:string;
+};
 
 type State = {
-  searchQuery :string
-}
+  searchQuery :string;
+};
 
 // TODO: allow customization and extensibility via styled-components
 class SearchInput extends React.Component<Props, State> {
 
   static defaultProps = {
     className: '',
+    onChange: undefined,
+    onSubmit: undefined,
     placeholder: 'Search...',
-    onChange: () => {},
-    onSubmit: () => {}
   };
 
   constructor(props :Props) {
@@ -82,7 +82,7 @@ class SearchInput extends React.Component<Props, State> {
       searchQuery: event.target.value
     });
 
-    if (onChange) {
+    if (typeof onChange === 'function') {
       onChange(event.target.value);
     }
   }
@@ -95,7 +95,9 @@ class SearchInput extends React.Component<Props, State> {
     switch (event.keyCode) {
       case 13: // 'Enter' key code
         if (searchQuery) {
-          onSubmit(searchQuery);
+          if (typeof onSubmit === 'function') {
+            onSubmit(searchQuery);
+          }
         }
         break;
       default:

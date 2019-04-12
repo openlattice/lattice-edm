@@ -2,11 +2,12 @@
  * @flow
  */
 
-import React from 'react';
+import React, { Component } from 'react';
 
 import qs from 'qs';
 import styled from 'styled-components';
-import { AuthActionFactory, AuthUtils } from 'lattice-auth';
+import { AuthActions, AuthUtils } from 'lattice-auth';
+import { EntityDataModelApiActions } from 'lattice-sagas';
 import { connect } from 'react-redux';
 import { Redirect, Route, Switch } from 'react-router';
 import { bindActionCreators } from 'redux';
@@ -16,12 +17,10 @@ import StyledButton from '../../components/buttons/StyledButton';
 import * as Routes from '../../core/router/Routes';
 
 import EntityDataModelContainer from '../edm/EntityDataModelContainer';
+import GitHubContainer from '../github/GitHubContainer';
 import NavContainer from './NavContainer';
+import OnlineToggleContainer from './OnlineToggleContainer';
 import SyncContainer from '../sync/SyncContainer';
-
-const {
-  logout
-} = AuthActionFactory;
 
 /*
  * styled components
@@ -58,12 +57,10 @@ const Title = styled.h1`
   margin: 0;
 `;
 
-const StyledActionButton = StyledButton.extend`
+const StyledActionButton = styled(StyledButton)`
   position: absolute;
   right: 50px;
 `;
-
-const LoginAnchor = StyledActionButton.withComponent('a');
 
 const Logo = styled.img`
   position: absolute;
@@ -76,6 +73,7 @@ const Logo = styled.img`
 
 type Props = {
   actions :{
+    getEntityDataModel :RequestSequence;
     logout :() => void;
   };
 };
@@ -90,43 +88,61 @@ function getLoginUrl() :string {
   return `${window.location.origin}${Routes.LOGIN}/${queryString}`;
 }
 
-const AppContainer = ({ actions } :Props) => (
-  <AppWrapper>
-    <AppHeaderOuterWrapper>
-      <AppHeaderInnerWrapper>
-        <Logo src={OpenLatticeLogo} height="50" />
-        <Title>
-          Entity Data Model
-        </Title>
+class AppContainer extends Component<Props> {
+
+  componentDidMount() {
+
+    const { actions } = this.props;
+    actions.getEntityDataModel();
+  }
+
+  render() {
+
+    const { actions } = this.props;
+    // TODO: revert when ready to release
+    const showOnlineToggle :boolean = false; // AuthUtils.isAuthenticated() && AuthUtils.isAdmin();
+
+    return (
+      <AppWrapper>
+        <AppHeaderOuterWrapper>
+          <AppHeaderInnerWrapper>
+            <Logo src={OpenLatticeLogo} height="50" />
+            <Title>
+              Entity Data Model
+            </Title>
+            {
+              AuthUtils.isAuthenticated()
+                ? (
+                  <StyledActionButton onClick={actions.logout}>Logout</StyledActionButton>
+                )
+                : (
+                  <StyledActionButton as="a" href={`${getLoginUrl()}`}>Login</StyledActionButton>
+                )
+            }
+          </AppHeaderInnerWrapper>
+        </AppHeaderOuterWrapper>
+        <NavContainer />
         {
-          AuthUtils.isAuthenticated()
-            ? (
-              <StyledActionButton onClick={actions.logout}>
-                Logout
-              </StyledActionButton>
-            )
-            : (
-              <LoginAnchor href={`${getLoginUrl()}`}>
-                Login
-              </LoginAnchor>
-            )
+          showOnlineToggle && (
+            <OnlineToggleContainer />
+          )
         }
-      </AppHeaderInnerWrapper>
-    </AppHeaderOuterWrapper>
-    <NavContainer />
-    <Switch>
-      <Route path={Routes.SYNC} component={SyncContainer} />
-      <Route path={Routes.ROOT} component={EntityDataModelContainer} />
-      <Redirect to={Routes.ROOT} />
-    </Switch>
-  </AppWrapper>
-);
-
-function mapDispatchToProps(dispatch :Function) :Object {
-
-  return {
-    actions: bindActionCreators({ logout }, dispatch)
-  };
+        <Switch>
+          <Route path={Routes.SYNC} component={SyncContainer} />
+          <Route path={Routes.GITHUB} component={GitHubContainer} />
+          <Route path={Routes.ROOT} component={EntityDataModelContainer} />
+          <Redirect to={Routes.ROOT} />
+        </Switch>
+      </AppWrapper>
+    );
+  }
 }
+
+const mapDispatchToProps = (dispatch :Function) :Object => ({
+  actions: bindActionCreators({
+    getEntityDataModel: EntityDataModelApiActions.getEntityDataModel,
+    logout: AuthActions.logout,
+  }, dispatch)
+});
 
 export default connect(null, mapDispatchToProps)(AppContainer);

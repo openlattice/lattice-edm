@@ -3,32 +3,58 @@
  */
 
 import { List, Map } from 'immutable';
+import type { FQN } from 'lattice';
 
 import type { AbstractType } from '../../utils/AbstractTypes';
 
-export type AbstractTypeOverviewContainerProps = {
+type IndexMap = Map<FQN | UUID, number>;
+
+type AbstractTypeOverviewContainerProps = {
   associationTypes :List<Map<*, *>>;
-  associationTypesById :Map<string, number>;
+  associationTypesIndexMap :IndexMap;
   entityTypes :List<Map<*, *>>;
-  entityTypesById :Map<string, number>;
-  isFetchingAllAssociationTypes :boolean;
-  isFetchingAllEntityTypes :boolean;
-  isFetchingAllPropertyTypes :boolean;
-  isFetchingAllSchemas :boolean;
-  newlyCreatedAssociationTypeId :string; // eslint-disable-line react/no-unused-prop-types
-  newlyCreatedEntityTypeId :string; // eslint-disable-line react/no-unused-prop-types
-  newlyCreatedPropertyTypeId :string; // eslint-disable-line react/no-unused-prop-types
+  entityTypesIndexMap :IndexMap;
+  isFetchingEntityDataModel :boolean;
+  newlyCreatedAssociationTypeFQN :FQN;
+  newlyCreatedEntityTypeFQN :FQN;
+  newlyCreatedPropertyTypeFQN :FQN;
+  newlyCreatedSchemaFQN :FQN;
   propertyTypes :List<Map<*, *>>;
-  propertyTypesById :Map<string, number>;
+  propertyTypesIndexMap :IndexMap;
   schemas :List<Map<*, *>>;
-  schemasByFqn :Map<string, number>;
+  schemasIndexMap :IndexMap;
   workingAbstractTypeType :AbstractType;
 };
 
-export type AbstractTypeOverviewContainerState = {
+type AbstractTypeOverviewContainerState = {
   filterQuery :string;
-  filteredTypes :List<Map<*, *>>;
-  selectedAbstractType :Map<*, *>;
-  selectedAbstractTypeId :string;
+  selectedAbstractTypeFQN :?FQN;
   showCreateNewAbstractTypeCard :boolean;
+};
+
+type UpdateAssociationTypeMeta = {
+  associationTypeFQN :FQN;
+  associationTypeId :?UUID;
+  metadata :Object;
+};
+
+type UpdateEntityTypeMeta = {
+  entityTypeFQN :FQN;
+  entityTypeId :?UUID;
+  metadata :Object;
+};
+
+type UpdatePropertyTypeMeta = {
+  metadata :Object;
+  propertyTypeFQN :FQN;
+  propertyTypeId :?UUID;
+};
+
+export type {
+  AbstractTypeOverviewContainerProps,
+  AbstractTypeOverviewContainerState,
+  IndexMap,
+  UpdateAssociationTypeMeta,
+  UpdateEntityTypeMeta,
+  UpdatePropertyTypeMeta,
 };
