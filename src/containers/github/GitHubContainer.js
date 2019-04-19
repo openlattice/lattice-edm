@@ -4,10 +4,17 @@
 
 import React, { Component } from 'react';
 
+import isString from 'lodash/isString';
 import styled from 'styled-components';
 import { faCheckCircle, faTimesCircle } from '@fortawesome/pro-light-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { List, Map, fromJS } from 'immutable';
+import {
+  List,
+  Map,
+  Set,
+  fromJS,
+  isCollection,
+} from 'immutable';
 import { Models } from 'lattice';
 import { AuthUtils } from 'lattice-auth';
 import { connect } from 'react-redux';
@@ -18,6 +25,7 @@ import Spinner from '../../components/spinner/Spinner';
 import * as Routes from '../../core/router/Routes';
 import { openPullRequest } from './GitHubActions';
 import { SUBMIT_STATES } from './GitHubReducer';
+import { isValidUUID } from '../../utils/ValidationUtils';
 
 const { FullyQualifiedName } = Models;
 
@@ -89,6 +97,23 @@ const fqnComparator = (path :string[]) => (valueA :Map, valueB :Map) => {
   return 0;
 };
 
+const extractKeys = (obj :Map) => {
+  if (!isCollection(obj)) {
+    return Set();
+  }
+  return obj.keySeq().reduce((keySet :Set, key :any[]) => {
+    let keys = keySet;
+    if (isString(key) && !isValidUUID(key)) {
+      keys = keys.add(key);
+    }
+    const value = obj.get(key);
+    if (isCollection(value)) {
+      keys = keys.union(extractKeys(value));
+    }
+    return keys;
+  }, Set());
+};
+
 type Props = {
   associationTypes :List<Map<*, *>>;
   entityTypes :List<Map<*, *>>;
@@ -148,35 +173,10 @@ class GitHubContainer extends Component<Props, State> {
       namespaces: namespaces.sort(),
       propertyTypes: propertyTypes.sort(fqnComparator(['type'])),
       schemas: schemas.sort(fqnComparator(['fqn'])),
-    }).sortBy((v, k) => k).toJS();
+    }).sortBy((v, k) => k);
 
-    const keys = [
-      'analyzer',
-      'associationTypes',
-      'bidirectional',
-      'category',
-      'datatype',
-      'description',
-      'dst',
-      'entityType',
-      'entityTypes',
-      'enumValues',
-      'id',
-      'key',
-      'name',
-      'namespace',
-      'namespaces',
-      'piiField',
-      'properties',
-      'propertyTypes',
-      'schemas',
-      'shard',
-      'src',
-      'title',
-      'type',
-    ].sort();
-
-    const edmAsString = JSON.stringify(edm, keys, 2);
+    const keys = extractKeys(edm).sort();
+    const edmAsString = JSON.stringify(edm.toJS(), keys.toJS(), 2);
     // !!! IMPORTANT - order matters !!!
 
     /* eslint-disable react/destructuring-assignment */
@@ -300,6 +300,6 @@ const mapStateToProps = state => ({
   submitState: state.getIn(['github', 'submitState'], SUBMIT_STATES.PRE_SUBMIT),
 });
 
-export default withRouter(
+export default withRouter<*>(
   connect(mapStateToProps, { openPullRequest })(GitHubContainer)
 );
