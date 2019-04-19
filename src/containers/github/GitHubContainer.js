@@ -136,8 +136,6 @@ class GitHubContainer extends Component<Props, State> {
     } = this.props;
 
     const {
-      email,
-      name,
       otp,
       password,
       username,
@@ -151,13 +149,39 @@ class GitHubContainer extends Component<Props, State> {
       propertyTypes: propertyTypes.sort(fqnComparator(['type'])),
       schemas: schemas.sort(fqnComparator(['fqn'])),
     }).sortBy((v, k) => k).toJS();
+
+    const keys = [
+      'analyzer',
+      'associationTypes',
+      'bidirectional',
+      'category',
+      'datatype',
+      'description',
+      'dst',
+      'entityType',
+      'entityTypes',
+      'enumValues',
+      'id',
+      'key',
+      'name',
+      'namespace',
+      'namespaces',
+      'piiField',
+      'properties',
+      'propertyTypes',
+      'schemas',
+      'shard',
+      'src',
+      'title',
+      'type',
+    ].sort();
+
+    const edmAsString = JSON.stringify(edm, keys, 2);
     // !!! IMPORTANT - order matters !!!
 
     /* eslint-disable react/destructuring-assignment */
     this.props.openPullRequest({
-      edm,
-      email,
-      name,
+      edmAsString,
       otp,
       password,
       username,
