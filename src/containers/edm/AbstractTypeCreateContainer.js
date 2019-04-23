@@ -450,7 +450,7 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
   handleOnChangeAnalyzerType = (event :SyntheticInputEvent<*>) => {
 
     this.setState({
-      analyzerValue: event.target.value || AnalyzerTypes.STANDARD,
+      analyzerValue: AnalyzerTypes[event.target.value] || AnalyzerTypes.STANDARD,
     });
   }
 
@@ -549,21 +549,18 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
     });
   }
 
-  renderAbstractTypeInputField = (type :string, name :string, onChange :Function, onEditToggle :Function) => {
-
-    return (
-      <div>
-        <h2>
-          { name }
-        </h2>
-        <InlineEditableControl
-            type={type}
-            placeholder={`${name}...`}
-            onChange={onChange}
-            onEditToggle={onEditToggle} />
-      </div>
-    );
-  }
+  renderAbstractTypeInputField = (type :string, name :string, onChange :Function, onEditToggle :Function) => (
+    <div>
+      <h2>
+        { name }
+      </h2>
+      <InlineEditableControl
+          type={type}
+          placeholder={`${name}...`}
+          onChange={onChange}
+          onEditToggle={onEditToggle} />
+    </div>
+  )
 
   renderTitleSection = () => {
 
@@ -747,19 +744,16 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
     abstractTypeType :AbstractType,
     searchPlaceholder :string,
     onAbstractTypeSelect :Function
-  ) => {
-
-    return (
-      <AbstractTypeSearchableSelectWrapper>
-        <AbstractTypeSearchableSelect
-            abstractTypes={abstractTypes}
-            maxHeight={400}
-            searchPlaceholder={searchPlaceholder}
-            workingAbstractTypeType={abstractTypeType}
-            onAbstractTypeSelect={onAbstractTypeSelect} />
-      </AbstractTypeSearchableSelectWrapper>
-    );
-  }
+  ) => (
+    <AbstractTypeSearchableSelectWrapper>
+      <AbstractTypeSearchableSelect
+          abstractTypes={abstractTypes}
+          maxHeight={400}
+          searchPlaceholder={searchPlaceholder}
+          workingAbstractTypeType={abstractTypeType}
+          onAbstractTypeSelect={onAbstractTypeSelect} />
+    </AbstractTypeSearchableSelectWrapper>
+  )
 
   renderEntityTypePrimaryKeyPropertyTypesSelectSection = () => {
 
@@ -1021,13 +1015,13 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
   }
 }
 
-const mapStateToProps = (state :Map<*, *>) :{} => ({
+const mapStateToProps = (state :Map<*, *>) => ({
   associationTypes: state.getIn(['edm', 'associationTypes', 'associationTypes']),
   entityTypes: state.getIn(['edm', 'entityTypes', 'entityTypes']),
   propertyTypes: state.getIn(['edm', 'propertyTypes', 'propertyTypes']),
 });
 
-const mapDispatchToProps = (dispatch :Function) :{} => ({
+const mapDispatchToProps = (dispatch :Function) => ({
   actions: bindActionCreators({
     localCreateAssociationType: AssociationTypesActions.localCreateAssociationType,
     localCreateEntityType: EntityTypesActions.localCreateEntityType,
@@ -1036,4 +1030,4 @@ const mapDispatchToProps = (dispatch :Function) :{} => ({
   }, dispatch)
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(AbstractTypeCreateContainer);
+export default connect<*, *, *, *, *, *>(mapStateToProps, mapDispatchToProps)(AbstractTypeCreateContainer);

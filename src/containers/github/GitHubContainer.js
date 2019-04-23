@@ -136,8 +136,6 @@ class GitHubContainer extends Component<Props, State> {
     } = this.props;
 
     const {
-      email,
-      name,
       otp,
       password,
       username,
@@ -156,8 +154,6 @@ class GitHubContainer extends Component<Props, State> {
     /* eslint-disable react/destructuring-assignment */
     this.props.openPullRequest({
       edm,
-      email,
-      name,
       otp,
       password,
       username,
@@ -276,6 +272,6 @@ const mapStateToProps = state => ({
   submitState: state.getIn(['github', 'submitState'], SUBMIT_STATES.PRE_SUBMIT),
 });
 
-export default withRouter(
+export default withRouter<*>(
   connect(mapStateToProps, { openPullRequest })(GitHubContainer)
 );

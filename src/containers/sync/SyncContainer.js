@@ -165,6 +165,6 @@ function mapDispatchToProps(dispatch :Function) :Object {
   };
 }
 
-export default withRouter(
+export default withRouter<*>(
   connect(mapStateToProps, mapDispatchToProps)(SyncContainer)
 );
