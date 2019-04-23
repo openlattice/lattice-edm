@@ -9,7 +9,7 @@ import {
 } from './AppActions';
 
 const INITIAL_STATE :Map<*, *> = fromJS({
-  isOnline: true, // TODO: revert to true when ready to release
+  isOnline: false,
 });
 
 export default function reducer(state :Map<*, *> = INITIAL_STATE, action :Object) {
@@ -17,9 +17,7 @@ export default function reducer(state :Map<*, *> = INITIAL_STATE, action :Object
   switch (action.type) {
 
     case TOGGLE_ONLINE: {
-      // TODO: revert when ready to release
-      // return state.set('isOnline', !state.get('isOnline'));
-      return state;
+      return state.set('isOnline', !state.get('isOnline'));
     }
 
     default:

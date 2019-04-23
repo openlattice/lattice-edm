@@ -41,8 +41,7 @@ function* openPullRequestWorker(seqAction :SequenceAction) :Generator<*, *, *> {
   try {
     yield put(openPullRequest.request(id, value));
 
-    const edmAsString = JSON.stringify(value.edm, undefined, 2);
-    const edmAsBase64 = Base64.encode(edmAsString);
+    const edmAsBase64 = Base64.encode(value.edmAsString);
 
     const axiosConfig = {
       auth: { username: value.username, password: value.password },
