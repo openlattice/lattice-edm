@@ -4,6 +4,7 @@
 
 import React from 'react';
 
+import Select from 'react-select';
 import styled from 'styled-components';
 import { List, Map, Set } from 'immutable';
 import { Models, Types } from 'lattice';
@@ -66,11 +67,9 @@ const DATA_TYPE_OPTIONS = EDM_PRIMITIVE_TYPES.map((primitive :string) => (
   </option>
 ));
 
-const ANALYZER_TYPE_OPTIONS = Object.keys(AnalyzerTypes).map((anaylzer :AnalyzerType) => (
-  <option key={anaylzer} value={anaylzer}>
-    { anaylzer }
-  </option>
-));
+const ANALYZER_TYPE_RS_OPTIONS = Object.keys(AnalyzerTypes).map(
+  (analyzerType :AnalyzerType) => ({ label: analyzerType, value: analyzerType })
+);
 
 /*
  * styled components
@@ -453,10 +452,10 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
     });
   }
 
-  handleOnChangeAnalyzerType = (event :SyntheticInputEvent<*>) => {
+  handleOnChangeAnalyzerType = (rsOption :{ label :string, value :string }) => {
 
     this.setState({
-      analyzerValue: AnalyzerTypes[event.target.value] || AnalyzerTypes.STANDARD,
+      analyzerValue: AnalyzerTypes[rsOption.value] || AnalyzerTypes.STANDARD,
     });
   }
 
@@ -666,12 +665,11 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
 
     return (
       <section>
-        <h2>
-          Analyzer Type
-        </h2>
-        <TypeSelect onChange={this.handleOnChangeAnalyzerType} value={analyzerValue}>
-          { ANALYZER_TYPE_OPTIONS }
-        </TypeSelect>
+        <h2>Analyzer Type</h2>
+        <Select
+            onChange={this.handleOnChangeAnalyzerType}
+            options={ANALYZER_TYPE_RS_OPTIONS}
+            value={{ label: analyzerValue, value: analyzerValue }} />
       </section>
     );
   }
@@ -983,27 +981,6 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
     );
   }
 
-  // renderAnalyzer = () => {
-  //
-  //   const { propertyType } = this.props;
-  //
-  //   if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
-  //     const options = Object.keys(AnalyzerTypes).map(
-  //       (analyzerType :AnalyzerType) => ({ label: analyzerType, value: analyzerType })
-  //     );
-  //     const defaultValue = options.find(option => option.value === propertyType.get('analyzer'));
-  //     return (
-  //       <Select defaultValue={defaultValue} isDisabled options={options} />
-  //     );
-  //   }
-  //
-  //   return (
-  //     <p>
-  //       { propertyType.get('analyzer') }
-  //     </p>
-  //   );
-  // }
-  //
   // renderIndexType = () => {
   //
   //   const { propertyType } = this.props;
