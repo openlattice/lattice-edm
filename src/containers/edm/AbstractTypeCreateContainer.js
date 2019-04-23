@@ -56,6 +56,10 @@ const PII_RADIO_NAME :string = 'propertyTypePii';
 const PII_YES_RADIO_ID :string = 'propertyTypePii-1';
 const PII_NO_RADIO_ID :string = 'propertyTypePii-2';
 
+const MV_RADIO_NAME :string = 'propertyTypeMultiValued';
+const MV_YES_RADIO_ID :string = 'propertyTypeMultiValued-1';
+const MV_NO_RADIO_ID :string = 'propertyTypeMultiValued-2';
+
 const DATA_TYPE_OPTIONS = EDM_PRIMITIVE_TYPES.map((primitive :string) => (
   <option key={primitive} value={primitive}>
     { primitive }
@@ -139,10 +143,10 @@ type Props = {
     localCreateSchema :RequestSequence;
   };
   entityTypes :List<Map<*, *>>;
-  propertyTypes :List<Map<*, *>>;
-  workingAbstractTypeType :AbstractType;
   onCancel :() => void;
   onSubmit :() => void;
+  propertyTypes :List<Map<*, *>>;
+  workingAbstractTypeType :AbstractType;
 };
 
 type State = {
@@ -153,15 +157,16 @@ type State = {
   isInEditModeName :boolean;
   isInEditModeNamespace :boolean;
   isInEditModeTitle :boolean;
+  multiValuedValue :boolean;
   nameValue :string;
   namespaceValue :string;
   phoneticSearchesValue :boolean;
   piiValue :boolean;
-  titleValue :string;
   selectedDestinationEntityTypes :Set<Map<*, *>>;
   selectedPrimaryKeyPropertyTypes :Set<Map<*, *>>;
   selectedPropertyTypes :Set<Map<*, *>>;
   selectedSourceEntityTypes :Set<Map<*, *>>;
+  titleValue :string;
 };
 
 class AbstractTypeCreateContainer extends React.Component<Props, State> {
@@ -178,6 +183,7 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
       isInEditModeName: true,
       isInEditModeNamespace: true,
       isInEditModeTitle: true,
+      multiValuedValue: true,
       nameValue: '',
       namespaceValue: '',
       phoneticSearchesValue: false,
@@ -483,6 +489,13 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
     });
   }
 
+  handleOnChangeMultiValued = (event :SyntheticInputEvent<*>) => {
+
+    this.setState({
+      multiValuedValue: event.target.id === MV_YES_RADIO_ID,
+    });
+  }
+
   handleOnChangeName = (name :string) => {
 
     this.setState({
@@ -694,6 +707,44 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
                 name={PII_RADIO_NAME}
                 onChange={this.handleOnChangePii}
                 checked={piiValue === false} />
+            No
+          </label>
+        </RadiosRowWrapper>
+      </section>
+    );
+  }
+
+  renderPropertyTypeMultiValuedSection = () => {
+
+    const { workingAbstractTypeType } = this.props;
+    const { multiValuedValue } = this.state;
+
+    if (workingAbstractTypeType !== AbstractTypes.PropertyType) {
+      return null;
+    }
+
+    return (
+      <section>
+        <h2>
+          Multi Valued
+        </h2>
+        <RadiosRowWrapper>
+          <label htmlFor={MV_YES_RADIO_ID}>
+            <input
+                type="radio"
+                id={MV_YES_RADIO_ID}
+                name={MV_RADIO_NAME}
+                onChange={this.handleOnChangeMultiValued}
+                checked={multiValuedValue === true} />
+            Yes
+          </label>
+          <label htmlFor={MV_NO_RADIO_ID}>
+            <input
+                type="radio"
+                id={MV_NO_RADIO_ID}
+                name={MV_RADIO_NAME}
+                onChange={this.handleOnChangeMultiValued}
+                checked={multiValuedValue === false} />
             No
           </label>
         </RadiosRowWrapper>
@@ -932,6 +983,46 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
     );
   }
 
+  // renderAnalyzer = () => {
+  //
+  //   const { propertyType } = this.props;
+  //
+  //   if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
+  //     const options = Object.keys(AnalyzerTypes).map(
+  //       (analyzerType :AnalyzerType) => ({ label: analyzerType, value: analyzerType })
+  //     );
+  //     const defaultValue = options.find(option => option.value === propertyType.get('analyzer'));
+  //     return (
+  //       <Select defaultValue={defaultValue} isDisabled options={options} />
+  //     );
+  //   }
+  //
+  //   return (
+  //     <p>
+  //       { propertyType.get('analyzer') }
+  //     </p>
+  //   );
+  // }
+  //
+  // renderIndexType = () => {
+  //
+  //   const { propertyType } = this.props;
+  //
+  //   if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
+  //     const options = Object.keys(IndexTypes).map(
+  //       (indexType :IndexType) => ({ label: indexType, value: indexType })
+  //     );
+  //     const defaultValue = options.find(option => option.value === propertyType.get('indexType'));
+  //     return (
+  //       <Select defaultValue={defaultValue} options={options} />
+  //     );
+  //   }
+  //
+  //   return (
+  //     null
+  //   );
+  // }
+
   render() {
 
     const { onCancel, workingAbstractTypeType } = this.props;
@@ -987,6 +1078,7 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
         { this.renderPropertyTypeDataTypeSelectSection() }
         { this.renderPropertyTypeAnalyzerTypeSelectSection() }
         { this.renderPropertyTypePiiSection() }
+        { this.renderPropertyTypeMultiValuedSection() }
         { this.renderAssociationTypeBidirectionalSection() }
         { this.renderEntityTypePrimaryKeyPropertyTypesSelectSection() }
         { this.renderEntityTypePropertyTypesSelectSection() }
