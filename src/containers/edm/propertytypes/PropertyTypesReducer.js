@@ -79,14 +79,17 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
               const propertyTypeId :?UUID = pt.id;
               const propertyTypeFQN :FQN = new FullyQualifiedName(pt.type);
               const propertyType :PropertyType = new PropertyTypeBuilder()
-                .setId(propertyTypeId)
-                .setType(propertyTypeFQN)
-                .setTitle(pt.title)
-                .setDescription(pt.description)
-                .setDataType(pt.datatype)
-                .setPii(pt.piiField)
                 .setAnalyzer(pt.analyzer)
+                .setDataType(pt.datatype)
+                .setDescription(pt.description)
+                .setEnumValues(pt.enumValues)
+                .setId(propertyTypeId)
+                .setIndexType(pt.indexType)
+                .setMultiValued(pt.multiValued)
+                .setPii(pt.pii)
                 .setSchemas(pt.schemas)
+                .setTitle(pt.title)
+                .setType(propertyTypeFQN)
                 .build();
               propertyTypes.push(propertyType.toImmutable());
               /*
@@ -132,14 +135,17 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
             const propertyTypeFQN :FQN = new FullyQualifiedName(storedPropertyType.type);
             const propertyTypeId :?UUID = seqAction.value; // id won't be available in "offline" mode
             const newPropertyType :PropertyType = new PropertyTypeBuilder()
-              .setId(propertyTypeId)
-              .setType(propertyTypeFQN)
-              .setTitle(storedPropertyType.title)
-              .setDescription(storedPropertyType.description)
-              .setDataType(storedPropertyType.datatype)
-              .setPii(storedPropertyType.piiField)
               .setAnalyzer(storedPropertyType.analyzer)
+              .setDataType(storedPropertyType.datatype)
+              .setDescription(storedPropertyType.description)
+              .setEnumValues(storedPropertyType.enumValues)
+              .setId(propertyTypeId)
+              .setIndexType(storedPropertyType.indexType)
+              .setMultiValued(storedPropertyType.multiValued)
+              .setPii(storedPropertyType.pii)
               .setSchemas(storedPropertyType.schemas)
+              .setTitle(storedPropertyType.title)
+              .setType(propertyTypeFQN)
               .build();
 
             const updatedPropertyTypes :List<Map<*, *>> = state
@@ -271,8 +277,11 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
               .setAnalyzer(currentPropertyType.analyzer)
               .setDataType(currentPropertyType.datatype)
               .setDescription(currentPropertyType.description)
+              .setEnumValues(currentPropertyType.enumValues)
               .setId(currentPropertyType.id)
-              .setPii(currentPropertyType.piiField)
+              .setIndexType(currentPropertyType.indexType)
+              .setMultiValued(currentPropertyType.multiValued)
+              .setPii(currentPropertyType.pii)
               .setSchemas(currentPropertyType.schemas)
               .setTitle(currentPropertyType.title)
               .setType(currentPropertyType.type);
