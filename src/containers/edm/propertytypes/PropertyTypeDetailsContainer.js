@@ -28,6 +28,7 @@ const { FullyQualifiedName } = Models;
 
 const DeleteButton = styled(StyledButton)`
   align-self: center;
+  margin-top: 18px;
 `;
 
 /*
@@ -83,18 +84,17 @@ class PropertyTypeDetailsContainer extends React.Component<Props> {
       return null;
     }
 
-    const ptPII :boolean = propertyType.get('piiField', false);
+    const ptPII :boolean = propertyType.get('pii', false);
     const piiAsString :string = ptPII === true ? 'true' : 'false';
+
+    const ptMultiValued :boolean = propertyType.get('multiValued', false);
+    const multiValuedAsString :string = ptMultiValued === true ? 'true' : 'false';
 
     return (
       <div>
-        <h1>
-          PropertyType Details
-        </h1>
+        <h1>PropertyType Details</h1>
         <section>
-          <h2>
-            ID
-          </h2>
+          <h2>ID</h2>
           <p>
             { propertyType.get('id') }
           </p>
@@ -115,28 +115,24 @@ class PropertyTypeDetailsContainer extends React.Component<Props> {
               abstractTypeType={AbstractTypes.PropertyType} />
         </section>
         <section>
-          <h2>
-            DataType
-          </h2>
-          <p>
-            { propertyType.get('datatype') }
-          </p>
+          <h2>DataType</h2>
+          <p>{ propertyType.get('datatype') }</p>
         </section>
         <section>
-          <h2>
-            PII
-          </h2>
-          <p>
-            { piiAsString }
-          </p>
+          <h2>PII</h2>
+          <p>{ piiAsString }</p>
         </section>
         <section>
-          <h2>
-            Analyzer
-          </h2>
-          <p>
-            { propertyType.get('analyzer') }
-          </p>
+          <h2>Multi Valued</h2>
+          <p>{ multiValuedAsString }</p>
+        </section>
+        <section>
+          <h2>Analyzer</h2>
+          <p>{ propertyType.get('analyzer') }</p>
+        </section>
+        <section>
+          <h2>Index Type</h2>
+          <p>{ propertyType.get('indexType') }</p>
         </section>
         { this.renderEntityTypesSection() }
         {
