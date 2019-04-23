@@ -241,6 +241,8 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
       bidiValue,
       datatypeValue,
       descriptionValue,
+      indexTypeValue,
+      multiValuedValue,
       nameValue,
       namespaceValue,
       phoneticSearchesValue,
@@ -270,6 +272,8 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
         .setAnalyzer(analyzer)
         .setDataType(datatypeValue)
         .setDescription(descriptionValue)
+        .setIndexType(indexTypeValue)
+        .setMultiValued(multiValuedValue)
         .setPii(piiValue)
         .setTitle(titleValue)
         .setType(new FullyQualifiedName(namespaceValue, nameValue))
@@ -1002,25 +1006,6 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
       </section>
     );
   }
-
-  // renderIndexType = () => {
-  //
-  //   const { propertyType } = this.props;
-  //
-  //   if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
-  //     const options = Object.keys(IndexTypes).map(
-  //       (indexType :IndexType) => ({ label: indexType, value: indexType })
-  //     );
-  //     const defaultValue = options.find(option => option.value === propertyType.get('indexType'));
-  //     return (
-  //       <Select defaultValue={defaultValue} options={options} />
-  //     );
-  //   }
-  //
-  //   return (
-  //     null
-  //   );
-  // }
 
   render() {
 
