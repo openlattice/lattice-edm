@@ -64,6 +64,7 @@ function filterAbstractTypes(params :FilterAbstractTypesParams) :List<Map<*, *>>
       ? FullyQualifiedName.toString(abstractType.get('fqn', Map())).toLowerCase()
       : FullyQualifiedName.toString(abstractTypeType).toLowerCase();
     const abstractTypeTitle :string = abstractType.get('title', '').toLowerCase();
+    const abstractTypeDescription :string = abstractType.get('description', '').toLowerCase();
 
     let includeAbstractType :boolean = true;
     if (filterQuery && filterQuery.trim()) {
@@ -71,7 +72,8 @@ function filterAbstractTypes(params :FilterAbstractTypesParams) :List<Map<*, *>>
       const matchesId :boolean = !!abstractTypeId && abstractTypeId.includes(filterTrimLowerCase);
       const matchesFQN :boolean = abstractTypeFQN.includes(filterTrimLowerCase);
       const matchesTitle :boolean = abstractTypeTitle.includes(filterTrimLowerCase);
-      if (!matchesId && !matchesFQN && !matchesTitle) {
+      const matchesDescription :boolean = abstractTypeDescription.includes(filterTrimLowerCase);
+      if (!matchesId && !matchesFQN && !matchesTitle && !matchesDescription) {
         includeAbstractType = false;
       }
     }
