@@ -265,12 +265,12 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
         : analyzerValue;
 
       const newPropertyType :PropertyType = new PropertyTypeBuilder()
-        .setType(new FullyQualifiedName(namespaceValue, nameValue))
-        .setTitle(titleValue)
-        .setDescription(descriptionValue)
-        .setDataType(datatypeValue)
-        .setPii(piiValue)
         .setAnalyzer(analyzer)
+        .setDataType(datatypeValue)
+        .setDescription(descriptionValue)
+        .setPii(piiValue)
+        .setTitle(titleValue)
+        .setType(new FullyQualifiedName(namespaceValue, nameValue))
         .build();
 
       actions.localCreatePropertyType(newPropertyType);
@@ -285,11 +285,11 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
         .concat(primaryKeyPropertyTypeIds);
 
       const entityTypeBuilder :EntityTypeBuilder = new EntityTypeBuilder()
-        .setType(new FullyQualifiedName(namespaceValue, nameValue))
-        .setTitle(titleValue)
         .setDescription(descriptionValue)
         .setKey(primaryKeyPropertyTypeIds.toJS())
-        .setPropertyTypes(propertyTypeIds.toJS());
+        .setPropertyTypes(propertyTypeIds.toJS())
+        .setTitle(titleValue)
+        .setType(new FullyQualifiedName(namespaceValue, nameValue));
 
       if (workingAbstractTypeType === AbstractTypes.EntityType) {
 
