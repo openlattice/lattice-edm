@@ -323,4 +323,4 @@ const mapDispatchToProps = (dispatch :Function) :Object => ({
   }, dispatch)
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(EntityTypeDetailsContainer);
+export default connect<*, *, *, *, *, *>(mapStateToProps, mapDispatchToProps)(EntityTypeDetailsContainer);

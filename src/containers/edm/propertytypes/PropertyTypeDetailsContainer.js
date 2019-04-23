@@ -10,6 +10,7 @@ import { Models } from 'lattice';
 import { AuthUtils } from 'lattice-auth';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
+import type { FQN } from 'lattice';
 
 import AbstractTypes from '../../../utils/AbstractTypes';
 import AbstractTypeDataTable from '../../../components/datatable/AbstractTypeDataTable';
@@ -171,4 +172,4 @@ const mapDispatchToProps = (dispatch :Function) :Object => ({
   }, dispatch)
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(PropertyTypeDetailsContainer);
+export default connect<*, *, *, *, *, *>(mapStateToProps, mapDispatchToProps)(PropertyTypeDetailsContainer);

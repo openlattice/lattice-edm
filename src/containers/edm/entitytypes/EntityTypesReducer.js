@@ -90,8 +90,10 @@ export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, act
                 .setDescription(et.description)
                 .setId(entityTypeId)
                 .setKey(et.key)
+                .setPropertyTags(et.propertyTags)
                 .setPropertyTypes(et.properties)
                 .setSchemas(et.schemas)
+                .setShards(et.shards)
                 .setTitle(et.title)
                 .setType(entityTypeFQN)
                 .build();
@@ -210,8 +212,10 @@ export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, act
               .setDescription(storedEntityType.description)
               .setId(entityTypeId)
               .setKey(storedEntityType.key)
+              .setPropertyTags(storedEntityType.propertyTags)
               .setPropertyTypes(storedEntityType.properties)
               .setSchemas(storedEntityType.schemas)
+              .setShards(storedEntityType.shards)
               .setTitle(storedEntityType.title)
               .setType(entityTypeFQN)
               .build();
@@ -419,8 +423,10 @@ export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, act
               .setDescription(currentEntityType.description)
               .setId(currentEntityType.id)
               .setKey(currentEntityType.key)
+              .setPropertyTags(currentEntityType.propertyTags)
               .setPropertyTypes(currentEntityType.properties)
               .setSchemas(currentEntityType.schemas)
+              .setShards(currentEntityType.shards)
               .setTitle(currentEntityType.title)
               .setType(currentEntityType.type);
 
