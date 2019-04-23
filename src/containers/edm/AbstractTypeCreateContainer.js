@@ -10,7 +10,7 @@ import { List, Map, Set } from 'immutable';
 import { Models, Types } from 'lattice';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import type { AnalyzerType, FQN } from 'lattice';
+import type { AnalyzerType, FQN, IndexType } from 'lattice';
 
 import AbstractTypes from '../../utils/AbstractTypes';
 import AbstractTypeDataTable from '../../components/datatable/AbstractTypeDataTable';
@@ -42,6 +42,7 @@ const {
 
 const {
   AnalyzerTypes,
+  IndexTypes,
   SecurableTypes
 } = Types;
 
@@ -69,6 +70,10 @@ const ANALYZER_TYPE_RS_OPTIONS = Object.keys(AnalyzerTypes).map(
   (analyzerType :AnalyzerType) => ({ label: analyzerType, value: analyzerType })
 );
 
+const INDEX_TYPE_RS_OPTIONS = Object.keys(IndexTypes).map(
+  (indexType :IndexType) => ({ label: indexType, value: indexType })
+);
+
 /*
  * styled components
  */
@@ -88,14 +93,6 @@ const ActionButtons = styled.div`
   button {
     margin: 0 10px;
   }
-`;
-
-const TypeSelect = styled.select`
-  align-self: left;
-  background: none;
-  border: 1px solid #c5d5e5;
-  height: 32px;
-  outline: none;
 `;
 
 const PhoneticCheckboxWrapper = styled.label`
@@ -151,6 +148,7 @@ type State = {
   bidiValue :boolean;
   datatypeValue :string;
   descriptionValue :string;
+  indexTypeValue :IndexType;
   isInEditModeName :boolean;
   isInEditModeNamespace :boolean;
   isInEditModeTitle :boolean;
@@ -177,6 +175,7 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
       bidiValue: false,
       datatypeValue: 'String',
       descriptionValue: '',
+      indexTypeValue: IndexTypes.BTREE,
       isInEditModeName: true,
       isInEditModeNamespace: true,
       isInEditModeTitle: true,
@@ -486,6 +485,13 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
     });
   }
 
+  handleOnChangeIndexType = (rsOption :{ label :string, value :string }) => {
+
+    this.setState({
+      indexTypeValue: IndexTypes[rsOption.value] || IndexTypes.BTREE,
+    });
+  }
+
   handleOnChangeMultiValued = (event :SyntheticInputEvent<*>) => {
 
     this.setState({
@@ -667,6 +673,25 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
             onChange={this.handleOnChangeAnalyzerType}
             options={ANALYZER_TYPE_RS_OPTIONS}
             value={{ label: analyzerValue, value: analyzerValue }} />
+      </section>
+    );
+  }
+
+  renderPropertyTypeIndexTypeSelectSection = () => {
+
+    const { workingAbstractTypeType } = this.props;
+    const { indexTypeValue } = this.state;
+    if (workingAbstractTypeType !== AbstractTypes.PropertyType) {
+      return null;
+    }
+
+    return (
+      <section>
+        <h2>Index Type</h2>
+        <Select
+            onChange={this.handleOnChangeIndexType}
+            options={INDEX_TYPE_RS_OPTIONS}
+            value={{ label: indexTypeValue, value: indexTypeValue }} />
       </section>
     );
   }
@@ -1051,6 +1076,7 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
         { this.renderDescriptionSection() }
         { this.renderPropertyTypeDataTypeSelectSection() }
         { this.renderPropertyTypeAnalyzerTypeSelectSection() }
+        { this.renderPropertyTypeIndexTypeSelectSection() }
         { this.renderPropertyTypePiiSection() }
         { this.renderPropertyTypeMultiValuedSection() }
         { this.renderAssociationTypeBidirectionalSection() }
