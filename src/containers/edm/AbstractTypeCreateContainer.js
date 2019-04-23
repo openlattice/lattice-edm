@@ -61,11 +61,9 @@ const MV_RADIO_NAME :string = 'propertyTypeMultiValued';
 const MV_YES_RADIO_ID :string = 'propertyTypeMultiValued-1';
 const MV_NO_RADIO_ID :string = 'propertyTypeMultiValued-2';
 
-const DATA_TYPE_OPTIONS = EDM_PRIMITIVE_TYPES.map((primitive :string) => (
-  <option key={primitive} value={primitive}>
-    { primitive }
-  </option>
-));
+const DATA_TYPE_RS_OPTIONS = EDM_PRIMITIVE_TYPES.map(
+  (primitive :string) => ({ label: primitive, value: primitive })
+);
 
 const ANALYZER_TYPE_RS_OPTIONS = Object.keys(AnalyzerTypes).map(
   (analyzerType :AnalyzerType) => ({ label: analyzerType, value: analyzerType })
@@ -466,10 +464,10 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
     });
   }
 
-  handleOnChangeDataType = (event :SyntheticInputEvent<*>) => {
+  handleOnChangeDataType = (rsOption :{ label :string, value :string }) => {
 
     let { phoneticSearchesValue } = this.state;
-    const datatypeValue = event.target.value || 'String';
+    const datatypeValue = rsOption.value || 'String';
 
     if (datatypeValue !== 'String') {
       phoneticSearchesValue = false;
@@ -631,12 +629,11 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
 
     return (
       <section>
-        <h2>
-          Data Type
-        </h2>
-        <TypeSelect onChange={this.handleOnChangeDataType} defaultValue="String">
-          { DATA_TYPE_OPTIONS }
-        </TypeSelect>
+        <h2>Data Type</h2>
+        <Select
+            onChange={this.handleOnChangeDataType}
+            options={DATA_TYPE_RS_OPTIONS}
+            value={{ label: datatypeValue, value: datatypeValue }} />
         {
           datatypeValue !== 'String'
             ? null
