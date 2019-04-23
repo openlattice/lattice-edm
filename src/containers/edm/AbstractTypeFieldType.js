@@ -124,4 +124,4 @@ const mapDispatchToProps = (dispatch :Function) :Object => ({
   }, dispatch)
 });
 
-export default connect(null, mapDispatchToProps)(AbstractTypeFieldType);
+export default connect<*, *, *, *, *, *>(null, mapDispatchToProps)(AbstractTypeFieldType);

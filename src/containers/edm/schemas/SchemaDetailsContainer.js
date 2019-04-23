@@ -488,4 +488,4 @@ const mapDispatchToProps = (dispatch :Function) :Object => ({
   }, dispatch)
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(SchemaDetailsContainer);
+export default connect<*, *, *, *, *, *>(mapStateToProps, mapDispatchToProps)(SchemaDetailsContainer);
