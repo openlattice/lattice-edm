@@ -137,7 +137,7 @@ type Props = {
   onChange :(value :string) => void;
   onEditToggle ?:(editable :boolean) => void;
   placeholder ?:string;
-  size ?:string;
+  size :string;
   type ?:string;
   validate ?:(value :string) => boolean;
   value ?:string;
@@ -173,7 +173,8 @@ export default class InlineEditableControl extends React.Component<Props, State>
 
     super(props);
 
-    const initialValue :string = isNonEmptyString(props.value) ? props.value : '';
+    const value = props.value || '';
+    const initialValue :string = isNonEmptyString(value) ? value : '';
     const initializeAsEditable :boolean = isEmptyString(initialValue);
 
     this.control = null;
@@ -222,7 +223,8 @@ export default class InlineEditableControl extends React.Component<Props, State>
     const { value } = this.props;
 
     if (value !== nextProps.value) {
-      const newValue :string = isNonEmptyString(nextProps.value) ? nextProps.value : '';
+      const nextValue = nextProps.value || '';
+      const newValue :string = isNonEmptyString(nextValue) ? nextValue : '';
       const initializeAsEditable :boolean = isEmptyString(newValue);
       this.setState({
         currentValue: newValue,

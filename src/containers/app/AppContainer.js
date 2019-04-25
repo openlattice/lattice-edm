@@ -138,11 +138,11 @@ class AppContainer extends Component<Props> {
   }
 }
 
-const mapDispatchToProps = (dispatch :Function) :Object => ({
+const mapDispatchToProps = (dispatch :Function) => ({
   actions: bindActionCreators({
     getEntityDataModel: EntityDataModelApiActions.getEntityDataModel,
     logout: AuthActions.logout,
   }, dispatch)
 });
 
-export default connect(null, mapDispatchToProps)(AppContainer);
+export default connect<*, *, *, *, *, *>(null, mapDispatchToProps)(AppContainer);

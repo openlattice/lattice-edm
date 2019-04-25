@@ -104,8 +104,10 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
                 .setDescription(at.entityType.description)
                 .setId(associationTypeId)
                 .setKey(at.entityType.key)
+                .setPropertyTags(at.entityType.propertyTags)
                 .setPropertyTypes(at.entityType.properties)
                 .setSchemas(at.entityType.schemas)
+                .setShards(at.entityType.shards)
                 .setTitle(at.entityType.title)
                 .setType(associationTypeFQN)
                 .build();
@@ -361,8 +363,10 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
               .setDescription(storedAssociationType.entityType.description)
               .setId(associationTypeId)
               .setKey(storedAssociationType.entityType.key)
+              .setPropertyTags(storedAssociationType.entityType.propertyTags)
               .setPropertyTypes(storedAssociationType.entityType.properties)
               .setSchemas(storedAssociationType.entityType.schemas)
+              .setShards(storedAssociationType.entityType.shards)
               .setTitle(storedAssociationType.entityType.title)
               .setType(associationTypeFQN)
               .build();
@@ -690,8 +694,10 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
               .setDescription(currentAssociationType.entityType.description)
               .setId(currentAssociationType.entityType.id)
               .setKey(currentAssociationType.entityType.key)
+              .setPropertyTags(currentAssociationType.entityType.propertyTags)
               .setPropertyTypes(currentAssociationType.entityType.properties)
               .setSchemas(currentAssociationType.entityType.schemas)
+              .setShards(currentAssociationType.entityType.shards)
               .setTitle(currentAssociationType.entityType.title)
               .setType(currentAssociationType.entityType.type);
 

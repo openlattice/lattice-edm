@@ -347,7 +347,7 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
   }
 }
 
-const mapStateToProps = (state :Map<*, *>) :{} => ({
+const mapStateToProps = (state :Map<*, *>) => ({
   associationTypes: state.getIn(['edm', 'associationTypes', 'associationTypes']),
   associationTypesIndexMap: state.getIn(['edm', 'associationTypes', 'associationTypesIndexMap']),
   entityTypes: state.getIn(['edm', 'entityTypes', 'entityTypes']),
@@ -363,4 +363,4 @@ const mapStateToProps = (state :Map<*, *>) :{} => ({
   schemasIndexMap: state.getIn(['edm', 'schemas', 'schemasIndexMap']),
 });
 
-export default connect(mapStateToProps)(AbstractTypeOverviewContainer);
+export default connect<*, *, *, *, *, *>(mapStateToProps)(AbstractTypeOverviewContainer);

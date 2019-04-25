@@ -109,7 +109,7 @@ class AbstractTypeFieldDescription extends React.Component<Props, State> {
   }
 }
 
-const mapDispatchToProps = (dispatch :Function) :Object => ({
+const mapDispatchToProps = (dispatch :Function) => ({
   actions: bindActionCreators({
     localUpdateAssociationTypeMeta: AssociationTypesActions.localUpdateAssociationTypeMeta,
     localUpdateEntityTypeMeta: EntityTypesActions.localUpdateEntityTypeMeta,
@@ -117,4 +117,4 @@ const mapDispatchToProps = (dispatch :Function) :Object => ({
   }, dispatch)
 });
 
-export default connect(null, mapDispatchToProps)(AbstractTypeFieldDescription);
+export default connect<*, *, *, *, *, *>(null, mapDispatchToProps)(AbstractTypeFieldDescription);

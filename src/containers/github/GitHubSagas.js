@@ -3,8 +3,8 @@
  */
 
 import axios from 'axios';
-import format from 'date-fns/format';
 import { put, takeEvery } from '@redux-saga/core/effects';
+import { format } from 'date-fns';
 import { Map, fromJS } from 'immutable';
 
 import Logger from '../../utils/Logger';
@@ -44,10 +44,9 @@ function* openPullRequestWorker(seqAction :SequenceAction) :Generator<*, *, *> {
     const edmAsString = JSON.stringify(value.edm, undefined, 2);
     const edmAsBase64 = Base64.encode(edmAsString);
 
-    const axiosConfig = {
-      auth: { username: value.username, password: value.password },
-      baseURL: 'https://api.github.com/repos/Lattice-Works/EDM',
-    };
+    const axiosConfig = {};
+    axiosConfig.auth = { username: value.username, password: value.password };
+    axiosConfig.baseURL = 'https://api.github.com/repos/Lattice-Works/EDM';
 
     if (value.otp) {
       axiosConfig.headers = { 'X-GitHub-OTP': value.otp };

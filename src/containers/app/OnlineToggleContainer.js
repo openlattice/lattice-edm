@@ -82,10 +82,10 @@ const mapStateToProps = state => ({
   isOnline: state.getIn(['app', 'isOnline'], false),
 });
 
-const mapDispatchToProps = (dispatch :Function) :Object => ({
+const mapDispatchToProps = (dispatch :Function) => ({
   actions: bindActionCreators({
     toggleOnline: AppActions.toggleOnline,
   }, dispatch)
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(OnlineToggleContainer);
+export default connect<*, *, *, *, *, *>(mapStateToProps, mapDispatchToProps)(OnlineToggleContainer);
