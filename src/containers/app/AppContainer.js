@@ -22,7 +22,7 @@ import GitHubContainer from '../github/GitHubContainer';
 import NavContainer from './NavContainer';
 import OnlineToggleContainer from './OnlineToggleContainer';
 import SyncContainer from '../sync/SyncContainer';
-import { GOOGLE_TRACKING_ID } from '../../core/tracking';
+import { GOOGLE_TRACKING_ID } from '../../core/tracking/google/GoogleAnalytics';
 
 declare var gtag :?Function;
 
