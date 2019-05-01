@@ -3,7 +3,11 @@
  */
 
 const TOGGLE_ONLINE :'TOGGLE_ONLINE' = 'TOGGLE_ONLINE';
-function toggleOnline() :Object {
+type ToggleOnlineAction = {
+  type :typeof TOGGLE_ONLINE;
+};
+
+function toggleOnline() :ToggleOnlineAction {
   return {
     type: TOGGLE_ONLINE,
   };

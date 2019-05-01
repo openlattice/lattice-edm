@@ -9,6 +9,7 @@ import { applyMiddleware, compose, createStore } from 'redux';
 
 import sagas from '../sagas/Sagas';
 import reduxReducer from './ReduxReducer';
+import { GoogleAnalyticsEvents, trackingMiddleware } from '../tracking';
 
 export default function initializeReduxStore(routerHistory :any) :Object {
 
@@ -16,7 +17,8 @@ export default function initializeReduxStore(routerHistory :any) :Object {
 
   const reduxMiddlewares = [
     sagaMiddleware,
-    routerMiddleware(routerHistory)
+    routerMiddleware(routerHistory),
+    trackingMiddleware(GoogleAnalyticsEvents),
   ];
 
   const reduxEnhancers = [
