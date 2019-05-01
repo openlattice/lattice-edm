@@ -4,6 +4,7 @@
 
 import React, { Component } from 'react';
 
+import isFunction from 'lodash/isFunction';
 import qs from 'qs';
 import styled from 'styled-components';
 import { AuthActions, AuthUtils } from 'lattice-auth';
@@ -21,6 +22,9 @@ import GitHubContainer from '../github/GitHubContainer';
 import NavContainer from './NavContainer';
 import OnlineToggleContainer from './OnlineToggleContainer';
 import SyncContainer from '../sync/SyncContainer';
+import { GOOGLE_TRACKING_ID } from '../../core/tracking';
+
+declare var gtag :?Function;
 
 /*
  * styled components
@@ -96,9 +100,18 @@ class AppContainer extends Component<Props> {
     actions.getEntityDataModel();
   }
 
-  render() {
+  handleOnClickLogOut = () => {
 
     const { actions } = this.props;
+    actions.logout();
+
+    if (isFunction(gtag)) {
+      gtag('config', GOOGLE_TRACKING_ID, { user_id: undefined, send_page_view: false });
+    }
+  }
+
+  render() {
+
     // TODO: revert when ready to release
     const showOnlineToggle :boolean = false; // AuthUtils.isAuthenticated() && AuthUtils.isAdmin();
 
@@ -113,7 +126,7 @@ class AppContainer extends Component<Props> {
             {
               AuthUtils.isAuthenticated()
                 ? (
-                  <StyledActionButton onClick={actions.logout}>Logout</StyledActionButton>
+                  <StyledActionButton onClick={this.handleOnClickLogOut}>Logout</StyledActionButton>
                 )
                 : (
                   <StyledActionButton as="a" href={`${getLoginUrl()}`}>Login</StyledActionButton>
