@@ -4,12 +4,13 @@
 
 import React from 'react';
 
+import Select from 'react-select';
 import styled from 'styled-components';
 import { List, Map, Set } from 'immutable';
 import { Models, Types } from 'lattice';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import type { AnalyzerType, FQN } from 'lattice';
+import type { AnalyzerType, FQN, IndexType } from 'lattice';
 
 import AbstractTypes from '../../utils/AbstractTypes';
 import AbstractTypeDataTable from '../../components/datatable/AbstractTypeDataTable';
@@ -41,6 +42,7 @@ const {
 
 const {
   AnalyzerTypes,
+  IndexTypes,
   SecurableTypes
 } = Types;
 
@@ -56,17 +58,21 @@ const PII_RADIO_NAME :string = 'propertyTypePii';
 const PII_YES_RADIO_ID :string = 'propertyTypePii-1';
 const PII_NO_RADIO_ID :string = 'propertyTypePii-2';
 
-const DATA_TYPE_OPTIONS = EDM_PRIMITIVE_TYPES.map((primitive :string) => (
-  <option key={primitive} value={primitive}>
-    { primitive }
-  </option>
-));
+const MV_RADIO_NAME :string = 'propertyTypeMultiValued';
+const MV_YES_RADIO_ID :string = 'propertyTypeMultiValued-1';
+const MV_NO_RADIO_ID :string = 'propertyTypeMultiValued-2';
 
-const ANALYZER_TYPE_OPTIONS = Object.keys(AnalyzerTypes).map((anaylzer :AnalyzerType) => (
-  <option key={anaylzer} value={anaylzer}>
-    { anaylzer }
-  </option>
-));
+const DATA_TYPE_RS_OPTIONS = EDM_PRIMITIVE_TYPES.map(
+  (primitive :string) => ({ label: primitive, value: primitive })
+);
+
+const ANALYZER_TYPE_RS_OPTIONS = Object.keys(AnalyzerTypes).map(
+  (analyzerType :AnalyzerType) => ({ label: analyzerType, value: analyzerType })
+);
+
+const INDEX_TYPE_RS_OPTIONS = Object.keys(IndexTypes).map(
+  (indexType :IndexType) => ({ label: indexType, value: indexType })
+);
 
 /*
  * styled components
@@ -87,14 +93,6 @@ const ActionButtons = styled.div`
   button {
     margin: 0 10px;
   }
-`;
-
-const TypeSelect = styled.select`
-  align-self: left;
-  background: none;
-  border: 1px solid #c5d5e5;
-  height: 32px;
-  outline: none;
 `;
 
 const PhoneticCheckboxWrapper = styled.label`
@@ -139,10 +137,10 @@ type Props = {
     localCreateSchema :RequestSequence;
   };
   entityTypes :List<Map<*, *>>;
-  propertyTypes :List<Map<*, *>>;
-  workingAbstractTypeType :AbstractType;
   onCancel :() => void;
   onSubmit :() => void;
+  propertyTypes :List<Map<*, *>>;
+  workingAbstractTypeType :AbstractType;
 };
 
 type State = {
@@ -150,18 +148,20 @@ type State = {
   bidiValue :boolean;
   datatypeValue :string;
   descriptionValue :string;
+  indexTypeValue :IndexType;
   isInEditModeName :boolean;
   isInEditModeNamespace :boolean;
   isInEditModeTitle :boolean;
+  multiValuedValue :boolean;
   nameValue :string;
   namespaceValue :string;
   phoneticSearchesValue :boolean;
   piiValue :boolean;
-  titleValue :string;
   selectedDestinationEntityTypes :Set<Map<*, *>>;
   selectedPrimaryKeyPropertyTypes :Set<Map<*, *>>;
   selectedPropertyTypes :Set<Map<*, *>>;
   selectedSourceEntityTypes :Set<Map<*, *>>;
+  titleValue :string;
 };
 
 class AbstractTypeCreateContainer extends React.Component<Props, State> {
@@ -175,9 +175,11 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
       bidiValue: false,
       datatypeValue: 'String',
       descriptionValue: '',
+      indexTypeValue: IndexTypes.BTREE,
       isInEditModeName: true,
       isInEditModeNamespace: true,
       isInEditModeTitle: true,
+      multiValuedValue: true,
       nameValue: '',
       namespaceValue: '',
       phoneticSearchesValue: false,
@@ -239,6 +241,8 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
       bidiValue,
       datatypeValue,
       descriptionValue,
+      indexTypeValue,
+      multiValuedValue,
       nameValue,
       namespaceValue,
       phoneticSearchesValue,
@@ -268,6 +272,8 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
         .setAnalyzer(analyzer)
         .setDataType(datatypeValue)
         .setDescription(descriptionValue)
+        .setIndexType(indexTypeValue)
+        .setMultiValued(multiValuedValue)
         .setPii(piiValue)
         .setTitle(titleValue)
         .setType(new FullyQualifiedName(namespaceValue, nameValue))
@@ -447,10 +453,10 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
     });
   }
 
-  handleOnChangeAnalyzerType = (event :SyntheticInputEvent<*>) => {
+  handleOnChangeAnalyzerType = (rsOption :{ label :string, value :string }) => {
 
     this.setState({
-      analyzerValue: AnalyzerTypes[event.target.value] || AnalyzerTypes.STANDARD,
+      analyzerValue: AnalyzerTypes[rsOption.value] || AnalyzerTypes.STANDARD,
     });
   }
 
@@ -461,10 +467,10 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
     });
   }
 
-  handleOnChangeDataType = (event :SyntheticInputEvent<*>) => {
+  handleOnChangeDataType = (rsOption :{ label :string, value :string }) => {
 
     let { phoneticSearchesValue } = this.state;
-    const datatypeValue = event.target.value || 'String';
+    const datatypeValue = rsOption.value || 'String';
 
     if (datatypeValue !== 'String') {
       phoneticSearchesValue = false;
@@ -483,7 +489,25 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
     });
   }
 
+  handleOnChangeIndexType = (rsOption :{ label :string, value :string }) => {
+
+    this.setState({
+      indexTypeValue: IndexTypes[rsOption.value] || IndexTypes.BTREE,
+    });
+  }
+
+  handleOnChangeMultiValued = (event :SyntheticInputEvent<*>) => {
+
+    this.setState({
+      multiValuedValue: event.target.id === MV_YES_RADIO_ID,
+    });
+  }
+
   handleOnChangeName = (name :string) => {
+
+    // TODO: enforce FQN max length <= 63
+    // const { namespaceValue } = this.state;
+    // const fqn = new FullyQualifiedName(namespaceValue, name);
 
     this.setState({
       nameValue: name || '',
@@ -492,6 +516,10 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
   }
 
   handleOnChangeNamespace = (namespace :string) => {
+
+    // TODO: enforce FQN max length <= 63
+    // const { nameValue } = this.state;
+    // const fqn = new FullyQualifiedName(namespace, nameValue);
 
     this.setState({
       namespaceValue: namespace || '',
@@ -619,12 +647,11 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
 
     return (
       <section>
-        <h2>
-          Data Type
-        </h2>
-        <TypeSelect onChange={this.handleOnChangeDataType} defaultValue="String">
-          { DATA_TYPE_OPTIONS }
-        </TypeSelect>
+        <h2>Data Type</h2>
+        <Select
+            onChange={this.handleOnChangeDataType}
+            options={DATA_TYPE_RS_OPTIONS}
+            value={{ label: datatypeValue, value: datatypeValue }} />
         {
           datatypeValue !== 'String'
             ? null
@@ -653,12 +680,30 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
 
     return (
       <section>
-        <h2>
-          Analyzer Type
-        </h2>
-        <TypeSelect onChange={this.handleOnChangeAnalyzerType} value={analyzerValue}>
-          { ANALYZER_TYPE_OPTIONS }
-        </TypeSelect>
+        <h2>Analyzer Type</h2>
+        <Select
+            onChange={this.handleOnChangeAnalyzerType}
+            options={ANALYZER_TYPE_RS_OPTIONS}
+            value={{ label: analyzerValue, value: analyzerValue }} />
+      </section>
+    );
+  }
+
+  renderPropertyTypeIndexTypeSelectSection = () => {
+
+    const { workingAbstractTypeType } = this.props;
+    const { indexTypeValue } = this.state;
+    if (workingAbstractTypeType !== AbstractTypes.PropertyType) {
+      return null;
+    }
+
+    return (
+      <section>
+        <h2>Index Type</h2>
+        <Select
+            onChange={this.handleOnChangeIndexType}
+            options={INDEX_TYPE_RS_OPTIONS}
+            value={{ label: indexTypeValue, value: indexTypeValue }} />
       </section>
     );
   }
@@ -694,6 +739,44 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
                 name={PII_RADIO_NAME}
                 onChange={this.handleOnChangePii}
                 checked={piiValue === false} />
+            No
+          </label>
+        </RadiosRowWrapper>
+      </section>
+    );
+  }
+
+  renderPropertyTypeMultiValuedSection = () => {
+
+    const { workingAbstractTypeType } = this.props;
+    const { multiValuedValue } = this.state;
+
+    if (workingAbstractTypeType !== AbstractTypes.PropertyType) {
+      return null;
+    }
+
+    return (
+      <section>
+        <h2>
+          Multi Valued
+        </h2>
+        <RadiosRowWrapper>
+          <label htmlFor={MV_YES_RADIO_ID}>
+            <input
+                type="radio"
+                id={MV_YES_RADIO_ID}
+                name={MV_RADIO_NAME}
+                onChange={this.handleOnChangeMultiValued}
+                checked={multiValuedValue === true} />
+            Yes
+          </label>
+          <label htmlFor={MV_NO_RADIO_ID}>
+            <input
+                type="radio"
+                id={MV_NO_RADIO_ID}
+                name={MV_RADIO_NAME}
+                onChange={this.handleOnChangeMultiValued}
+                checked={multiValuedValue === false} />
             No
           </label>
         </RadiosRowWrapper>
@@ -986,7 +1069,9 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
         { this.renderDescriptionSection() }
         { this.renderPropertyTypeDataTypeSelectSection() }
         { this.renderPropertyTypeAnalyzerTypeSelectSection() }
+        { this.renderPropertyTypeIndexTypeSelectSection() }
         { this.renderPropertyTypePiiSection() }
+        { this.renderPropertyTypeMultiValuedSection() }
         { this.renderAssociationTypeBidirectionalSection() }
         { this.renderEntityTypePrimaryKeyPropertyTypesSelectSection() }
         { this.renderEntityTypePropertyTypesSelectSection() }
