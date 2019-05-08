@@ -505,6 +505,10 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
 
   handleOnChangeName = (name :string) => {
 
+    // TODO: enforce FQN max length <= 63
+    // const { namespaceValue } = this.state;
+    // const fqn = new FullyQualifiedName(namespaceValue, name);
+
     this.setState({
       nameValue: name || '',
       isInEditModeName: false,
@@ -512,6 +516,10 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
   }
 
   handleOnChangeNamespace = (namespace :string) => {
+
+    // TODO: enforce FQN max length <= 63
+    // const { nameValue } = this.state;
+    // const fqn = new FullyQualifiedName(namespace, nameValue);
 
     this.setState({
       namespaceValue: namespace || '',
