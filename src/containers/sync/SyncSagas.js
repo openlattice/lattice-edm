@@ -6,9 +6,9 @@
 
 import Lattice, { Models } from 'lattice';
 import { call, put, takeEvery } from '@redux-saga/core/effects';
+import { AuthUtils } from 'lattice-auth';
 import { EntityDataModelApiActions, EntityDataModelApiSagas } from 'lattice-sagas';
 
-import { resetLatticeConfig } from '../../utils/Utils';
 import {
   SYNC_PROD_EDM,
   syncProdEntityDataModel,
@@ -77,7 +77,8 @@ function* syncProdEntityDataModelWorker(action :SequenceAction) :Generator<*, *,
     prodEntityDataModel = removeOpenLatticeAuditType(prodEntityDataModel);
 
     // revert back to initial configuration
-    resetLatticeConfig();
+    Lattice.configure({ authToken: AuthUtils.getAuthToken(), baseUrl: 'localhost' });
+
     response = yield call(getEntityDataModelDiffWorker, getEntityDataModelDiff(prodEntityDataModel));
     if (response.error) {
       throw new Error(response.error);
@@ -100,7 +101,7 @@ function* syncProdEntityDataModelWorker(action :SequenceAction) :Generator<*, *,
   }
   finally {
     // making sure to revert back to initial configuration
-    resetLatticeConfig();
+    Lattice.configure({ authToken: AuthUtils.getAuthToken(), baseUrl: 'localhost' });
     yield put(syncProdEntityDataModel.finally(action.id));
   }
 }
