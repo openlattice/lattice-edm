@@ -3,6 +3,7 @@
  */
 
 import { newRequestSequence } from 'redux-reqseq';
+import type { RequestSequence } from 'redux-reqseq';
 
 const LOCAL_CREATE_SCHEMA :'LOCAL_CREATE_SCHEMA' = 'LOCAL_CREATE_SCHEMA';
 const localCreateSchema :RequestSequence = newRequestSequence(LOCAL_CREATE_SCHEMA);

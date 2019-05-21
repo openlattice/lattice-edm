@@ -13,6 +13,7 @@ import {
 import { Models, Types } from 'lattice';
 import { EntityDataModelApiActions } from 'lattice-sagas';
 import type { FQN, AssociationTypeObject } from 'lattice';
+import type { SequenceAction } from 'redux-reqseq';
 
 import Logger from '../../../utils/Logger';
 import { isValidUUID } from '../../../utils/ValidationUtils';

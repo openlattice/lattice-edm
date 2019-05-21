@@ -23,6 +23,11 @@ module.exports = (env) => {
   const ENV_DEV = 'development';
   const ENV_PROD = 'production';
 
+  // NOTE: for future reference
+  // const getNodeModulesRegEx = toInclude => (
+  //   new RegExp(`/(node_modules|openlattice)/(${toInclude.join('|')})`)
+  // );
+
   /*
    * loaders
    */
@@ -32,6 +37,8 @@ module.exports = (env) => {
     exclude: /node_modules/,
     include: [
       APP_PATHS.ABS.SOURCE,
+      // NOTE: for future reference
+      // getNodeModulesRegEx(['redux-reqseq']),
     ],
     use: {
       loader: 'babel-loader',
