@@ -3,8 +3,8 @@
  */
 
 import isFunction from 'lodash/isFunction';
-import { Map } from 'immutable';
 import { AuthUtils } from 'lattice-auth';
+import type { Map } from 'immutable';
 
 import Logger from '../../../../utils/Logger';
 import { GOOGLE_TRACKING_ID } from '../GoogleAnalytics';
@@ -22,7 +22,7 @@ type RouteChangeEvent = {
   user_id ?:string;
 };
 
-export default function handler(action :Action, prevState :Map, nextState :Map) {
+export default function handler(action :Action, prevState :Map<any, any>, nextState :Map<any, any>) {
 
   const prevPath = prevState.getIn(['router', 'location', 'pathname'], '');
   const prevSearch = prevState.getIn(['router', 'location', 'search'], '');

@@ -8,6 +8,7 @@ import Lattice, { Models } from 'lattice';
 import { call, put, takeEvery } from '@redux-saga/core/effects';
 import { AuthUtils } from 'lattice-auth';
 import { EntityDataModelApiActions, EntityDataModelApiSagas } from 'lattice-sagas';
+import type { SequenceAction } from 'redux-reqseq';
 
 import {
   SYNC_PROD_EDM,

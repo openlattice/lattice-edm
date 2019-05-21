@@ -19,6 +19,7 @@ import { Models } from 'lattice';
 import { AuthUtils } from 'lattice-auth';
 import { connect } from 'react-redux';
 import { Redirect, withRouter } from 'react-router';
+import type { RequestSequence } from 'redux-reqseq';
 
 import StyledButton from '../../components/buttons/StyledButton';
 import Spinner from '../../components/spinner/Spinner';

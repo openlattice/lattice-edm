@@ -3,6 +3,7 @@
  */
 
 import { newRequestSequence } from 'redux-reqseq';
+import type { RequestSequence } from 'redux-reqseq';
 
 const LOCAL_ADD_DST_ET_TO_AT :'LOCAL_ADD_DST_ET_TO_AT' = 'LOCAL_ADD_DST_ET_TO_AT';
 const localAddDstEntityTypeToAssociationType :RequestSequence = newRequestSequence(LOCAL_ADD_DST_ET_TO_AT);

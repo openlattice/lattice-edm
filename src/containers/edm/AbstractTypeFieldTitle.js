@@ -10,6 +10,7 @@ import { AuthUtils } from 'lattice-auth';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import type { FQN } from 'lattice';
+import type { RequestSequence } from 'redux-reqseq';
 
 import AbstractTypes from '../../utils/AbstractTypes';
 import InlineEditableControl from '../../components/controls/InlineEditableControl';

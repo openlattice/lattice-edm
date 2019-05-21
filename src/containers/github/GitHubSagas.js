@@ -6,6 +6,7 @@ import axios from 'axios';
 import { put, takeEvery } from '@redux-saga/core/effects';
 import { format } from 'date-fns';
 import { Map, fromJS } from 'immutable';
+import type { SequenceAction } from 'redux-reqseq';
 
 import Logger from '../../utils/Logger';
 import { ERR_ACTION_VALUE_NOT_DEFINED, ERR_WORKER_SAGA } from '../../utils/Errors';

@@ -10,6 +10,7 @@ import {
 } from '@redux-saga/core/effects';
 import type { FQN, EntityType } from 'lattice';
 import { EntityDataModelApiActions, EntityDataModelApiSagas } from 'lattice-sagas';
+import type { SequenceAction } from 'redux-reqseq';
 
 import Logger from '../../../utils/Logger';
 import { isValidUUID } from '../../../utils/ValidationUtils';
