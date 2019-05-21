@@ -3,6 +3,7 @@
  */
 
 import { newRequestSequence } from 'redux-reqseq';
+import type { RequestSequence } from 'redux-reqseq';
 
 const LOCAL_ADD_PT_TO_ET :'LOCAL_ADD_PT_TO_ET' = 'LOCAL_ADD_PT_TO_ET';
 const localAddPropertyTypeToEntityType :RequestSequence = newRequestSequence(LOCAL_ADD_PT_TO_ET);

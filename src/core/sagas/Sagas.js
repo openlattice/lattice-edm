@@ -16,14 +16,14 @@ import * as SyncSagas from '../../containers/sync/SyncSagas';
 export default function* sagas() :Generator<*, *, *> {
 
   yield all([
-    // "lattice-auth" Sagas
+    // "lattice-auth" sagas
     fork(AuthSagas.watchAuthAttempt),
     fork(AuthSagas.watchAuthSuccess),
     fork(AuthSagas.watchAuthFailure),
     fork(AuthSagas.watchAuthExpired),
     fork(AuthSagas.watchLogout),
 
-    // "lattice-sagas" Sagas
+    // "lattice-sagas" sagas
     fork(EntityDataModelApiSagas.getEntityDataModelWatcher),
     fork(EntityDataModelApiSagas.addDstEntityTypeToAssociationTypeWatcher),
     fork(EntityDataModelApiSagas.addPropertyTypeToEntityTypeWatcher),

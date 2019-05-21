@@ -13,9 +13,10 @@
 #
 [ignore]
 ./build/.*
+./config/.*
 .*/node_modules/.*
+!<PROJECT_ROOT>/node_modules/redux-reqseq
 
 [libs]
-./config/flow
 ./node_modules/lattice/config/flow/
-./node_modules/redux-reqseq/config/flow/
+./src/types.js.flow
