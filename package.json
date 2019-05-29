@@ -38,7 +38,7 @@
     "immutable": "4.0.0-rc.9",
     "lattice": "0.58.1",
     "lattice-auth": "0.14.0",
-    "lattice-sagas": "0.18.1",
+    "lattice-sagas": "0.19.0",
     "lodash": "~4.17.10",
     "loglevel": "~1.6.0",
     "polished": "~3.2.0",
