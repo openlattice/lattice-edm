@@ -4,8 +4,8 @@
 
 import axios from 'axios';
 import { put, takeEvery } from '@redux-saga/core/effects';
-import { format } from 'date-fns';
 import { Map, fromJS } from 'immutable';
+import { DateTime } from 'luxon';
 import type { SequenceAction } from 'redux-reqseq';
 
 import Logger from '../../utils/Logger';
@@ -67,7 +67,7 @@ function* openPullRequestWorker(seqAction :SequenceAction) :Generator<*, *, *> {
      * 2. create new branch off of "master"
      */
 
-    const formattedDateTime :string = format(new Date(), 'YYYYMMDDTHHmmss');
+    const formattedDateTime :string = DateTime.local().toFormat('yyyyMMddHHmmss');
     const newBranchName :string = `edm-changes-${formattedDateTime}`;
     response = yield ax.post('/git/refs', { ref: `refs/heads/${newBranchName}`, sha: masterBranchHash });
     const newBranchData :Map = fromJS(response.data);
