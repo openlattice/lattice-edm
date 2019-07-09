@@ -44,8 +44,15 @@ type UpdateEntityTypeMeta = {
   metadata :Object;
 };
 
+type PropertyTypeMeta = {
+  description ?:string;
+  title ?:string;
+  type ?:FQN;
+  pii ?:boolean;
+};
+
 type UpdatePropertyTypeMeta = {
-  metadata :Object;
+  metadata :PropertyTypeMeta;
   propertyTypeFQN :FQN;
   propertyTypeId :?UUID;
 };
@@ -54,6 +61,7 @@ export type {
   AbstractTypeOverviewContainerProps,
   AbstractTypeOverviewContainerState,
   IndexMap,
+  PropertyTypeMeta,
   UpdateAssociationTypeMeta,
   UpdateEntityTypeMeta,
   UpdatePropertyTypeMeta,

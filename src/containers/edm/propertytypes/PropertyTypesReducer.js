@@ -12,6 +12,7 @@ import {
 } from 'immutable';
 import { Models, Types } from 'lattice';
 import { EntityDataModelApiActions } from 'lattice-sagas';
+import { RequestStates } from 'redux-reqseq';
 import type { FQN, PropertyTypeObject } from 'lattice';
 import type { SequenceAction } from 'redux-reqseq';
 
@@ -21,6 +22,7 @@ import {
   LOCAL_CREATE_PROPERTY_TYPE,
   LOCAL_DELETE_PROPERTY_TYPE,
   LOCAL_UPDATE_PROPERTY_TYPE_META,
+  RESET_REQUEST_STATE,
   localCreatePropertyType,
   localDeletePropertyType,
   localUpdatePropertyTypeMeta,
@@ -48,10 +50,18 @@ const {
 } = Types;
 
 const INITIAL_STATE :Map<*, *> = fromJS({
-  [LOCAL_CREATE_PROPERTY_TYPE]: { error: false },
-  [LOCAL_DELETE_PROPERTY_TYPE]: { error: false },
-  [LOCAL_UPDATE_PROPERTY_TYPE_META]: { error: false },
-  [LOCAL_UPDATE_SCHEMA]: { error: false },
+  [LOCAL_CREATE_PROPERTY_TYPE]: {
+    requestState: RequestStates.STANDBY,
+  },
+  [LOCAL_DELETE_PROPERTY_TYPE]: {
+    requestState: RequestStates.STANDBY,
+  },
+  [LOCAL_UPDATE_PROPERTY_TYPE_META]: {
+    requestState: RequestStates.STANDBY,
+  },
+  [LOCAL_UPDATE_SCHEMA]: {
+    requestState: RequestStates.STANDBY,
+  },
   newlyCreatedPropertyTypeFQN: undefined,
   propertyTypes: List(),
   propertyTypesIndexMap: Map(),
@@ -60,6 +70,14 @@ const INITIAL_STATE :Map<*, *> = fromJS({
 export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, action :Object) :Map<*, *> {
 
   switch (action.type) {
+
+    case RESET_REQUEST_STATE: {
+      const { actionType } = action;
+      if (actionType && state.has(actionType)) {
+        return state.setIn([actionType, 'requestState'], RequestStates.STANDBY);
+      }
+      return state;
+    }
 
     case getEntityDataModel.case(action.type): {
       return getEntityDataModel.reducer(state, action, {
@@ -250,16 +268,16 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
     }
 
     case localUpdatePropertyTypeMeta.case(action.type): {
+      const seqAction :SequenceAction = action;
       return localUpdatePropertyTypeMeta.reducer(state, action, {
         REQUEST: () => {
-          const seqAction :SequenceAction = action;
-          return state.setIn([LOCAL_UPDATE_PROPERTY_TYPE_META, seqAction.id], seqAction);
+          return state
+            .setIn([LOCAL_UPDATE_PROPERTY_TYPE_META, 'requestState'], RequestStates.PENDING)
+            .setIn([LOCAL_UPDATE_PROPERTY_TYPE_META, seqAction.id], seqAction);
         },
         SUCCESS: () => {
 
-          const seqAction :SequenceAction = action;
           const storedSeqAction :SequenceAction = state.getIn([LOCAL_UPDATE_PROPERTY_TYPE_META, seqAction.id]);
-
           if (storedSeqAction) {
 
             const {
@@ -303,24 +321,27 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
                 .setIn(['propertyTypesIndexMap', newPropertyTypeFQN], propertyTypeIndex);
             }
 
+            if (has(metadata, 'pii')) {
+              propertyTypeBuilder.setPii(metadata.pii);
+            }
+
             const updatedPropertyType :PropertyType = propertyTypeBuilder.build();
             return newState
+              .setIn([LOCAL_UPDATE_PROPERTY_TYPE_META, 'requestState'], RequestStates.SUCCESS)
               .setIn(['propertyTypes', propertyTypeIndex], updatedPropertyType.toImmutable());
           }
 
           return state;
         },
         FAILURE: () => {
-          const seqAction :SequenceAction = action;
           const storedSeqAction :SequenceAction = state.getIn([LOCAL_UPDATE_PROPERTY_TYPE_META, seqAction.id]);
           if (storedSeqAction) {
             // TODO: we need a better pattern for setting and handling errors
-            return state.setIn([LOCAL_UPDATE_PROPERTY_TYPE_META, 'error'], true);
+            return state.setIn([LOCAL_UPDATE_PROPERTY_TYPE_META, 'requestState'], RequestStates.FAILURE);
           }
           return state;
         },
         FINALLY: () => {
-          const seqAction :SequenceAction = action;
           return state.deleteIn([LOCAL_UPDATE_PROPERTY_TYPE_META, seqAction.id]);
         },
       });
