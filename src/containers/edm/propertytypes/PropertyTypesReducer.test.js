@@ -2,6 +2,7 @@ import randomUUID from 'uuid/v4';
 import { List, Map, fromJS } from 'immutable';
 import { Models, Types } from 'lattice';
 import { EntityDataModelApiActions } from 'lattice-sagas';
+import { RequestStates } from 'redux-reqseq';
 
 import reducer from './PropertyTypesReducer';
 import { MOCK_PROPERTY_TYPE, genRandomFQN } from '../../../utils/testing/MockDataModels';
@@ -40,10 +41,10 @@ describe('PropertyTypesReducer', () => {
   test('INITIAL_STATE', () => {
     expect(INITIAL_STATE).toBeInstanceOf(Map);
     expect(INITIAL_STATE.toJS()).toEqual({
-      [LOCAL_CREATE_PROPERTY_TYPE]: { error: false },
-      [LOCAL_DELETE_PROPERTY_TYPE]: { error: false },
-      [LOCAL_UPDATE_PROPERTY_TYPE_META]: { error: false },
-      [LOCAL_UPDATE_SCHEMA]: { error: false },
+      [LOCAL_CREATE_PROPERTY_TYPE]: { requestState: RequestStates.STANDBY },
+      [LOCAL_DELETE_PROPERTY_TYPE]: { requestState: RequestStates.STANDBY },
+      [LOCAL_UPDATE_PROPERTY_TYPE_META]: { requestState: RequestStates.STANDBY },
+      [LOCAL_UPDATE_SCHEMA]: { requestState: RequestStates.STANDBY },
       newlyCreatedPropertyTypeFQN: undefined,
       propertyTypes: [],
       propertyTypesIndexMap: {},
