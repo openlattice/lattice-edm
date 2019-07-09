@@ -66,7 +66,7 @@ type Props = {
 
 type State = {
   modalState :{
-    actionPrimary :Function;
+    actionPrimary :() => void;
     isVisible :boolean;
     textTitle :string;
     textContent :string;
