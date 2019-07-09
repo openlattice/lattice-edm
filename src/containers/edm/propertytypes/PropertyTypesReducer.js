@@ -309,11 +309,11 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
               propertyTypeBuilder.setDescription(metadata.description);
             }
 
-            if (has(metadata, 'title')) {
+            if (metadata.title) {
               propertyTypeBuilder.setTitle(metadata.title);
             }
 
-            if (has(metadata, 'type')) {
+            if (metadata.type) {
               const newPropertyTypeFQN = new FullyQualifiedName(metadata.type);
               propertyTypeBuilder.setType(metadata.type);
               newState = newState
