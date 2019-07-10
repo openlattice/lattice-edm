@@ -6,14 +6,17 @@ import { RequestStates } from 'redux-reqseq';
 
 import reducer from './PropertyTypesReducer';
 import { MOCK_PROPERTY_TYPE, genRandomFQN } from '../../../utils/testing/MockDataModels';
+import { INVALID_PARAMS_SS } from '../../../utils/testing/Invalid';
 import { genRandomString } from '../../../utils/testing/MockUtils';
 import {
   LOCAL_CREATE_PROPERTY_TYPE,
   LOCAL_DELETE_PROPERTY_TYPE,
   LOCAL_UPDATE_PROPERTY_TYPE_META,
+  RESET_REQUEST_STATE,
   localCreatePropertyType,
   localDeletePropertyType,
   localUpdatePropertyTypeMeta,
+  resetRequestState,
 } from './PropertyTypesActions';
 import {
   LOCAL_UPDATE_SCHEMA,
@@ -49,6 +52,61 @@ describe('PropertyTypesReducer', () => {
       propertyTypes: [],
       propertyTypesIndexMap: {},
     });
+  });
+
+  describe(RESET_REQUEST_STATE, () => {
+
+    const initialState = INITIAL_STATE
+      .setIn([LOCAL_CREATE_PROPERTY_TYPE, 'requestState'], RequestStates.PENDING)
+      .setIn([LOCAL_DELETE_PROPERTY_TYPE, 'requestState'], RequestStates.PENDING)
+      .setIn([LOCAL_UPDATE_PROPERTY_TYPE_META, 'requestState'], RequestStates.PENDING)
+      .setIn([LOCAL_UPDATE_SCHEMA, 'requestState'], RequestStates.PENDING);
+
+    test(LOCAL_CREATE_PROPERTY_TYPE, () => {
+
+      const newState = reducer(initialState, resetRequestState(LOCAL_CREATE_PROPERTY_TYPE));
+      expect(newState.getIn([LOCAL_CREATE_PROPERTY_TYPE, 'requestState'])).toEqual(RequestStates.STANDBY);
+      expect(newState.getIn([LOCAL_DELETE_PROPERTY_TYPE, 'requestState'])).toEqual(RequestStates.PENDING);
+      expect(newState.getIn([LOCAL_UPDATE_PROPERTY_TYPE_META, 'requestState'])).toEqual(RequestStates.PENDING);
+      expect(newState.getIn([LOCAL_UPDATE_SCHEMA, 'requestState'])).toEqual(RequestStates.PENDING);
+    });
+
+    test(LOCAL_DELETE_PROPERTY_TYPE, () => {
+
+      const newState = reducer(initialState, resetRequestState(LOCAL_DELETE_PROPERTY_TYPE));
+      expect(newState.getIn([LOCAL_CREATE_PROPERTY_TYPE, 'requestState'])).toEqual(RequestStates.PENDING);
+      expect(newState.getIn([LOCAL_DELETE_PROPERTY_TYPE, 'requestState'])).toEqual(RequestStates.STANDBY);
+      expect(newState.getIn([LOCAL_UPDATE_PROPERTY_TYPE_META, 'requestState'])).toEqual(RequestStates.PENDING);
+      expect(newState.getIn([LOCAL_UPDATE_SCHEMA, 'requestState'])).toEqual(RequestStates.PENDING);
+    });
+
+    test(LOCAL_UPDATE_PROPERTY_TYPE_META, () => {
+
+      const newState = reducer(initialState, resetRequestState(LOCAL_UPDATE_PROPERTY_TYPE_META));
+      expect(newState.getIn([LOCAL_CREATE_PROPERTY_TYPE, 'requestState'])).toEqual(RequestStates.PENDING);
+      expect(newState.getIn([LOCAL_DELETE_PROPERTY_TYPE, 'requestState'])).toEqual(RequestStates.PENDING);
+      expect(newState.getIn([LOCAL_UPDATE_PROPERTY_TYPE_META, 'requestState'])).toEqual(RequestStates.STANDBY);
+      expect(newState.getIn([LOCAL_UPDATE_SCHEMA, 'requestState'])).toEqual(RequestStates.PENDING);
+    });
+
+    test(LOCAL_UPDATE_SCHEMA, () => {
+
+      const newState = reducer(initialState, resetRequestState(LOCAL_UPDATE_SCHEMA));
+      expect(newState.getIn([LOCAL_CREATE_PROPERTY_TYPE, 'requestState'])).toEqual(RequestStates.PENDING);
+      expect(newState.getIn([LOCAL_DELETE_PROPERTY_TYPE, 'requestState'])).toEqual(RequestStates.PENDING);
+      expect(newState.getIn([LOCAL_UPDATE_PROPERTY_TYPE_META, 'requestState'])).toEqual(RequestStates.PENDING);
+      expect(newState.getIn([LOCAL_UPDATE_SCHEMA, 'requestState'])).toEqual(RequestStates.STANDBY);
+    });
+
+    test('should not change state given an invalid action type', () => {
+
+      INVALID_PARAMS_SS.forEach((invalid) => {
+        const stateAfterRequest = reducer(INITIAL_STATE, resetRequestState(invalid));
+        expect(stateAfterRequest.hashCode()).toEqual(INITIAL_STATE.hashCode());
+        expect(stateAfterRequest.equals(INITIAL_STATE)).toEqual(true);
+      });
+    });
+
   });
 
   describe(GET_ENTITY_DATA_MODEL, () => {
