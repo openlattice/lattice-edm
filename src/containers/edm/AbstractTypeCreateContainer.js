@@ -11,6 +11,7 @@ import { Models, Types } from 'lattice';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import type { AnalyzerType, FQN, IndexType } from 'lattice';
+import type { RequestSequence } from 'redux-reqseq';
 
 import AbstractTypes from '../../utils/AbstractTypes';
 import AbstractTypeDataTable from '../../components/datatable/AbstractTypeDataTable';
