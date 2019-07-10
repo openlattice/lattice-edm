@@ -2,17 +2,21 @@ import randomUUID from 'uuid/v4';
 import { List, Map, fromJS } from 'immutable';
 import { Models, Types } from 'lattice';
 import { EntityDataModelApiActions } from 'lattice-sagas';
+import { RequestStates } from 'redux-reqseq';
 
 import reducer from './PropertyTypesReducer';
 import { MOCK_PROPERTY_TYPE, genRandomFQN } from '../../../utils/testing/MockDataModels';
+import { INVALID_PARAMS_SS } from '../../../utils/testing/Invalid';
 import { genRandomString } from '../../../utils/testing/MockUtils';
 import {
   LOCAL_CREATE_PROPERTY_TYPE,
   LOCAL_DELETE_PROPERTY_TYPE,
   LOCAL_UPDATE_PROPERTY_TYPE_META,
+  RESET_REQUEST_STATE,
   localCreatePropertyType,
   localDeletePropertyType,
   localUpdatePropertyTypeMeta,
+  resetRequestState,
 } from './PropertyTypesActions';
 import {
   LOCAL_UPDATE_SCHEMA,
@@ -40,14 +44,69 @@ describe('PropertyTypesReducer', () => {
   test('INITIAL_STATE', () => {
     expect(INITIAL_STATE).toBeInstanceOf(Map);
     expect(INITIAL_STATE.toJS()).toEqual({
-      [LOCAL_CREATE_PROPERTY_TYPE]: { error: false },
-      [LOCAL_DELETE_PROPERTY_TYPE]: { error: false },
-      [LOCAL_UPDATE_PROPERTY_TYPE_META]: { error: false },
-      [LOCAL_UPDATE_SCHEMA]: { error: false },
+      [LOCAL_CREATE_PROPERTY_TYPE]: { requestState: RequestStates.STANDBY },
+      [LOCAL_DELETE_PROPERTY_TYPE]: { requestState: RequestStates.STANDBY },
+      [LOCAL_UPDATE_PROPERTY_TYPE_META]: { requestState: RequestStates.STANDBY },
+      [LOCAL_UPDATE_SCHEMA]: { requestState: RequestStates.STANDBY },
       newlyCreatedPropertyTypeFQN: undefined,
       propertyTypes: [],
       propertyTypesIndexMap: {},
     });
+  });
+
+  describe(RESET_REQUEST_STATE, () => {
+
+    const initialState = INITIAL_STATE
+      .setIn([LOCAL_CREATE_PROPERTY_TYPE, 'requestState'], RequestStates.PENDING)
+      .setIn([LOCAL_DELETE_PROPERTY_TYPE, 'requestState'], RequestStates.PENDING)
+      .setIn([LOCAL_UPDATE_PROPERTY_TYPE_META, 'requestState'], RequestStates.PENDING)
+      .setIn([LOCAL_UPDATE_SCHEMA, 'requestState'], RequestStates.PENDING);
+
+    test(LOCAL_CREATE_PROPERTY_TYPE, () => {
+
+      const newState = reducer(initialState, resetRequestState(LOCAL_CREATE_PROPERTY_TYPE));
+      expect(newState.getIn([LOCAL_CREATE_PROPERTY_TYPE, 'requestState'])).toEqual(RequestStates.STANDBY);
+      expect(newState.getIn([LOCAL_DELETE_PROPERTY_TYPE, 'requestState'])).toEqual(RequestStates.PENDING);
+      expect(newState.getIn([LOCAL_UPDATE_PROPERTY_TYPE_META, 'requestState'])).toEqual(RequestStates.PENDING);
+      expect(newState.getIn([LOCAL_UPDATE_SCHEMA, 'requestState'])).toEqual(RequestStates.PENDING);
+    });
+
+    test(LOCAL_DELETE_PROPERTY_TYPE, () => {
+
+      const newState = reducer(initialState, resetRequestState(LOCAL_DELETE_PROPERTY_TYPE));
+      expect(newState.getIn([LOCAL_CREATE_PROPERTY_TYPE, 'requestState'])).toEqual(RequestStates.PENDING);
+      expect(newState.getIn([LOCAL_DELETE_PROPERTY_TYPE, 'requestState'])).toEqual(RequestStates.STANDBY);
+      expect(newState.getIn([LOCAL_UPDATE_PROPERTY_TYPE_META, 'requestState'])).toEqual(RequestStates.PENDING);
+      expect(newState.getIn([LOCAL_UPDATE_SCHEMA, 'requestState'])).toEqual(RequestStates.PENDING);
+    });
+
+    test(LOCAL_UPDATE_PROPERTY_TYPE_META, () => {
+
+      const newState = reducer(initialState, resetRequestState(LOCAL_UPDATE_PROPERTY_TYPE_META));
+      expect(newState.getIn([LOCAL_CREATE_PROPERTY_TYPE, 'requestState'])).toEqual(RequestStates.PENDING);
+      expect(newState.getIn([LOCAL_DELETE_PROPERTY_TYPE, 'requestState'])).toEqual(RequestStates.PENDING);
+      expect(newState.getIn([LOCAL_UPDATE_PROPERTY_TYPE_META, 'requestState'])).toEqual(RequestStates.STANDBY);
+      expect(newState.getIn([LOCAL_UPDATE_SCHEMA, 'requestState'])).toEqual(RequestStates.PENDING);
+    });
+
+    test(LOCAL_UPDATE_SCHEMA, () => {
+
+      const newState = reducer(initialState, resetRequestState(LOCAL_UPDATE_SCHEMA));
+      expect(newState.getIn([LOCAL_CREATE_PROPERTY_TYPE, 'requestState'])).toEqual(RequestStates.PENDING);
+      expect(newState.getIn([LOCAL_DELETE_PROPERTY_TYPE, 'requestState'])).toEqual(RequestStates.PENDING);
+      expect(newState.getIn([LOCAL_UPDATE_PROPERTY_TYPE_META, 'requestState'])).toEqual(RequestStates.PENDING);
+      expect(newState.getIn([LOCAL_UPDATE_SCHEMA, 'requestState'])).toEqual(RequestStates.STANDBY);
+    });
+
+    test('should not change state given an invalid action type', () => {
+
+      INVALID_PARAMS_SS.forEach((invalid) => {
+        const stateAfterRequest = reducer(INITIAL_STATE, resetRequestState(invalid));
+        expect(stateAfterRequest.hashCode()).toEqual(INITIAL_STATE.hashCode());
+        expect(stateAfterRequest.equals(INITIAL_STATE)).toEqual(true);
+      });
+    });
+
   });
 
   describe(GET_ENTITY_DATA_MODEL, () => {
@@ -339,6 +398,7 @@ describe('PropertyTypesReducer', () => {
         const requestAction = localUpdatePropertyTypeMeta.request(id, mockActionValue);
         const state = reducer(initialState, requestAction);
         expect(state.getIn([LOCAL_UPDATE_PROPERTY_TYPE_META, id])).toEqual(requestAction);
+        expect(state.getIn([LOCAL_UPDATE_PROPERTY_TYPE_META, 'requestState'])).toEqual(RequestStates.PENDING);
       });
 
       test(localUpdatePropertyTypeMeta.SUCCESS, () => {
@@ -348,6 +408,7 @@ describe('PropertyTypesReducer', () => {
         let state = reducer(initialState, requestAction);
         state = reducer(state, localUpdatePropertyTypeMeta.success(id));
         expect(state.getIn([LOCAL_UPDATE_PROPERTY_TYPE_META, id])).toEqual(requestAction);
+        expect(state.getIn([LOCAL_UPDATE_PROPERTY_TYPE_META, 'requestState'])).toEqual(RequestStates.SUCCESS);
 
         const expectedPropertyTypes = List().push(
           MOCK_PROPERTY_TYPE.toImmutable().set('description', mockActionValue.metadata.description)
@@ -373,6 +434,7 @@ describe('PropertyTypesReducer', () => {
         let state = reducer(initialState, requestAction);
         state = reducer(state, localUpdatePropertyTypeMeta.failure(id));
         expect(state.getIn([LOCAL_UPDATE_PROPERTY_TYPE_META, id])).toEqual(requestAction);
+        expect(state.getIn([LOCAL_UPDATE_PROPERTY_TYPE_META, 'requestState'])).toEqual(RequestStates.FAILURE);
 
         const expectedPropertyTypes = List().push(MOCK_PROPERTY_TYPE.toImmutable());
         expect(state.get('propertyTypes').hashCode()).toEqual(expectedPropertyTypes.hashCode());
@@ -394,6 +456,86 @@ describe('PropertyTypesReducer', () => {
         state = reducer(state, localUpdatePropertyTypeMeta.success(id));
         state = reducer(state, localUpdatePropertyTypeMeta.finally(id));
         expect(state.hasIn([LOCAL_UPDATE_PROPERTY_TYPE_META, id])).toEqual(false);
+        expect(state.getIn([LOCAL_UPDATE_PROPERTY_TYPE_META, 'requestState'])).toEqual(RequestStates.SUCCESS);
+      });
+
+    });
+
+    describe('pii', () => {
+
+      const mockActionValue = {
+        metadata: { pii: true },
+        propertyTypeId: MOCK_PROPERTY_TYPE.id,
+        propertyTypeFQN: MOCK_PROPERTY_TYPE.type,
+      };
+
+      test(localUpdatePropertyTypeMeta.REQUEST, () => {
+
+        const { id } = localUpdatePropertyTypeMeta();
+        const requestAction = localUpdatePropertyTypeMeta.request(id, mockActionValue);
+        const state = reducer(initialState, requestAction);
+        expect(state.getIn([LOCAL_UPDATE_PROPERTY_TYPE_META, id])).toEqual(requestAction);
+        expect(state.getIn([LOCAL_UPDATE_PROPERTY_TYPE_META, 'requestState'])).toEqual(RequestStates.PENDING);
+      });
+
+      test(localUpdatePropertyTypeMeta.SUCCESS, () => {
+
+        const { id } = localUpdatePropertyTypeMeta();
+        const requestAction = localUpdatePropertyTypeMeta.request(id, mockActionValue);
+        let state = reducer(initialState, requestAction);
+        state = reducer(state, localUpdatePropertyTypeMeta.success(id));
+        expect(state.getIn([LOCAL_UPDATE_PROPERTY_TYPE_META, id])).toEqual(requestAction);
+        expect(state.getIn([LOCAL_UPDATE_PROPERTY_TYPE_META, 'requestState'])).toEqual(RequestStates.SUCCESS);
+
+        const expectedPropertyTypes = List().push(
+          MOCK_PROPERTY_TYPE.toImmutable().set('pii', mockActionValue.metadata.pii)
+        );
+        expect(state.get('propertyTypes').hashCode()).toEqual(expectedPropertyTypes.hashCode());
+        expect(state.get('propertyTypes').equals(expectedPropertyTypes)).toEqual(true);
+
+        const expectedPropertyTypesIndexMap = Map()
+          .set(MOCK_PROPERTY_TYPE.id, 0)
+          .set(MOCK_PROPERTY_TYPE.type, 0);
+        expect(state.get('propertyTypesIndexMap').hashCode()).toEqual(expectedPropertyTypesIndexMap.hashCode());
+        expect(state.get('propertyTypesIndexMap').equals(expectedPropertyTypesIndexMap)).toEqual(true);
+        state.get('propertyTypesIndexMap')
+          .filter((v, k) => FullyQualifiedName.isValid(k))
+          .keySeq()
+          .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+      });
+
+      test(localUpdatePropertyTypeMeta.FAILURE, () => {
+
+        const { id } = localUpdatePropertyTypeMeta();
+        const requestAction = localUpdatePropertyTypeMeta.request(id, mockActionValue);
+        let state = reducer(initialState, requestAction);
+        state = reducer(state, localUpdatePropertyTypeMeta.failure(id));
+        expect(state.getIn([LOCAL_UPDATE_PROPERTY_TYPE_META, id])).toEqual(requestAction);
+        expect(state.getIn([LOCAL_UPDATE_PROPERTY_TYPE_META, 'requestState'])).toEqual(RequestStates.FAILURE);
+
+        const expectedPropertyTypes = List().push(MOCK_PROPERTY_TYPE.toImmutable());
+        expect(state.get('propertyTypes').hashCode()).toEqual(expectedPropertyTypes.hashCode());
+        expect(state.get('propertyTypes').equals(expectedPropertyTypes)).toEqual(true);
+
+        const expectedPropertyTypesIndexMap = Map()
+          .set(MOCK_PROPERTY_TYPE.id, 0)
+          .set(MOCK_PROPERTY_TYPE.type, 0);
+        expect(state.get('propertyTypesIndexMap').hashCode()).toEqual(expectedPropertyTypesIndexMap.hashCode());
+        expect(state.get('propertyTypesIndexMap').equals(expectedPropertyTypesIndexMap)).toEqual(true);
+        state.get('propertyTypesIndexMap')
+          .filter((v, k) => FullyQualifiedName.isValid(k))
+          .keySeq()
+          .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+      });
+
+      test(localUpdatePropertyTypeMeta.FINALLY, () => {
+
+        const { id } = localUpdatePropertyTypeMeta();
+        let state = reducer(initialState, localUpdatePropertyTypeMeta.request(id, mockActionValue));
+        state = reducer(state, localUpdatePropertyTypeMeta.success(id));
+        state = reducer(state, localUpdatePropertyTypeMeta.finally(id));
+        expect(state.hasIn([LOCAL_UPDATE_PROPERTY_TYPE_META, id])).toEqual(false);
+        expect(state.getIn([LOCAL_UPDATE_PROPERTY_TYPE_META, 'requestState'])).toEqual(RequestStates.SUCCESS);
       });
 
     });
@@ -412,6 +554,7 @@ describe('PropertyTypesReducer', () => {
         const requestAction = localUpdatePropertyTypeMeta.request(id, mockActionValue);
         const state = reducer(initialState, requestAction);
         expect(state.getIn([LOCAL_UPDATE_PROPERTY_TYPE_META, id])).toEqual(requestAction);
+        expect(state.getIn([LOCAL_UPDATE_PROPERTY_TYPE_META, 'requestState'])).toEqual(RequestStates.PENDING);
       });
 
       test(localUpdatePropertyTypeMeta.SUCCESS, () => {
@@ -421,6 +564,7 @@ describe('PropertyTypesReducer', () => {
         let state = reducer(initialState, requestAction);
         state = reducer(state, localUpdatePropertyTypeMeta.success(id));
         expect(state.getIn([LOCAL_UPDATE_PROPERTY_TYPE_META, id])).toEqual(requestAction);
+        expect(state.getIn([LOCAL_UPDATE_PROPERTY_TYPE_META, 'requestState'])).toEqual(RequestStates.SUCCESS);
 
         const expectedPropertyTypes = List().push(
           MOCK_PROPERTY_TYPE.toImmutable().set('title', mockActionValue.metadata.title)
@@ -446,6 +590,7 @@ describe('PropertyTypesReducer', () => {
         let state = reducer(initialState, requestAction);
         state = reducer(state, localUpdatePropertyTypeMeta.failure(id));
         expect(state.getIn([LOCAL_UPDATE_PROPERTY_TYPE_META, id])).toEqual(requestAction);
+        expect(state.getIn([LOCAL_UPDATE_PROPERTY_TYPE_META, 'requestState'])).toEqual(RequestStates.FAILURE);
 
         const expectedPropertyTypes = List().push(MOCK_PROPERTY_TYPE.toImmutable());
         expect(state.get('propertyTypes').hashCode()).toEqual(expectedPropertyTypes.hashCode());
@@ -469,6 +614,7 @@ describe('PropertyTypesReducer', () => {
         state = reducer(state, localUpdatePropertyTypeMeta.success(id));
         state = reducer(state, localUpdatePropertyTypeMeta.finally(id));
         expect(state.hasIn([LOCAL_UPDATE_PROPERTY_TYPE_META, id])).toEqual(false);
+        expect(state.getIn([LOCAL_UPDATE_PROPERTY_TYPE_META, 'requestState'])).toEqual(RequestStates.SUCCESS);
       });
 
     });
@@ -487,6 +633,7 @@ describe('PropertyTypesReducer', () => {
         const requestAction = localUpdatePropertyTypeMeta.request(id, mockActionValue);
         const state = reducer(initialState, requestAction);
         expect(state.getIn([LOCAL_UPDATE_PROPERTY_TYPE_META, id])).toEqual(requestAction);
+        expect(state.getIn([LOCAL_UPDATE_PROPERTY_TYPE_META, 'requestState'])).toEqual(RequestStates.PENDING);
       });
 
       test(localUpdatePropertyTypeMeta.SUCCESS, () => {
@@ -496,6 +643,7 @@ describe('PropertyTypesReducer', () => {
         let state = reducer(initialState, requestAction);
         state = reducer(state, localUpdatePropertyTypeMeta.success(id));
         expect(state.getIn([LOCAL_UPDATE_PROPERTY_TYPE_META, id])).toEqual(requestAction);
+        expect(state.getIn([LOCAL_UPDATE_PROPERTY_TYPE_META, 'requestState'])).toEqual(RequestStates.SUCCESS);
 
         const expectedPropertyTypes = List().push(
           MOCK_PROPERTY_TYPE.toImmutable().set('type', fromJS(mockActionValue.metadata.type.toObject()))
@@ -521,6 +669,7 @@ describe('PropertyTypesReducer', () => {
         let state = reducer(initialState, requestAction);
         state = reducer(state, localUpdatePropertyTypeMeta.failure(id));
         expect(state.getIn([LOCAL_UPDATE_PROPERTY_TYPE_META, id])).toEqual(requestAction);
+        expect(state.getIn([LOCAL_UPDATE_PROPERTY_TYPE_META, 'requestState'])).toEqual(RequestStates.FAILURE);
 
         const expectedPropertyTypes = List().push(MOCK_PROPERTY_TYPE.toImmutable());
         expect(state.get('propertyTypes').hashCode()).toEqual(expectedPropertyTypes.hashCode());
@@ -544,6 +693,7 @@ describe('PropertyTypesReducer', () => {
         state = reducer(state, localUpdatePropertyTypeMeta.success(id));
         state = reducer(state, localUpdatePropertyTypeMeta.finally(id));
         expect(state.hasIn([LOCAL_UPDATE_PROPERTY_TYPE_META, id])).toEqual(false);
+        expect(state.getIn([LOCAL_UPDATE_PROPERTY_TYPE_META, 'requestState'])).toEqual(RequestStates.SUCCESS);
       });
 
     });

@@ -18,7 +18,7 @@
 !<PROJECT_ROOT>/node_modules/lattice
 !<PROJECT_ROOT>/node_modules/lattice-sagas
 !<PROJECT_ROOT>/node_modules/redux-reqseq
-+.*/node_modules/immutable/.*
+.*/node_modules/immutable/.*
 
 [libs]
 ./src/types.js.flow
