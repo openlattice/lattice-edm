@@ -20,7 +20,7 @@ import * as Routes from './core/router/Routes';
 // injected by Webpack.DefinePlugin
 declare var __AUTH0_CLIENT_ID__ :string;
 declare var __AUTH0_DOMAIN__ :string;
-declare var __ENV_DEV__ :boolean;
+declare var __ENV_PROD__ :boolean;
 
 const {
   AuthRoute,
@@ -68,6 +68,7 @@ LatticeAuth.configure({
   auth0ClientId: __AUTH0_CLIENT_ID__,
   auth0Domain: __AUTH0_DOMAIN__,
   authToken: AuthUtils.getAuthToken(),
+  baseUrl: __ENV_PROD__ ? 'production' : null, // baseUrl is optional, so null will use default configuration
 });
 
 /*
