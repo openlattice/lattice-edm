@@ -578,7 +578,7 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
             }
 
             const currentPropertyTypeIds :List<UUID> = target.getIn(['entityType', 'properties'], List());
-            const updatedPropertyTypeIds :List<UUID> = currentPropertyTypeIds.filter(id => id !== propertyTypeId);
+            const updatedPropertyTypeIds :List<UUID> = currentPropertyTypeIds.filter((id) => id !== propertyTypeId);
             return state.setIn(['associationTypes', targetIndex, 'entityType', 'properties'], updatedPropertyTypeIds);
           }
 
