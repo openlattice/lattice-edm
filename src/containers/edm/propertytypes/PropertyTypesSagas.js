@@ -64,7 +64,7 @@ function* localCreatePropertyTypeWorker(seqAction :SequenceAction) :Generator<*,
     const newPropertyType :PropertyType = value;
     const newPropertyTypeFQN :FQN = newPropertyType.type;
     const propertyTypesIndexMap :IndexMap = yield select(
-      state => state.getIn(['edm', 'propertyTypes', 'propertyTypesIndexMap'])
+      (state) => state.getIn(['edm', 'propertyTypes', 'propertyTypesIndexMap'])
     );
 
     if (propertyTypesIndexMap.has(newPropertyTypeFQN)) {
@@ -73,7 +73,7 @@ function* localCreatePropertyTypeWorker(seqAction :SequenceAction) :Generator<*,
     }
 
     const isOnline :boolean = yield select(
-      state => state.getIn(['app', 'isOnline'])
+      (state) => state.getIn(['app', 'isOnline'])
     );
 
     let newPropertyTypeId :?UUID = '';
@@ -120,7 +120,7 @@ function* localDeletePropertyTypeWorker(seqAction :SequenceAction) :Generator<*,
     const propertyTypeId :?UUID = value.propertyTypeId;
 
     const propertyTypesIndexMap :IndexMap = yield select(
-      state => state.getIn(['edm', 'propertyTypes', 'propertyTypesIndexMap'])
+      (state) => state.getIn(['edm', 'propertyTypes', 'propertyTypesIndexMap'])
     );
 
     if (!propertyTypesIndexMap.has(propertyTypeFQN)) {
@@ -129,7 +129,7 @@ function* localDeletePropertyTypeWorker(seqAction :SequenceAction) :Generator<*,
     }
 
     const isOnline :boolean = yield select(
-      state => state.getIn(['app', 'isOnline'])
+      (state) => state.getIn(['app', 'isOnline'])
     );
 
     if (isOnline && isValidUUID(propertyTypeId)) {
@@ -176,7 +176,7 @@ function* localUpdatePropertyTypeMetaWorker(seqAction :SequenceAction) :Generato
     } :UpdatePropertyTypeMeta = value;
 
     const isOnline :boolean = yield select(
-      state => state.getIn(['app', 'isOnline'])
+      (state) => state.getIn(['app', 'isOnline'])
     );
 
     if (isOnline && isValidUUID(propertyTypeId)) {

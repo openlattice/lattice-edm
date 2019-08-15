@@ -362,7 +362,7 @@ export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, act
             }
 
             const currentPropertyTypeIds :List<UUID> = target.get('properties', List());
-            const updatedPropertyTypeIds :List<UUID> = currentPropertyTypeIds.filter(id => id !== propertyTypeId);
+            const updatedPropertyTypeIds :List<UUID> = currentPropertyTypeIds.filter((id) => id !== propertyTypeId);
             return state.setIn(['entityTypes', targetIndex, 'properties'], updatedPropertyTypeIds);
           }
 

@@ -100,7 +100,7 @@ describe('AssociationTypesReducer', () => {
       state.get('associationTypesIndexMap')
         .filter((v, k) => FullyQualifiedName.isValid(k))
         .keySeq()
-        .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+        .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
     });
 
     test(getEntityDataModel.FAILURE, () => {
@@ -169,7 +169,7 @@ describe('AssociationTypesReducer', () => {
         state.get('associationTypesIndexMap')
           .filter((v, k) => FullyQualifiedName.isValid(k))
           .keySeq()
-          .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+          .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
       });
 
       test('should not mutate state if the id is already in the list', () => {
@@ -222,7 +222,7 @@ describe('AssociationTypesReducer', () => {
       state.get('associationTypesIndexMap')
         .filter((v, k) => FullyQualifiedName.isValid(k))
         .keySeq()
-        .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+        .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
     });
 
     test(localAddDstEntityTypeToAssociationType.FINALLY, () => {
@@ -285,7 +285,7 @@ describe('AssociationTypesReducer', () => {
         state.get('associationTypesIndexMap')
           .filter((v, k) => FullyQualifiedName.isValid(k))
           .keySeq()
-          .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+          .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
       });
 
       test('should not mutate state if the id is already in the list', () => {
@@ -338,7 +338,7 @@ describe('AssociationTypesReducer', () => {
       state.get('associationTypesIndexMap')
         .filter((v, k) => FullyQualifiedName.isValid(k))
         .keySeq()
-        .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+        .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
     });
 
     test(localAddPropertyTypeToAssociationType.FINALLY, () => {
@@ -398,7 +398,7 @@ describe('AssociationTypesReducer', () => {
         state.get('associationTypesIndexMap')
           .filter((v, k) => FullyQualifiedName.isValid(k))
           .keySeq()
-          .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+          .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
       });
 
       test('should not mutate state if the id is already in the list', () => {
@@ -451,7 +451,7 @@ describe('AssociationTypesReducer', () => {
       state.get('associationTypesIndexMap')
         .filter((v, k) => FullyQualifiedName.isValid(k))
         .keySeq()
-        .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+        .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
     });
 
     test(localAddSrcEntityTypeToAssociationType.FINALLY, () => {
@@ -500,7 +500,7 @@ describe('AssociationTypesReducer', () => {
       state.get('associationTypesIndexMap')
         .filter((v, k) => FullyQualifiedName.isValid(k))
         .keySeq()
-        .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+        .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
     });
 
     test(localCreateAssociationType.FAILURE, () => {
@@ -623,7 +623,7 @@ describe('AssociationTypesReducer', () => {
         state.get('associationTypesIndexMap')
           .filter((v, k) => FullyQualifiedName.isValid(k))
           .keySeq()
-          .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+          .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
       });
 
       test('should not mutate state if attempting to delete a non-existent EntityType', () => {
@@ -743,7 +743,7 @@ describe('AssociationTypesReducer', () => {
         state.get('associationTypesIndexMap')
           .filter((v, k) => FullyQualifiedName.isValid(k))
           .keySeq()
-          .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+          .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
       });
 
       test('should not mutate state if the id is not in the list', () => {
@@ -796,7 +796,7 @@ describe('AssociationTypesReducer', () => {
       state.get('associationTypesIndexMap')
         .filter((v, k) => FullyQualifiedName.isValid(k))
         .keySeq()
-        .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+        .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
     });
 
     test(localRemoveDstEntityTypeFromAssociationType.FINALLY, () => {
@@ -859,7 +859,7 @@ describe('AssociationTypesReducer', () => {
         state.get('associationTypesIndexMap')
           .filter((v, k) => FullyQualifiedName.isValid(k))
           .keySeq()
-          .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+          .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
       });
 
       test('should not mutate state if the id is not in the list', () => {
@@ -912,7 +912,7 @@ describe('AssociationTypesReducer', () => {
       state.get('associationTypesIndexMap')
         .filter((v, k) => FullyQualifiedName.isValid(k))
         .keySeq()
-        .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+        .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
     });
 
     test(localRemovePropertyTypeFromAssociationType.FINALLY, () => {
@@ -972,7 +972,7 @@ describe('AssociationTypesReducer', () => {
         state.get('associationTypesIndexMap')
           .filter((v, k) => FullyQualifiedName.isValid(k))
           .keySeq()
-          .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+          .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
       });
 
       test('should not mutate state if the id is not in the list', () => {
@@ -1025,7 +1025,7 @@ describe('AssociationTypesReducer', () => {
       state.get('associationTypesIndexMap')
         .filter((v, k) => FullyQualifiedName.isValid(k))
         .keySeq()
-        .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+        .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
     });
 
     test(localRemoveSrcEntityTypeFromAssociationType.FINALLY, () => {
@@ -1087,7 +1087,7 @@ describe('AssociationTypesReducer', () => {
         state.get('associationTypesIndexMap')
           .filter((v, k) => FullyQualifiedName.isValid(k))
           .keySeq()
-          .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+          .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
       });
 
       test(localUpdateAssociationTypeMeta.FAILURE, () => {
@@ -1110,7 +1110,7 @@ describe('AssociationTypesReducer', () => {
         state.get('associationTypesIndexMap')
           .filter((v, k) => FullyQualifiedName.isValid(k))
           .keySeq()
-          .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+          .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
       });
 
       test(localUpdateAssociationTypeMeta.FINALLY, () => {
@@ -1165,7 +1165,7 @@ describe('AssociationTypesReducer', () => {
         state.get('associationTypesIndexMap')
           .filter((v, k) => FullyQualifiedName.isValid(k))
           .keySeq()
-          .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+          .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
       });
 
       test(localUpdateAssociationTypeMeta.FAILURE, () => {
@@ -1188,7 +1188,7 @@ describe('AssociationTypesReducer', () => {
         state.get('associationTypesIndexMap')
           .filter((v, k) => FullyQualifiedName.isValid(k))
           .keySeq()
-          .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+          .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
       });
 
       test(localUpdateAssociationTypeMeta.FINALLY, () => {
@@ -1243,7 +1243,7 @@ describe('AssociationTypesReducer', () => {
         state.get('associationTypesIndexMap')
           .filter((v, k) => FullyQualifiedName.isValid(k))
           .keySeq()
-          .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+          .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
       });
 
       test(localUpdateAssociationTypeMeta.FAILURE, () => {
@@ -1266,7 +1266,7 @@ describe('AssociationTypesReducer', () => {
         state.get('associationTypesIndexMap')
           .filter((v, k) => FullyQualifiedName.isValid(k))
           .keySeq()
-          .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+          .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
       });
 
       test(localUpdateAssociationTypeMeta.FINALLY, () => {
@@ -1331,7 +1331,7 @@ describe('AssociationTypesReducer', () => {
         state.get('associationTypesIndexMap')
           .filter((v, k) => FullyQualifiedName.isValid(k))
           .keySeq()
-          .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+          .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
       });
 
       test(localUpdateSchema.FAILURE, () => {
@@ -1354,7 +1354,7 @@ describe('AssociationTypesReducer', () => {
         state.get('associationTypesIndexMap')
           .filter((v, k) => FullyQualifiedName.isValid(k))
           .keySeq()
-          .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+          .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
       });
 
       test(localUpdateSchema.FINALLY, () => {
@@ -1410,7 +1410,7 @@ describe('AssociationTypesReducer', () => {
         state.get('associationTypesIndexMap')
           .filter((v, k) => FullyQualifiedName.isValid(k))
           .keySeq()
-          .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+          .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
       });
 
       test(localUpdateSchema.FAILURE, () => {
@@ -1433,7 +1433,7 @@ describe('AssociationTypesReducer', () => {
         state.get('associationTypesIndexMap')
           .filter((v, k) => FullyQualifiedName.isValid(k))
           .keySeq()
-          .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+          .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
       });
 
       test(localUpdateSchema.FINALLY, () => {
