@@ -58,7 +58,7 @@ function* localCreateSchemaWorker(seqAction :SequenceAction) :Generator<*, *, *>
     const newSchema :Schema = value;
     const newSchemaFQN :FQN = newSchema.fqn;
     const schemasIndexMap :IndexMap = yield select(
-      state => state.getIn(['edm', 'schemas', 'schemasIndexMap'])
+      (state) => state.getIn(['edm', 'schemas', 'schemasIndexMap'])
     );
 
     if (schemasIndexMap.has(newSchemaFQN)) {
@@ -67,7 +67,7 @@ function* localCreateSchemaWorker(seqAction :SequenceAction) :Generator<*, *, *>
     }
 
     const isOnline :boolean = yield select(
-      state => state.getIn(['app', 'isOnline'])
+      (state) => state.getIn(['app', 'isOnline'])
     );
 
     if (isOnline) {
@@ -109,7 +109,7 @@ function* localUpdateSchemaWorker(seqAction :SequenceAction) :Generator<*, *, *>
     yield put(localUpdateSchema.request(id, value));
 
     const isOnline :boolean = yield select(
-      state => state.getIn(['app', 'isOnline'])
+      (state) => state.getIn(['app', 'isOnline'])
     );
 
     if (isOnline) {

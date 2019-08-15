@@ -524,7 +524,7 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
             }
 
             const currentEntityTypeIds :List<UUID> = target.get('dst', List());
-            const updatedEntityTypeIds :List<UUID> = currentEntityTypeIds.filter(id => id !== entityTypeId);
+            const updatedEntityTypeIds :List<UUID> = currentEntityTypeIds.filter((id) => id !== entityTypeId);
             return state.setIn(['associationTypes', targetIndex, 'dst'], updatedEntityTypeIds);
           }
 
@@ -632,7 +632,7 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
             }
 
             const currentEntityTypeIds :List<UUID> = target.get('src', List());
-            const updatedEntityTypeIds :List<UUID> = currentEntityTypeIds.filter(id => id !== entityTypeId);
+            const updatedEntityTypeIds :List<UUID> = currentEntityTypeIds.filter((id) => id !== entityTypeId);
             return state.setIn(['associationTypes', targetIndex, 'src'], updatedEntityTypeIds);
           }
 
