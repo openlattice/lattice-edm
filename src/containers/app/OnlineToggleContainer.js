@@ -78,7 +78,7 @@ class OnlineToggleContainer extends Component<Props> {
   }
 }
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
   isOnline: state.getIn(['app', 'isOnline'], false),
 });
 

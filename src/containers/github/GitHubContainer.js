@@ -291,7 +291,7 @@ class GitHubContainer extends Component<Props, State> {
   }
 }
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
   associationTypes: state.getIn(['edm', 'associationTypes', 'associationTypes']),
   entityTypes: state.getIn(['edm', 'entityTypes', 'entityTypes']),
   isFetchingEntityDataModel: state.getIn(['edm', 'isFetchingEntityDataModel']),

@@ -37,18 +37,23 @@ const OL_AUDIT_FQN :FullyQualifiedName = new FullyQualifiedName('OPENLATTICE_AUD
 function removeOpenLatticeAuditType(edm :Object) :Object {
 
   const propertyTypes = edm.propertyTypes.filter(
-    propertyType => FullyQualifiedName.toString(propertyType.type) !== OL_AUDIT_FQN.toString()
+    (propertyType) => FullyQualifiedName.toString(propertyType.type) !== OL_AUDIT_FQN.toString()
   );
 
   const entityTypes = edm.entityTypes.filter(
-    enitityType => FullyQualifiedName.toString(enitityType.type) !== OL_AUDIT_FQN.toString()
+    (enitityType) => FullyQualifiedName.toString(enitityType.type) !== OL_AUDIT_FQN.toString()
   );
 
   const associationTypes = edm.associationTypes.filter(
-    associationType => FullyQualifiedName.toString(associationType.entityType.type) !== OL_AUDIT_FQN.toString()
+    (associationType) => FullyQualifiedName.toString(associationType.entityType.type) !== OL_AUDIT_FQN.toString()
   );
 
-  return Object.assign({}, edm, { propertyTypes, entityTypes, associationTypes });
+  return {
+    ...edm,
+    associationTypes,
+    entityTypes,
+    propertyTypes,
+  };
 }
 
 function* syncProdEntityDataModelWatcher() :Generator<*, *, *> {

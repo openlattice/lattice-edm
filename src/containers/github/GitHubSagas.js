@@ -19,8 +19,8 @@ import {
 const LOG = new Logger('ConsentSagas');
 
 const Base64 = {
-  encode: str => btoa(unescape(encodeURIComponent(str))),
-  decode: str => decodeURIComponent(escape(atob(str))),
+  encode: (str) => btoa(unescape(encodeURIComponent(str))),
+  decode: (str) => decodeURIComponent(escape(atob(str))),
 };
 
 /*
