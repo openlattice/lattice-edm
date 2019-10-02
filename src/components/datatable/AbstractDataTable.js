@@ -247,17 +247,18 @@ class AbstractDataTable extends React.Component<Props, State> {
       maxWidth,
       width,
     } = this.props;
-    const { autosizerHeight, autosizerWidth } = prevState;
+    const { columnWidths } = this.state;
 
     const haveHeadersChanged :boolean = !headers.equals(prevProps.headers);
     const hasDataChanged :boolean = !data.equals(prevProps.data);
+    const haveColumnWidthsChanged :boolean = !columnWidths.equals(prevState.columnWidths);
 
     if (haveHeadersChanged || hasDataChanged) {
       const newDimensions :Object = AbstractDataTable.computeDimensions({
-        autosizerHeight,
-        autosizerWidth,
         data,
         headers,
+        autosizerHeight: prevState.autosizerHeight,
+        autosizerWidth: prevState.autosizerWidth,
         specifiedMaxHeight: maxHeight,
         specifiedMaxWidth: maxWidth,
         specifiedHeight: height,
@@ -265,24 +266,13 @@ class AbstractDataTable extends React.Component<Props, State> {
       });
       this.setState({ ...newDimensions });
     }
-  }
-
-  componentWillUpdate(nextProps :Props, nextState :State) {
-
-    const { data, headers } = this.props;
-    const { columnWidths } = this.state;
 
     /* eslint-disable prefer-destructuring */
     const headGrid :?Grid = this.headGrid;
     const bodyGrid :?Grid = this.bodyGrid;
     /* eslint-enable */
 
-    const haveHeadersChanged :boolean = !headers.equals(nextProps.headers);
-    const hasDataChanged :boolean = !data.equals(nextProps.data);
-    const haveColumnWidthsChanged :boolean = !columnWidths.equals(nextState.columnWidths);
-
     const shouldRecomputeGrids :boolean = haveHeadersChanged || hasDataChanged || haveColumnWidthsChanged;
-
     if (shouldRecomputeGrids && headGrid && bodyGrid) {
       // https://github.com/bvaughn/react-virtualized/issues/136#issuecomment-190440226
       headGrid.recomputeGridSize();
