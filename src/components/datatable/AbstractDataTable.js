@@ -237,33 +237,33 @@ class AbstractDataTable extends React.Component<Props, State> {
     };
   }
 
-  componentWillReceiveProps(nextProps :Props) {
+  componentDidUpdate(prevProps :Props, prevState :State) {
 
-    const { data, headers } = this.props;
-    const { autosizerHeight, autosizerWidth } = this.state;
+    const {
+      data,
+      headers,
+      height,
+      maxHeight,
+      maxWidth,
+      width,
+    } = this.props;
+    const { autosizerHeight, autosizerWidth } = prevState;
 
-    const nextHeaders :GridHeaders = nextProps.headers;
-    const nextData :GridData = nextProps.data;
-
-    const haveHeadersChanged :boolean = !headers.equals(nextHeaders);
-    const hasDataChanged :boolean = !data.equals(nextData);
+    const haveHeadersChanged :boolean = !headers.equals(prevProps.headers);
+    const hasDataChanged :boolean = !data.equals(prevProps.data);
 
     if (haveHeadersChanged || hasDataChanged) {
-
       const newDimensions :Object = AbstractDataTable.computeDimensions({
         autosizerHeight,
         autosizerWidth,
-        data: nextData,
-        headers: nextHeaders,
-        specifiedMaxHeight: nextProps.maxHeight,
-        specifiedMaxWidth: nextProps.maxWidth,
-        specifiedHeight: nextProps.height,
-        specifiedWidth: nextProps.width
+        data,
+        headers,
+        specifiedMaxHeight: maxHeight,
+        specifiedMaxWidth: maxWidth,
+        specifiedHeight: height,
+        specifiedWidth: width,
       });
-
-      this.setState({
-        ...newDimensions
-      });
+      this.setState({ ...newDimensions });
     }
   }
 
