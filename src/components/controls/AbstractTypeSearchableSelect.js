@@ -118,12 +118,13 @@ class AbstractTypeSearchableSelect extends React.Component<Props, State> {
     };
   }
 
-  componentWillReceiveProps(nextProps :Props) {
+  componentDidUpdate(prevProps :Props) {
 
-    this.setState({
-      filteredTypes: nextProps.abstractTypes,
-      searchQuery: ''
-    });
+    const { abstractTypes } = this.props;
+
+    if (!abstractTypes.equals(prevProps.abstractTypes)) {
+      this.setState({ filteredTypes: abstractTypes, searchQuery: '' });
+    }
   }
 
   hideDataTable = () => {

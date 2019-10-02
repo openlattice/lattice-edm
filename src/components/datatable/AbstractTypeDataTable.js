@@ -160,20 +160,14 @@ class AbstractTypeDataTable extends React.Component<Props, State> {
     return data;
   }
 
-  componentWillReceiveProps(nextProps :Props) {
+  componentDidUpdate(prevProps :Props) {
 
     const { abstractTypes } = this.props;
 
-    const haveAbstractTypesChanged :boolean = !abstractTypes.equals(nextProps.abstractTypes);
-    if (haveAbstractTypesChanged) {
-
-      const data :List<Map<string, string>> = AbstractTypeDataTable.getData(nextProps);
-      const headers :List<Map<string, string>> = AbstractTypeDataTable.getHeaders(nextProps);
-
-      this.setState({
-        data,
-        headers
-      });
+    if (!abstractTypes.equals(prevProps.abstractTypes)) {
+      const data :List<Map<string, string>> = AbstractTypeDataTable.getData(this.props);
+      const headers :List<Map<string, string>> = AbstractTypeDataTable.getHeaders(this.props);
+      this.setState({ data, headers });
     }
   }
 

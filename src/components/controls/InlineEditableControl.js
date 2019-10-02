@@ -188,8 +188,19 @@ export default class InlineEditableControl extends React.Component<Props, State>
 
   componentDidUpdate(prevProps :Props, prevState :State) {
 
-    const { onChange } = this.props;
+    const { onChange, value } = this.props;
     const { currentValue, editable } = this.state;
+
+    if (value !== prevProps.value) {
+      const nextValue = value || '';
+      const newValue = isNonEmptyString(nextValue) ? nextValue : '';
+      const initializeAsEditable = isEmptyString(newValue);
+      this.setState({
+        currentValue: newValue,
+        editable: initializeAsEditable,
+        previousValue: newValue,
+      });
+    }
 
     // going from editable to not editable should invoke the onChange callback only if the value actually changed
     if (prevState.previousValue !== currentValue
@@ -215,22 +226,6 @@ export default class InlineEditableControl extends React.Component<Props, State>
       // component sees "currentValue" with the new property type description and compares it to the previous
       // property type description, which was "".
       onChange(currentValue);
-    }
-  }
-
-  componentWillReceiveProps(nextProps :Props) {
-
-    const { value } = this.props;
-
-    if (value !== nextProps.value) {
-      const nextValue = nextProps.value || '';
-      const newValue :string = isNonEmptyString(nextValue) ? nextValue : '';
-      const initializeAsEditable :boolean = isEmptyString(newValue);
-      this.setState({
-        currentValue: newValue,
-        editable: initializeAsEditable,
-        previousValue: newValue
-      });
     }
   }
 
