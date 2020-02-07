@@ -89,7 +89,7 @@ function* localAddDstEntityTypeToAssociationTypeWorker(seqAction :SequenceAction
     const entityTypeId :?UUID = value.entityTypeId;
 
     const isOnline :boolean = yield select(
-      state => state.getIn(['app', 'isOnline'])
+      (state) => state.getIn(['app', 'isOnline'])
     );
 
     if (isOnline && isValidUUID(associationTypeId) && isValidUUID(entityTypeId)) {
@@ -137,7 +137,7 @@ function* localAddPropertyTypeToAssociationTypeWorker(seqAction :SequenceAction)
     const propertyTypeId :?UUID = value.propertyTypeId;
 
     const isOnline :boolean = yield select(
-      state => state.getIn(['app', 'isOnline'])
+      (state) => state.getIn(['app', 'isOnline'])
     );
 
     if (isOnline && isValidUUID(entityTypeId) && isValidUUID(propertyTypeId)) {
@@ -185,7 +185,7 @@ function* localAddSrcEntityTypeToAssociationTypeWorker(seqAction :SequenceAction
     const entityTypeId :?UUID = value.entityTypeId;
 
     const isOnline :boolean = yield select(
-      state => state.getIn(['app', 'isOnline'])
+      (state) => state.getIn(['app', 'isOnline'])
     );
 
     if (isOnline && isValidUUID(associationTypeId) && isValidUUID(entityTypeId)) {
@@ -232,7 +232,7 @@ function* localCreateAssociationTypeWorker(seqAction :SequenceAction) :Generator
     const newAssociationType :AssociationType = value;
     const newAssociationTypeFQN :FQN = newAssociationType.entityType.type;
     const associationTypesIndexMap :IndexMap = yield select(
-      state => state.getIn(['edm', 'associationTypes', 'associationTypesIndexMap'])
+      (state) => state.getIn(['edm', 'associationTypes', 'associationTypesIndexMap'])
     );
 
     if (associationTypesIndexMap.has(newAssociationTypeFQN)) {
@@ -241,7 +241,7 @@ function* localCreateAssociationTypeWorker(seqAction :SequenceAction) :Generator
     }
 
     const isOnline :boolean = yield select(
-      state => state.getIn(['app', 'isOnline'])
+      (state) => state.getIn(['app', 'isOnline'])
     );
 
     let newAssociationTypeId :?UUID = '';
@@ -288,7 +288,7 @@ function* localDeleteAssociationTypeWorker(seqAction :SequenceAction) :Generator
     const associationTypeId :?UUID = value.associationTypeId;
 
     const associationTypesIndexMap :IndexMap = yield select(
-      state => state.getIn(['edm', 'associationTypes', 'associationTypesIndexMap'])
+      (state) => state.getIn(['edm', 'associationTypes', 'associationTypesIndexMap'])
     );
 
     if (!associationTypesIndexMap.has(associationTypeFQN)) {
@@ -297,7 +297,7 @@ function* localDeleteAssociationTypeWorker(seqAction :SequenceAction) :Generator
     }
 
     const isOnline :boolean = yield select(
-      state => state.getIn(['app', 'isOnline'])
+      (state) => state.getIn(['app', 'isOnline'])
     );
 
     if (isOnline && isValidUUID(associationTypeId)) {
@@ -342,7 +342,7 @@ function* localRemoveDstEntityTypeFromAssociationTypeWorker(seqAction :SequenceA
     const entityTypeId :?UUID = value.entityTypeId;
 
     const isOnline :boolean = yield select(
-      state => state.getIn(['app', 'isOnline'])
+      (state) => state.getIn(['app', 'isOnline'])
     );
 
     if (isOnline && isValidUUID(associationTypeId) && isValidUUID(entityTypeId)) {
@@ -390,7 +390,7 @@ function* localRemovePropertyTypeFromAssociationTypeWorker(seqAction :SequenceAc
     const propertyTypeId :?UUID = value.propertyTypeId;
 
     const isOnline :boolean = yield select(
-      state => state.getIn(['app', 'isOnline'])
+      (state) => state.getIn(['app', 'isOnline'])
     );
 
     if (isOnline && isValidUUID(entityTypeId) && isValidUUID(propertyTypeId)) {
@@ -438,7 +438,7 @@ function* localRemoveSrcEntityTypeFromAssociationTypeWorker(seqAction :SequenceA
     const entityTypeId :?UUID = value.entityTypeId;
 
     const isOnline :boolean = yield select(
-      state => state.getIn(['app', 'isOnline'])
+      (state) => state.getIn(['app', 'isOnline'])
     );
 
     if (isOnline && isValidUUID(associationTypeId) && isValidUUID(entityTypeId)) {
@@ -488,7 +488,7 @@ function* localUpdateAssociationTypeMetaWorker(seqAction :SequenceAction) :Gener
     } :UpdateAssociationTypeMeta = value;
 
     const isOnline :boolean = yield select(
-      state => state.getIn(['app', 'isOnline'])
+      (state) => state.getIn(['app', 'isOnline'])
     );
 
     if (isOnline && isValidUUID(associationTypeId)) {

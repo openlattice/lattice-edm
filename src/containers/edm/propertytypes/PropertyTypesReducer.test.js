@@ -139,7 +139,7 @@ describe('PropertyTypesReducer', () => {
       state.get('propertyTypesIndexMap')
         .filter((v, k) => FullyQualifiedName.isValid(k))
         .keySeq()
-        .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+        .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
     });
 
     test(getEntityDataModel.FAILURE, () => {
@@ -198,7 +198,7 @@ describe('PropertyTypesReducer', () => {
       state.get('propertyTypesIndexMap')
         .filter((v, k) => FullyQualifiedName.isValid(k))
         .keySeq()
-        .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+        .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
     });
 
     test(localCreatePropertyType.FAILURE, () => {
@@ -320,7 +320,7 @@ describe('PropertyTypesReducer', () => {
         state.get('propertyTypesIndexMap')
           .filter((v, k) => FullyQualifiedName.isValid(k))
           .keySeq()
-          .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+          .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
       });
 
       test('should not mutate state if attempting to delete a non-existent PropertyType', () => {
@@ -424,7 +424,7 @@ describe('PropertyTypesReducer', () => {
         state.get('propertyTypesIndexMap')
           .filter((v, k) => FullyQualifiedName.isValid(k))
           .keySeq()
-          .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+          .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
       });
 
       test(localUpdatePropertyTypeMeta.FAILURE, () => {
@@ -446,7 +446,7 @@ describe('PropertyTypesReducer', () => {
         state.get('propertyTypesIndexMap')
           .filter((v, k) => FullyQualifiedName.isValid(k))
           .keySeq()
-          .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+          .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
       });
 
       test(localUpdatePropertyTypeMeta.FINALLY, () => {
@@ -501,7 +501,7 @@ describe('PropertyTypesReducer', () => {
         state.get('propertyTypesIndexMap')
           .filter((v, k) => FullyQualifiedName.isValid(k))
           .keySeq()
-          .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+          .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
       });
 
       test(localUpdatePropertyTypeMeta.FAILURE, () => {
@@ -525,7 +525,7 @@ describe('PropertyTypesReducer', () => {
         state.get('propertyTypesIndexMap')
           .filter((v, k) => FullyQualifiedName.isValid(k))
           .keySeq()
-          .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+          .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
       });
 
       test(localUpdatePropertyTypeMeta.FINALLY, () => {
@@ -580,7 +580,7 @@ describe('PropertyTypesReducer', () => {
         state.get('propertyTypesIndexMap')
           .filter((v, k) => FullyQualifiedName.isValid(k))
           .keySeq()
-          .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+          .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
       });
 
       test(localUpdatePropertyTypeMeta.FAILURE, () => {
@@ -604,7 +604,7 @@ describe('PropertyTypesReducer', () => {
         state.get('propertyTypesIndexMap')
           .filter((v, k) => FullyQualifiedName.isValid(k))
           .keySeq()
-          .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+          .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
       });
 
       test(localUpdatePropertyTypeMeta.FINALLY, () => {
@@ -659,7 +659,7 @@ describe('PropertyTypesReducer', () => {
         state.get('propertyTypesIndexMap')
           .filter((v, k) => FullyQualifiedName.isValid(k))
           .keySeq()
-          .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+          .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
       });
 
       test(localUpdatePropertyTypeMeta.FAILURE, () => {
@@ -683,7 +683,7 @@ describe('PropertyTypesReducer', () => {
         state.get('propertyTypesIndexMap')
           .filter((v, k) => FullyQualifiedName.isValid(k))
           .keySeq()
-          .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+          .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
       });
 
       test(localUpdatePropertyTypeMeta.FINALLY, () => {
@@ -749,7 +749,7 @@ describe('PropertyTypesReducer', () => {
         state.get('propertyTypesIndexMap')
           .filter((v, k) => FullyQualifiedName.isValid(k))
           .keySeq()
-          .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+          .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
       });
 
       test(localUpdateSchema.FAILURE, () => {
@@ -772,7 +772,7 @@ describe('PropertyTypesReducer', () => {
         state.get('propertyTypesIndexMap')
           .filter((v, k) => FullyQualifiedName.isValid(k))
           .keySeq()
-          .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+          .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
       });
 
       test(localUpdateSchema.FINALLY, () => {
@@ -825,7 +825,7 @@ describe('PropertyTypesReducer', () => {
         state.get('propertyTypesIndexMap')
           .filter((v, k) => FullyQualifiedName.isValid(k))
           .keySeq()
-          .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+          .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
       });
 
       test(localUpdateSchema.FAILURE, () => {
@@ -848,7 +848,7 @@ describe('PropertyTypesReducer', () => {
         state.get('propertyTypesIndexMap')
           .filter((v, k) => FullyQualifiedName.isValid(k))
           .keySeq()
-          .forEach(k => expect(k).toBeInstanceOf(FullyQualifiedName));
+          .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
       });
 
       test(localUpdateSchema.FINALLY, () => {

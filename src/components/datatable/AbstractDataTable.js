@@ -237,52 +237,42 @@ class AbstractDataTable extends React.Component<Props, State> {
     };
   }
 
-  componentWillReceiveProps(nextProps :Props) {
+  componentDidUpdate(prevProps :Props, prevState :State) {
 
-    const { data, headers } = this.props;
-    const { autosizerHeight, autosizerWidth } = this.state;
+    const {
+      data,
+      headers,
+      height,
+      maxHeight,
+      maxWidth,
+      width,
+    } = this.props;
+    const { columnWidths } = this.state;
 
-    const nextHeaders :GridHeaders = nextProps.headers;
-    const nextData :GridData = nextProps.data;
-
-    const haveHeadersChanged :boolean = !headers.equals(nextHeaders);
-    const hasDataChanged :boolean = !data.equals(nextData);
+    const haveHeadersChanged :boolean = !headers.equals(prevProps.headers);
+    const hasDataChanged :boolean = !data.equals(prevProps.data);
+    const haveColumnWidthsChanged :boolean = !columnWidths.equals(prevState.columnWidths);
 
     if (haveHeadersChanged || hasDataChanged) {
-
       const newDimensions :Object = AbstractDataTable.computeDimensions({
-        autosizerHeight,
-        autosizerWidth,
-        data: nextData,
-        headers: nextHeaders,
-        specifiedMaxHeight: nextProps.maxHeight,
-        specifiedMaxWidth: nextProps.maxWidth,
-        specifiedHeight: nextProps.height,
-        specifiedWidth: nextProps.width
+        data,
+        headers,
+        autosizerHeight: prevState.autosizerHeight,
+        autosizerWidth: prevState.autosizerWidth,
+        specifiedMaxHeight: maxHeight,
+        specifiedMaxWidth: maxWidth,
+        specifiedHeight: height,
+        specifiedWidth: width,
       });
-
-      this.setState({
-        ...newDimensions
-      });
+      this.setState({ ...newDimensions });
     }
-  }
-
-  componentWillUpdate(nextProps :Props, nextState :State) {
-
-    const { data, headers } = this.props;
-    const { columnWidths } = this.state;
 
     /* eslint-disable prefer-destructuring */
     const headGrid :?Grid = this.headGrid;
     const bodyGrid :?Grid = this.bodyGrid;
     /* eslint-enable */
 
-    const haveHeadersChanged :boolean = !headers.equals(nextProps.headers);
-    const hasDataChanged :boolean = !data.equals(nextProps.data);
-    const haveColumnWidthsChanged :boolean = !columnWidths.equals(nextState.columnWidths);
-
     const shouldRecomputeGrids :boolean = haveHeadersChanged || hasDataChanged || haveColumnWidthsChanged;
-
     if (shouldRecomputeGrids && headGrid && bodyGrid) {
       // https://github.com/bvaughn/react-virtualized/issues/136#issuecomment-190440226
       headGrid.recomputeGridSize();

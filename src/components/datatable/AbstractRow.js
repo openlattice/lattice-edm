@@ -154,7 +154,8 @@ const AbstractRow = (params :Object) => (
 );
 
 const OrderableRow = SortableElement(AbstractRow);
-const orderableRowRangeRenderer = rowRangeRenderer(params => (
+const orderableRowRangeRenderer = rowRangeRenderer((params) => (
+  // eslint-disable-next-line react/jsx-props-no-spreading
   <OrderableRow key={params.key} index={params.index} {...params} />
 ));
 

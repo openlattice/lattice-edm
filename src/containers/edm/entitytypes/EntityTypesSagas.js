@@ -75,7 +75,7 @@ function* localAddPropertyTypeToEntityTypeWorker(seqAction :SequenceAction) :Gen
     } = value;
 
     const isOnline :boolean = yield select(
-      state => state.getIn(['app', 'isOnline'])
+      (state) => state.getIn(['app', 'isOnline'])
     );
 
     if (isOnline && isValidUUID(entityTypeId) && isValidUUID(propertyTypeId)) {
@@ -122,7 +122,7 @@ function* localCreateEntityTypeWorker(seqAction :SequenceAction) :Generator<*, *
     const newEntityType :EntityType = value;
     const newEntityTypeFQN :FQN = newEntityType.type;
     const entityTypesIndexMap :IndexMap = yield select(
-      state => state.getIn(['edm', 'entityTypes', 'entityTypesIndexMap'])
+      (state) => state.getIn(['edm', 'entityTypes', 'entityTypesIndexMap'])
     );
 
     if (entityTypesIndexMap.has(newEntityTypeFQN)) {
@@ -131,7 +131,7 @@ function* localCreateEntityTypeWorker(seqAction :SequenceAction) :Generator<*, *
     }
 
     const isOnline :boolean = yield select(
-      state => state.getIn(['app', 'isOnline'])
+      (state) => state.getIn(['app', 'isOnline'])
     );
 
     let newEntityTypeId :?UUID = '';
@@ -178,7 +178,7 @@ function* localDeleteEntityTypeWorker(seqAction :SequenceAction) :Generator<*, *
     const entityTypeId :?UUID = value.entityTypeId;
 
     const entityTypesIndexMap :IndexMap = yield select(
-      state => state.getIn(['edm', 'entityTypes', 'entityTypesIndexMap'])
+      (state) => state.getIn(['edm', 'entityTypes', 'entityTypesIndexMap'])
     );
 
     if (!entityTypesIndexMap.has(entityTypeFQN)) {
@@ -187,7 +187,7 @@ function* localDeleteEntityTypeWorker(seqAction :SequenceAction) :Generator<*, *
     }
 
     const isOnline :boolean = yield select(
-      state => state.getIn(['app', 'isOnline'])
+      (state) => state.getIn(['app', 'isOnline'])
     );
 
     if (isOnline && isValidUUID(entityTypeId)) {
@@ -234,7 +234,7 @@ function* localRemovePropertyTypeFromEntityTypeWorker(seqAction :SequenceAction)
     } = value;
 
     const isOnline :boolean = yield select(
-      state => state.getIn(['app', 'isOnline'])
+      (state) => state.getIn(['app', 'isOnline'])
     );
 
     if (isOnline && isValidUUID(entityTypeId) && isValidUUID(propertyTypeId)) {
@@ -284,7 +284,7 @@ function* localUpdateEntityTypeMetaWorker(seqAction :SequenceAction) :Generator<
     } :UpdateEntityTypeMeta = value;
 
     const isOnline :boolean = yield select(
-      state => state.getIn(['app', 'isOnline'])
+      (state) => state.getIn(['app', 'isOnline'])
     );
 
     if (isOnline && isValidUUID(entityTypeId)) {

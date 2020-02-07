@@ -6,6 +6,7 @@
   ],
   "plugins": [
     "flowtype",
+    "import",
     "jest",
     "react"
   ],
@@ -112,7 +113,7 @@
     "jsx-a11y/href-no-hash": "off",
 
     "react/default-props-match-prop-types": [
-      "warn",
+      "error",
       {
         "allowRequiredDefaults": true
       }
@@ -141,6 +142,8 @@
         "forbidDefaultForRequired": false,
       }
     ],
-    "react/sort-comp": "off"
+    "react/sort-comp": "off",
+    "react/state-in-constructor": ["warn", "always"],
+    "react/static-property-placement": ["error", "static public field"]
   }
 }

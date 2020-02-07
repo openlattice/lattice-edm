@@ -346,7 +346,7 @@ const mapStateToProps = (state, props) => {
   };
 };
 
-const mapDispatchToProps = dispatch => ({
+const mapDispatchToProps = (dispatch) => ({
   actions: bindActionCreators({
     localDeletePropertyType: PropertyTypesActions.localDeletePropertyType,
     localUpdatePropertyTypeMeta: PropertyTypesActions.localUpdatePropertyTypeMeta,
