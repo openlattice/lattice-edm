@@ -14,7 +14,6 @@ import { Redirect, Route, Switch } from 'react-router';
 import { bindActionCreators } from 'redux';
 import type { RequestSequence } from 'redux-reqseq';
 
-import OpenLatticeLogo from '../../assets/images/logo_and_name.png';
 import StyledButton from '../../components/buttons/StyledButton';
 import * as Routes from '../../core/router/Routes';
 
@@ -67,11 +66,6 @@ const StyledActionButton = styled(StyledButton)`
   right: 50px;
 `;
 
-const Logo = styled.img`
-  position: absolute;
-  left: 50px;
-`;
-
 /*
  * types
  */
@@ -120,7 +114,6 @@ class AppContainer extends Component<Props> {
       <AppWrapper>
         <AppHeaderOuterWrapper>
           <AppHeaderInnerWrapper>
-            <Logo src={OpenLatticeLogo} height="50" />
             <Title>
               Entity Data Model
             </Title>
