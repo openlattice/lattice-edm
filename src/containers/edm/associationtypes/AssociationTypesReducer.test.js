@@ -1,4 +1,4 @@
-import randomUUID from 'uuid/v4';
+import { v4 as uuid } from 'uuid';
 import { List, Map, fromJS } from 'immutable';
 import { Models, Types } from 'lattice';
 import { EntityDataModelApiActions } from 'lattice-sagas';
@@ -133,7 +133,7 @@ describe('AssociationTypesReducer', () => {
     const mockActionValue = {
       associationTypeFQN: MOCK_ASSOCIATION_TYPE.entityType.type,
       associationTypeId: MOCK_ASSOCIATION_TYPE.entityType.id,
-      entityTypeId: randomUUID(),
+      entityTypeId: uuid(),
     };
 
     test(localAddDstEntityTypeToAssociationType.REQUEST, () => {
@@ -246,7 +246,7 @@ describe('AssociationTypesReducer', () => {
     const mockActionValue = {
       associationTypeFQN: MOCK_ASSOCIATION_TYPE.entityType.type,
       associationTypeId: MOCK_ASSOCIATION_TYPE.entityType.id,
-      propertyTypeId: randomUUID(),
+      propertyTypeId: uuid(),
     };
 
     test(localAddPropertyTypeToAssociationType.REQUEST, () => {
@@ -362,7 +362,7 @@ describe('AssociationTypesReducer', () => {
     const mockActionValue = {
       associationTypeFQN: MOCK_ASSOCIATION_TYPE.entityType.type,
       associationTypeId: MOCK_ASSOCIATION_TYPE.entityType.id,
-      entityTypeId: randomUUID(),
+      entityTypeId: uuid(),
     };
 
     test(localAddSrcEntityTypeToAssociationType.REQUEST, () => {
@@ -638,7 +638,7 @@ describe('AssociationTypesReducer', () => {
           id,
           {
             associationTypeFQN: new FullyQualifiedName(genRandomString(), genRandomString()),
-            associationTypeId: randomUUID(),
+            associationTypeId: uuid(),
           },
         ));
         const stateAfterSuccess = reducer(stateAfterRequest, localDeleteAssociationType.success(id));
@@ -752,7 +752,7 @@ describe('AssociationTypesReducer', () => {
         const requestAction = localRemoveDstEntityTypeFromAssociationType.request(id, {
           associationTypeFQN: MOCK_ASSOCIATION_TYPE.entityType.type,
           associationTypeId: MOCK_ASSOCIATION_TYPE.entityType.id,
-          entityTypeId: randomUUID(),
+          entityTypeId: uuid(),
         });
         const stateAfterRequest = reducer(initialState, requestAction);
         const stateAfterSuccess = reducer(stateAfterRequest, localRemoveDstEntityTypeFromAssociationType.success(id));
@@ -868,7 +868,7 @@ describe('AssociationTypesReducer', () => {
         const requestAction = localRemovePropertyTypeFromAssociationType.request(id, {
           associationTypeFQN: MOCK_ASSOCIATION_TYPE.entityType.type,
           associationTypeId: MOCK_ASSOCIATION_TYPE.entityType.id,
-          propertyTypeId: randomUUID(),
+          propertyTypeId: uuid(),
         });
         const stateAfterRequest = reducer(initialState, requestAction);
         const stateAfterSuccess = reducer(stateAfterRequest, localRemovePropertyTypeFromAssociationType.success(id));
@@ -981,7 +981,7 @@ describe('AssociationTypesReducer', () => {
         const requestAction = localRemoveSrcEntityTypeFromAssociationType.request(id, {
           associationTypeFQN: MOCK_ASSOCIATION_TYPE.entityType.type,
           associationTypeId: MOCK_ASSOCIATION_TYPE.entityType.id,
-          entityTypeId: randomUUID(),
+          entityTypeId: uuid(),
         });
         const stateAfterRequest = reducer(initialState, requestAction);
         const stateAfterSuccess = reducer(stateAfterRequest, localRemoveSrcEntityTypeFromAssociationType.success(id));

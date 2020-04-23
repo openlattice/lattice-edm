@@ -1,4 +1,4 @@
-import randomUUID from 'uuid/v4';
+import { v4 as uuid } from 'uuid';
 import { List, Map, fromJS } from 'immutable';
 import { Models, Types } from 'lattice';
 import { EntityDataModelApiActions } from 'lattice-sagas';
@@ -268,21 +268,21 @@ describe('PropertyTypesReducer', () => {
 
         const mockPropertyType0 = new PropertyTypeBuilder()
           .setDataType('String')
-          .setId(randomUUID())
+          .setId(uuid())
           .setTitle('title')
           .setType(new FullyQualifiedName(genRandomString(), genRandomString()))
           .build();
 
         const mockPropertyType1 = new PropertyTypeBuilder()
           .setDataType('String')
-          .setId(randomUUID())
+          .setId(uuid())
           .setTitle('title')
           .setType(new FullyQualifiedName(genRandomString(), genRandomString()))
           .build();
 
         const mockPropertyType2 = new PropertyTypeBuilder()
           .setDataType('String')
-          .setId(randomUUID())
+          .setId(uuid())
           .setTitle('title')
           .setType(new FullyQualifiedName(genRandomString(), genRandomString()))
           .build();

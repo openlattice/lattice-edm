@@ -2,7 +2,7 @@
  * @flow
  */
 
-import randomUUID from 'uuid/v4';
+import { v4 as uuid } from 'uuid';
 import { Models, Types } from 'lattice';
 import type { FQN } from 'lattice';
 
@@ -61,16 +61,16 @@ const MOCK_ENTITY_TYPE :EntityType = new EntityTypeBuilder()
 
 function genRandomEntityType() :EntityType {
   return new EntityTypeBuilder()
-    .setBaseType(randomUUID())
+    .setBaseType(uuid())
     .setCategory(SecurableTypes.EntityType)
     .setDescription(genRandomString())
-    .setId(randomUUID())
-    .setKey([randomUUID(), randomUUID()])
+    .setId(uuid())
+    .setKey([uuid(), uuid()])
     .setPropertyTags({
-      [randomUUID()]: [genRandomString(), genRandomString()],
-      [randomUUID()]: [genRandomString()],
+      [uuid()]: [genRandomString(), genRandomString()],
+      [uuid()]: [genRandomString()],
     })
-    .setPropertyTypes([randomUUID(), randomUUID(), randomUUID()])
+    .setPropertyTypes([uuid(), uuid(), uuid()])
     .setSchemas([new FullyQualifiedName(genRandomString(), genRandomString())])
     .setShards(1)
     .setTitle(genRandomString())
@@ -98,7 +98,7 @@ function genRandomPropertyType() :PropertyType {
     .setDataType('String')
     .setDescription(genRandomString())
     .setEnumValues([genRandomString(), genRandomString()])
-    .setId(randomUUID())
+    .setId(uuid())
     .setIndexType(IndexTypes.HASH)
     .setMultiValued(genRandomBoolean())
     .setPii(genRandomBoolean())
@@ -137,8 +137,8 @@ const MOCK_ASSOCIATION_TYPE :AssociationType = new AssociationTypeBuilder()
 function genRandomAssociationType() :AssociationType {
   return new AssociationTypeBuilder()
     .setEntityType(genRandomEntityType())
-    .setSourceEntityTypeIds([randomUUID(), randomUUID()])
-    .setDestinationEntityTypeIds([randomUUID(), randomUUID(), randomUUID()])
+    .setSourceEntityTypeIds([uuid(), uuid()])
+    .setDestinationEntityTypeIds([uuid(), uuid(), uuid()])
     .setBidirectional(genRandomBoolean())
     .build();
 }
