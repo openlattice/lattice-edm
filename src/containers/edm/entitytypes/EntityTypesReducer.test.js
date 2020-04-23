@@ -1,4 +1,4 @@
-import randomUUID from 'uuid/v4';
+import { v4 as uuid } from 'uuid';
 import { List, Map, fromJS } from 'immutable';
 import { Models, Types } from 'lattice';
 import { EntityDataModelApiActions } from 'lattice-sagas';
@@ -117,7 +117,7 @@ describe('EntityTypesReducer', () => {
     const mockActionValue = {
       entityTypeFQN: MOCK_ENTITY_TYPE.type,
       entityTypeId: MOCK_ENTITY_TYPE.id,
-      propertyTypeId: randomUUID(),
+      propertyTypeId: uuid(),
     };
 
     test(localAddPropertyTypeToEntityType.REQUEST, () => {
@@ -320,27 +320,27 @@ describe('EntityTypesReducer', () => {
       test('should correctly update "entityTypes" and "entityTypesIndexMap"', () => {
 
         const mockEntityType0 = new EntityTypeBuilder()
-          .setId(randomUUID())
-          .setKey([randomUUID()])
-          .setPropertyTypes([randomUUID(), randomUUID()])
+          .setId(uuid())
+          .setKey([uuid()])
+          .setPropertyTypes([uuid(), uuid()])
           .setSchemas([new FullyQualifiedName(genRandomString(), genRandomString())])
           .setTitle(genRandomString())
           .setType(new FullyQualifiedName(genRandomString(), genRandomString()))
           .build();
 
         const mockEntityType1 = new EntityTypeBuilder()
-          .setId(randomUUID())
-          .setKey([randomUUID()])
-          .setPropertyTypes([randomUUID(), randomUUID()])
+          .setId(uuid())
+          .setKey([uuid()])
+          .setPropertyTypes([uuid(), uuid()])
           .setSchemas([new FullyQualifiedName(genRandomString(), genRandomString())])
           .setTitle(genRandomString())
           .setType(new FullyQualifiedName(genRandomString(), genRandomString()))
           .build();
 
         const mockEntityType2 = new EntityTypeBuilder()
-          .setId(randomUUID())
-          .setKey([randomUUID()])
-          .setPropertyTypes([randomUUID(), randomUUID()])
+          .setId(uuid())
+          .setKey([uuid()])
+          .setPropertyTypes([uuid(), uuid()])
           .setSchemas([new FullyQualifiedName(genRandomString(), genRandomString())])
           .setTitle(genRandomString())
           .setType(new FullyQualifiedName(genRandomString(), genRandomString()))
@@ -489,7 +489,7 @@ describe('EntityTypesReducer', () => {
         const requestAction = localRemovePropertyTypeFromEntityType.request(id, {
           entityTypeFQN: MOCK_ENTITY_TYPE.type,
           entityTypeId: MOCK_ENTITY_TYPE.id,
-          propertyTypeId: randomUUID(),
+          propertyTypeId: uuid(),
         });
         const stateAfterRequest = reducer(initialState, requestAction);
         const stateAfterSuccess = reducer(stateAfterRequest, localRemovePropertyTypeFromEntityType.success(id));
