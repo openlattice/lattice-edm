@@ -8,28 +8,26 @@ import styled from 'styled-components';
 import { List, Map, OrderedSet } from 'immutable';
 import { Models } from 'lattice';
 import { AuthUtils } from 'lattice-auth';
-import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import type { FQN } from 'lattice';
+import { bindActionCreators } from 'redux';
 import type { RequestSequence } from 'redux-reqseq';
 
-import AbstractTypes from '../../../utils/AbstractTypes';
+import * as AssociationTypesActions from './AssociationTypesActions';
+
 import AbstractTypeDataTable from '../../../components/datatable/AbstractTypeDataTable';
 import AbstractTypeFieldDescription from '../AbstractTypeFieldDescription';
 import AbstractTypeFieldTitle from '../AbstractTypeFieldTitle';
 import AbstractTypeFieldType from '../AbstractTypeFieldType';
 import AbstractTypeSearchableSelect from '../../../components/controls/AbstractTypeSearchableSelect';
+import AbstractTypes from '../../../utils/AbstractTypes';
 import Logger from '../../../utils/Logger';
 import StyledButton from '../../../components/buttons/StyledButton';
-import * as AssociationTypesActions from './AssociationTypesActions';
 import { isValidUUID } from '../../../utils/ValidationUtils';
 import type { IndexMap } from '../Types';
 
 const LOG :Logger = new Logger('AssociationTypeDetailsContainer');
 
-const {
-  FullyQualifiedName
-} = Models;
+const { FQN } = Models;
 
 /*
  * styled components
@@ -86,7 +84,7 @@ class AssociationTypeDetailsContainer extends React.Component<Props> {
       }
       actions.localAddDstEntityTypeToAssociationType({
         entityTypeId,
-        associationTypeFQN: new FullyQualifiedName(associationEntityType.get('type')),
+        associationTypeFQN: FQN.of(associationEntityType.get('type')),
         associationTypeId: associationEntityType.get('id'),
       });
     }
@@ -112,7 +110,7 @@ class AssociationTypeDetailsContainer extends React.Component<Props> {
       }
       actions.localAddPropertyTypeToAssociationType({
         propertyTypeId,
-        associationTypeFQN: new FullyQualifiedName(associationEntityType.get('type')),
+        associationTypeFQN: FQN.of(associationEntityType.get('type')),
         associationTypeId: associationEntityType.get('id'),
       });
     }
@@ -138,7 +136,7 @@ class AssociationTypeDetailsContainer extends React.Component<Props> {
       }
       actions.localAddSrcEntityTypeToAssociationType({
         entityTypeId,
-        associationTypeFQN: new FullyQualifiedName(associationEntityType.get('type')),
+        associationTypeFQN: FQN.of(associationEntityType.get('type')),
         associationTypeId: associationEntityType.get('id'),
       });
     }
@@ -159,7 +157,7 @@ class AssociationTypeDetailsContainer extends React.Component<Props> {
       const entityTypeId :UUID = entityTypes.getIn([entityTypesIndex, 'id']);
       actions.localRemoveDstEntityTypeFromAssociationType({
         entityTypeId,
-        associationTypeFQN: new FullyQualifiedName(associationEntityType.get('type')),
+        associationTypeFQN: FQN.of(associationEntityType.get('type')),
         associationTypeId: associationEntityType.get('id'),
       });
     }
@@ -180,7 +178,7 @@ class AssociationTypeDetailsContainer extends React.Component<Props> {
       const propertyTypeId :UUID = propertyTypes.getIn([propertyTypesIndex, 'id']);
       actions.localRemovePropertyTypeFromAssociationType({
         propertyTypeId,
-        associationTypeFQN: new FullyQualifiedName(associationEntityType.get('type')),
+        associationTypeFQN: FQN.of(associationEntityType.get('type')),
         associationTypeId: associationEntityType.get('id'),
       });
     }
@@ -201,7 +199,7 @@ class AssociationTypeDetailsContainer extends React.Component<Props> {
       const entityTypeId :UUID = entityTypes.getIn([entityTypesIndex, 'id']);
       actions.localRemoveSrcEntityTypeFromAssociationType({
         entityTypeId,
-        associationTypeFQN: new FullyQualifiedName(associationEntityType.get('type')),
+        associationTypeFQN: FQN.of(associationEntityType.get('type')),
         associationTypeId: associationEntityType.get('id'),
       });
     }
@@ -233,7 +231,7 @@ class AssociationTypeDetailsContainer extends React.Component<Props> {
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
       const associationEntityType :Map<*, *> = associationType.get('entityType', Map());
       const associationTypeId :?UUID = associationEntityType.get('id');
-      const associationTypeFQN :FQN = new FullyQualifiedName(associationEntityType.get('type'));
+      const associationTypeFQN :FQN = FQN.of(associationEntityType.get('type'));
       actions.localDeleteAssociationType({ associationTypeFQN, associationTypeId });
     }
   }
