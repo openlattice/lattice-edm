@@ -9,33 +9,31 @@ import { List, Map } from 'immutable';
 import { Models } from 'lattice';
 import { AuthUtils } from 'lattice-auth';
 import { connect } from 'react-redux';
-import type { FQN } from 'lattice';
-
-import AbstractTypes from '../../utils/AbstractTypes';
-import AbstractTypeDataTable from '../../components/datatable/AbstractTypeDataTable';
-import SearchInput from '../../components/controls/SearchInput';
-import StyledButton from '../../components/buttons/StyledButton';
-import StyledCard from '../../components/cards/StyledCard';
-import Spinner from '../../components/spinner/Spinner';
 
 import AbstractTypeCreateContainer from './AbstractTypeCreateContainer';
 import AssociationTypeDetailsContainer from './associationtypes/AssociationTypeDetailsContainer';
 import EntityTypeDetailsContainer from './entitytypes/EntityTypeDetailsContainer';
 import PropertyTypeDetailsContainer from './propertytypes/PropertyTypeDetailsContainer';
 import SchemaDetailsContainer from './schemas/SchemaDetailsContainer';
-import {
-  getWorkingAbstractTypes,
-  filterAbstractTypes,
-  maybeGetAbstractTypeMatchingFQN,
-  maybeGetNewlyCreatedAbstractTypeFQN,
-} from '../../utils/AbstractTypeUtils';
-
 import type {
   AbstractTypeOverviewContainerProps as Props,
   AbstractTypeOverviewContainerState as State,
 } from './Types';
 
-const { FullyQualifiedName } = Models;
+import AbstractTypeDataTable from '../../components/datatable/AbstractTypeDataTable';
+import AbstractTypes from '../../utils/AbstractTypes';
+import SearchInput from '../../components/controls/SearchInput';
+import Spinner from '../../components/spinner/Spinner';
+import StyledButton from '../../components/buttons/StyledButton';
+import StyledCard from '../../components/cards/StyledCard';
+import {
+  filterAbstractTypes,
+  getWorkingAbstractTypes,
+  maybeGetAbstractTypeMatchingFQN,
+  maybeGetNewlyCreatedAbstractTypeFQN,
+} from '../../utils/AbstractTypeUtils';
+
+const { FQN } = Models;
 
 /*
  * styled components
@@ -121,7 +119,7 @@ class AbstractTypeOverviewContainer extends React.Component<Props, State> {
     else {
       // if a new abstract type was created, use its fqn for selection
       const fqn :?FQN = maybeGetNewlyCreatedAbstractTypeFQN(prevProps, this.props);
-      if (FullyQualifiedName.isValid(fqn)) {
+      if (FQN.isValid(fqn)) {
         this.setState({
           selectedAbstractTypeFQN: fqn,
         });

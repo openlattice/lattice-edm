@@ -4,15 +4,15 @@
 
 import { List, Map } from 'immutable';
 import { Models } from 'lattice';
-import type { FQN } from 'lattice';
 
 import AbstractTypes from './AbstractTypes';
 import Logger from './Logger';
 import type { AbstractType } from './AbstractTypes';
+
 import type { AbstractTypeOverviewContainerProps } from '../containers/edm/Types';
 
 const LOG :Logger = new Logger('AbstractTypeUtils');
-const { FullyQualifiedName } = Models;
+const { FQN } = Models;
 
 type GetWorkingAbstractTypesParams = {
   associationTypes :List<Map<*, *>>;
@@ -61,8 +61,8 @@ function filterAbstractTypes(params :FilterAbstractTypesParams) :List<Map<*, *>>
     const abstractTypeId :?string = abstractType.get('id', '');
     const abstractTypeType :Map<string, string> = abstractType.get('type', Map());
     const abstractTypeFQN :string = (workingAbstractTypeType === AbstractTypes.Schema)
-      ? FullyQualifiedName.toString(abstractType.get('fqn', Map())).toLowerCase()
-      : FullyQualifiedName.toString(abstractTypeType).toLowerCase();
+      ? FQN.toString(abstractType.get('fqn', Map())).toLowerCase()
+      : FQN.toString(abstractTypeType).toLowerCase();
     const abstractTypeTitle :string = abstractType.get('title', '').toLowerCase();
     const abstractTypeDescription :string = abstractType.get('description', '').toLowerCase();
 
@@ -102,7 +102,7 @@ function maybeGetAbstractTypeMatchingFQN(
   let abstractTypeIndex :number;
   switch (workingAbstractTypeType) {
     case AbstractTypes.AssociationType: {
-      if (FullyQualifiedName.isValid(abstractTypeFQN)) {
+      if (FQN.isValid(abstractTypeFQN)) {
         abstractTypeIndex = associationTypesIndexMap.get(abstractTypeFQN, -1);
         if (abstractTypeIndex !== -1) {
           return associationTypes.get(abstractTypeIndex, Map());
@@ -111,7 +111,7 @@ function maybeGetAbstractTypeMatchingFQN(
       break;
     }
     case AbstractTypes.EntityType: {
-      if (FullyQualifiedName.isValid(abstractTypeFQN)) {
+      if (FQN.isValid(abstractTypeFQN)) {
         abstractTypeIndex = entityTypesIndexMap.get(abstractTypeFQN, -1);
         if (abstractTypeIndex !== -1) {
           return entityTypes.get(abstractTypeIndex, Map());
@@ -120,7 +120,7 @@ function maybeGetAbstractTypeMatchingFQN(
       break;
     }
     case AbstractTypes.PropertyType: {
-      if (FullyQualifiedName.isValid(abstractTypeFQN)) {
+      if (FQN.isValid(abstractTypeFQN)) {
         abstractTypeIndex = propertyTypesIndexMap.get(abstractTypeFQN, -1);
         if (abstractTypeIndex !== -1) {
           return propertyTypes.get(abstractTypeIndex, Map());
@@ -129,7 +129,7 @@ function maybeGetAbstractTypeMatchingFQN(
       break;
     }
     case AbstractTypes.Schema: {
-      if (FullyQualifiedName.isValid(abstractTypeFQN)) {
+      if (FQN.isValid(abstractTypeFQN)) {
         abstractTypeIndex = schemasIndexMap.get(abstractTypeFQN, -1);
         if (abstractTypeIndex !== -1) {
           return schemas.get(abstractTypeIndex, Map());
@@ -182,12 +182,12 @@ function maybeGetNewlyCreatedAbstractTypeFQN(
   // to decide if the newly created abstract type fqn should be used, we have to check for two conditions:
   //   1. "SUCCESS" sets the new fqn value, previous fqn value is empty
   //   2. "FINALLY" clears the new fqn value, previous fqn value is not empty since it was set by "SUCCESS"
-  if (FullyQualifiedName.isValid(nextFQN) && !FullyQualifiedName.isValid(prevFQN)) {
+  if (FQN.isValid(nextFQN) && !FQN.isValid(prevFQN)) {
     // "SUCCESS" action
     return nextFQN;
   }
 
-  if (!FullyQualifiedName.isValid(nextFQN) && FullyQualifiedName.isValid(prevFQN)) {
+  if (!FQN.isValid(nextFQN) && FQN.isValid(prevFQN)) {
     // "FINALLY" action
     return prevFQN;
   }

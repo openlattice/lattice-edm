@@ -5,25 +5,25 @@
 import React, { Component } from 'react';
 
 import styled from 'styled-components';
-import { Map, List } from 'immutable';
+import { List, Map } from 'immutable';
 import { Models } from 'lattice';
 import { AuthUtils } from 'lattice-auth';
 import { Modal, Spinner } from 'lattice-ui-kit';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { RequestStates } from 'redux-reqseq';
-import type { FQN } from 'lattice';
 import type { RequestSequence, RequestState } from 'redux-reqseq';
 
-import AbstractTypes from '../../../utils/AbstractTypes';
+import * as PropertyTypesActions from './PropertyTypesActions';
+
 import AbstractTypeDataTable from '../../../components/datatable/AbstractTypeDataTable';
 import AbstractTypeFieldDescription from '../AbstractTypeFieldDescription';
 import AbstractTypeFieldTitle from '../AbstractTypeFieldTitle';
 import AbstractTypeFieldType from '../AbstractTypeFieldType';
+import AbstractTypes from '../../../utils/AbstractTypes';
 import StyledButton from '../../../components/buttons/StyledButton';
-import * as PropertyTypesActions from './PropertyTypesActions';
 
-const { FullyQualifiedName } = Models;
+const { FQN } = Models;
 
 const PII_RADIO_NAME :string = 'propertyTypePii';
 const PII_YES_RADIO_ID :string = 'propertyTypePii-yes';
@@ -127,7 +127,7 @@ class PropertyTypeDetailsContainer extends Component<Props, State> {
       const actionPrimary = () => {
         if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
           const propertyTypeId :?UUID = propertyType.get('id');
-          const propertyTypeFQN :FQN = new FullyQualifiedName(propertyType.get('type'));
+          const propertyTypeFQN :FQN = FQN.of(propertyType.get('type'));
           actions.localUpdatePropertyTypeMeta({
             propertyTypeFQN,
             propertyTypeId,
@@ -152,7 +152,7 @@ class PropertyTypeDetailsContainer extends Component<Props, State> {
 
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
       const propertyTypeId :?UUID = propertyType.get('id');
-      const propertyTypeFQN :FQN = new FullyQualifiedName(propertyType.get('type'));
+      const propertyTypeFQN :FQN = FQN.of(propertyType.get('type'));
       actions.localDeletePropertyType({ propertyTypeFQN, propertyTypeId });
     }
   }

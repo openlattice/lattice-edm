@@ -1,11 +1,9 @@
-import { v4 as uuid } from 'uuid';
 import { List, Map, fromJS } from 'immutable';
 import { Models, Types } from 'lattice';
 import { EntityDataModelApiActions } from 'lattice-sagas';
+import { v4 as uuid } from 'uuid';
 
 import reducer from './EntityTypesReducer';
-import { MOCK_ENTITY_TYPE, genRandomFQN } from '../../../utils/testing/MockDataModels';
-import { genRandomString } from '../../../utils/testing/MockUtils';
 import {
   LOCAL_ADD_PT_TO_ET,
   LOCAL_CREATE_ENTITY_TYPE,
@@ -18,13 +16,16 @@ import {
   localRemovePropertyTypeFromEntityType,
   localUpdateEntityTypeMeta,
 } from './EntityTypesActions';
+
+import { MOCK_ENTITY_TYPE, genRandomFQN } from '../../../utils/testing/MockDataModels';
+import { genRandomString } from '../../../utils/testing/MockUtils';
 import {
   LOCAL_UPDATE_SCHEMA,
   localUpdateSchema,
 } from '../schemas/SchemasActions';
 
 const {
-  FullyQualifiedName,
+  FQN,
   EntityTypeBuilder,
 } = Models;
 
@@ -82,9 +83,9 @@ describe('EntityTypesReducer', () => {
       expect(state.get('entityTypesIndexMap').hashCode()).toEqual(expectedPropertyTypesIndexMap.hashCode());
       expect(state.get('entityTypesIndexMap').equals(expectedPropertyTypesIndexMap)).toEqual(true);
       state.get('entityTypesIndexMap')
-        .filter((v, k) => FullyQualifiedName.isValid(k))
+        .filter((v, k) => FQN.isValid(k))
         .keySeq()
-        .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
+        .forEach((k) => expect(k).toBeInstanceOf(FQN));
     });
 
     test(getEntityDataModel.FAILURE, () => {
@@ -149,9 +150,9 @@ describe('EntityTypesReducer', () => {
         expect(state.get('entityTypesIndexMap').hashCode()).toEqual(expectedEntityTypesIndexMap.hashCode());
         expect(state.get('entityTypesIndexMap').equals(expectedEntityTypesIndexMap)).toEqual(true);
         state.get('entityTypesIndexMap')
-          .filter((v, k) => FullyQualifiedName.isValid(k))
+          .filter((v, k) => FQN.isValid(k))
           .keySeq()
-          .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
+          .forEach((k) => expect(k).toBeInstanceOf(FQN));
       });
 
       test('should not mutate state if the id is already in the list', () => {
@@ -200,9 +201,9 @@ describe('EntityTypesReducer', () => {
       expect(state.get('entityTypesIndexMap').hashCode()).toEqual(expectedEntityTypesIndexMap.hashCode());
       expect(state.get('entityTypesIndexMap').equals(expectedEntityTypesIndexMap)).toEqual(true);
       state.get('entityTypesIndexMap')
-        .filter((v, k) => FullyQualifiedName.isValid(k))
+        .filter((v, k) => FQN.isValid(k))
         .keySeq()
-        .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
+        .forEach((k) => expect(k).toBeInstanceOf(FQN));
     });
 
     test(localAddPropertyTypeToEntityType.FINALLY, () => {
@@ -237,7 +238,7 @@ describe('EntityTypesReducer', () => {
 
       expect(state.getIn([LOCAL_CREATE_ENTITY_TYPE, id])).toEqual(requestAction);
       expect(state.get('newlyCreatedEntityTypeFQN')).toEqual(MOCK_ENTITY_TYPE.type);
-      expect(state.get('newlyCreatedEntityTypeFQN')).toBeInstanceOf(FullyQualifiedName);
+      expect(state.get('newlyCreatedEntityTypeFQN')).toBeInstanceOf(FQN);
 
       const expectedEntityTypes = List().push(MOCK_ENTITY_TYPE.toImmutable());
       expect(state.get('entityTypes').hashCode()).toEqual(expectedEntityTypes.hashCode());
@@ -249,9 +250,9 @@ describe('EntityTypesReducer', () => {
       expect(state.get('entityTypesIndexMap').hashCode()).toEqual(expectedEntityTypesIndexMap.hashCode());
       expect(state.get('entityTypesIndexMap').equals(expectedEntityTypesIndexMap)).toEqual(true);
       state.get('entityTypesIndexMap')
-        .filter((v, k) => FullyQualifiedName.isValid(k))
+        .filter((v, k) => FQN.isValid(k))
         .keySeq()
-        .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
+        .forEach((k) => expect(k).toBeInstanceOf(FQN));
     });
 
     test(localCreateEntityType.FAILURE, () => {
@@ -283,7 +284,7 @@ describe('EntityTypesReducer', () => {
 
       expect(state.hasIn([LOCAL_CREATE_ENTITY_TYPE, id])).toEqual(false);
       expect(state.get('newlyCreatedEntityTypeFQN')).toEqual(MOCK_ENTITY_TYPE.type);
-      expect(state.get('newlyCreatedEntityTypeFQN')).toBeInstanceOf(FullyQualifiedName);
+      expect(state.get('newlyCreatedEntityTypeFQN')).toBeInstanceOf(FQN);
     });
 
   });
@@ -323,27 +324,27 @@ describe('EntityTypesReducer', () => {
           .setId(uuid())
           .setKey([uuid()])
           .setPropertyTypes([uuid(), uuid()])
-          .setSchemas([new FullyQualifiedName(genRandomString(), genRandomString())])
+          .setSchemas([new FQN(genRandomString(), genRandomString())])
           .setTitle(genRandomString())
-          .setType(new FullyQualifiedName(genRandomString(), genRandomString()))
+          .setType(new FQN(genRandomString(), genRandomString()))
           .build();
 
         const mockEntityType1 = new EntityTypeBuilder()
           .setId(uuid())
           .setKey([uuid()])
           .setPropertyTypes([uuid(), uuid()])
-          .setSchemas([new FullyQualifiedName(genRandomString(), genRandomString())])
+          .setSchemas([new FQN(genRandomString(), genRandomString())])
           .setTitle(genRandomString())
-          .setType(new FullyQualifiedName(genRandomString(), genRandomString()))
+          .setType(new FQN(genRandomString(), genRandomString()))
           .build();
 
         const mockEntityType2 = new EntityTypeBuilder()
           .setId(uuid())
           .setKey([uuid()])
           .setPropertyTypes([uuid(), uuid()])
-          .setSchemas([new FullyQualifiedName(genRandomString(), genRandomString())])
+          .setSchemas([new FQN(genRandomString(), genRandomString())])
           .setTitle(genRandomString())
-          .setType(new FullyQualifiedName(genRandomString(), genRandomString()))
+          .setType(new FQN(genRandomString(), genRandomString()))
           .build();
 
         const initialState = INITIAL_STATE
@@ -377,9 +378,9 @@ describe('EntityTypesReducer', () => {
         expect(state.get('entityTypesIndexMap').hashCode()).toEqual(expectedEntityTypesIndexMap.hashCode());
         expect(state.get('entityTypesIndexMap').equals(expectedEntityTypesIndexMap)).toEqual(true);
         state.get('entityTypesIndexMap')
-          .filter((v, k) => FullyQualifiedName.isValid(k))
+          .filter((v, k) => FQN.isValid(k))
           .keySeq()
-          .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
+          .forEach((k) => expect(k).toBeInstanceOf(FQN));
       });
 
       test('should not mutate state if attempting to delete a non-existent EntityType', () => {
@@ -390,7 +391,7 @@ describe('EntityTypesReducer', () => {
           .setIn(['entityTypesIndexMap', MOCK_ENTITY_TYPE.type], 0);
 
         const { id } = localDeleteEntityType();
-        const entityTypeFQN = new FullyQualifiedName(genRandomString(), genRandomString());
+        const entityTypeFQN = new FQN(genRandomString(), genRandomString());
         const stateAfterRequest = reducer(initialState, localDeleteEntityType.request(id, { entityTypeFQN }));
         const stateAfterSuccess = reducer(stateAfterRequest, localDeleteEntityType.success(id));
         expect(stateAfterSuccess.hashCode()).toEqual(stateAfterRequest.hashCode());
@@ -478,9 +479,9 @@ describe('EntityTypesReducer', () => {
         expect(state.get('entityTypesIndexMap').hashCode()).toEqual(expectedEntityTypesIndexMap.hashCode());
         expect(state.get('entityTypesIndexMap').equals(expectedEntityTypesIndexMap)).toEqual(true);
         state.get('entityTypesIndexMap')
-          .filter((v, k) => FullyQualifiedName.isValid(k))
+          .filter((v, k) => FQN.isValid(k))
           .keySeq()
-          .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
+          .forEach((k) => expect(k).toBeInstanceOf(FQN));
       });
 
       test('should not mutate state if the id is not in the list', () => {
@@ -529,9 +530,9 @@ describe('EntityTypesReducer', () => {
       expect(state.get('entityTypesIndexMap').hashCode()).toEqual(expectedEntityTypesIndexMap.hashCode());
       expect(state.get('entityTypesIndexMap').equals(expectedEntityTypesIndexMap)).toEqual(true);
       state.get('entityTypesIndexMap')
-        .filter((v, k) => FullyQualifiedName.isValid(k))
+        .filter((v, k) => FQN.isValid(k))
         .keySeq()
-        .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
+        .forEach((k) => expect(k).toBeInstanceOf(FQN));
     });
 
     test(localRemovePropertyTypeFromEntityType.FINALLY, () => {
@@ -586,9 +587,9 @@ describe('EntityTypesReducer', () => {
         expect(state.get('entityTypesIndexMap').hashCode()).toEqual(expectedEntityTypesIndexMap.hashCode());
         expect(state.get('entityTypesIndexMap').equals(expectedEntityTypesIndexMap)).toEqual(true);
         state.get('entityTypesIndexMap')
-          .filter((v, k) => FullyQualifiedName.isValid(k))
+          .filter((v, k) => FQN.isValid(k))
           .keySeq()
-          .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
+          .forEach((k) => expect(k).toBeInstanceOf(FQN));
       });
 
       test(localUpdateEntityTypeMeta.FAILURE, () => {
@@ -607,9 +608,9 @@ describe('EntityTypesReducer', () => {
         expect(state.get('entityTypesIndexMap').hashCode()).toEqual(expectedEntityTypesIndexMap.hashCode());
         expect(state.get('entityTypesIndexMap').equals(expectedEntityTypesIndexMap)).toEqual(true);
         state.get('entityTypesIndexMap')
-          .filter((v, k) => FullyQualifiedName.isValid(k))
+          .filter((v, k) => FQN.isValid(k))
           .keySeq()
-          .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
+          .forEach((k) => expect(k).toBeInstanceOf(FQN));
       });
 
       test(localUpdateEntityTypeMeta.FINALLY, () => {
@@ -657,9 +658,9 @@ describe('EntityTypesReducer', () => {
         expect(state.get('entityTypesIndexMap').hashCode()).toEqual(expectedEntityTypesIndexMap.hashCode());
         expect(state.get('entityTypesIndexMap').equals(expectedEntityTypesIndexMap)).toEqual(true);
         state.get('entityTypesIndexMap')
-          .filter((v, k) => FullyQualifiedName.isValid(k))
+          .filter((v, k) => FQN.isValid(k))
           .keySeq()
-          .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
+          .forEach((k) => expect(k).toBeInstanceOf(FQN));
       });
 
       test(localUpdateEntityTypeMeta.FAILURE, () => {
@@ -678,9 +679,9 @@ describe('EntityTypesReducer', () => {
         expect(state.get('entityTypesIndexMap').hashCode()).toEqual(expectedEntityTypesIndexMap.hashCode());
         expect(state.get('entityTypesIndexMap').equals(expectedEntityTypesIndexMap)).toEqual(true);
         state.get('entityTypesIndexMap')
-          .filter((v, k) => FullyQualifiedName.isValid(k))
+          .filter((v, k) => FQN.isValid(k))
           .keySeq()
-          .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
+          .forEach((k) => expect(k).toBeInstanceOf(FQN));
       });
 
       test(localUpdateEntityTypeMeta.FINALLY, () => {
@@ -699,7 +700,7 @@ describe('EntityTypesReducer', () => {
       const mockActionValue = {
         entityTypeId: MOCK_ENTITY_TYPE.id,
         entityTypeFQN: MOCK_ENTITY_TYPE.type,
-        metadata: { type: new FullyQualifiedName(genRandomString(), genRandomString()) },
+        metadata: { type: new FQN(genRandomString(), genRandomString()) },
       };
 
       test(localUpdateEntityTypeMeta.REQUEST, () => {
@@ -728,9 +729,9 @@ describe('EntityTypesReducer', () => {
         expect(state.get('entityTypesIndexMap').hashCode()).toEqual(expectedEntityTypesIndexMap.hashCode());
         expect(state.get('entityTypesIndexMap').equals(expectedEntityTypesIndexMap)).toEqual(true);
         state.get('entityTypesIndexMap')
-          .filter((v, k) => FullyQualifiedName.isValid(k))
+          .filter((v, k) => FQN.isValid(k))
           .keySeq()
-          .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
+          .forEach((k) => expect(k).toBeInstanceOf(FQN));
       });
 
       test(localUpdateEntityTypeMeta.FAILURE, () => {
@@ -749,9 +750,9 @@ describe('EntityTypesReducer', () => {
         expect(state.get('entityTypesIndexMap').hashCode()).toEqual(expectedEntityTypesIndexMap.hashCode());
         expect(state.get('entityTypesIndexMap').equals(expectedEntityTypesIndexMap)).toEqual(true);
         state.get('entityTypesIndexMap')
-          .filter((v, k) => FullyQualifiedName.isValid(k))
+          .filter((v, k) => FQN.isValid(k))
           .keySeq()
-          .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
+          .forEach((k) => expect(k).toBeInstanceOf(FQN));
       });
 
       test(localUpdateEntityTypeMeta.FINALLY, () => {
@@ -814,9 +815,9 @@ describe('EntityTypesReducer', () => {
         expect(state.get('entityTypesIndexMap').hashCode()).toEqual(expectedEntityTypesIndexMap.hashCode());
         expect(state.get('entityTypesIndexMap').equals(expectedEntityTypesIndexMap)).toEqual(true);
         state.get('entityTypesIndexMap')
-          .filter((v, k) => FullyQualifiedName.isValid(k))
+          .filter((v, k) => FQN.isValid(k))
           .keySeq()
-          .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
+          .forEach((k) => expect(k).toBeInstanceOf(FQN));
       });
 
       test(localUpdateSchema.FAILURE, () => {
@@ -837,9 +838,9 @@ describe('EntityTypesReducer', () => {
         expect(state.get('entityTypesIndexMap').hashCode()).toEqual(expectedEntityTypesIndexMap.hashCode());
         expect(state.get('entityTypesIndexMap').equals(expectedEntityTypesIndexMap)).toEqual(true);
         state.get('entityTypesIndexMap')
-          .filter((v, k) => FullyQualifiedName.isValid(k))
+          .filter((v, k) => FQN.isValid(k))
           .keySeq()
-          .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
+          .forEach((k) => expect(k).toBeInstanceOf(FQN));
       });
 
       test(localUpdateSchema.FINALLY, () => {
@@ -890,9 +891,9 @@ describe('EntityTypesReducer', () => {
         expect(state.get('entityTypesIndexMap').hashCode()).toEqual(expectedEntityTypesIndexMap.hashCode());
         expect(state.get('entityTypesIndexMap').equals(expectedEntityTypesIndexMap)).toEqual(true);
         state.get('entityTypesIndexMap')
-          .filter((v, k) => FullyQualifiedName.isValid(k))
+          .filter((v, k) => FQN.isValid(k))
           .keySeq()
-          .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
+          .forEach((k) => expect(k).toBeInstanceOf(FQN));
       });
 
       test(localUpdateSchema.FAILURE, () => {
@@ -913,9 +914,9 @@ describe('EntityTypesReducer', () => {
         expect(state.get('entityTypesIndexMap').hashCode()).toEqual(expectedEntityTypesIndexMap.hashCode());
         expect(state.get('entityTypesIndexMap').equals(expectedEntityTypesIndexMap)).toEqual(true);
         state.get('entityTypesIndexMap')
-          .filter((v, k) => FullyQualifiedName.isValid(k))
+          .filter((v, k) => FQN.isValid(k))
           .keySeq()
-          .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
+          .forEach((k) => expect(k).toBeInstanceOf(FQN));
       });
 
       test(localUpdateSchema.FINALLY, () => {

@@ -30,22 +30,22 @@ const {
   updateEntityDataModelWorker,
 } = EntityDataModelApiSagas;
 
-const { FullyQualifiedName } = Models;
+const { FQN } = Models;
 
-const OL_AUDIT_FQN :FullyQualifiedName = new FullyQualifiedName('OPENLATTICE_AUDIT', 'AUDIT');
+const OL_AUDIT_FQN = FQN.of('OPENLATTICE_AUDIT', 'AUDIT');
 
 function removeOpenLatticeAuditType(edm :Object) :Object {
 
   const propertyTypes = edm.propertyTypes.filter(
-    (propertyType) => FullyQualifiedName.toString(propertyType.type) !== OL_AUDIT_FQN.toString()
+    (propertyType) => FQN.toString(propertyType.type) !== OL_AUDIT_FQN.toString()
   );
 
   const entityTypes = edm.entityTypes.filter(
-    (enitityType) => FullyQualifiedName.toString(enitityType.type) !== OL_AUDIT_FQN.toString()
+    (enitityType) => FQN.toString(enitityType.type) !== OL_AUDIT_FQN.toString()
   );
 
   const associationTypes = edm.associationTypes.filter(
-    (associationType) => FullyQualifiedName.toString(associationType.entityType.type) !== OL_AUDIT_FQN.toString()
+    (associationType) => FQN.toString(associationType.entityType.type) !== OL_AUDIT_FQN.toString()
   );
 
   return {
