@@ -5,7 +5,6 @@
 import React from 'react';
 
 import styled from 'styled-components';
-import { AuthUtils } from 'lattice-auth';
 import { NavLink } from 'react-router-dom';
 
 import * as Routes from '../../core/router/Routes';
@@ -48,10 +47,7 @@ const NavTab = styled(NavLink).attrs({
 const NavContainer = () => {
 
   // GitHub and Sync tabs should only ever be available when an admin is logged in
-  const showGitHub :boolean = AuthUtils.isAuthenticated() && AuthUtils.isAdmin();
-
-  // Sync should only ever be available when running locally, never on prod
-  const showSync :boolean = AuthUtils.isAuthenticated() && AuthUtils.isAdmin() && __ENV_DEV__;
+  const showGitHub :boolean = false; // AuthUtils.isAuthenticated() && AuthUtils.isAdmin();
 
   return (
     <Nav>
@@ -67,13 +63,6 @@ const NavContainer = () => {
       <NavTab to={Routes.SCHEMAS}>
         Schemas
       </NavTab>
-      {
-        showSync && (
-          <NavTab to={Routes.SYNC}>
-            Sync
-          </NavTab>
-        )
-      }
       {
         showGitHub && (
           <NavTab to={Routes.GITHUB}>

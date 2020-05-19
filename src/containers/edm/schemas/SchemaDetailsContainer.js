@@ -8,21 +8,21 @@ import styled from 'styled-components';
 import { List, Map } from 'immutable';
 import { Models, Types } from 'lattice';
 import { AuthUtils } from 'lattice-auth';
-import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import type { FQN } from 'lattice';
+import { bindActionCreators } from 'redux';
 import type { RequestSequence } from 'redux-reqseq';
 
-import AbstractTypes from '../../../utils/AbstractTypes';
+import * as SchemasActions from './SchemasActions';
+
 import AbstractTypeDataTable from '../../../components/datatable/AbstractTypeDataTable';
 import AbstractTypeSearchableSelect from '../../../components/controls/AbstractTypeSearchableSelect';
+import AbstractTypes from '../../../utils/AbstractTypes';
 import Logger from '../../../utils/Logger';
-import * as SchemasActions from './SchemasActions';
 import { isValidUUID } from '../../../utils/ValidationUtils';
 
 const LOG :Logger = new Logger('SchemaDetailsContainer');
 
-const { FullyQualifiedName } = Models;
+const { FQN } = Models;
 const { ActionTypes } = Types;
 
 /*
@@ -69,7 +69,7 @@ class SchemaDetailsContainer extends React.Component<Props> {
           actions.localUpdateSchema({
             actionType: ActionTypes.ADD,
             entityTypes: [associationEntityType],
-            schemaFQN: new FullyQualifiedName(schema.get('fqn')),
+            schemaFQN: FQN.of(schema.get('fqn')),
           });
         }
         else {
@@ -99,7 +99,7 @@ class SchemaDetailsContainer extends React.Component<Props> {
           actions.localUpdateSchema({
             actionType: ActionTypes.ADD,
             entityTypes: [entityType],
-            schemaFQN: new FullyQualifiedName(schema.get('fqn')),
+            schemaFQN: FQN.of(schema.get('fqn')),
           });
         }
         else {
@@ -129,7 +129,7 @@ class SchemaDetailsContainer extends React.Component<Props> {
           actions.localUpdateSchema({
             actionType: ActionTypes.ADD,
             propertyTypes: [propertyType],
-            schemaFQN: new FullyQualifiedName(schema.get('fqn')),
+            schemaFQN: FQN.of(schema.get('fqn')),
           });
         }
         else {
@@ -158,7 +158,7 @@ class SchemaDetailsContainer extends React.Component<Props> {
         actions.localUpdateSchema({
           actionType: ActionTypes.REMOVE,
           entityTypeIds: [associationTypeId],
-          schemaFQN: new FullyQualifiedName(schema.get('fqn')),
+          schemaFQN: FQN.of(schema.get('fqn')),
         });
       }
       else {
@@ -183,7 +183,7 @@ class SchemaDetailsContainer extends React.Component<Props> {
         actions.localUpdateSchema({
           actionType: ActionTypes.REMOVE,
           entityTypeIds: [entityTypeId],
-          schemaFQN: new FullyQualifiedName(schema.get('fqn')),
+          schemaFQN: FQN.of(schema.get('fqn')),
         });
       }
       else {
@@ -208,7 +208,7 @@ class SchemaDetailsContainer extends React.Component<Props> {
         actions.localUpdateSchema({
           actionType: ActionTypes.REMOVE,
           propertyTypeIds: [propertyTypeId],
-          schemaFQN: new FullyQualifiedName(schema.get('fqn')),
+          schemaFQN: FQN.of(schema.get('fqn')),
         });
       }
       else {
@@ -460,7 +460,7 @@ class SchemaDetailsContainer extends React.Component<Props> {
             FQN
           </h2>
           <p>
-            { FullyQualifiedName.toString(schema.get('fqn')) }
+            { FQN.toString(schema.get('fqn')) }
           </p>
         </section>
         { this.renderPropertyTypesSection() }

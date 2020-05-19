@@ -13,11 +13,9 @@ import {
 import { Models, Types } from 'lattice';
 import { EntityDataModelApiActions } from 'lattice-sagas';
 import { RequestStates } from 'redux-reqseq';
-import type { FQN, PropertyTypeObject } from 'lattice';
+import type { PropertyTypeObject } from 'lattice';
 import type { SequenceAction } from 'redux-reqseq';
 
-import Logger from '../../../utils/Logger';
-import { isValidUUID } from '../../../utils/ValidationUtils';
 import {
   LOCAL_CREATE_PROPERTY_TYPE,
   LOCAL_DELETE_PROPERTY_TYPE,
@@ -27,6 +25,9 @@ import {
   localDeletePropertyType,
   localUpdatePropertyTypeMeta,
 } from './PropertyTypesActions';
+
+import Logger from '../../../utils/Logger';
+import { isValidUUID } from '../../../utils/ValidationUtils';
 import {
   LOCAL_UPDATE_SCHEMA,
   localUpdateSchema,
@@ -40,7 +41,7 @@ const {
 } = EntityDataModelApiActions;
 
 const {
-  FullyQualifiedName,
+  FQN,
   PropertyType,
   PropertyTypeBuilder,
 } = Models;
@@ -95,27 +96,13 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
 
           responsePropertyTypes.forEach((pt :PropertyTypeObject, index :number) => {
             try {
-              const propertyTypeId :?UUID = pt.id;
-              const propertyTypeFQN :FQN = new FullyQualifiedName(pt.type);
-              const propertyType :PropertyType = new PropertyTypeBuilder()
-                .setAnalyzer(pt.analyzer)
-                .setDataType(pt.datatype)
-                .setDescription(pt.description)
-                .setEnumValues(pt.enumValues)
-                .setId(propertyTypeId)
-                .setIndexType(pt.indexType)
-                .setMultiValued(pt.multiValued)
-                .setPii(pt.pii)
-                .setSchemas(pt.schemas)
-                .setTitle(pt.title)
-                .setType(propertyTypeFQN)
-                .build();
+              const propertyType :PropertyType = (new PropertyTypeBuilder(pt)).build();
               propertyTypes.push(propertyType.toImmutable());
               /*
                * IMPORTANT! we must keep the fqn and id index mapping in sync!
                */
-              propertyTypesIndexMap.set(propertyTypeId, index);
-              propertyTypesIndexMap.set(propertyTypeFQN, index);
+              propertyTypesIndexMap.set(propertyType.id, index);
+              propertyTypesIndexMap.set(propertyType.type, index);
             }
             catch (e) {
               LOG.error('getEntityDataModel()', pt);
@@ -151,20 +138,10 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
           if (storedSeqAction) {
 
             const storedPropertyType :PropertyType = storedSeqAction.value;
-            const propertyTypeFQN :FQN = new FullyQualifiedName(storedPropertyType.type);
+            const propertyTypeFQN :FQN = FQN.of(storedPropertyType.type);
             const propertyTypeId :?UUID = seqAction.value; // id won't be available in "offline" mode
-            const newPropertyType :PropertyType = new PropertyTypeBuilder()
-              .setAnalyzer(storedPropertyType.analyzer)
-              .setDataType(storedPropertyType.datatype)
-              .setDescription(storedPropertyType.description)
-              .setEnumValues(storedPropertyType.enumValues)
+            const newPropertyType :PropertyType = (new PropertyTypeBuilder(storedPropertyType))
               .setId(propertyTypeId)
-              .setIndexType(storedPropertyType.indexType)
-              .setMultiValued(storedPropertyType.multiValued)
-              .setPii(storedPropertyType.pii)
-              .setSchemas(storedPropertyType.schemas)
-              .setTitle(storedPropertyType.title)
-              .setType(propertyTypeFQN)
               .build();
 
             const updatedPropertyTypes :List<Map<*, *>> = state
@@ -236,7 +213,7 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
               /*
                * IMPORTANT! we must keep the fqn and id index mapping in sync!
                */
-              const propertyTypeFQN :FQN = new FullyQualifiedName(propertyType.get('type'));
+              const propertyTypeFQN :FQN = FQN.of(propertyType.get('type'));
               updatedPropertyTypesIndexMap.set(propertyTypeFQN, index);
               const propertyTypeId :?UUID = propertyType.get('id');
               if (isValidUUID(propertyTypeId)) {
@@ -292,18 +269,7 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
 
             let newState :Map<*, *> = state;
             const currentPropertyType :PropertyTypeObject = state.getIn(['propertyTypes', propertyTypeIndex]).toJS();
-            const propertyTypeBuilder :PropertyTypeBuilder = new PropertyTypeBuilder()
-              .setAnalyzer(currentPropertyType.analyzer)
-              .setDataType(currentPropertyType.datatype)
-              .setDescription(currentPropertyType.description)
-              .setEnumValues(currentPropertyType.enumValues)
-              .setId(currentPropertyType.id)
-              .setIndexType(currentPropertyType.indexType)
-              .setMultiValued(currentPropertyType.multiValued)
-              .setPii(currentPropertyType.pii)
-              .setSchemas(currentPropertyType.schemas)
-              .setTitle(currentPropertyType.title)
-              .setType(currentPropertyType.type);
+            const propertyTypeBuilder :PropertyTypeBuilder = new PropertyTypeBuilder(currentPropertyType);
 
             if (has(metadata, 'description')) {
               propertyTypeBuilder.setDescription(metadata.description);
@@ -314,15 +280,15 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
             }
 
             if (metadata.type) {
-              const newPropertyTypeFQN = new FullyQualifiedName(metadata.type);
-              propertyTypeBuilder.setType(metadata.type);
+              const newPropertyTypeFQN = FQN.of(metadata.type);
+              propertyTypeBuilder.setType(newPropertyTypeFQN);
               newState = newState
                 .deleteIn(['propertyTypesIndexMap', propertyTypeFQN])
                 .setIn(['propertyTypesIndexMap', newPropertyTypeFQN], propertyTypeIndex);
             }
 
             if (has(metadata, 'pii')) {
-              propertyTypeBuilder.setPii(metadata.pii);
+              propertyTypeBuilder.setPII(metadata.pii);
             }
 
             const updatedPropertyType :PropertyType = propertyTypeBuilder.build();
@@ -390,7 +356,7 @@ export default function propertyTypesReducer(state :Map<*, *> = INITIAL_STATE, a
                 }
                 else if (actionType === ActionTypes.REMOVE) {
                   const schemaIndex :number = newState.getIn(path).findIndex(
-                    (fqn :Map<*, *>) => FullyQualifiedName.toString(fqn) === schemaFQN.toString()
+                    (fqn :Map<*, *>) => FQN.toString(fqn) === schemaFQN.toString()
                   );
                   if (schemaIndex !== -1) {
                     path.push(schemaIndex);

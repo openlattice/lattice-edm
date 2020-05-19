@@ -21,14 +21,15 @@ import { connect } from 'react-redux';
 import { Redirect, withRouter } from 'react-router';
 import type { RequestSequence } from 'redux-reqseq';
 
-import StyledButton from '../../components/buttons/StyledButton';
-import Spinner from '../../components/spinner/Spinner';
-import * as Routes from '../../core/router/Routes';
 import { openPullRequest } from './GitHubActions';
 import { SUBMIT_STATES } from './GitHubReducer';
 import { isValidUUID } from '../../utils/ValidationUtils';
 
-const { FullyQualifiedName } = Models;
+import Spinner from '../../components/spinner/Spinner';
+import StyledButton from '../../components/buttons/StyledButton';
+import * as Routes from '../../core/router/Routes';
+
+const { FQN } = Models;
 
 const ContainerWrapper = styled.div`
   align-items: center;
@@ -86,8 +87,8 @@ const Input = styled.input`
 
 const fqnComparator = (path :string[]) => (valueA :Map, valueB :Map) => {
 
-  const fqnStrA :string = FullyQualifiedName.toString(valueA.getIn(path));
-  const fqnStrB :string = FullyQualifiedName.toString(valueB.getIn(path));
+  const fqnStrA :string = FQN.toString(valueA.getIn(path));
+  const fqnStrB :string = FQN.toString(valueB.getIn(path));
 
   if (fqnStrA < fqnStrB) {
     return -1;

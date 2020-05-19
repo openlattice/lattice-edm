@@ -7,19 +7,19 @@ import React from 'react';
 import { Map } from 'immutable';
 import { Models } from 'lattice';
 import { AuthUtils } from 'lattice-auth';
-import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import type { FQN } from 'lattice';
+import { bindActionCreators } from 'redux';
 import type { RequestSequence } from 'redux-reqseq';
 
-import AbstractTypes from '../../utils/AbstractTypes';
-import InlineEditableControl from '../../components/controls/InlineEditableControl';
 import * as AssociationTypesActions from './associationtypes/AssociationTypesActions';
 import * as EntityTypesActions from './entitytypes/EntityTypesActions';
 import * as PropertyTypesActions from './propertytypes/PropertyTypesActions';
+
+import AbstractTypes from '../../utils/AbstractTypes';
+import InlineEditableControl from '../../components/controls/InlineEditableControl';
 import type { AbstractType } from '../../utils/AbstractTypes';
 
-const { FullyQualifiedName } = Models;
+const { FQN } = Models;
 
 const FIELD_TITLE :string = 'Description';
 
@@ -55,7 +55,7 @@ class AbstractTypeFieldDescription extends React.Component<Props, State> {
     }
 
     const abstractTypeId :?UUID = theAbstractType.get('id');
-    const abstractTypeFQN :FQN = new FullyQualifiedName(theAbstractType.get('type'));
+    const abstractTypeFQN :FQN = FQN.of(theAbstractType.get('type'));
     const abstractTypeMetaData :Object = { description: descriptionValue };
 
     switch (abstractTypeType) {
