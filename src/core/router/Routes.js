@@ -11,4 +11,3 @@ export const GITHUB :string = '/github';
 export const OVERVIEW :string = '/overview';
 export const PROPERTY_TYPES :string = '/propertyTypes';
 export const SCHEMAS :string = '/schemas';
-export const SYNC :string = '/sync';

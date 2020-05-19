@@ -11,7 +11,6 @@ import * as EntityTypesSagas from '../../containers/edm/entitytypes/EntityTypesS
 import * as GitHubSagas from '../../containers/github/GitHubSagas';
 import * as PropertyTypesSagas from '../../containers/edm/propertytypes/PropertyTypesSagas';
 import * as SchemasSagas from '../../containers/edm/schemas/SchemasSagas';
-import * as SyncSagas from '../../containers/sync/SyncSagas';
 
 export default function* sagas() :Generator<*, *, *> {
 
@@ -24,10 +23,9 @@ export default function* sagas() :Generator<*, *, *> {
     fork(AuthSagas.watchLogout),
 
     // "lattice-sagas" sagas
-    fork(EntityDataModelApiSagas.getEntityDataModelWatcher),
-    fork(EntityDataModelApiSagas.addDstEntityTypeToAssociationTypeWatcher),
+    fork(EntityDataModelApiSagas.addDestinationEntityTypeToAssociationTypeWatcher),
     fork(EntityDataModelApiSagas.addPropertyTypeToEntityTypeWatcher),
-    fork(EntityDataModelApiSagas.addSrcEntityTypeToAssociationTypeWatcher),
+    fork(EntityDataModelApiSagas.addSourceEntityTypeToAssociationTypeWatcher),
     fork(EntityDataModelApiSagas.createAssociationTypeWatcher),
     fork(EntityDataModelApiSagas.createEntityTypeWatcher),
     fork(EntityDataModelApiSagas.createPropertyTypeWatcher),
@@ -35,13 +33,11 @@ export default function* sagas() :Generator<*, *, *> {
     fork(EntityDataModelApiSagas.deleteAssociationTypeWatcher),
     fork(EntityDataModelApiSagas.deleteEntityTypeWatcher),
     fork(EntityDataModelApiSagas.deletePropertyTypeWatcher),
-    fork(EntityDataModelApiSagas.getEntityDataModelDiffWatcher),
-    fork(EntityDataModelApiSagas.removeDstEntityTypeFromAssociationTypeWatcher),
+    fork(EntityDataModelApiSagas.getEntityDataModelWatcher),
+    fork(EntityDataModelApiSagas.removeDestinationEntityTypeFromAssociationTypeWatcher),
     fork(EntityDataModelApiSagas.removePropertyTypeFromEntityTypeWatcher),
-    fork(EntityDataModelApiSagas.removeSrcEntityTypeFromAssociationTypeWatcher),
-    fork(EntityDataModelApiSagas.reorderEntityTypePropertyTypesWatcher),
+    fork(EntityDataModelApiSagas.removeSourceEntityTypeFromAssociationTypeWatcher),
     fork(EntityDataModelApiSagas.updateAssociationTypeMetaDataWatcher),
-    fork(EntityDataModelApiSagas.updateEntityDataModelWatcher),
     fork(EntityDataModelApiSagas.updateEntityTypeMetaDataWatcher),
     fork(EntityDataModelApiSagas.updatePropertyTypeMetaDataWatcher),
     fork(EntityDataModelApiSagas.updateSchemaWatcher),
@@ -75,8 +71,5 @@ export default function* sagas() :Generator<*, *, *> {
     // SchemasSagas
     fork(SchemasSagas.localCreateSchemaWatcher),
     fork(SchemasSagas.localUpdateSchemaWatcher),
-
-    // SyncSagas
-    fork(SyncSagas.syncProdEntityDataModelWatcher),
   ]);
 }
