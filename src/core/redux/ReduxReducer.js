@@ -8,7 +8,6 @@ import { combineReducers } from 'redux-immutable';
 
 import edmReducer from '../../containers/edm/EntityDataModelReducer';
 import githubReducer from '../../containers/github/GitHubReducer';
-import syncEdmReducer from '../../containers/sync/SyncReducer';
 import { AppReducer } from '../../containers/app';
 
 export default function reduxReducer(routerHistory :any) {
@@ -19,6 +18,5 @@ export default function reduxReducer(routerHistory :any) {
     edm: edmReducer(),
     github: githubReducer,
     router: connectRouter(routerHistory),
-    sync: syncEdmReducer,
   });
 }
