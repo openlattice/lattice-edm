@@ -10,6 +10,7 @@ import { Models, Types } from 'lattice';
 import { AuthUtils } from 'lattice-auth';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
+import type { UUID } from 'lattice';
 import type { RequestSequence } from 'redux-reqseq';
 
 import * as SchemasActions from './SchemasActions';
