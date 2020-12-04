@@ -13,7 +13,7 @@ import {
 import { Models, Types } from 'lattice';
 import { EntityDataModelApiActions } from 'lattice-sagas';
 import { RequestStates } from 'redux-reqseq';
-import type { PropertyTypeObject } from 'lattice';
+import type { PropertyTypeObject, UUID } from 'lattice';
 import type { SequenceAction } from 'redux-reqseq';
 
 import {
