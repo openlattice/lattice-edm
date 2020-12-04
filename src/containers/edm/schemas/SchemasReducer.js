@@ -7,7 +7,7 @@
 import { List, Map, fromJS } from 'immutable';
 import { Models, Types } from 'lattice';
 import { EntityDataModelApiActions } from 'lattice-sagas';
-import type { SchemaObject } from 'lattice';
+import type { SchemaObject, UUID } from 'lattice';
 import type { SequenceAction } from 'redux-reqseq';
 
 import {
