@@ -9,7 +9,7 @@ import {
   takeEvery,
 } from '@redux-saga/core/effects';
 import { EntityDataModelApiActions, EntityDataModelApiSagas } from 'lattice-sagas';
-import type { AssociationType, FQN } from 'lattice';
+import type { AssociationType, FQN, UUID } from 'lattice';
 import type { SequenceAction } from 'redux-reqseq';
 
 import {

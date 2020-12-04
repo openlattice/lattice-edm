@@ -12,7 +12,7 @@ import {
 } from 'immutable';
 import { Models, Types } from 'lattice';
 import { EntityDataModelApiActions } from 'lattice-sagas';
-import type { AssociationTypeObject } from 'lattice';
+import type { AssociationTypeObject, UUID } from 'lattice';
 import type { SequenceAction } from 'redux-reqseq';
 
 import {
