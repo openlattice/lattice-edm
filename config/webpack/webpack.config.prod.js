@@ -20,7 +20,6 @@ module.exports = (env) => {
     plugins: [
       new HtmlWebpackPlugin({
         favicon: `${APP_PATHS.ABS.SOURCE_ASSETS_IMAGES}/ol-favicon.png`,
-        inject: true,
         template: `${APP_PATHS.ABS.SOURCE}/index.html`,
       }),
       ...baseConfig.plugins
