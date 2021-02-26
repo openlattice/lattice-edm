@@ -22,6 +22,10 @@ module.exports = (env) => {
       publicPath: baseConfig.output.publicPath,
     },
     devtool: false,
+    output: {
+      ...baseConfig.output,
+      filename: `${APP_PATHS.REL.STATIC_JS}/index.js`,
+    },
     plugins: [
       new HtmlWebpackPlugin({
         favicon: `${APP_PATHS.ABS.SOURCE_ASSETS_IMAGES}/ol-favicon.png`,
