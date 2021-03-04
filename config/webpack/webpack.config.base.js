@@ -14,56 +14,36 @@ const {
 
 module.exports = (env) => {
 
-  /*
-   * constants
-   */
+  //
+  // constants
+  //
 
   const BABEL_CONFIG = path.resolve(__dirname, '../babel/babel.config.js');
   const BASE_PATH = `/${env.basePath || 'edm'}/`;
   const ENV_DEV = 'development';
   const ENV_PROD = 'production';
 
-  // NOTE: for future reference
-  // const getNodeModulesRegEx = toInclude => (
-  //   new RegExp(`/(node_modules|openlattice)/(${toInclude.join('|')})`)
-  // );
-
-  /*
-   * loaders
-   */
+  //
+  // loaders
+  //
 
   const BABEL_LOADER = {
     test: /\.js$/,
     exclude: /node_modules/,
     include: [
       APP_PATHS.ABS.SOURCE,
-      // NOTE: for future reference
-      // getNodeModulesRegEx(['redux-reqseq']),
     ],
     use: {
       loader: 'babel-loader',
       options: {
-        cacheDirectory: true,
         configFile: BABEL_CONFIG,
       },
     },
   };
 
-  const FILE_LOADER_ASSETS_IMAGES = {
-    test: /\.(gif|ico|jpg|jpeg|png|svg|webp)(\?.*)?$/,
-    exclude: /node_modules/,
-    use: [{
-      loader: 'file-loader',
-      options: {
-        name: '[name].[hash:8].[ext]',
-        outputPath: `${APP_PATHS.REL.STATIC_ASSETS_IMAGES}/`,
-      }
-    }]
-  };
-
-  /*
-   * plugins
-   */
+  //
+  // plugins
+  //
 
   const BANNER_PLUGIN = new Webpack.BannerPlugin({
     banner: APP_CONFIG.BANNER,
@@ -80,14 +60,9 @@ module.exports = (env) => {
     __VERSION__: JSON.stringify(`v${PACKAGE.version}`),
   });
 
-  // https://github.com/moment/moment/issues/2373
-  // https://stackoverflow.com/a/25426019/196921
-  // https://github.com/facebookincubator/create-react-app/pull/2187
-  const IGNORE_MOMENT_LOCALES = new Webpack.IgnorePlugin(/^\.\/locale$/, /moment$/);
-
-  /*
-   * base webpack config
-   */
+  //
+  // base webpack config
+  //
 
   return {
     bail: true,
@@ -99,11 +74,18 @@ module.exports = (env) => {
     module: {
       rules: [
         BABEL_LOADER,
-        FILE_LOADER_ASSETS_IMAGES,
+        {
+          generator: {
+            filename: (
+              env.production
+                ? `${APP_PATHS.REL.STATIC_ASSETS}/[name].[contenthash].[ext]`
+                : `${APP_PATHS.REL.STATIC_ASSETS}/[name].[ext]`
+            )
+          },
+          test: /\.(gif|ico|jpg|jpeg|png|svg|webp)(\?.*)?$/,
+          type: 'asset/resource',
+        },
       ],
-    },
-    node: {
-      net: 'empty',
     },
     optimization: {
       minimize: !!env.production,
@@ -118,7 +100,6 @@ module.exports = (env) => {
     plugins: [
       DEFINE_PLUGIN,
       BANNER_PLUGIN,
-      IGNORE_MOMENT_LOCALES,
     ],
     resolve: {
       extensions: ['.js', '.css'],
