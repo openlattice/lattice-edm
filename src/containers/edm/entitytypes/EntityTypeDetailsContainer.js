@@ -22,7 +22,6 @@ import AbstractTypeFieldType from '../AbstractTypeFieldType';
 import AbstractTypeSearchableSelect from '../../../components/controls/AbstractTypeSearchableSelect';
 import AbstractTypes from '../../../utils/AbstractTypes';
 import Logger from '../../../utils/Logger';
-import StyledButton from '../../../components/buttons/StyledButton';
 import { isValidUUID } from '../../../utils/ValidationUtils';
 import type { IndexMap } from '../Types';
 
@@ -33,10 +32,6 @@ const { FQN } = Models;
 /*
  * styled components
  */
-
-const DeleteButton = styled(StyledButton)`
-  align-self: center;
-`;
 
 const AbstractTypeSearchableSelectWrapper = styled.div`
   margin: 20px 0;
@@ -49,7 +44,6 @@ const AbstractTypeSearchableSelectWrapper = styled.div`
 type Props = {
   actions :{
     localAddPropertyTypeToEntityType :RequestSequence;
-    localDeleteEntityType :RequestSequence;
     localRemovePropertyTypeFromEntityType :RequestSequence;
   };
   entityType :Map<*, *>;
@@ -121,17 +115,6 @@ class EntityTypeDetailsContainer extends React.Component<Props> {
   //     });
   //   }
   // }
-
-  handleOnClickDelete = () => {
-
-    const { actions, entityType } = this.props;
-
-    if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
-      const entityTypeId :?UUID = entityType.get('id');
-      const entityTypeFQN :FQN = FQN.of(entityType.get('type'));
-      actions.localDeleteEntityType({ entityTypeFQN, entityTypeId });
-    }
-  }
 
   renderPropertyTypesSection = (propertyTypes :List<Map<*, *>>) => {
 
@@ -296,17 +279,6 @@ class EntityTypeDetailsContainer extends React.Component<Props> {
         </section>
         { this.renderPropertyTypesSection(thePropertyTypes) }
         { this.renderAddPropertyTypesSection() }
-        {
-          AuthUtils.isAuthenticated() && AuthUtils.isAdmin()
-            ? (
-              <section>
-                <DeleteButton onClick={this.handleOnClickDelete}>
-                  Delete EntityType
-                </DeleteButton>
-              </section>
-            )
-            : null
-        }
       </div>
     );
   }
@@ -320,7 +292,6 @@ const mapStateToProps = (state :Map<*, *>) :Object => ({
 const mapDispatchToProps = (dispatch :Function) :Object => ({
   actions: bindActionCreators({
     localAddPropertyTypeToEntityType: EntityTypesActions.localAddPropertyTypeToEntityType,
-    localDeleteEntityType: EntityTypesActions.localDeleteEntityType,
     localRemovePropertyTypeFromEntityType: EntityTypesActions.localRemovePropertyTypeFromEntityType,
   }, dispatch)
 });

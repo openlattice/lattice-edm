@@ -22,7 +22,6 @@ import AbstractTypeFieldType from '../AbstractTypeFieldType';
 import AbstractTypeSearchableSelect from '../../../components/controls/AbstractTypeSearchableSelect';
 import AbstractTypes from '../../../utils/AbstractTypes';
 import Logger from '../../../utils/Logger';
-import StyledButton from '../../../components/buttons/StyledButton';
 import { isValidUUID } from '../../../utils/ValidationUtils';
 import type { IndexMap } from '../Types';
 
@@ -33,10 +32,6 @@ const { FQN } = Models;
 /*
  * styled components
  */
-
-const DeleteButton = styled(StyledButton)`
-  align-self: center;
-`;
 
 const AbstractTypeSearchableSelectWrapper = styled.div`
   margin: 20px 0;
@@ -51,7 +46,6 @@ type Props = {
     localAddDstEntityTypeToAssociationType :RequestSequence;
     localAddPropertyTypeToAssociationType :RequestSequence;
     localAddSrcEntityTypeToAssociationType :RequestSequence;
-    localDeleteAssociationType :RequestSequence;
     localRemoveDstEntityTypeFromAssociationType :RequestSequence;
     localRemovePropertyTypeFromAssociationType :RequestSequence;
     localRemoveSrcEntityTypeFromAssociationType :RequestSequence;
@@ -203,37 +197,6 @@ class AssociationTypeDetailsContainer extends React.Component<Props> {
         associationTypeFQN: FQN.of(associationEntityType.get('type')),
         associationTypeId: associationEntityType.get('id'),
       });
-    }
-  }
-
-  // TODO: uncomment when re-enabling this feature
-  // handleReorderPropertyTypes = (oldIndex :number, newIndex :number) => {
-  //
-  //   const { actions, associationType } = this.props;
-  //
-  //   if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
-  //
-  //     const associationEntityType :Map<*, *> = associationType.get('entityType', Map());
-  //     const propertyTypeIds :List<string> = associationEntityType.get('properties');
-  //     const idToMove :string = propertyTypeIds.get(oldIndex);
-  //     const reorderedPropertyTypeIds :List<string> = propertyTypeIds.delete(oldIndex).insert(newIndex, idToMove);
-  //
-  //     actions.reorderEntityTypePropertyTypes({
-  //       entityTypeId: associationEntityType.get('id'),
-  //       propertyTypeIds: reorderedPropertyTypeIds.toJS()
-  //     });
-  //   }
-  // }
-
-  handleOnClickDelete = () => {
-
-    const { actions, associationType } = this.props;
-
-    if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
-      const associationEntityType :Map<*, *> = associationType.get('entityType', Map());
-      const associationTypeId :?UUID = associationEntityType.get('id');
-      const associationTypeFQN :FQN = FQN.of(associationEntityType.get('type'));
-      actions.localDeleteAssociationType({ associationTypeFQN, associationTypeId });
     }
   }
 
@@ -581,17 +544,6 @@ class AssociationTypeDetailsContainer extends React.Component<Props> {
         { this.renderAddSourceEntityTypesSection() }
         { this.renderDestinationEntityTypesSection(destinationEntityTypes) }
         { this.renderAddDestinationEntityTypesSection() }
-        {
-          AuthUtils.isAuthenticated() && AuthUtils.isAdmin()
-            ? (
-              <section>
-                <DeleteButton onClick={this.handleOnClickDelete}>
-                  Delete AssociationType
-                </DeleteButton>
-              </section>
-            )
-            : null
-        }
       </div>
     );
   }
@@ -609,7 +561,6 @@ const mapDispatchToProps = (dispatch :Function) :Object => ({
     localAddDstEntityTypeToAssociationType: AssociationTypesActions.localAddDstEntityTypeToAssociationType,
     localAddPropertyTypeToAssociationType: AssociationTypesActions.localAddPropertyTypeToAssociationType,
     localAddSrcEntityTypeToAssociationType: AssociationTypesActions.localAddSrcEntityTypeToAssociationType,
-    localDeleteAssociationType: AssociationTypesActions.localDeleteAssociationType,
     localRemoveDstEntityTypeFromAssociationType: AssociationTypesActions.localRemoveDstEntityTypeFromAssociationType,
     localRemovePropertyTypeFromAssociationType: AssociationTypesActions.localRemovePropertyTypeFromAssociationType,
     localRemoveSrcEntityTypeFromAssociationType: AssociationTypesActions.localRemoveSrcEntityTypeFromAssociationType,

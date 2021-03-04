@@ -8,7 +8,6 @@ import styled from 'styled-components';
 import { List, Map } from 'immutable';
 import { Models } from 'lattice';
 import { AuthUtils } from 'lattice-auth';
-import { Modal, Spinner } from 'lattice-ui-kit';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { RequestStates } from 'redux-reqseq';
@@ -22,7 +21,6 @@ import AbstractTypeFieldDescription from '../AbstractTypeFieldDescription';
 import AbstractTypeFieldTitle from '../AbstractTypeFieldTitle';
 import AbstractTypeFieldType from '../AbstractTypeFieldType';
 import AbstractTypes from '../../../utils/AbstractTypes';
-import StyledButton from '../../../components/buttons/StyledButton';
 
 const { FQN } = Models;
 
@@ -33,11 +31,6 @@ const PII_NO_RADIO_ID :string = 'propertyTypePii-no';
 /*
  * styled components
  */
-
-const DeleteButton = styled(StyledButton)`
-  align-self: center;
-  margin-top: 18px;
-`;
 
 const RadiosRowWrapper = styled.div`
   display: flex;
@@ -56,7 +49,6 @@ const RadiosRowWrapper = styled.div`
 
 type Props = {
   actions :{
-    localDeletePropertyType :RequestSequence;
     localUpdatePropertyTypeMeta :RequestSequence;
     resetRequestState :(actionType :string) => void;
   };
@@ -65,47 +57,14 @@ type Props = {
   updateRequestState :RequestState;
 };
 
-type State = {
-  modalState :{
-    actionPrimary :() => void;
-    isVisible :boolean;
-    textTitle :string;
-    textContent :string;
-  };
-}
-
-const INITIAL_MODAL_STATE = {
-  actionPrimary: () => {},
-  isVisible: false,
-  textTitle: '',
-  textContent: '',
-};
-
-class PropertyTypeDetailsContainer extends Component<Props, State> {
-
-  constructor(props :Props) {
-
-    super(props);
-
-    this.state = {
-      modalState: INITIAL_MODAL_STATE,
-    };
-  }
+class PropertyTypeDetailsContainer extends Component<Props> {
 
   componentDidUpdate(prevProps :Props) {
 
     const { actions, updateRequestState } = this.props;
     if (prevProps.updateRequestState === RequestStates.PENDING && updateRequestState === RequestStates.SUCCESS) {
-      this.resetModalState();
       actions.resetRequestState(PropertyTypesActions.LOCAL_UPDATE_PROPERTY_TYPE_META);
     }
-  }
-
-  resetModalState = () => {
-
-    this.setState({
-      modalState: INITIAL_MODAL_STATE,
-    });
   }
 
   handleOnChangePii = (event :SyntheticInputEvent<HTMLElement>) => {
@@ -125,36 +84,13 @@ class PropertyTypeDetailsContainer extends Component<Props, State> {
     }
 
     if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
-      const actionPrimary = () => {
-        if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
-          const propertyTypeId :?UUID = propertyType.get('id');
-          const propertyTypeFQN :FQN = FQN.of(propertyType.get('type'));
-          actions.localUpdatePropertyTypeMeta({
-            propertyTypeFQN,
-            propertyTypeId,
-            metadata: { pii },
-          });
-        }
-      };
-      this.setState({
-        modalState: {
-          actionPrimary,
-          isVisible: true,
-          textTitle: 'Update PropertyType metadata',
-          textContent: `Are you sure you want to change PII to ${String(pii)}?`,
-        },
-      });
-    }
-  }
-
-  handleOnClickDelete = () => {
-
-    const { actions, propertyType } = this.props;
-
-    if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
       const propertyTypeId :?UUID = propertyType.get('id');
       const propertyTypeFQN :FQN = FQN.of(propertyType.get('type'));
-      actions.localDeletePropertyType({ propertyTypeFQN, propertyTypeId });
+      actions.localUpdatePropertyTypeMeta({
+        propertyTypeFQN,
+        propertyTypeId,
+        metadata: { pii },
+      });
     }
   }
 
@@ -215,60 +151,6 @@ class PropertyTypeDetailsContainer extends Component<Props, State> {
     );
   }
 
-  renderDeleteButtonSection = () => {
-
-    if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
-      return (
-        <section>
-          <DeleteButton onClick={this.handleOnClickDelete}>
-            Delete PropertyType
-          </DeleteButton>
-        </section>
-      );
-    }
-
-    return null;
-  }
-
-  renderConfirmationModal = () => {
-
-    const { updateRequestState } = this.props;
-    const { modalState } = this.state;
-
-    let body = (
-      <div>{modalState.textContent}</div>
-    );
-    let withFooter = true;
-
-    if (updateRequestState === RequestStates.PENDING) {
-      body = (
-        <Spinner size="2x" />
-      );
-      withFooter = false;
-    }
-
-    if (updateRequestState === RequestStates.FAILURE) {
-      body = (
-        <div>Update failed. Please try again.</div>
-      );
-    }
-
-    return (
-      <Modal
-          isVisible={modalState.isVisible}
-          onClose={this.resetModalState}
-          onClickPrimary={modalState.actionPrimary}
-          onClickSecondary={this.resetModalState}
-          shouldStretchButtons
-          textPrimary="Yes"
-          textSecondary="Cancel"
-          textTitle={modalState.textTitle}
-          withFooter={withFooter}>
-        {body}
-      </Modal>
-    );
-  }
-
   render() {
 
     const { propertyType } = this.props;
@@ -321,8 +203,6 @@ class PropertyTypeDetailsContainer extends Component<Props, State> {
           <p>{ propertyType.get('indexType') }</p>
         </section>
         {this.renderEntityTypesSection()}
-        {this.renderDeleteButtonSection()}
-        {this.renderConfirmationModal()}
       </div>
     );
   }
@@ -349,7 +229,6 @@ const mapStateToProps = (state, props) => {
 
 const mapDispatchToProps = (dispatch) => ({
   actions: bindActionCreators({
-    localDeletePropertyType: PropertyTypesActions.localDeletePropertyType,
     localUpdatePropertyTypeMeta: PropertyTypesActions.localUpdatePropertyTypeMeta,
     resetRequestState: PropertyTypesActions.resetRequestState,
   }, dispatch)
