@@ -98,24 +98,6 @@ class EntityTypeDetailsContainer extends React.Component<Props> {
     }
   }
 
-  // TODO: uncomment when re-enabling this feature
-  // handleOnPropertyTypeReorder = (oldIndex :number, newIndex :number) => {
-  //
-  //   const { actions, entityType } = this.props;
-  //
-  //   if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
-  //
-  //     const propertyTypeIds :List<string> = entityType.get('properties');
-  //     const idToMove :string = propertyTypeIds.get(oldIndex);
-  //     const reorderedPropertyTypeIds :List<string> = propertyTypeIds.delete(oldIndex).insert(newIndex, idToMove);
-  //
-  //     actions.reorderEntityTypePropertyTypes({
-  //       entityTypeId: entityType.get('id'),
-  //       propertyTypeIds: reorderedPropertyTypeIds.toJS()
-  //     });
-  //   }
-  // }
-
   renderPropertyTypesSection = (propertyTypes :List<Map<*, *>>) => {
 
     if (propertyTypes.isEmpty()) {
@@ -136,9 +118,6 @@ class EntityTypeDetailsContainer extends React.Component<Props> {
             highlightOnHover
             maxHeight={500}
             onAbstractTypeRemove={this.handleOnPropertyTypeRemove}
-            // TODO: uncomment when re-enabling this feature
-            // onReorder={this.handleOnPropertyTypeReorder}
-            // orderable
             showRemoveColumn
             workingAbstractTypeType={AbstractTypes.PropertyType} />
       );

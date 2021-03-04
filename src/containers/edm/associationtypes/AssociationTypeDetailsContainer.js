@@ -247,9 +247,6 @@ class AssociationTypeDetailsContainer extends React.Component<Props> {
             highlightOnHover
             maxHeight={500}
             onAbstractTypeRemove={this.handleRemovePropertyTypeFromAssociationType}
-            // TODO: uncomment when re-enabling this feature
-            // onReorder={this.handleReorderPropertyTypes}
-            // orderable
             showRemoveColumn
             workingAbstractTypeType={AbstractTypes.PropertyType} />
       );
