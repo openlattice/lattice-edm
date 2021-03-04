@@ -4,10 +4,10 @@
 
 import React from 'react';
 
+import Select from 'react-select';
 import styled from 'styled-components';
 import { List, Map, Set } from 'immutable';
 import { Models, Types } from 'lattice';
-import { Select } from 'lattice-ui-kit';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import type { AnalyzerType, IndexType } from 'lattice';
