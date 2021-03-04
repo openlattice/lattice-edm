@@ -66,12 +66,10 @@ type Props = {
   highlightOnHover ?:boolean;
   highlightOnSelect ?:boolean;
   maxHeight ?:number;
-  orderable ?:boolean;
   showRemoveColumn ?:boolean;
   workingAbstractTypeType :AbstractType;
   onAbstractTypeRemove ?:(selectedAbstractTypeFQN :FQN) => void;
   onAbstractTypeSelect ?:(selectedAbstractTypeFQN :FQN) => void;
-  onReorder ?:(oldIndex :number, newIndex :number) => void;
 };
 
 type State = {
@@ -91,8 +89,6 @@ class AbstractTypeDataTable extends React.Component<Props, State> {
     maxHeight: -1,
     onAbstractTypeRemove: undefined,
     onAbstractTypeSelect: undefined,
-    onReorder: undefined,
-    orderable: false,
     showRemoveColumn: false,
   }
 
@@ -239,21 +235,6 @@ class AbstractTypeDataTable extends React.Component<Props, State> {
     });
   }
 
-  handleOnReorder = (oldIndex :number, newIndex :number) => {
-
-    const { onReorder } = this.props;
-    const { data } = this.state;
-
-    if (oldIndex !== newIndex) {
-      const itemToMove = data.get(oldIndex);
-      const reorderedData = data.delete(oldIndex).insert(newIndex, itemToMove);
-      this.setState({ data: reorderedData });
-      if (typeof onReorder === 'function') {
-        onReorder(oldIndex, newIndex);
-      }
-    }
-  }
-
   renderBodyCell = (params :Object, cellValue :any) => {
 
     const { highlightOnHover, highlightOnSelect, showRemoveColumn } = this.props;
@@ -336,7 +317,6 @@ class AbstractTypeDataTable extends React.Component<Props, State> {
       abstractTypes,
       height,
       maxHeight,
-      orderable
     } = this.props;
     const { data, headers } = this.state;
 
@@ -350,9 +330,7 @@ class AbstractTypeDataTable extends React.Component<Props, State> {
           data={data}
           headers={headers}
           height={height}
-          maxHeight={maxHeight}
-          onReorder={this.handleOnReorder}
-          orderable={orderable} />
+          maxHeight={maxHeight} />
     );
   }
 }

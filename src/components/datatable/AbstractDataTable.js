@@ -7,11 +7,9 @@ import React from 'react';
 import isFunction from 'lodash/isFunction';
 import styled from 'styled-components';
 import { List, Map, OrderedMap } from 'immutable';
-import { SortableContainer } from 'react-sortable-hoc';
 import { AutoSizer, Grid, ScrollSync } from 'react-virtualized';
 
 import AbstractCell, { AbstractCellTypes } from './AbstractCell';
-import { orderableRowRangeRenderer } from './AbstractRow';
 
 /*
  * constants
@@ -35,13 +33,6 @@ const CELL_PADDING :number = 10;
 const CANVAS = document.createElement('canvas');
 const CANVAS_CONTEXT = CANVAS.getContext('2d');
 CANVAS_CONTEXT.font = '14px "Open Sans", sans-serif';
-
-/*
- * helper components
- */
-
-// NOTE: will "withRef" be a problem in the future?
-const OrderableGrid = SortableContainer(Grid, { withRef: true });
 
 /*
  * styled components
@@ -71,13 +62,6 @@ const BodyGrid = styled(Grid)`
   z-index: 99;
 `;
 
-const OrderableBodyGrid = styled(OrderableGrid)`
-  border: none;
-  outline: none;
-  margin-top: -1px;
-  z-index: 99;
-`;
-
 /*
  * types
  */
@@ -92,8 +76,6 @@ type Props = {
   height ?:number;
   maxHeight ?:number;
   maxWidth ?:number;
-  onReorder ?:(oldIndex :number, newIndex :number) => void;
-  orderable ?:boolean;
   width ?:number;
 };
 
@@ -121,8 +103,6 @@ class AbstractDataTable extends React.Component<Props, State> {
     height: -1,
     maxHeight: -1,
     maxWidth: -1,
-    onReorder: undefined,
-    orderable: false,
     width: -1,
   };
 
@@ -353,18 +333,6 @@ class AbstractDataTable extends React.Component<Props, State> {
     });
   }
 
-  // https://github.com/clauderic/react-sortable-hoc
-  onSortEnd = (rsParams :Object) => {
-
-    const { onReorder } = this.props;
-
-    if (rsParams.oldIndex !== rsParams.newIndex) {
-      if (typeof onReorder === 'function') {
-        onReorder(rsParams.oldIndex, rsParams.newIndex);
-      }
-    }
-  }
-
   renderHeadCell = (params :Object) => {
 
     const { headers } = this.props;
@@ -399,7 +367,7 @@ class AbstractDataTable extends React.Component<Props, State> {
 
   render() {
 
-    const { data, headers, orderable } = this.props;
+    const { data, headers } = this.props;
     const {
       computedBodyGridHeight,
       computedBodyGridWidth,
@@ -453,43 +421,19 @@ class AbstractDataTable extends React.Component<Props, State> {
                               width={computedHeadGridWidth} />
                         </div>
                         <div>
-                          {
-                            orderable
-                              ? (
-                                <OrderableBodyGrid
-                                    cellRangeRenderer={orderableRowRangeRenderer}
-                                    cellRenderer={this.renderBodyCell}
-                                    columnCount={columnCount}
-                                    columnWidth={this.getColumnWidth}
-                                    estimatedColumnSize={DEFAULT_COLUMN_MIN_WIDTH}
-                                    height={computedBodyGridHeight}
-                                    ref={this.setBodyGridRef}
-                                    lockAxis="y"
-                                    onScroll={onScroll}
-                                    onSortEnd={this.onSortEnd}
-                                    overscanColumnCount={DEFAULT_OVERSCAN_COLUMN_COUNT}
-                                    overscanRowCount={DEFAULT_OVERSCAN_ROW_COUNT}
-                                    rowCount={rowCount}
-                                    rowHeight={this.getRowHeight}
-                                    width={computedBodyGridWidth} />
-                              )
-                              : (
-                                <BodyGrid
-                                    cellRenderer={this.renderBodyCell}
-                                    columnCount={columnCount}
-                                    columnWidth={this.getColumnWidth}
-                                    estimatedColumnSize={DEFAULT_COLUMN_MIN_WIDTH}
-                                    height={computedBodyGridHeight}
-                                    ref={this.setBodyGridRef}
-                                    onScroll={onScroll}
-                                    overscanColumnCount={DEFAULT_OVERSCAN_COLUMN_COUNT}
-                                    overscanRowCount={DEFAULT_OVERSCAN_ROW_COUNT}
-                                    rowCount={rowCount}
-                                    rowHeight={this.getRowHeight}
-                                    width={computedBodyGridWidth} />
-                              )
-                          }
-
+                          <BodyGrid
+                              cellRenderer={this.renderBodyCell}
+                              columnCount={columnCount}
+                              columnWidth={this.getColumnWidth}
+                              estimatedColumnSize={DEFAULT_COLUMN_MIN_WIDTH}
+                              height={computedBodyGridHeight}
+                              ref={this.setBodyGridRef}
+                              onScroll={onScroll}
+                              overscanColumnCount={DEFAULT_OVERSCAN_COLUMN_COUNT}
+                              overscanRowCount={DEFAULT_OVERSCAN_ROW_COUNT}
+                              rowCount={rowCount}
+                              rowHeight={this.getRowHeight}
+                              width={computedBodyGridWidth} />
                         </div>
                       </div>
                     )
