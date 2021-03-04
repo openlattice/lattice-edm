@@ -3,7 +3,7 @@
  */
 
 import { List, Map } from 'immutable';
-import type { FQN } from 'lattice';
+import type { FQN, UUID } from 'lattice';
 
 import type { AbstractType } from '../../utils/AbstractTypes';
 

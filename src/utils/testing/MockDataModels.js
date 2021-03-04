@@ -2,9 +2,8 @@
  * @flow
  */
 
-import randomUUID from 'uuid/v4';
 import { Models, Types } from 'lattice';
-import type { FQN } from 'lattice';
+import { v4 as uuid } from 'uuid';
 
 import { genRandomBoolean, genRandomString } from './MockUtils';
 
@@ -19,23 +18,23 @@ const {
   AssociationTypeBuilder,
   EntityType,
   EntityTypeBuilder,
-  FullyQualifiedName,
+  FQN,
   PropertyType,
   PropertyTypeBuilder,
   Schema,
   SchemaBuilder,
 } = Models;
 
-const MOCK_ASSOCIATION_TYPE_FQN :FQN = new FullyQualifiedName('OpenLattice', 'MockAssociationType');
-const MOCK_ENTITY_TYPE_FQN :FQN = new FullyQualifiedName('OpenLattice', 'MockEntityType');
-const MOCK_PROPERTY_TYPE_FQN :FQN = new FullyQualifiedName('OpenLattice', 'MockPropertyType');
-const MOCK_SCHEMA_FQN :FQN = new FullyQualifiedName('OpenLattice', 'MockSchema');
+const MOCK_ASSOCIATION_TYPE_FQN :FQN = FQN.of('OpenLattice', 'MockAssociationType');
+const MOCK_ENTITY_TYPE_FQN :FQN = FQN.of('OpenLattice', 'MockEntityType');
+const MOCK_PROPERTY_TYPE_FQN :FQN = FQN.of('OpenLattice', 'MockPropertyType');
+const MOCK_SCHEMA_FQN :FQN = FQN.of('OpenLattice', 'MockSchema');
 
 function genRandomFQN() :FQN {
-  return new FullyQualifiedName(genRandomString(), genRandomString());
+  return FQN.of(genRandomString(), genRandomString());
 }
 
-const MOCK_ENTITY_TYPE :EntityType = new EntityTypeBuilder()
+const MOCK_ENTITY_TYPE :EntityType = (new EntityTypeBuilder())
   .setBaseType('9a768c9b-b76f-4fa1-be60-0178695cdbc3')
   .setCategory(SecurableTypes.EntityType)
   .setDescription('description')
@@ -54,27 +53,25 @@ const MOCK_ENTITY_TYPE :EntityType = new EntityTypeBuilder()
     'fae6af98-2675-45bd-9a5b-1619a87235a8',
   ])
   .setSchemas([MOCK_SCHEMA_FQN])
-  .setShards(1)
   .setTitle('title')
   .setType(MOCK_ENTITY_TYPE_FQN)
   .build();
 
 function genRandomEntityType() :EntityType {
   return new EntityTypeBuilder()
-    .setBaseType(randomUUID())
+    .setBaseType(uuid())
     .setCategory(SecurableTypes.EntityType)
     .setDescription(genRandomString())
-    .setId(randomUUID())
-    .setKey([randomUUID(), randomUUID()])
+    .setId(uuid())
+    .setKey([uuid(), uuid()])
     .setPropertyTags({
-      [randomUUID()]: [genRandomString(), genRandomString()],
-      [randomUUID()]: [genRandomString()],
+      [uuid()]: [genRandomString(), genRandomString()],
+      [uuid()]: [genRandomString()],
     })
-    .setPropertyTypes([randomUUID(), randomUUID(), randomUUID()])
-    .setSchemas([new FullyQualifiedName(genRandomString(), genRandomString())])
-    .setShards(1)
+    .setPropertyTypes([uuid(), uuid(), uuid()])
+    .setSchemas([FQN.of(genRandomString(), genRandomString())])
     .setTitle(genRandomString())
-    .setType(new FullyQualifiedName(genRandomString(), genRandomString()))
+    .setType(FQN.of(genRandomString(), genRandomString()))
     .build();
 }
 
@@ -86,7 +83,7 @@ const MOCK_PROPERTY_TYPE :PropertyType = new PropertyTypeBuilder()
   .setId('3771c28a-cdee-403b-9cea-48845210f8ab')
   .setIndexType(IndexTypes.BTREE)
   .setMultiValued(false)
-  .setPii(false)
+  .setPII(false)
   .setSchemas([MOCK_SCHEMA_FQN])
   .setTitle('title')
   .setType(MOCK_PROPERTY_TYPE_FQN)
@@ -98,10 +95,10 @@ function genRandomPropertyType() :PropertyType {
     .setDataType('String')
     .setDescription(genRandomString())
     .setEnumValues([genRandomString(), genRandomString()])
-    .setId(randomUUID())
+    .setId(uuid())
     .setIndexType(IndexTypes.HASH)
     .setMultiValued(genRandomBoolean())
-    .setPii(genRandomBoolean())
+    .setPII(genRandomBoolean())
     .setSchemas([genRandomFQN()])
     .setTitle(genRandomString())
     .setType(genRandomFQN())
@@ -137,14 +134,14 @@ const MOCK_ASSOCIATION_TYPE :AssociationType = new AssociationTypeBuilder()
 function genRandomAssociationType() :AssociationType {
   return new AssociationTypeBuilder()
     .setEntityType(genRandomEntityType())
-    .setSourceEntityTypeIds([randomUUID(), randomUUID()])
-    .setDestinationEntityTypeIds([randomUUID(), randomUUID(), randomUUID()])
+    .setSourceEntityTypeIds([uuid(), uuid()])
+    .setDestinationEntityTypeIds([uuid(), uuid(), uuid()])
     .setBidirectional(genRandomBoolean())
     .build();
 }
 
 const MOCK_SCHEMA :Schema = new SchemaBuilder()
-  .setFullyQualifiedName(MOCK_SCHEMA_FQN)
+  .setFQN(MOCK_SCHEMA_FQN)
   .setEntityTypes([MOCK_ENTITY_TYPE])
   .setPropertyTypes([MOCK_PROPERTY_TYPE])
   .build();

@@ -14,14 +14,13 @@ import { Redirect, Route, Switch } from 'react-router';
 import { bindActionCreators } from 'redux';
 import type { RequestSequence } from 'redux-reqseq';
 
-import StyledButton from '../../components/buttons/StyledButton';
-import * as Routes from '../../core/router/Routes';
+import NavContainer from './NavContainer';
+import OnlineToggleContainer from './OnlineToggleContainer';
 
 import EntityDataModelContainer from '../edm/EntityDataModelContainer';
 import GitHubContainer from '../github/GitHubContainer';
-import NavContainer from './NavContainer';
-import OnlineToggleContainer from './OnlineToggleContainer';
-import SyncContainer from '../sync/SyncContainer';
+import StyledButton from '../../components/buttons/StyledButton';
+import * as Routes from '../../core/router/Routes';
 import { GOOGLE_TRACKING_ID } from '../../core/tracking/google/GoogleAnalytics';
 
 declare var gtag :?Function;
@@ -135,7 +134,6 @@ class AppContainer extends Component<Props> {
           )
         }
         <Switch>
-          <Route path={Routes.SYNC} component={SyncContainer} />
           <Route path={Routes.GITHUB} component={GitHubContainer} />
           <Route path={Routes.ROOT} component={EntityDataModelContainer} />
           <Redirect to={Routes.ROOT} />

@@ -8,36 +8,30 @@ import styled from 'styled-components';
 import { List, Map, OrderedSet } from 'immutable';
 import { Models } from 'lattice';
 import { AuthUtils } from 'lattice-auth';
-import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import type { FQN } from 'lattice';
+import { bindActionCreators } from 'redux';
+import type { UUID } from 'lattice';
 import type { RequestSequence } from 'redux-reqseq';
 
-import AbstractTypes from '../../../utils/AbstractTypes';
+import * as AssociationTypesActions from './AssociationTypesActions';
+
 import AbstractTypeDataTable from '../../../components/datatable/AbstractTypeDataTable';
 import AbstractTypeFieldDescription from '../AbstractTypeFieldDescription';
 import AbstractTypeFieldTitle from '../AbstractTypeFieldTitle';
 import AbstractTypeFieldType from '../AbstractTypeFieldType';
 import AbstractTypeSearchableSelect from '../../../components/controls/AbstractTypeSearchableSelect';
+import AbstractTypes from '../../../utils/AbstractTypes';
 import Logger from '../../../utils/Logger';
-import StyledButton from '../../../components/buttons/StyledButton';
-import * as AssociationTypesActions from './AssociationTypesActions';
 import { isValidUUID } from '../../../utils/ValidationUtils';
 import type { IndexMap } from '../Types';
 
 const LOG :Logger = new Logger('AssociationTypeDetailsContainer');
 
-const {
-  FullyQualifiedName
-} = Models;
+const { FQN } = Models;
 
 /*
  * styled components
  */
-
-const DeleteButton = styled(StyledButton)`
-  align-self: center;
-`;
 
 const AbstractTypeSearchableSelectWrapper = styled.div`
   margin: 20px 0;
@@ -52,7 +46,6 @@ type Props = {
     localAddDstEntityTypeToAssociationType :RequestSequence;
     localAddPropertyTypeToAssociationType :RequestSequence;
     localAddSrcEntityTypeToAssociationType :RequestSequence;
-    localDeleteAssociationType :RequestSequence;
     localRemoveDstEntityTypeFromAssociationType :RequestSequence;
     localRemovePropertyTypeFromAssociationType :RequestSequence;
     localRemoveSrcEntityTypeFromAssociationType :RequestSequence;
@@ -86,7 +79,7 @@ class AssociationTypeDetailsContainer extends React.Component<Props> {
       }
       actions.localAddDstEntityTypeToAssociationType({
         entityTypeId,
-        associationTypeFQN: new FullyQualifiedName(associationEntityType.get('type')),
+        associationTypeFQN: FQN.of(associationEntityType.get('type')),
         associationTypeId: associationEntityType.get('id'),
       });
     }
@@ -112,7 +105,7 @@ class AssociationTypeDetailsContainer extends React.Component<Props> {
       }
       actions.localAddPropertyTypeToAssociationType({
         propertyTypeId,
-        associationTypeFQN: new FullyQualifiedName(associationEntityType.get('type')),
+        associationTypeFQN: FQN.of(associationEntityType.get('type')),
         associationTypeId: associationEntityType.get('id'),
       });
     }
@@ -138,7 +131,7 @@ class AssociationTypeDetailsContainer extends React.Component<Props> {
       }
       actions.localAddSrcEntityTypeToAssociationType({
         entityTypeId,
-        associationTypeFQN: new FullyQualifiedName(associationEntityType.get('type')),
+        associationTypeFQN: FQN.of(associationEntityType.get('type')),
         associationTypeId: associationEntityType.get('id'),
       });
     }
@@ -159,7 +152,7 @@ class AssociationTypeDetailsContainer extends React.Component<Props> {
       const entityTypeId :UUID = entityTypes.getIn([entityTypesIndex, 'id']);
       actions.localRemoveDstEntityTypeFromAssociationType({
         entityTypeId,
-        associationTypeFQN: new FullyQualifiedName(associationEntityType.get('type')),
+        associationTypeFQN: FQN.of(associationEntityType.get('type')),
         associationTypeId: associationEntityType.get('id'),
       });
     }
@@ -180,7 +173,7 @@ class AssociationTypeDetailsContainer extends React.Component<Props> {
       const propertyTypeId :UUID = propertyTypes.getIn([propertyTypesIndex, 'id']);
       actions.localRemovePropertyTypeFromAssociationType({
         propertyTypeId,
-        associationTypeFQN: new FullyQualifiedName(associationEntityType.get('type')),
+        associationTypeFQN: FQN.of(associationEntityType.get('type')),
         associationTypeId: associationEntityType.get('id'),
       });
     }
@@ -201,40 +194,9 @@ class AssociationTypeDetailsContainer extends React.Component<Props> {
       const entityTypeId :UUID = entityTypes.getIn([entityTypesIndex, 'id']);
       actions.localRemoveSrcEntityTypeFromAssociationType({
         entityTypeId,
-        associationTypeFQN: new FullyQualifiedName(associationEntityType.get('type')),
+        associationTypeFQN: FQN.of(associationEntityType.get('type')),
         associationTypeId: associationEntityType.get('id'),
       });
-    }
-  }
-
-  // TODO: uncomment when re-enabling this feature
-  // handleReorderPropertyTypes = (oldIndex :number, newIndex :number) => {
-  //
-  //   const { actions, associationType } = this.props;
-  //
-  //   if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
-  //
-  //     const associationEntityType :Map<*, *> = associationType.get('entityType', Map());
-  //     const propertyTypeIds :List<string> = associationEntityType.get('properties');
-  //     const idToMove :string = propertyTypeIds.get(oldIndex);
-  //     const reorderedPropertyTypeIds :List<string> = propertyTypeIds.delete(oldIndex).insert(newIndex, idToMove);
-  //
-  //     actions.reorderEntityTypePropertyTypes({
-  //       entityTypeId: associationEntityType.get('id'),
-  //       propertyTypeIds: reorderedPropertyTypeIds.toJS()
-  //     });
-  //   }
-  // }
-
-  handleOnClickDelete = () => {
-
-    const { actions, associationType } = this.props;
-
-    if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
-      const associationEntityType :Map<*, *> = associationType.get('entityType', Map());
-      const associationTypeId :?UUID = associationEntityType.get('id');
-      const associationTypeFQN :FQN = new FullyQualifiedName(associationEntityType.get('type'));
-      actions.localDeleteAssociationType({ associationTypeFQN, associationTypeId });
     }
   }
 
@@ -285,9 +247,6 @@ class AssociationTypeDetailsContainer extends React.Component<Props> {
             highlightOnHover
             maxHeight={500}
             onAbstractTypeRemove={this.handleRemovePropertyTypeFromAssociationType}
-            // TODO: uncomment when re-enabling this feature
-            // onReorder={this.handleReorderPropertyTypes}
-            // orderable
             showRemoveColumn
             workingAbstractTypeType={AbstractTypes.PropertyType} />
       );
@@ -582,17 +541,6 @@ class AssociationTypeDetailsContainer extends React.Component<Props> {
         { this.renderAddSourceEntityTypesSection() }
         { this.renderDestinationEntityTypesSection(destinationEntityTypes) }
         { this.renderAddDestinationEntityTypesSection() }
-        {
-          AuthUtils.isAuthenticated() && AuthUtils.isAdmin()
-            ? (
-              <section>
-                <DeleteButton onClick={this.handleOnClickDelete}>
-                  Delete AssociationType
-                </DeleteButton>
-              </section>
-            )
-            : null
-        }
       </div>
     );
   }
@@ -610,7 +558,6 @@ const mapDispatchToProps = (dispatch :Function) :Object => ({
     localAddDstEntityTypeToAssociationType: AssociationTypesActions.localAddDstEntityTypeToAssociationType,
     localAddPropertyTypeToAssociationType: AssociationTypesActions.localAddPropertyTypeToAssociationType,
     localAddSrcEntityTypeToAssociationType: AssociationTypesActions.localAddSrcEntityTypeToAssociationType,
-    localDeleteAssociationType: AssociationTypesActions.localDeleteAssociationType,
     localRemoveDstEntityTypeFromAssociationType: AssociationTypesActions.localRemoveDstEntityTypeFromAssociationType,
     localRemovePropertyTypeFromAssociationType: AssociationTypesActions.localRemovePropertyTypeFromAssociationType,
     localRemoveSrcEntityTypeFromAssociationType: AssociationTypesActions.localRemoveSrcEntityTypeFromAssociationType,

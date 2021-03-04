@@ -7,21 +7,21 @@ import React from 'react';
 import styled from 'styled-components';
 import { faTimes } from '@fortawesome/pro-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Models } from 'lattice';
 import {
   List,
   Map,
   OrderedMap,
-  fromJS
+  fromJS,
 } from 'immutable';
-import type { FQN } from 'lattice';
+import { Models } from 'lattice';
 
-import AbstractCell, { AbstractCellTypes } from './AbstractCell';
 import AbstractDataTable from './AbstractDataTable';
+import AbstractCell, { AbstractCellTypes } from './AbstractCell';
+
 import AbstractTypes from '../../utils/AbstractTypes';
 import type { AbstractType } from '../../utils/AbstractTypes';
 
-const { FullyQualifiedName } = Models;
+const { FQN } = Models;
 
 /*
  * constants
@@ -66,12 +66,10 @@ type Props = {
   highlightOnHover ?:boolean;
   highlightOnSelect ?:boolean;
   maxHeight ?:number;
-  orderable ?:boolean;
   showRemoveColumn ?:boolean;
   workingAbstractTypeType :AbstractType;
   onAbstractTypeRemove ?:(selectedAbstractTypeFQN :FQN) => void;
   onAbstractTypeSelect ?:(selectedAbstractTypeFQN :FQN) => void;
-  onReorder ?:(oldIndex :number, newIndex :number) => void;
 };
 
 type State = {
@@ -91,8 +89,6 @@ class AbstractTypeDataTable extends React.Component<Props, State> {
     maxHeight: -1,
     onAbstractTypeRemove: undefined,
     onAbstractTypeSelect: undefined,
-    onReorder: undefined,
-    orderable: false,
     showRemoveColumn: false,
   }
 
@@ -137,9 +133,9 @@ class AbstractTypeDataTable extends React.Component<Props, State> {
         ? type.get('entityType', Map())
         : type;
 
-      const abstractTypeFQN :FullyQualifiedName = (props.workingAbstractTypeType === AbstractTypes.Schema)
-        ? new FullyQualifiedName(abstractType.get('fqn', Map()))
-        : new FullyQualifiedName(abstractType.get('type', Map()));
+      const abstractTypeFQN :FQN = (props.workingAbstractTypeType === AbstractTypes.Schema)
+        ? FQN.of(abstractType.get('fqn', Map()))
+        : FQN.of(abstractType.get('type', Map()));
 
       return OrderedMap().withMutations((map :OrderedMap<string, string>) => {
         if (props.workingAbstractTypeType === AbstractTypes.Schema) {
@@ -177,14 +173,14 @@ class AbstractTypeDataTable extends React.Component<Props, State> {
     const { selectedRowIndex } = this.state;
 
     const selectedAbstractType :Map<*, *> = abstractTypes.get(clickedRowIndex, Map());
-    let selectedAbstractTypeFQN :FQN = new FullyQualifiedName(selectedAbstractType.get('type'));
+    let selectedAbstractTypeFQN :FQN = FQN.of(selectedAbstractType.get('type'));
 
     if (workingAbstractTypeType === AbstractTypes.AssociationType) {
       const entityType :Map<*, *> = selectedAbstractType.get('entityType', Map());
-      selectedAbstractTypeFQN = new FullyQualifiedName(entityType.get('type'));
+      selectedAbstractTypeFQN = FQN.of(entityType.get('type'));
     }
     else if (workingAbstractTypeType === AbstractTypes.Schema) {
-      selectedAbstractTypeFQN = new FullyQualifiedName(selectedAbstractType.get('fqn'));
+      selectedAbstractTypeFQN = FQN.of(selectedAbstractType.get('fqn'));
       // selectedAbstractTypeId = FullyQualifiedName.toString(selectedAbstractType.get('fqn', Map()));
     }
 
@@ -220,13 +216,13 @@ class AbstractTypeDataTable extends React.Component<Props, State> {
 
     if (workingAbstractTypeType === AbstractTypes.AssociationType) {
       const entityType :Map<*, *> = selectedAbstractType.get('entityType', Map());
-      selectedAbstractTypeFQN = new FullyQualifiedName(entityType.get('type', Map()));
+      selectedAbstractTypeFQN = FQN.of(entityType.get('type', Map()));
     }
     else if (workingAbstractTypeType === AbstractTypes.Schema) {
-      selectedAbstractTypeFQN = new FullyQualifiedName(selectedAbstractType.get('fqn', Map()));
+      selectedAbstractTypeFQN = FQN.of(selectedAbstractType.get('fqn', Map()));
     }
     else {
-      selectedAbstractTypeFQN = new FullyQualifiedName(selectedAbstractType.get('type', Map()));
+      selectedAbstractTypeFQN = FQN.of(selectedAbstractType.get('type', Map()));
     }
 
     if (typeof onAbstractTypeSelect === 'function') {
@@ -237,21 +233,6 @@ class AbstractTypeDataTable extends React.Component<Props, State> {
       selectedRowIndex,
       hoveredRowIndex: -1
     });
-  }
-
-  handleOnReorder = (oldIndex :number, newIndex :number) => {
-
-    const { onReorder } = this.props;
-    const { data } = this.state;
-
-    if (oldIndex !== newIndex) {
-      const itemToMove = data.get(oldIndex);
-      const reorderedData = data.delete(oldIndex).insert(newIndex, itemToMove);
-      this.setState({ data: reorderedData });
-      if (typeof onReorder === 'function') {
-        onReorder(oldIndex, newIndex);
-      }
-    }
   }
 
   renderBodyCell = (params :Object, cellValue :any) => {
@@ -336,7 +317,6 @@ class AbstractTypeDataTable extends React.Component<Props, State> {
       abstractTypes,
       height,
       maxHeight,
-      orderable
     } = this.props;
     const { data, headers } = this.state;
 
@@ -350,9 +330,7 @@ class AbstractTypeDataTable extends React.Component<Props, State> {
           data={data}
           headers={headers}
           height={height}
-          maxHeight={maxHeight}
-          onReorder={this.handleOnReorder}
-          orderable={orderable} />
+          maxHeight={maxHeight} />
     );
   }
 }

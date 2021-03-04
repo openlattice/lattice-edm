@@ -12,11 +12,9 @@ import {
 } from 'immutable';
 import { Models, Types } from 'lattice';
 import { EntityDataModelApiActions } from 'lattice-sagas';
-import type { FQN, AssociationTypeObject } from 'lattice';
+import type { AssociationTypeObject, UUID } from 'lattice';
 import type { SequenceAction } from 'redux-reqseq';
 
-import Logger from '../../../utils/Logger';
-import { isValidUUID } from '../../../utils/ValidationUtils';
 import {
   LOCAL_ADD_DST_ET_TO_AT,
   LOCAL_ADD_PT_TO_AT,
@@ -37,6 +35,9 @@ import {
   localRemoveSrcEntityTypeFromAssociationType,
   localUpdateAssociationTypeMeta,
 } from './AssociationTypesActions';
+
+import Logger from '../../../utils/Logger';
+import { isValidUUID } from '../../../utils/ValidationUtils';
 import {
   LOCAL_UPDATE_SCHEMA,
   localUpdateSchema,
@@ -54,7 +55,7 @@ const {
   AssociationTypeBuilder,
   EntityType,
   EntityTypeBuilder,
-  FullyQualifiedName,
+  FQN,
 } = Models;
 
 const {
@@ -96,35 +97,13 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
 
           responseAssociationTypes.forEach((at :AssociationTypeObject, index :number) => {
             try {
-              const associationTypeId :?UUID = at.entityType.id;
-              const associationTypeFQN :FQN = new FullyQualifiedName(at.entityType.type);
-
-              const entityType :EntityType = new EntityTypeBuilder()
-                .setBaseType(at.entityType.baseType)
-                .setCategory(at.entityType.category)
-                .setDescription(at.entityType.description)
-                .setId(associationTypeId)
-                .setKey(at.entityType.key)
-                .setPropertyTags(at.entityType.propertyTags)
-                .setPropertyTypes(at.entityType.properties)
-                .setSchemas(at.entityType.schemas)
-                .setShards(at.entityType.shards)
-                .setTitle(at.entityType.title)
-                .setType(associationTypeFQN)
-                .build();
-
-              const associationType = new AssociationTypeBuilder()
-                .setBidirectional(at.bidirectional)
-                .setDestinationEntityTypeIds(at.dst)
-                .setEntityType(entityType)
-                .setSourceEntityTypeIds(at.src)
-                .build();
+              const associationType = (new AssociationTypeBuilder(at)).build();
               associationTypes.push(associationType.toImmutable());
               /*
                * IMPORTANT! we must keep the fqn and id index mapping in sync!
                */
-              associationTypesIndexMap.set(associationTypeId, index);
-              associationTypesIndexMap.set(associationTypeFQN, index);
+              associationTypesIndexMap.set(associationType.entityType.id, index);
+              associationTypesIndexMap.set(associationType.entityType.type, index);
             }
             catch (e) {
               LOG.error('getEntityDataModel()', at);
@@ -173,7 +152,7 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
             }
 
             const target :Map<*, *> = state.getIn(['associationTypes', targetIndex], Map());
-            const targetFQN :FQN = new FullyQualifiedName(target.getIn(['entityType', 'type'], Map()));
+            const targetFQN :FQN = FQN.of(target.getIn(['entityType', 'type'], Map()));
             const targetId :?UUID = target.getIn(['entityType', 'id']);
             if (targetId !== associationTypeId || targetFQN.toString() !== associationTypeFQN.toString()) {
               LOG.error('AssociationType does not match id or fqn', associationTypeId, associationTypeFQN);
@@ -238,7 +217,7 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
             }
 
             const target :Map<*, *> = state.getIn(['associationTypes', targetIndex], Map());
-            const targetFQN :FQN = new FullyQualifiedName(target.getIn(['entityType', 'type'], Map()));
+            const targetFQN :FQN = FQN.of(target.getIn(['entityType', 'type'], Map()));
             const targetId :?UUID = target.getIn(['entityType', 'id']);
             if (targetId !== associationTypeId || targetFQN.toString() !== associationTypeFQN.toString()) {
               LOG.error('AssociationType does not match id or fqn', associationTypeId, associationTypeFQN);
@@ -303,7 +282,7 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
             }
 
             const target :Map<*, *> = state.getIn(['associationTypes', targetIndex], Map());
-            const targetFQN :FQN = new FullyQualifiedName(target.getIn(['entityType', 'type'], Map()));
+            const targetFQN :FQN = FQN.of(target.getIn(['entityType', 'type'], Map()));
             const targetId :?UUID = target.getIn(['entityType', 'id']);
             if (targetId !== associationTypeId || targetFQN.toString() !== associationTypeFQN.toString()) {
               LOG.error('AssociationType does not match id or fqn', associationTypeId, associationTypeFQN);
@@ -355,28 +334,15 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
           if (storedSeqAction) {
 
             const storedAssociationType :AssociationType = storedSeqAction.value;
-            const associationTypeFQN :FQN = new FullyQualifiedName(storedAssociationType.entityType.type);
+            const associationTypeFQN :FQN = FQN.of(storedAssociationType.entityType.type);
             const associationTypeId :?UUID = seqAction.value; // id won't be available in "offline" mode
 
-            const newAssociationTypeEntityType :EntityType = new EntityTypeBuilder()
-              .setBaseType(storedAssociationType.entityType.baseType)
-              .setCategory(storedAssociationType.entityType.category)
-              .setDescription(storedAssociationType.entityType.description)
+            const newAssociationTypeEntityType :EntityType = (new EntityTypeBuilder(storedAssociationType.entityType))
               .setId(associationTypeId)
-              .setKey(storedAssociationType.entityType.key)
-              .setPropertyTags(storedAssociationType.entityType.propertyTags)
-              .setPropertyTypes(storedAssociationType.entityType.properties)
-              .setSchemas(storedAssociationType.entityType.schemas)
-              .setShards(storedAssociationType.entityType.shards)
-              .setTitle(storedAssociationType.entityType.title)
-              .setType(associationTypeFQN)
               .build();
 
-            const newAssociationType :AssociationType = new AssociationTypeBuilder()
-              .setBidirectional(storedAssociationType.bidirectional)
-              .setDestinationEntityTypeIds(storedAssociationType.dst)
+            const newAssociationType :AssociationType = (new AssociationTypeBuilder(storedAssociationType))
               .setEntityType(newAssociationTypeEntityType)
-              .setSourceEntityTypeIds(storedAssociationType.src)
               .build();
 
             const updatedAssociationTypes :List<Map<*, *>> = state
@@ -445,7 +411,7 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
             }
 
             const target :Map<*, *> = state.getIn(['associationTypes', targetIndex], Map());
-            const targetFQN :FQN = new FullyQualifiedName(target.getIn(['entityType', 'type'], Map()));
+            const targetFQN :FQN = FQN.of(target.getIn(['entityType', 'type'], Map()));
             const targetId :?UUID = target.getIn(['entityType', 'id']);
             if (targetId !== associationTypeId || targetFQN.toString() !== associationTypeFQN.toString()) {
               LOG.error('AssociationType does not match id or fqn', associationTypeId, associationTypeFQN);
@@ -461,7 +427,7 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
                * IMPORTANT! we must keep the fqn and id index mapping in sync!
                */
               const associationEntityType :Map<*, *> = associationType.get('entityType', Map());
-              const fqn :FQN = new FullyQualifiedName(associationEntityType.get('type'));
+              const fqn :FQN = FQN.of(associationEntityType.get('type'));
               updatedAssociationTypesIndexMap.set(fqn, index);
               const id :?UUID = associationType.getIn(['entityType', 'id']);
               if (isValidUUID(id)) {
@@ -516,7 +482,7 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
             }
 
             const target :Map<*, *> = state.getIn(['associationTypes', targetIndex], Map());
-            const targetFQN :FQN = new FullyQualifiedName(target.getIn(['entityType', 'type'], Map()));
+            const targetFQN :FQN = FQN.of(target.getIn(['entityType', 'type'], Map()));
             const targetId :?UUID = target.getIn(['entityType', 'id']);
             if (targetId !== associationTypeId || targetFQN.toString() !== associationTypeFQN.toString()) {
               LOG.error('AssociationType does not match id or fqn', associationTypeId, associationTypeFQN);
@@ -570,7 +536,7 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
             }
 
             const target :Map<*, *> = state.getIn(['associationTypes', targetIndex], Map());
-            const targetFQN :FQN = new FullyQualifiedName(target.getIn(['entityType', 'type'], Map()));
+            const targetFQN :FQN = FQN.of(target.getIn(['entityType', 'type'], Map()));
             const targetId :?UUID = target.getIn(['entityType', 'id']);
             if (targetId !== associationTypeId || targetFQN.toString() !== associationTypeFQN.toString()) {
               LOG.error('AssociationType does not match id or fqn', associationTypeId, associationTypeFQN);
@@ -624,7 +590,7 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
             }
 
             const target :Map<*, *> = state.getIn(['associationTypes', targetIndex], Map());
-            const targetFQN :FQN = new FullyQualifiedName(target.getIn(['entityType', 'type'], Map()));
+            const targetFQN :FQN = FQN.of(target.getIn(['entityType', 'type'], Map()));
             const targetId :?UUID = target.getIn(['entityType', 'id']);
             if (targetId !== associationTypeId || targetFQN.toString() !== associationTypeFQN.toString()) {
               LOG.error('AssociationType does not match id or fqn', associationTypeId, associationTypeFQN);
@@ -680,7 +646,7 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
             }
 
             const target :Map<*, *> = state.getIn(['associationTypes', targetIndex], Map());
-            const targetFQN :FQN = new FullyQualifiedName(target.getIn(['entityType', 'type'], Map()));
+            const targetFQN :FQN = FQN.of(target.getIn(['entityType', 'type'], Map()));
             const targetId :?UUID = target.getIn(['entityType', 'id']);
             if (targetId !== associationTypeId || targetFQN.toString() !== associationTypeFQN.toString()) {
               LOG.error('AssociationType does not match id or fqn', associationTypeId, associationTypeFQN);
@@ -689,18 +655,7 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
 
             let newState :Map<*, *> = state;
             const currentAssociationType :AssociationTypeObject = target.toJS();
-            const entityTypeBuilder :EntityTypeBuilder = new EntityTypeBuilder()
-              .setBaseType(currentAssociationType.entityType.baseType)
-              .setCategory(currentAssociationType.entityType.category)
-              .setDescription(currentAssociationType.entityType.description)
-              .setId(currentAssociationType.entityType.id)
-              .setKey(currentAssociationType.entityType.key)
-              .setPropertyTags(currentAssociationType.entityType.propertyTags)
-              .setPropertyTypes(currentAssociationType.entityType.properties)
-              .setSchemas(currentAssociationType.entityType.schemas)
-              .setShards(currentAssociationType.entityType.shards)
-              .setTitle(currentAssociationType.entityType.title)
-              .setType(currentAssociationType.entityType.type);
+            const entityTypeBuilder :EntityTypeBuilder = new EntityTypeBuilder(currentAssociationType.entityType);
 
             if (has(metadata, 'description')) {
               entityTypeBuilder.setDescription(metadata.description);
@@ -711,7 +666,7 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
             }
 
             if (has(metadata, 'type')) {
-              const newAssociationTypeFQN = new FullyQualifiedName(metadata.type);
+              const newAssociationTypeFQN = FQN.of(metadata.type);
               entityTypeBuilder.setType(metadata.type);
               newState = newState
                 .deleteIn(['associationTypesIndexMap', associationTypeFQN])
@@ -719,11 +674,8 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
             }
 
             const updatedEntityType :EntityType = entityTypeBuilder.build();
-            const updatedAssociationType :AssociationType = new AssociationTypeBuilder()
-              .setBidirectional(currentAssociationType.bidirectional)
-              .setDestinationEntityTypeIds(currentAssociationType.dst)
+            const updatedAssociationType :AssociationType = (new AssociationTypeBuilder(currentAssociationType))
               .setEntityType(updatedEntityType)
-              .setSourceEntityTypeIds(currentAssociationType.src)
               .build();
 
             return newState
@@ -791,7 +743,7 @@ export default function associationTypesReducer(state :Map<*, *> = INITIAL_STATE
                 }
                 else if (actionType === ActionTypes.REMOVE) {
                   const schemaIndex :number = newState.getIn(path).findIndex(
-                    (fqn :Map<*, *>) => FullyQualifiedName.toString(fqn) === schemaFQN.toString()
+                    (fqn :Map<*, *>) => FQN.toString(fqn) === schemaFQN.toString()
                   );
                   if (schemaIndex !== -1) {
                     path.push(schemaIndex);

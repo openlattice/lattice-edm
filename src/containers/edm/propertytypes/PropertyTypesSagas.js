@@ -9,17 +9,9 @@ import {
   takeEvery,
 } from '@redux-saga/core/effects';
 import { EntityDataModelApiActions, EntityDataModelApiSagas } from 'lattice-sagas';
-import type { FQN, PropertyType } from 'lattice';
+import type { FQN, PropertyType, UUID } from 'lattice';
 import type { SequenceAction } from 'redux-reqseq';
 
-import Logger from '../../../utils/Logger';
-import { isValidUUID } from '../../../utils/ValidationUtils';
-import {
-  ERR_ACTION_VALUE_NOT_DEFINED,
-  ERR_FQN_EXISTS,
-  ERR_PT_DOES_NOT_EXIST,
-  ERR_WORKER_SAGA,
-} from '../../../utils/Errors';
 import {
   LOCAL_CREATE_PROPERTY_TYPE,
   LOCAL_DELETE_PROPERTY_TYPE,
@@ -28,6 +20,15 @@ import {
   localDeletePropertyType,
   localUpdatePropertyTypeMeta,
 } from './PropertyTypesActions';
+
+import Logger from '../../../utils/Logger';
+import {
+  ERR_ACTION_VALUE_NOT_DEFINED,
+  ERR_FQN_EXISTS,
+  ERR_PT_DOES_NOT_EXIST,
+  ERR_WORKER_SAGA,
+} from '../../../utils/Errors';
+import { isValidUUID } from '../../../utils/ValidationUtils';
 import type { IndexMap, UpdatePropertyTypeMeta } from '../Types';
 
 const LOG = new Logger('PropertyTypesSagas');

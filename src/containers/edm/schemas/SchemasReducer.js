@@ -7,16 +7,17 @@
 import { List, Map, fromJS } from 'immutable';
 import { Models, Types } from 'lattice';
 import { EntityDataModelApiActions } from 'lattice-sagas';
-import type { FQN, SchemaObject } from 'lattice';
+import type { SchemaObject, UUID } from 'lattice';
 import type { SequenceAction } from 'redux-reqseq';
 
-import Logger from '../../../utils/Logger';
 import {
   LOCAL_CREATE_SCHEMA,
   LOCAL_UPDATE_SCHEMA,
   localCreateSchema,
   localUpdateSchema,
 } from './SchemasActions';
+
+import Logger from '../../../utils/Logger';
 import type { IndexMap } from '../Types';
 
 const LOG :Logger = new Logger('SchemasReducer');
@@ -26,7 +27,7 @@ const {
 } = EntityDataModelApiActions;
 
 const {
-  FullyQualifiedName,
+  FQN,
   Schema,
   SchemaBuilder,
 } = Models;
@@ -61,14 +62,9 @@ export default function schemasReducer(state :Map<*, *> = INITIAL_STATE, action 
 
           responseSchemas.forEach((s :SchemaObject, index :number) => {
             try {
-              const schemaFQN :FQN = new FullyQualifiedName(s.fqn);
-              const schema = new SchemaBuilder()
-                .setFullyQualifiedName(schemaFQN)
-                .setEntityTypes(s.entityTypes)
-                .setPropertyTypes(s.propertyTypes)
-                .build();
+              const schema = (new SchemaBuilder(s)).build();
               schemas.push(schema.toImmutable());
-              schemasIndexMap.set(schemaFQN, index);
+              schemasIndexMap.set(schema.fqn, index);
             }
             catch (e) {
               LOG.error('getEntityDataModel()', s);
@@ -104,11 +100,9 @@ export default function schemasReducer(state :Map<*, *> = INITIAL_STATE, action 
           if (storedSeqAction) {
 
             const storedSchema :Schema = storedSeqAction.value;
-            const schemaFQN :FQN = new FullyQualifiedName(storedSchema.fqn);
-            const newSchema :Schema = new SchemaBuilder()
-              .setFullyQualifiedName(schemaFQN)
-              .setEntityTypes(storedSchema.entityTypes)
-              .setPropertyTypes(storedSchema.propertyTypes)
+            const schemaFQN :FQN = FQN.of(storedSchema.fqn);
+            const newSchema :Schema = (new SchemaBuilder(storedSchema))
+              .setFQN(schemaFQN)
               .build();
 
             const updatedSchemas :List<Map<*, *>> = state
@@ -173,7 +167,7 @@ export default function schemasReducer(state :Map<*, *> = INITIAL_STATE, action 
               return state;
             }
             const target :Map<*, *> = state.getIn(['schemas', targetIndex], Map());
-            const targetFQN :FQN = new FullyQualifiedName(target.get('fqn', Map()));
+            const targetFQN :FQN = FQN.of(target.get('fqn', Map()));
             if (targetFQN.toString() !== schemaFQN.toString()) {
               LOG.error('EntityType does not match fqn', schemaFQN);
               return state;

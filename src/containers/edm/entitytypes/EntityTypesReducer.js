@@ -12,11 +12,9 @@ import {
 } from 'immutable';
 import { Models, Types } from 'lattice';
 import { EntityDataModelApiActions } from 'lattice-sagas';
-import type { FQN, EntityTypeObject } from 'lattice';
+import type { EntityTypeObject, UUID } from 'lattice';
 import type { SequenceAction } from 'redux-reqseq';
 
-import Logger from '../../../utils/Logger';
-import { isValidUUID } from '../../../utils/ValidationUtils';
 import {
   LOCAL_ADD_PT_TO_ET,
   LOCAL_CREATE_ENTITY_TYPE,
@@ -29,6 +27,9 @@ import {
   localRemovePropertyTypeFromEntityType,
   localUpdateEntityTypeMeta,
 } from './EntityTypesActions';
+
+import Logger from '../../../utils/Logger';
+import { isValidUUID } from '../../../utils/ValidationUtils';
 import {
   LOCAL_UPDATE_SCHEMA,
   localUpdateSchema,
@@ -44,7 +45,7 @@ const {
 const {
   EntityType,
   EntityTypeBuilder,
-  FullyQualifiedName,
+  FQN,
 } = Models;
 
 const {
@@ -83,27 +84,13 @@ export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, act
 
           responseEntityTypes.forEach((et :EntityTypeObject, index :number) => {
             try {
-              const entityTypeId :?UUID = et.id;
-              const entityTypeFQN :FQN = new FullyQualifiedName(et.type);
-              const entityType = new EntityTypeBuilder()
-                .setBaseType(et.baseType)
-                .setCategory(et.category)
-                .setDescription(et.description)
-                .setId(entityTypeId)
-                .setKey(et.key)
-                .setPropertyTags(et.propertyTags)
-                .setPropertyTypes(et.properties)
-                .setSchemas(et.schemas)
-                .setShards(et.shards)
-                .setTitle(et.title)
-                .setType(entityTypeFQN)
-                .build();
+              const entityType = (new EntityTypeBuilder(et)).build();
               entityTypes.push(entityType.toImmutable());
               /*
                * IMPORTANT! we must keep the fqn and id index mapping in sync!
                */
-              entityTypesIndexMap.set(entityTypeId, index);
-              entityTypesIndexMap.set(entityTypeFQN, index);
+              entityTypesIndexMap.set(entityType.id, index);
+              entityTypesIndexMap.set(entityType.type, index);
             }
             catch (e) {
               LOG.error('getEntityDataModel()', et);
@@ -154,7 +141,7 @@ export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, act
             }
 
             const target :Map<*, *> = state.getIn(['entityTypes', targetIndex], Map());
-            const targetFQN :FQN = new FullyQualifiedName(target.get('type', Map()));
+            const targetFQN :FQN = FQN.of(target.get('type', Map()));
             if (target.get('id') !== entityTypeId || targetFQN.toString() !== entityTypeFQN.toString()) {
               LOG.error('EntityType does not match id or fqn', entityTypeId, entityTypeFQN);
               return state;
@@ -205,20 +192,11 @@ export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, act
           if (storedSeqAction) {
 
             const storedEntityType :EntityType = storedSeqAction.value;
-            const entityTypeFQN :FQN = new FullyQualifiedName(storedEntityType.type);
+            const entityTypeFQN :FQN = FQN.of(storedEntityType.type);
             const entityTypeId :?UUID = seqAction.value; // id won't be available in "offline" mode
-            const newEntityType :EntityType = new EntityTypeBuilder()
-              .setBaseType(storedEntityType.baseType)
-              .setCategory(storedEntityType.category)
-              .setDescription(storedEntityType.description)
+
+            const newEntityType :EntityType = (new EntityTypeBuilder(storedEntityType))
               .setId(entityTypeId)
-              .setKey(storedEntityType.key)
-              .setPropertyTags(storedEntityType.propertyTags)
-              .setPropertyTypes(storedEntityType.properties)
-              .setSchemas(storedEntityType.schemas)
-              .setShards(storedEntityType.shards)
-              .setTitle(storedEntityType.title)
-              .setType(entityTypeFQN)
               .build();
 
             const updatedEntityTypes :List<Map<*, *>> = state
@@ -234,8 +212,7 @@ export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, act
               .get('entityTypesIndexMap')
               .set(entityTypeFQN, newEntityTypeIndex);
             if (isValidUUID(entityTypeId)) {
-              updatedEntityTypesIndexMap = updatedEntityTypesIndexMap
-                .set(entityTypeId, newEntityTypeIndex);
+              updatedEntityTypesIndexMap = updatedEntityTypesIndexMap.set(entityTypeId, newEntityTypeIndex);
             }
 
             return state
@@ -285,7 +262,7 @@ export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, act
             }
 
             const target :Map<*, *> = state.getIn(['entityTypes', targetIndex], Map());
-            if (FullyQualifiedName.toString(target.get('type', Map())) !== targetFQN.toString()) {
+            if (FQN.toString(target.get('type', Map())) !== targetFQN.toString()) {
               LOG.error('EntityType does not match fqn', targetFQN);
               return state;
             }
@@ -298,7 +275,7 @@ export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, act
               /*
                * IMPORTANT! we must keep the fqn and id index mapping in sync!
                */
-              const entityTypeFQN :FQN = new FullyQualifiedName(entityType.get('type'));
+              const entityTypeFQN :FQN = FQN.of(entityType.get('type'));
               updatedEntityTypesIndexMap.set(entityTypeFQN, index);
               const entityTypeId :?UUID = entityType.get('id');
               if (isValidUUID(entityTypeId)) {
@@ -355,7 +332,7 @@ export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, act
             }
 
             const target :Map<*, *> = state.getIn(['entityTypes', targetIndex], Map());
-            const targetFQN :FQN = new FullyQualifiedName(target.get('type', Map()));
+            const targetFQN :FQN = FQN.of(target.get('type', Map()));
             if (target.get('id') !== entityTypeId || targetFQN.toString() !== entityTypeFQN.toString()) {
               LOG.error('EntityType does not match id or fqn', entityTypeId, entityTypeFQN);
               return state;
@@ -410,7 +387,7 @@ export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, act
             }
 
             const target :Map<*, *> = state.getIn(['entityTypes', targetIndex], Map());
-            const targetFQN :FQN = new FullyQualifiedName(target.get('type', Map()));
+            const targetFQN :FQN = FQN.of(target.get('type', Map()));
             if (target.get('id') !== entityTypeId || targetFQN.toString() !== entityTypeFQN.toString()) {
               LOG.error('EntityType does not match id or fqn', entityTypeId, entityTypeFQN);
               return state;
@@ -418,18 +395,7 @@ export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, act
 
             let newState :Map<*, *> = state;
             const currentEntityType :EntityTypeObject = target.toJS();
-            const entityTypeBuilder :EntityTypeBuilder = new EntityTypeBuilder()
-              .setBaseType(currentEntityType.baseType)
-              .setCategory(currentEntityType.category)
-              .setDescription(currentEntityType.description)
-              .setId(currentEntityType.id)
-              .setKey(currentEntityType.key)
-              .setPropertyTags(currentEntityType.propertyTags)
-              .setPropertyTypes(currentEntityType.properties)
-              .setSchemas(currentEntityType.schemas)
-              .setShards(currentEntityType.shards)
-              .setTitle(currentEntityType.title)
-              .setType(currentEntityType.type);
+            const entityTypeBuilder :EntityTypeBuilder = (new EntityTypeBuilder(currentEntityType));
 
             if (has(metadata, 'description')) {
               entityTypeBuilder.setDescription(metadata.description);
@@ -440,7 +406,7 @@ export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, act
             }
 
             if (has(metadata, 'type')) {
-              const newEntityTypeFQN = new FullyQualifiedName(metadata.type);
+              const newEntityTypeFQN = FQN.of(metadata.type);
               entityTypeBuilder.setType(metadata.type);
               newState = newState
                 .deleteIn(['entityTypesIndexMap', entityTypeFQN])
@@ -513,7 +479,7 @@ export default function entityTypesReducer(state :Map<*, *> = INITIAL_STATE, act
                 }
                 else if (actionType === ActionTypes.REMOVE) {
                   const schemaIndex :number = newState.getIn(path).findIndex(
-                    (fqn :Map<*, *>) => FullyQualifiedName.toString(fqn) === schemaFQN.toString()
+                    (fqn :Map<*, *>) => FQN.toString(fqn) === schemaFQN.toString()
                   );
                   if (schemaIndex !== -1) {
                     path.push(schemaIndex);

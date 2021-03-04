@@ -3,13 +3,6 @@ import { Models, Types } from 'lattice';
 import { EntityDataModelApiActions } from 'lattice-sagas';
 
 import reducer from './SchemasReducer';
-import { INVALID_PARAMS_SS } from '../../../utils/testing/Invalid';
-import {
-  MOCK_SCHEMA,
-  genRandomEntityType,
-  genRandomFQN,
-  genRandomPropertyType
-} from '../../../utils/testing/MockDataModels';
 import {
   LOCAL_CREATE_SCHEMA,
   LOCAL_UPDATE_SCHEMA,
@@ -17,8 +10,16 @@ import {
   localUpdateSchema,
 } from './SchemasActions';
 
+import { INVALID_PARAMS_SS } from '../../../utils/testing/Invalid';
+import {
+  MOCK_SCHEMA,
+  genRandomEntityType,
+  genRandomFQN,
+  genRandomPropertyType
+} from '../../../utils/testing/MockDataModels';
+
 const {
-  FullyQualifiedName,
+  FQN,
 } = Models;
 
 const {
@@ -71,9 +72,9 @@ describe('SchemasReducer', () => {
       expect(state.get('schemasIndexMap').hashCode()).toEqual(expectedSchemasIndexMap.hashCode());
       expect(state.get('schemasIndexMap').equals(expectedSchemasIndexMap)).toEqual(true);
       state.get('schemasIndexMap')
-        .filter((v, k) => FullyQualifiedName.isValid(k))
+        .filter((v, k) => FQN.isValid(k))
         .keySeq()
-        .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
+        .forEach((k) => expect(k).toBeInstanceOf(FQN));
     });
 
     test(getEntityDataModel.FAILURE, () => {
@@ -118,7 +119,7 @@ describe('SchemasReducer', () => {
 
       expect(state.getIn([LOCAL_CREATE_SCHEMA, id])).toEqual(requestAction);
       expect(state.get('newlyCreatedSchemaFQN')).toEqual(MOCK_SCHEMA.fqn);
-      expect(state.get('newlyCreatedSchemaFQN')).toBeInstanceOf(FullyQualifiedName);
+      expect(state.get('newlyCreatedSchemaFQN')).toBeInstanceOf(FQN);
 
       const expectedSchemas = List().push(MOCK_SCHEMA.toImmutable());
       expect(state.get('schemas').hashCode()).toEqual(expectedSchemas.hashCode());
@@ -128,9 +129,9 @@ describe('SchemasReducer', () => {
       expect(state.get('schemasIndexMap').hashCode()).toEqual(expectedSchemasIndexMap.hashCode());
       expect(state.get('schemasIndexMap').equals(expectedSchemasIndexMap)).toEqual(true);
       state.get('schemasIndexMap')
-        .filter((v, k) => FullyQualifiedName.isValid(k))
+        .filter((v, k) => FQN.isValid(k))
         .keySeq()
-        .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
+        .forEach((k) => expect(k).toBeInstanceOf(FQN));
     });
 
     test(localCreateSchema.FAILURE, () => {
@@ -163,7 +164,7 @@ describe('SchemasReducer', () => {
 
       expect(state.hasIn([LOCAL_CREATE_SCHEMA, id])).toEqual(false);
       expect(state.get('newlyCreatedSchemaFQN')).toEqual(MOCK_SCHEMA.fqn);
-      expect(state.get('newlyCreatedSchemaFQN')).toBeInstanceOf(FullyQualifiedName);
+      expect(state.get('newlyCreatedSchemaFQN')).toBeInstanceOf(FQN);
     });
 
   });
@@ -225,9 +226,9 @@ describe('SchemasReducer', () => {
         expect(state.get('schemasIndexMap').hashCode()).toEqual(expectedSchemasIndexMap.hashCode());
         expect(state.get('schemasIndexMap').equals(expectedSchemasIndexMap)).toEqual(true);
         state.get('schemasIndexMap')
-          .filter((v, k) => FullyQualifiedName.isValid(k))
+          .filter((v, k) => FQN.isValid(k))
           .keySeq()
-          .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
+          .forEach((k) => expect(k).toBeInstanceOf(FQN));
       });
 
       test(localUpdateSchema.FAILURE, () => {
@@ -246,9 +247,9 @@ describe('SchemasReducer', () => {
         expect(state.get('schemasIndexMap').hashCode()).toEqual(expectedSchemasIndexMap.hashCode());
         expect(state.get('schemasIndexMap').equals(expectedSchemasIndexMap)).toEqual(true);
         state.get('schemasIndexMap')
-          .filter((v, k) => FullyQualifiedName.isValid(k))
+          .filter((v, k) => FQN.isValid(k))
           .keySeq()
-          .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
+          .forEach((k) => expect(k).toBeInstanceOf(FQN));
       });
 
       test(localUpdateSchema.FINALLY, () => {
@@ -313,9 +314,9 @@ describe('SchemasReducer', () => {
         expect(state.get('schemasIndexMap').hashCode()).toEqual(expectedSchemasIndexMap.hashCode());
         expect(state.get('schemasIndexMap').equals(expectedSchemasIndexMap)).toEqual(true);
         state.get('schemasIndexMap')
-          .filter((v, k) => FullyQualifiedName.isValid(k))
+          .filter((v, k) => FQN.isValid(k))
           .keySeq()
-          .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
+          .forEach((k) => expect(k).toBeInstanceOf(FQN));
       });
 
       test(localUpdateSchema.FAILURE, () => {
@@ -334,9 +335,9 @@ describe('SchemasReducer', () => {
         expect(state.get('schemasIndexMap').hashCode()).toEqual(expectedSchemasIndexMap.hashCode());
         expect(state.get('schemasIndexMap').equals(expectedSchemasIndexMap)).toEqual(true);
         state.get('schemasIndexMap')
-          .filter((v, k) => FullyQualifiedName.isValid(k))
+          .filter((v, k) => FQN.isValid(k))
           .keySeq()
-          .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
+          .forEach((k) => expect(k).toBeInstanceOf(FQN));
       });
 
       test(localUpdateSchema.FINALLY, () => {
@@ -401,9 +402,9 @@ describe('SchemasReducer', () => {
         expect(state.get('schemasIndexMap').hashCode()).toEqual(expectedSchemasIndexMap.hashCode());
         expect(state.get('schemasIndexMap').equals(expectedSchemasIndexMap)).toEqual(true);
         state.get('schemasIndexMap')
-          .filter((v, k) => FullyQualifiedName.isValid(k))
+          .filter((v, k) => FQN.isValid(k))
           .keySeq()
-          .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
+          .forEach((k) => expect(k).toBeInstanceOf(FQN));
       });
 
       test(localUpdateSchema.FAILURE, () => {
@@ -422,9 +423,9 @@ describe('SchemasReducer', () => {
         expect(state.get('schemasIndexMap').hashCode()).toEqual(expectedSchemasIndexMap.hashCode());
         expect(state.get('schemasIndexMap').equals(expectedSchemasIndexMap)).toEqual(true);
         state.get('schemasIndexMap')
-          .filter((v, k) => FullyQualifiedName.isValid(k))
+          .filter((v, k) => FQN.isValid(k))
           .keySeq()
-          .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
+          .forEach((k) => expect(k).toBeInstanceOf(FQN));
       });
 
       test(localUpdateSchema.FINALLY, () => {
@@ -489,9 +490,9 @@ describe('SchemasReducer', () => {
         expect(state.get('schemasIndexMap').hashCode()).toEqual(expectedSchemasIndexMap.hashCode());
         expect(state.get('schemasIndexMap').equals(expectedSchemasIndexMap)).toEqual(true);
         state.get('schemasIndexMap')
-          .filter((v, k) => FullyQualifiedName.isValid(k))
+          .filter((v, k) => FQN.isValid(k))
           .keySeq()
-          .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
+          .forEach((k) => expect(k).toBeInstanceOf(FQN));
       });
 
       test(localUpdateSchema.FAILURE, () => {
@@ -510,9 +511,9 @@ describe('SchemasReducer', () => {
         expect(state.get('schemasIndexMap').hashCode()).toEqual(expectedSchemasIndexMap.hashCode());
         expect(state.get('schemasIndexMap').equals(expectedSchemasIndexMap)).toEqual(true);
         state.get('schemasIndexMap')
-          .filter((v, k) => FullyQualifiedName.isValid(k))
+          .filter((v, k) => FQN.isValid(k))
           .keySeq()
-          .forEach((k) => expect(k).toBeInstanceOf(FullyQualifiedName));
+          .forEach((k) => expect(k).toBeInstanceOf(FQN));
       });
 
       test(localUpdateSchema.FINALLY, () => {

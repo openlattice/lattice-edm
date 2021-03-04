@@ -8,34 +8,30 @@ import styled from 'styled-components';
 import { List, Map, OrderedSet } from 'immutable';
 import { Models } from 'lattice';
 import { AuthUtils } from 'lattice-auth';
-import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import type { FQN } from 'lattice';
+import { bindActionCreators } from 'redux';
+import type { UUID } from 'lattice';
 import type { RequestSequence } from 'redux-reqseq';
 
-import AbstractTypes from '../../../utils/AbstractTypes';
+import * as EntityTypesActions from './EntityTypesActions';
+
 import AbstractTypeDataTable from '../../../components/datatable/AbstractTypeDataTable';
 import AbstractTypeFieldDescription from '../AbstractTypeFieldDescription';
 import AbstractTypeFieldTitle from '../AbstractTypeFieldTitle';
 import AbstractTypeFieldType from '../AbstractTypeFieldType';
 import AbstractTypeSearchableSelect from '../../../components/controls/AbstractTypeSearchableSelect';
+import AbstractTypes from '../../../utils/AbstractTypes';
 import Logger from '../../../utils/Logger';
-import StyledButton from '../../../components/buttons/StyledButton';
-import * as EntityTypesActions from './EntityTypesActions';
 import { isValidUUID } from '../../../utils/ValidationUtils';
 import type { IndexMap } from '../Types';
 
 const LOG :Logger = new Logger('EntityTypeDetailsContainer');
 
-const { FullyQualifiedName } = Models;
+const { FQN } = Models;
 
 /*
  * styled components
  */
-
-const DeleteButton = styled(StyledButton)`
-  align-self: center;
-`;
 
 const AbstractTypeSearchableSelectWrapper = styled.div`
   margin: 20px 0;
@@ -48,7 +44,6 @@ const AbstractTypeSearchableSelectWrapper = styled.div`
 type Props = {
   actions :{
     localAddPropertyTypeToEntityType :RequestSequence;
-    localDeleteEntityType :RequestSequence;
     localRemovePropertyTypeFromEntityType :RequestSequence;
   };
   entityType :Map<*, *>;
@@ -77,7 +72,7 @@ class EntityTypeDetailsContainer extends React.Component<Props> {
       }
       actions.localAddPropertyTypeToEntityType({
         propertyTypeId,
-        entityTypeFQN: new FullyQualifiedName(entityType.get('type')),
+        entityTypeFQN: FQN.of(entityType.get('type')),
         entityTypeId: entityType.get('id'),
       });
     }
@@ -97,38 +92,9 @@ class EntityTypeDetailsContainer extends React.Component<Props> {
       const propertyTypeId :?UUID = propertyTypes.getIn([propertyTypesIndex, 'id']);
       actions.localRemovePropertyTypeFromEntityType({
         propertyTypeId,
-        entityTypeFQN: new FullyQualifiedName(entityType.get('type')),
+        entityTypeFQN: FQN.of(entityType.get('type')),
         entityTypeId: entityType.get('id'),
       });
-    }
-  }
-
-  // TODO: uncomment when re-enabling this feature
-  // handleOnPropertyTypeReorder = (oldIndex :number, newIndex :number) => {
-  //
-  //   const { actions, entityType } = this.props;
-  //
-  //   if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
-  //
-  //     const propertyTypeIds :List<string> = entityType.get('properties');
-  //     const idToMove :string = propertyTypeIds.get(oldIndex);
-  //     const reorderedPropertyTypeIds :List<string> = propertyTypeIds.delete(oldIndex).insert(newIndex, idToMove);
-  //
-  //     actions.reorderEntityTypePropertyTypes({
-  //       entityTypeId: entityType.get('id'),
-  //       propertyTypeIds: reorderedPropertyTypeIds.toJS()
-  //     });
-  //   }
-  // }
-
-  handleOnClickDelete = () => {
-
-    const { actions, entityType } = this.props;
-
-    if (AuthUtils.isAuthenticated() && AuthUtils.isAdmin()) {
-      const entityTypeId :?UUID = entityType.get('id');
-      const entityTypeFQN :FQN = new FullyQualifiedName(entityType.get('type'));
-      actions.localDeleteEntityType({ entityTypeFQN, entityTypeId });
     }
   }
 
@@ -152,9 +118,6 @@ class EntityTypeDetailsContainer extends React.Component<Props> {
             highlightOnHover
             maxHeight={500}
             onAbstractTypeRemove={this.handleOnPropertyTypeRemove}
-            // TODO: uncomment when re-enabling this feature
-            // onReorder={this.handleOnPropertyTypeReorder}
-            // orderable
             showRemoveColumn
             workingAbstractTypeType={AbstractTypes.PropertyType} />
       );
@@ -295,17 +258,6 @@ class EntityTypeDetailsContainer extends React.Component<Props> {
         </section>
         { this.renderPropertyTypesSection(thePropertyTypes) }
         { this.renderAddPropertyTypesSection() }
-        {
-          AuthUtils.isAuthenticated() && AuthUtils.isAdmin()
-            ? (
-              <section>
-                <DeleteButton onClick={this.handleOnClickDelete}>
-                  Delete EntityType
-                </DeleteButton>
-              </section>
-            )
-            : null
-        }
       </div>
     );
   }
@@ -319,7 +271,6 @@ const mapStateToProps = (state :Map<*, *>) :Object => ({
 const mapDispatchToProps = (dispatch :Function) :Object => ({
   actions: bindActionCreators({
     localAddPropertyTypeToEntityType: EntityTypesActions.localAddPropertyTypeToEntityType,
-    localDeleteEntityType: EntityTypesActions.localDeleteEntityType,
     localRemovePropertyTypeFromEntityType: EntityTypesActions.localRemovePropertyTypeFromEntityType,
   }, dispatch)
 });

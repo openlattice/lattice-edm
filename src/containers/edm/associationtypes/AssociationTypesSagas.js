@@ -9,17 +9,9 @@ import {
   takeEvery,
 } from '@redux-saga/core/effects';
 import { EntityDataModelApiActions, EntityDataModelApiSagas } from 'lattice-sagas';
-import type { FQN, AssociationType } from 'lattice';
+import type { AssociationType, FQN, UUID } from 'lattice';
 import type { SequenceAction } from 'redux-reqseq';
 
-import Logger from '../../../utils/Logger';
-import { isValidUUID } from '../../../utils/ValidationUtils';
-import {
-  ERR_ACTION_VALUE_NOT_DEFINED,
-  ERR_AT_DOES_NOT_EXIST,
-  ERR_FQN_EXISTS,
-  ERR_WORKER_SAGA,
-} from '../../../utils/Errors';
 import {
   LOCAL_ADD_DST_ET_TO_AT,
   LOCAL_ADD_PT_TO_AT,
@@ -40,31 +32,40 @@ import {
   localRemoveSrcEntityTypeFromAssociationType,
   localUpdateAssociationTypeMeta,
 } from './AssociationTypesActions';
+
+import Logger from '../../../utils/Logger';
+import {
+  ERR_ACTION_VALUE_NOT_DEFINED,
+  ERR_AT_DOES_NOT_EXIST,
+  ERR_FQN_EXISTS,
+  ERR_WORKER_SAGA,
+} from '../../../utils/Errors';
+import { isValidUUID } from '../../../utils/ValidationUtils';
 import type { IndexMap, UpdateAssociationTypeMeta } from '../Types';
 
 const LOG = new Logger('EntityTypesSagas');
 
 const {
-  addDstEntityTypeToAssociationType,
+  addDestinationEntityTypeToAssociationType,
   addPropertyTypeToEntityType,
-  addSrcEntityTypeToAssociationType,
+  addSourceEntityTypeToAssociationType,
   createAssociationType,
   deleteAssociationType,
-  removeDstEntityTypeFromAssociationType,
+  removeDestinationEntityTypeFromAssociationType,
   removePropertyTypeFromEntityType,
-  removeSrcEntityTypeFromAssociationType,
+  removeSourceEntityTypeFromAssociationType,
   updateAssociationTypeMetaData,
 } = EntityDataModelApiActions;
 
 const {
-  addDstEntityTypeToAssociationTypeWorker,
+  addDestinationEntityTypeToAssociationTypeWorker,
   addPropertyTypeToEntityTypeWorker,
-  addSrcEntityTypeToAssociationTypeWorker,
+  addSourceEntityTypeToAssociationTypeWorker,
   createAssociationTypeWorker,
   deleteAssociationTypeWorker,
-  removeDstEntityTypeFromAssociationTypeWorker,
+  removeDestinationEntityTypeFromAssociationTypeWorker,
   removePropertyTypeFromEntityTypeWorker,
-  removeSrcEntityTypeFromAssociationTypeWorker,
+  removeSourceEntityTypeFromAssociationTypeWorker,
   updateAssociationTypeMetaDataWorker,
 } = EntityDataModelApiSagas;
 
@@ -94,8 +95,8 @@ function* localAddDstEntityTypeToAssociationTypeWorker(seqAction :SequenceAction
 
     if (isOnline && isValidUUID(associationTypeId) && isValidUUID(entityTypeId)) {
       const response :Object = yield call(
-        addDstEntityTypeToAssociationTypeWorker,
-        addDstEntityTypeToAssociationType({ associationTypeId, entityTypeId })
+        addDestinationEntityTypeToAssociationTypeWorker,
+        addDestinationEntityTypeToAssociationType({ associationTypeId, entityTypeId })
       );
       if (response.error) throw response.error;
     }
@@ -190,8 +191,8 @@ function* localAddSrcEntityTypeToAssociationTypeWorker(seqAction :SequenceAction
 
     if (isOnline && isValidUUID(associationTypeId) && isValidUUID(entityTypeId)) {
       const response :Object = yield call(
-        addSrcEntityTypeToAssociationTypeWorker,
-        addSrcEntityTypeToAssociationType({ associationTypeId, entityTypeId })
+        addSourceEntityTypeToAssociationTypeWorker,
+        addSourceEntityTypeToAssociationType({ associationTypeId, entityTypeId })
       );
       if (response.error) throw response.error;
     }
@@ -347,8 +348,8 @@ function* localRemoveDstEntityTypeFromAssociationTypeWorker(seqAction :SequenceA
 
     if (isOnline && isValidUUID(associationTypeId) && isValidUUID(entityTypeId)) {
       const response :Object = yield call(
-        removeDstEntityTypeFromAssociationTypeWorker,
-        removeDstEntityTypeFromAssociationType({ associationTypeId, entityTypeId })
+        removeDestinationEntityTypeFromAssociationTypeWorker,
+        removeDestinationEntityTypeFromAssociationType({ associationTypeId, entityTypeId })
       );
       if (response.error) throw response.error;
     }
@@ -443,8 +444,8 @@ function* localRemoveSrcEntityTypeFromAssociationTypeWorker(seqAction :SequenceA
 
     if (isOnline && isValidUUID(associationTypeId) && isValidUUID(entityTypeId)) {
       const response :Object = yield call(
-        removeSrcEntityTypeFromAssociationTypeWorker,
-        removeSrcEntityTypeFromAssociationType({ associationTypeId, entityTypeId })
+        removeSourceEntityTypeFromAssociationTypeWorker,
+        removeSourceEntityTypeFromAssociationType({ associationTypeId, entityTypeId })
       );
       if (response.error) throw response.error;
     }

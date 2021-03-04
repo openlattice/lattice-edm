@@ -8,22 +8,23 @@ import Select from 'react-select';
 import styled from 'styled-components';
 import { List, Map, Set } from 'immutable';
 import { Models, Types } from 'lattice';
-import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import type { AnalyzerType, FQN, IndexType } from 'lattice';
+import { bindActionCreators } from 'redux';
+import type { AnalyzerType, IndexType } from 'lattice';
 import type { RequestSequence } from 'redux-reqseq';
 
-import AbstractTypes from '../../utils/AbstractTypes';
-import AbstractTypeDataTable from '../../components/datatable/AbstractTypeDataTable';
-import AbstractTypeSearchableSelect from '../../components/controls/AbstractTypeSearchableSelect';
-import InlineEditableControl from '../../components/controls/InlineEditableControl';
-import Logger from '../../utils/Logger';
-import StyledButton from '../../components/buttons/StyledButton';
-import StyledCard from '../../components/cards/StyledCard';
 import * as AssociationTypesActions from './associationtypes/AssociationTypesActions';
 import * as EntityTypesActions from './entitytypes/EntityTypesActions';
 import * as PropertyTypesActions from './propertytypes/PropertyTypesActions';
 import * as SchemasActions from './schemas/SchemasActions';
+
+import AbstractTypeDataTable from '../../components/datatable/AbstractTypeDataTable';
+import AbstractTypeSearchableSelect from '../../components/controls/AbstractTypeSearchableSelect';
+import AbstractTypes from '../../utils/AbstractTypes';
+import InlineEditableControl from '../../components/controls/InlineEditableControl';
+import Logger from '../../utils/Logger';
+import StyledButton from '../../components/buttons/StyledButton';
+import StyledCard from '../../components/cards/StyledCard';
 import { EDM_PRIMITIVE_TYPES } from '../../utils/EdmPrimitiveTypes';
 import type { AbstractType } from '../../utils/AbstractTypes';
 
@@ -34,7 +35,7 @@ const {
   AssociationTypeBuilder,
   EntityType,
   EntityTypeBuilder,
-  FullyQualifiedName,
+  FQN,
   PropertyType,
   PropertyTypeBuilder,
   Schema,
@@ -176,7 +177,7 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
       bidiValue: false,
       datatypeValue: 'String',
       descriptionValue: '',
-      indexTypeValue: IndexTypes.BTREE,
+      indexTypeValue: IndexTypes.NONE,
       isInEditModeName: true,
       isInEditModeNamespace: true,
       isInEditModeTitle: true,
@@ -258,7 +259,7 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
     if (workingAbstractTypeType === AbstractTypes.Schema) {
 
       const newSchema :Schema = (new SchemaBuilder())
-        .setFullyQualifiedName(new FullyQualifiedName(namespaceValue, nameValue))
+        .setFQN(FQN.of(namespaceValue, nameValue))
         .build();
 
       actions.localCreateSchema(newSchema);
@@ -275,9 +276,9 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
         .setDescription(descriptionValue)
         .setIndexType(indexTypeValue)
         .setMultiValued(multiValuedValue)
-        .setPii(piiValue)
+        .setPII(piiValue)
         .setTitle(titleValue)
-        .setType(new FullyQualifiedName(namespaceValue, nameValue))
+        .setType(FQN.of(namespaceValue, nameValue))
         .build();
 
       actions.localCreatePropertyType(newPropertyType);
@@ -296,7 +297,7 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
         .setKey(primaryKeyPropertyTypeIds.toJS())
         .setPropertyTypes(propertyTypeIds.toJS())
         .setTitle(titleValue)
-        .setType(new FullyQualifiedName(namespaceValue, nameValue));
+        .setType(FQN.of(namespaceValue, nameValue));
 
       if (workingAbstractTypeType === AbstractTypes.EntityType) {
 
@@ -343,7 +344,7 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
     const { selectedDestinationEntityTypes } = this.state;
 
     const selectedEntityType :Map<*, *> = entityTypes.find((entityType :Map<*, *>) => (
-      FullyQualifiedName.toString(entityType.get('type', Map())) === selectedEntityTypeFQN.toString()
+      FQN.toString(entityType.get('type', Map())) === selectedEntityTypeFQN.toString()
     ));
 
     this.setState({
@@ -357,7 +358,7 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
     const { selectedPrimaryKeyPropertyTypes, selectedPropertyTypes } = this.state;
 
     const selectedPropertyType :Map<*, *> = propertyTypes.find((propertyType :Map<*, *>) => (
-      FullyQualifiedName.toString(propertyType.get('type', Map())) === selectedPropertyTypeFQN.toString()
+      FQN.toString(propertyType.get('type', Map())) === selectedPropertyTypeFQN.toString()
     ));
 
     this.setState({
@@ -372,7 +373,7 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
     const { selectedPrimaryKeyPropertyTypes, selectedPropertyTypes } = this.state;
 
     const selectedPropertyType :Map<*, *> = propertyTypes.find((propertyType :Map<*, *>) => (
-      FullyQualifiedName.toString(propertyType.get('type', Map())) === selectedPropertyTypeFQN.toString()
+      FQN.toString(propertyType.get('type', Map())) === selectedPropertyTypeFQN.toString()
     ));
 
     if (selectedPrimaryKeyPropertyTypes.contains(selectedPropertyType)) {
@@ -390,7 +391,7 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
     const { selectedSourceEntityTypes } = this.state;
 
     const selectedEntityType :Map<*, *> = entityTypes.find((entityType :Map<*, *>) => (
-      FullyQualifiedName.toString(entityType.get('type', Map())) === selectedEntityTypeFQN.toString()
+      FQN.toString(entityType.get('type', Map())) === selectedEntityTypeFQN.toString()
     ));
 
     this.setState({
@@ -404,7 +405,7 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
 
     const updatedSelectedDestinationEntityTypes :Set<Map<*, *>> = selectedDestinationEntityTypes
       .filterNot((entityType :Map<*, *>) => (
-        FullyQualifiedName.toString(entityType.get('type', Map())) === selectedEntityTypeFQN.toString()
+        FQN.toString(entityType.get('type', Map())) === selectedEntityTypeFQN.toString()
       ));
 
     this.setState({
@@ -418,7 +419,7 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
 
     const updatedSelectedPrimaryKeyPropertyTypes :Set<Map<*, *>> = selectedPrimaryKeyPropertyTypes
       .filterNot((propertyType :Map<*, *>) => (
-        FullyQualifiedName.toString(propertyType.get('type', Map())) === selectedPropertyTypeFQN.toString()
+        FQN.toString(propertyType.get('type', Map())) === selectedPropertyTypeFQN.toString()
       ));
 
     this.setState({
@@ -432,7 +433,7 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
 
     const updatedSelectedPropertyTypes :Set<Map<*, *>> = selectedPropertyTypes
       .filterNot((propertyType :Map<*, *>) => (
-        FullyQualifiedName.toString(propertyType.get('type', Map())) === selectedPropertyTypeFQN.toString()
+        FQN.toString(propertyType.get('type', Map())) === selectedPropertyTypeFQN.toString()
       ));
 
     this.setState({
@@ -446,7 +447,7 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
 
     const updatedSelectedSourceEntityTypes :Set<Map<*, *>> = selectedSourceEntityTypes
       .filterNot((entityType :Map<*, *>) => (
-        FullyQualifiedName.toString(entityType.get('type', Map())) === selectedEntityTypeFQN.toString()
+        FQN.toString(entityType.get('type', Map())) === selectedEntityTypeFQN.toString()
       ));
 
     this.setState({
@@ -493,7 +494,7 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
   handleOnChangeIndexType = (rsOption :{ label :string, value :string }) => {
 
     this.setState({
-      indexTypeValue: IndexTypes[rsOption.value] || IndexTypes.BTREE,
+      indexTypeValue: IndexTypes[rsOption.value] || IndexTypes.NONE,
     });
   }
 
@@ -508,7 +509,7 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
 
     // TODO: enforce FQN max length <= 63
     // const { namespaceValue } = this.state;
-    // const fqn = new FullyQualifiedName(namespaceValue, name);
+    // const fqn = FQN.of(namespaceValue, name);
 
     this.setState({
       nameValue: name || '',
@@ -520,7 +521,7 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
 
     // TODO: enforce FQN max length <= 63
     // const { nameValue } = this.state;
-    // const fqn = new FullyQualifiedName(namespace, nameValue);
+    // const fqn = FQN.of(namespace, nameValue);
 
     this.setState({
       namespaceValue: namespace || '',
@@ -700,7 +701,7 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
 
     return (
       <section>
-        <h2>Index Type</h2>
+        <h2>PostgreSQL Index Type</h2>
         <Select
             onChange={this.handleOnChangeIndexType}
             options={INDEX_TYPE_RS_OPTIONS}
