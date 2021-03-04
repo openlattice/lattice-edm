@@ -177,7 +177,7 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
       bidiValue: false,
       datatypeValue: 'String',
       descriptionValue: '',
-      indexTypeValue: IndexTypes.BTREE,
+      indexTypeValue: IndexTypes.NONE,
       isInEditModeName: true,
       isInEditModeNamespace: true,
       isInEditModeTitle: true,
@@ -494,7 +494,7 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
   handleOnChangeIndexType = (rsOption :{ label :string, value :string }) => {
 
     this.setState({
-      indexTypeValue: IndexTypes[rsOption.value] || IndexTypes.BTREE,
+      indexTypeValue: IndexTypes[rsOption.value] || IndexTypes.NONE,
     });
   }
 
@@ -701,7 +701,7 @@ class AbstractTypeCreateContainer extends React.Component<Props, State> {
 
     return (
       <section>
-        <h2>Index Type</h2>
+        <h2>PostgreSQL Index Type</h2>
         <Select
             onChange={this.handleOnChangeIndexType}
             options={INDEX_TYPE_RS_OPTIONS}
